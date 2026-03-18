@@ -1,23 +1,18 @@
 /** @file load_sfx.h
- *  @brief Sound-effect loading helper.
+ *  @brief Sound-effect loading from code-defined paths.
  */
 
 #pragma once
 
 #include "gamestate.h"
+#include "audio_defs.h"
 
-/** @brief Load sound effects listed in `sfx.txt` into the active game state. */
+/** @brief Load all sound effects from the compiled SFX_PATHS table. */
 static inline void libdraw_load_sfx(gamestate& g) {
-    FILE* infile = fopen("sfx.txt", "r");
-    char buffer[128];
-    while (fgets(buffer, sizeof(buffer), infile) != NULL) {
-        size_t len = strlen(buffer);
-        if (len > 0 && buffer[len - 1] == '\n')
-            buffer[len - 1] = '\0';
-        string fullpath = "audio/sfx/" + string(buffer);
-        Sound sound = LoadSound(fullpath.c_str());
+    g.sfx.clear();
+    for (int i = 0; i < SFX_DEF_COUNT; i++) {
+        Sound sound = LoadSound(SFX_PATHS[i]);
         SetSoundVolume(sound, g.get_sfx_volume());
         g.sfx.push_back(sound);
     }
-    fclose(infile);
 }

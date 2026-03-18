@@ -62,7 +62,6 @@ public:
         TS_ASSERT_EQUALS(g.msg_history.size(), 0U);
         TS_ASSERT_EQUALS(g.d.floors.size(), 0U);
         TS_ASSERT(!g.d.is_initialized);
-        TS_ASSERT(!g.music_file_paths.empty());
     }
 
     void testGamestateAddEntityTracksDirtyRange() {
@@ -166,24 +165,16 @@ public:
         TS_ASSERT_DELTA(g.get_music_volume(), DEFAULT_MUSIC_VOLUME, 0.001f);
         TS_ASSERT(!g.get_music_volume_changed());
         TS_ASSERT_EQUALS(g.get_current_music_index(), 0U);
-        TS_ASSERT(!g.music_file_paths.empty());
-
-        const std::vector<std::string> initialMusicPaths = g.music_file_paths;
 
         g.set_music_volume(0.25f);
         g.set_music_volume_changed(true);
         g.set_current_music_index(9);
-        g.music_file_paths.clear();
-        g.music_file_paths.push_back("broken/path.ogg");
 
         g.reset();
 
         TS_ASSERT_DELTA(g.get_music_volume(), DEFAULT_MUSIC_VOLUME, 0.001f);
         TS_ASSERT(!g.get_music_volume_changed());
         TS_ASSERT_EQUALS(g.get_current_music_index(), 0U);
-        TS_ASSERT(!g.music_file_paths.empty());
-        TS_ASSERT_DIFFERS(g.music_file_paths.front(), "broken/path.ogg");
-        TS_ASSERT_EQUALS(g.music_file_paths, initialMusicPaths);
     }
 
     void testRestartGameReinitializesGameplayWithoutLeavingTitleScene() {
