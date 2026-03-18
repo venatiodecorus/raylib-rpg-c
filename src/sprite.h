@@ -17,7 +17,7 @@
  */
 class sprite {
 private:
-    Texture2D* texture;
+    const Texture2D* texture;
     int width;
     int height;
     int numcontexts;
@@ -40,7 +40,7 @@ public:
      * @param nc Number of animation contexts/rows in the texture.
      * @param nf Number of animation frames/columns in the texture.
      */
-    sprite(Texture* t, int nc, int nf)
+    sprite(const Texture2D* t, int nc, int nf)
         : texture(t)
         , numcontexts(nc)
         , numframes(nf) {
@@ -159,8 +159,8 @@ public:
         num_loops = 0;
     }
 
-    /** @brief Return the backing texture pointer. */
-    Texture2D* get_texture() {
+    /** @brief Return the non-owning backing texture pointer. */
+    const Texture2D* get_texture() {
         return texture;
     }
 

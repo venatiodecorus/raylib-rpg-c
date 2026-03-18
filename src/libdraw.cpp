@@ -89,7 +89,7 @@ bool create_spritegroup(gamestate& g, entityid id, int* keys, int num_keys, int 
         for (int i = 0; i < num_keys; i++) {
             const int k = keys[i];
             minfo("k: %d", k);
-            Texture2D* tex = &libdraw_ctx.txinfo[k].texture;
+            const Texture2D* tex = &libdraw_ctx.txinfo[k].texture;
             auto s = make_shared<sprite>(tex, libdraw_ctx.txinfo[k].contexts, libdraw_ctx.txinfo[k].num_frames);
             massert(s, "s is NULL for some reason!");
             group->add(s);
@@ -134,7 +134,7 @@ bool create_spritegroup(gamestate& g, entityid id, int* keys, int num_keys, int 
     minfo("it does NOT have a location");
     for (int i = 0; i < num_keys; i++) {
         int k = keys[i];
-        Texture2D* tex = &libdraw_ctx.txinfo[k].texture;
+        const Texture2D* tex = &libdraw_ctx.txinfo[k].texture;
         auto s = make_shared<sprite>(tex, libdraw_ctx.txinfo[k].contexts, libdraw_ctx.txinfo[k].num_frames);
         group->add(s);
     }
@@ -1582,7 +1582,7 @@ bool draw_dungeon_floor_tile(gamestate& g, int x, int y, int z, int light_dist, 
     }
     const int txkey = get_txkey_for_tiletype(tile.get_type());
     massert(txkey >= 0, "txkey is invalid");
-    Texture2D* texture = &libdraw_ctx.txinfo[txkey].texture;
+    const Texture2D* texture = &libdraw_ctx.txinfo[txkey].texture;
     massert(texture->id > 0, "texture->id is <= 0");
     const bool tile_visible = full_light || tile.get_visible();
     const unsigned char a = tile_visible ? 255 : 102;
@@ -1615,7 +1615,7 @@ void draw_dungeon_floor_pressure_plates(gamestate& g, int light_rad) {
         }
 
         const int txkey = plate.active ? plate.txkey_down : plate.txkey_up;
-        Texture2D* texture = &libdraw_ctx.txinfo[txkey].texture;
+        const Texture2D* texture = &libdraw_ctx.txinfo[txkey].texture;
         massert(texture->id > 0, "pressure plate texture->id is <= 0");
 
         const float px = plate.loc.x * DEFAULT_TILE_SIZE + DEFAULT_OFFSET;

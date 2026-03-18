@@ -63,7 +63,7 @@ These must be addressed first because everything else depends on them.
   - Options: adopt EnTT or similar, or redesign with sparse sets / archetype
     storage for cache-friendly iteration.
 
-- [ ] **Fix memory management — adopt RAII throughout**
+- [x] **Fix memory management — adopt RAII throughout**
   - `libdraw.cpp:73`: `new spritegroup(...)` stored as raw pointer in
     `unordered_map<entityid, spritegroup*>` — never deleted on restart (leak).
   - `spritegroup.h:55`: `sprites2 = new vector<...>()` — should be a direct
