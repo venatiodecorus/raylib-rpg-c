@@ -259,7 +259,7 @@ void gamestate::restart_game() {
     frame_dirty = true;
 }
 
-void gamestate::handle_test_flag() {
+void gamestate::advance_animation_phase() {
     minfo2(
         "handle test flag: %s",
         flag == GAMESTATE_FLAG_PLAYER_ANIM    ? "player anim"
@@ -321,9 +321,6 @@ void gamestate::tick(inputstate& is) {
     currenttime = time(NULL);
     currenttimetm = localtime(&currenttime);
     strftime(currenttimebuf, GAMESTATE_SIZEOFTIMEBUF, "Current Time: %Y-%m-%d %H:%M:%S", currenttimetm);
-    if (test) {
-        handle_test_flag();
-    }
     ticks++;
     minfo2("end tick");
 }

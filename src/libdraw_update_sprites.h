@@ -9,5 +9,5 @@
 /** @brief Run pre-draw sprite and dirty-entity updates for the current frame. */
 void libdraw_update_sprites_pre(gamestate& g);
 
-/** @brief Run post-draw animation advancement and gamestate-flag handling. */
+/** @brief Run post-draw animation advancement only. */
 void libdraw_update_sprites_post(gamestate& g);

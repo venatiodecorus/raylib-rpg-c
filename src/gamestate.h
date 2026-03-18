@@ -571,8 +571,8 @@ public:
     /** @brief Handle input while the character creation scene is active. */
     void handle_input_character_creation_scene(inputstate& is);
 
-    /** @brief Apply any enabled test or debug flags for the current tick. */
-    void handle_test_flag();
+    /** @brief Advance high-level gameplay phase after one animation slice completes. */
+    void advance_animation_phase();
 
     /**
      * @brief Advance one gameplay tick from the latest input snapshot.

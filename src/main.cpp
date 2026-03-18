@@ -26,6 +26,7 @@ static inline void gameloop() {
     inputstate_update(is);
     g.tick(is);
     drawframe(g);
+    g.advance_animation_phase();
     if (g.do_restart) {
         msuccess("Restarting game...");
         g.restart_game();
