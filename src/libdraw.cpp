@@ -32,10 +32,8 @@
 #include "draw_title_screen.h"
 #include "draw_window_color_menu.h"
 #include "entitytype.h"
-#include "item.h"
 #include "libdraw_frame_stats.h"
 #include "libdraw_from_texture.h"
-#include "libdraw_create_spritegroup.h"
 #include "libdraw_update_shield_for_entity.h"
 #include "libdraw_to_texture.h"
 #include "libdraw_update_sprites.h"
@@ -45,15 +43,6 @@
 #include "shaders.h"
 #include "spritegroup_anim.h"
 #include "stat_bonus.h"
-#include "tx_keys_boxes.h"
-#include "tx_keys_chests.h"
-#include "tx_keys_doors.h"
-#include "tx_keys_monsters.h"
-#include "tx_keys_npcs.h"
-#include "tx_keys_potions.h"
-#include "tx_keys_props.h"
-#include "tx_keys_shields.h"
-#include "tx_keys_weapons.h"
 #include "unload_textures.h"
 #include "update_sprite.h"
 #include <algorithm>
@@ -63,99 +52,6 @@
 #include <memory>
 
 libdraw_context_t libdraw_ctx;
-
-bool create_spritegroup(gamestate& g, entityid id, int* keys, int num_keys, int offset_x, int offset_y) {
-    minfo("BEGIN create_spritegroup");
-    massert(libdraw_ctx.txinfo, "txinfo is null");
-    auto group = std::make_unique<spritegroup>(SPRITEGROUP_DEFAULT_SIZE);
-
-    massert(group, "spritegroup is NULL");
-    auto maybe_loc = g.ct.get<location>(id);
-
-    minfo("checking if has location");
-    if (maybe_loc.has_value()) {
-        minfo("it DOES have a location");
-        const vec3 loc = maybe_loc.value();
-        massert(loc.z >= 0 && static_cast<size_t>(loc.z) < g.d.get_floor_count(), "location z out of bounds: %d", loc.z);
-        auto df = g.d.get_floor(loc.z);
-        massert(df, "dungeon floor is NULL");
-        massert(loc.x >= 0 && loc.x < df->get_width(), "location x out of bounds: %d", loc.x);
-        massert(loc.y >= 0 && loc.y < df->get_height(), "location y out of bounds: %d", loc.y);
-
-        minfo2("creating spritegroups...");
-        minfo2("num_keys: %d", num_keys);
-        int count = 0;
-        for (int i = 0; i < num_keys; i++) {
-            const int k = keys[i];
-            minfo("k: %d", k);
-            const Texture2D* tex = &libdraw_ctx.txinfo[k].texture;
-            auto s = make_shared<sprite>(tex, libdraw_ctx.txinfo[k].contexts, libdraw_ctx.txinfo[k].num_frames);
-            massert(s, "s is NULL for some reason!");
-            group->add(s);
-            count++;
-        }
-        msuccess2("spritegroups created");
-        minfo2("count: %d", count);
-        minfo2("setting id: %d", id);
-        group->id = id;
-
-        string n = g.ct.get<name>(id).value_or("no-name");
-        minfo2("name: %s", n.c_str());
-        entitytype_t t = g.ct.get<entitytype>(id).value_or(ENTITY_NONE);
-        string t_s = entitytype_to_str(t);
-        minfo2("type: %s", t_s.c_str());
-        minfo2("group->get(0)");
-        minfo2("group->count(): %lu", group->count());
-
-        auto s = group->get(0);
-        massert(s, "sprite is NULL");
-
-        minfo2("group->current = 0");
-        group->current = 0;
-
-        float x = loc.x * DEFAULT_TILE_SIZE + offset_x;
-        float y = loc.y * DEFAULT_TILE_SIZE + offset_y;
-        minfo("getting width");
-        float w = s->get_width();
-        minfo("getting height");
-        float h = s->get_height();
-
-        minfo("setting destination...");
-        group->dest = Rectangle{x, y, w, h};
-        group->off_x = offset_x;
-        group->off_y = offset_y;
-        libdraw_ctx.spritegroups[id] = std::move(group);
-
-        msuccess("END create spritegroup");
-        return true;
-    }
-
-    minfo("it does NOT have a location");
-    for (int i = 0; i < num_keys; i++) {
-        int k = keys[i];
-        const Texture2D* tex = &libdraw_ctx.txinfo[k].texture;
-        auto s = make_shared<sprite>(tex, libdraw_ctx.txinfo[k].contexts, libdraw_ctx.txinfo[k].num_frames);
-        group->add(s);
-    }
-    group->id = id;
-    group->current = 0;
-    auto s = group->get(0);
-    massert(s, "sprite is NULL");
-    float x = -DEFAULT_TILE_SIZE + offset_x;
-    float y = -DEFAULT_TILE_SIZE + offset_y;
-    float w = s->get_width();
-    float h = s->get_height();
-    group->dest = Rectangle{x, y, w, h};
-    group->off_x = offset_x;
-    group->off_y = offset_y;
-    libdraw_ctx.spritegroups[id] = std::move(group);
-    msuccess("END create spritegroup");
-    return true;
-}
-
-bool create_sg(gamestate& g, entityid id, int* keys, int num_keys) {
-    return create_spritegroup(g, id, keys, num_keys, -12, -12);
-}
 
 
 
@@ -184,135 +80,6 @@ void draw_keyboard_profile_prompt(gamestate& g) {
     }
 
     DrawText("Arrows to choose, Enter to confirm", box_x + 16, box_y + box_h - 20, 10, g.ui.window_box_fgcolor);
-}
-
-void create_npc_sg_byid(gamestate& g, entityid id) {
-    massert(id != ENTITYID_INVALID, "entityid is invalid");
-
-    const race_t r = g.ct.get<race>(id).value_or(RACE_NONE);
-    massert(r != RACE_NONE, "race is none for id %d", id);
-
-    int* keys = NULL;
-    int key_count = 0;
-
-    switch (r) {
-    case RACE_HUMAN: keys = TX_HUMAN_KEYS; key_count = TX_HUMAN_COUNT; break;
-    case RACE_ORC: keys = TX_ORC_KEYS; key_count = TX_ORC_COUNT; break;
-    case RACE_ELF: keys = TX_ELF_KEYS; key_count = TX_ELF_COUNT; break;
-    case RACE_DWARF: keys = TX_DWARF_KEYS; key_count = TX_DWARF_COUNT; break;
-    case RACE_HALFLING: keys = TX_HALFLING_KEYS; key_count = TX_HALFLING_COUNT; break;
-    case RACE_GOBLIN: keys = TX_GOBLIN_KEYS; key_count = TX_GOBLIN_COUNT; break;
-    case RACE_WOLF: keys = TX_WOLF_KEYS; key_count = TX_WOLF_COUNT; break;
-    case RACE_BAT: keys = TX_BAT_KEYS; key_count = TX_BAT_COUNT; break;
-    case RACE_WARG: keys = TX_WARG_KEYS; key_count = TX_WARG_COUNT; break;
-    case RACE_GREEN_SLIME: keys = TX_GREEN_SLIME_KEYS; key_count = TX_GREEN_SLIME_COUNT; break;
-    case RACE_SKELETON: keys = TX_SKELETON_KEYS; key_count = TX_SKELETON_COUNT; break;
-    case RACE_RAT: keys = TX_RAT_KEYS; key_count = TX_RAT_COUNT; break;
-    case RACE_ZOMBIE: keys = TX_ZOMBIE_KEYS; key_count = TX_ZOMBIE_COUNT; break;
-    default: break;
-    }
-
-    massert(keys != NULL, "keys is null");
-    massert(key_count > 0, "key_count is not > 0");
-    create_sg(g, id, keys, key_count);
-}
-
-void create_door_sg_byid(gamestate& g, entityid id) {
-    massert(id != ENTITYID_INVALID, "entityid is invalid");
-    minfo("create_door_sg_byid: %d", id);
-    create_sg(g, id, TX_WOODEN_DOOR_KEYS, TX_WOODEN_DOOR_COUNT);
-}
-
-void create_box_sg_byid(gamestate& g, entityid id) {
-    massert(id != ENTITYID_INVALID, "entityid is invalid");
-    create_sg(g, id, TX_WOODEN_BOX_KEYS, TX_WOODEN_BOX_COUNT);
-}
-
-void create_chest_sg_byid(gamestate& g, entityid id) {
-    massert(id != ENTITYID_INVALID, "entityid is invalid");
-    create_sg(g, id, TX_TREASURE_CHEST_KEYS, TX_TREASURE_CHEST_COUNT);
-}
-
-void create_potion_sg_byid(gamestate& g, entityid id) {
-    massert(id != ENTITYID_INVALID, "entityid is invalid");
-    switch (g.ct.get<potiontype>(id).value_or(POTION_NONE)) {
-    case POTION_HP_SMALL: create_sg(g, id, TX_POTION_HP_SMALL_KEYS, TX_POTION_HP_SMALL_COUNT); break;
-    case POTION_HP_MEDIUM: create_sg(g, id, TX_POTION_HP_MEDIUM_KEYS, TX_POTION_HP_MEDIUM_COUNT); break;
-    case POTION_HP_LARGE: create_sg(g, id, TX_POTION_HP_LARGE_KEYS, TX_POTION_HP_LARGE_COUNT); break;
-    case POTION_MP_SMALL: create_sg(g, id, TX_POTION_MP_SMALL_KEYS, TX_POTION_MP_SMALL_COUNT); break;
-    case POTION_MP_MEDIUM: create_sg(g, id, TX_POTION_MP_MEDIUM_KEYS, TX_POTION_MP_MEDIUM_COUNT); break;
-    case POTION_MP_LARGE: create_sg(g, id, TX_POTION_MP_LARGE_KEYS, TX_POTION_MP_LARGE_COUNT); break;
-    default: break;
-    }
-}
-
-void create_weapon_sg_byid(gamestate& g, entityid id) {
-    massert(id != ENTITYID_INVALID, "entityid is invalid");
-    switch (g.ct.get<weapontype>(id).value_or(WEAPON_NONE)) {
-    case WEAPON_DAGGER: create_sg(g, id, TX_DAGGER_KEYS, TX_DAGGER_COUNT); break;
-    case WEAPON_SHORT_SWORD: create_sg(g, id, TX_SHORT_SWORD_KEYS, TX_SHORT_SWORD_COUNT); break;
-    case WEAPON_AXE: create_sg(g, id, TX_AXE_KEYS, TX_AXE_COUNT); break;
-    default: break;
-    }
-}
-
-void create_shield_sg_byid(gamestate& g, entityid id) {
-    massert(id != ENTITYID_INVALID, "entityid is invalid");
-    switch (g.ct.get<shieldtype>(id).value_or(SHIELD_NONE)) {
-    case SHIELD_BUCKLER: create_sg(g, id, TX_BUCKLER_KEYS, TX_BUCKLER_COUNT); break;
-    case SHIELD_KITE: create_sg(g, id, TX_KITE_SHIELD_KEYS, TX_BUCKLER_COUNT); break;
-    case SHIELD_TOWER: create_sg(g, id, TX_TOWER_SHIELD_KEYS, TX_TOWER_SHIELD_COUNT); break;
-    default: break;
-    }
-}
-
-void create_item_sg_byid(gamestate& g, entityid id) {
-    massert(id != ENTITYID_INVALID, "entityid is invalid");
-    switch (g.ct.get<itemtype>(id).value_or(ITEM_NONE)) {
-    case ITEM_POTION: create_potion_sg_byid(g, id); break;
-    case ITEM_WEAPON: create_weapon_sg_byid(g, id); break;
-    case ITEM_SHIELD: create_shield_sg_byid(g, id); break;
-    default: break;
-    }
-}
-
-void create_prop_sg_byid(gamestate& g, entityid id) {
-    massert(id != ENTITYID_INVALID, "entityid is invalid");
-    switch (g.ct.get<proptype>(id).value_or(PROP_NONE)) {
-    case PROP_DUNGEON_BANNER_00: create_sg(g, id, TX_PROP_DUNGEON_BANNER_00_KEYS, TX_PROP_DUNGEON_BANNER_00_COUNT); break;
-    case PROP_DUNGEON_BANNER_01: create_sg(g, id, TX_PROP_DUNGEON_BANNER_01_KEYS, TX_PROP_DUNGEON_BANNER_01_COUNT); break;
-    case PROP_DUNGEON_BANNER_02: create_sg(g, id, TX_PROP_DUNGEON_BANNER_02_KEYS, TX_PROP_DUNGEON_BANNER_02_COUNT); break;
-    case PROP_DUNGEON_WOODEN_TABLE_00: create_sg(g, id, TX_PROP_DUNGEON_WOODEN_TABLE_00_KEYS, TX_PROP_DUNGEON_WOODEN_TABLE_00_COUNT); break;
-    case PROP_DUNGEON_WOODEN_TABLE_01: create_sg(g, id, TX_PROP_DUNGEON_WOODEN_TABLE_01_KEYS, TX_PROP_DUNGEON_WOODEN_TABLE_01_COUNT); break;
-    case PROP_DUNGEON_WOODEN_SIGN: create_sg(g, id, TX_PROP_DUNGEON_WOODEN_SIGN_KEYS, TX_PROP_DUNGEON_WOODEN_SIGN_COUNT); break;
-    case PROP_DUNGEON_WOODEN_CHAIR_00: create_sg(g, id, TX_PROP_DUNGEON_WOODEN_CHAIR_00_KEYS, TX_PROP_DUNGEON_WOODEN_CHAIR_00_COUNT); break;
-    case PROP_DUNGEON_STATUE_00: create_sg(g, id, TX_PROP_DUNGEON_STATUE_00_KEYS, TX_PROP_DUNGEON_STATUE_00_COUNT); break;
-    case PROP_DUNGEON_TORCH_00: create_sg(g, id, TX_PROP_DUNGEON_TORCH_00_KEYS, TX_PROP_DUNGEON_TORCH_00_COUNT); break;
-    case PROP_DUNGEON_CANDLE_00: create_sg(g, id, TX_PROP_DUNGEON_CANDLE_00_KEYS, TX_PROP_DUNGEON_CANDLE_00_COUNT); break;
-    case PROP_DUNGEON_JAR_00: create_sg(g, id, TX_PROP_DUNGEON_JAR_00_KEYS, TX_PROP_DUNGEON_JAR_00_COUNT); break;
-    case PROP_DUNGEON_PLATE_00: create_sg(g, id, TX_PROP_DUNGEON_PLATE_00_KEYS, TX_PROP_DUNGEON_PLATE_00_COUNT); break;
-    case PROP_DUNGEON_WOODEN_BARREL_OPEN_TOP_EMPTY:
-        create_sg(g, id, TX_PROP_DUNGEON_WOODEN_BARREL_OPEN_TOP_EMPTY_KEYS, TX_PROP_DUNGEON_WOODEN_BARREL_OPEN_TOP_EMPTY_COUNT);
-        break;
-    case PROP_DUNGEON_WOODEN_BARREL_OPEN_TOP_WATER:
-        create_sg(g, id, TX_PROP_DUNGEON_WOODEN_BARREL_OPEN_TOP_WATER_KEYS, TX_PROP_DUNGEON_WOODEN_BARREL_OPEN_TOP_WATER_COUNT);
-        break;
-    default: break;
-    }
-}
-
-void create_sg_byid(gamestate& g, entityid id) {
-    massert(id != ENTITYID_INVALID, "entityid is invalid");
-    switch (g.ct.get<entitytype>(id).value_or(ENTITY_NONE)) {
-    case ENTITY_PLAYER:
-    case ENTITY_NPC: create_npc_sg_byid(g, id); break;
-    case ENTITY_DOOR: create_door_sg_byid(g, id); break;
-    case ENTITY_BOX: create_box_sg_byid(g, id); break;
-    case ENTITY_CHEST: create_chest_sg_byid(g, id); break;
-    case ENTITY_ITEM: create_item_sg_byid(g, id); break;
-    case ENTITY_PROP: create_prop_sg_byid(g, id); break;
-    default: break;
-    }
 }
 
 void libdraw_set_sg_block_success(gamestate& g, entityid id, spritegroup* const sg) {
