@@ -9,7 +9,10 @@ MAIN_C = $(SRCDIR)/main.cpp
 LIBDRAW_C = $(SRCDIR)/libdraw.cpp
 AUX_DRAW_C = $(addprefix $(SRCDIR)/, \
 	draw_action_menu.cpp \
+	draw_character_creation_screen.cpp \
 	draw_controls_menu.cpp \
+	draw_damage_numbers.cpp \
+	draw_handle_debug_panel.cpp \
 	draw_item_detail_text.cpp \
 	draw_help_menu.cpp \
 	draw_hud.cpp \
@@ -23,6 +26,8 @@ AUX_DRAW_C = $(addprefix $(SRCDIR)/, \
 	draw_mini_inventory_menu.cpp \
 	draw_option_menu.cpp \
 	draw_sound_menu.cpp \
+	draw_title_screen.cpp \
+	libdraw_frontend_scenes.cpp \
 	draw_window_color_menu.cpp)
 AUDIO_MANAGER_C = $(SRCDIR)/audio_manager.cpp
 MESSAGE_LOG_C = $(SRCDIR)/message_log.cpp
