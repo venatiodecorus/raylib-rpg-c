@@ -1,5 +1,10 @@
 /** @file load_textures.h
- *  @brief Texture metadata parsing and texture loading helpers.
+ *  @brief Texture loading from code-defined texture definitions.
+ *
+ *  Supports three source types:
+ *  - TXSRC_FILE:        Load an entire PNG file as a texture.
+ *  - TXSRC_TILEMAP:     Extract a sub-rectangle from a tilemap PNG.
+ *  - TXSRC_PLACEHOLDER: Generate a magenta placeholder texture.
  */
 
 #pragma once
@@ -7,65 +12,113 @@
 #include "massert.h"
 #include "mprint.h"
 #include "textureinfo.h"
+#include "texture_defs.h"
+#include <unordered_map>
+#include <string>
 
-/** @brief Load one texture and record its spritesheet metadata in the texture table. */
-static inline bool load_texture(textureinfo* txinfo, int txkey, int ctxs, int frames, bool do_dither, char* path) {
+/** @brief Cache of loaded tilemap images, keyed by file path. */
+static std::unordered_map<std::string, Image> g_tilemap_cache;
+
+/** @brief Unload all cached tilemap images. Call after load_textures(). */
+static inline void unload_tilemap_cache() {
+    for (auto& pair : g_tilemap_cache) {
+        UnloadImage(pair.second);
+    }
+    g_tilemap_cache.clear();
+}
+
+/** @brief Get or load a tilemap image from cache. */
+static inline Image get_tilemap_image(const char* path) {
+    std::string key(path);
+    auto it = g_tilemap_cache.find(key);
+    if (it != g_tilemap_cache.end()) {
+        return it->second;
+    }
+    Image img = LoadImage(path);
+    massert(img.data != NULL, "Failed to load tilemap: %s", path);
+    g_tilemap_cache[key] = img;
+    return img;
+}
+
+/** @brief Generate a solid magenta placeholder image of given dimensions. */
+static inline Image generate_placeholder_image(int width, int height) {
+    Image img = GenImageColor(width, height, MAGENTA);
+    return img;
+}
+
+/** @brief Load one texture from a texture_def entry. */
+static inline bool load_texture_from_def(textureinfo* txinfo, const texture_def& def) {
     massert(txinfo != NULL, "txinfo is NULL");
-    massert(path, "path is NULL");
-    massert(txkey >= 0, "txkey is invalid");
-    massert(ctxs >= 0, "contexts is invalid");
-    massert(frames >= 0, "frames is invalid");
-    massert(txkey < GAMESTATE_SIZEOFTEXINFOARRAY, "txkey is out of bounds: %d", txkey);
-    massert(txinfo[txkey].texture.id == 0, "txinfo[%d].texture.id is not 0", txkey);
-    massert(strlen(path) > 0, "load_texture: path is empty");
-    massert(strcmp(path, "\n") != 0, "load_texture: path is newline");
-    Image image = LoadImage(path);
-    // crash if there is a problem loading the image
-    massert(image.data != NULL, "load_texture: image data is NULL for path: %s", path);
-    if (do_dither)
+    massert(def.txkey >= 0, "txkey is invalid");
+    massert(def.txkey < GAMESTATE_SIZEOFTEXINFOARRAY, "txkey out of bounds: %d", def.txkey);
+
+    Image image;
+    switch (def.src_type) {
+    case TXSRC_FILE: {
+        massert(def.path != NULL, "TXSRC_FILE path is NULL for txkey %d", def.txkey);
+        image = LoadImage(def.path);
+        massert(image.data != NULL, "Failed to load image: %s (txkey %d)", def.path, def.txkey);
+        break;
+    }
+    case TXSRC_TILEMAP: {
+        massert(def.path != NULL, "TXSRC_TILEMAP path is NULL for txkey %d", def.txkey);
+        Image tilemap = get_tilemap_image(def.path);
+        Rectangle src = {
+            static_cast<float>(def.src_x),
+            static_cast<float>(def.src_y),
+            static_cast<float>(def.src_w),
+            static_cast<float>(def.src_h)
+        };
+        image = ImageFromImage(tilemap, src);
+        massert(image.data != NULL, "Failed to crop tilemap %s at (%d,%d,%d,%d) for txkey %d",
+                def.path, def.src_x, def.src_y, def.src_w, def.src_h, def.txkey);
+        break;
+    }
+    case TXSRC_PLACEHOLDER: {
+        int w = (def.src_w > 0) ? def.src_w : 32;
+        int h = (def.src_h > 0) ? def.src_h : 32;
+        image = generate_placeholder_image(w, h);
+        break;
+    }
+    default:
+        merror("Unknown src_type %d for txkey %d", def.src_type, def.txkey);
+        return false;
+    }
+
+    if (def.dither)
         ImageDither(&image, 4, 4, 4, 4);
+
     Texture2D texture = LoadTextureFromImage(image);
-    massert(texture.id != 0, "texture.id is 0, load fail");
-    UnloadImage(image);
-    txinfo[txkey].texture = texture;
-    txinfo[txkey].contexts = ctxs;
-    txinfo[txkey].num_frames = frames;
+    massert(texture.id != 0, "texture.id is 0 for txkey %d", def.txkey);
+
+    // Only unload if we own the image (not tilemap cache)
+    if (def.src_type != TXSRC_TILEMAP) {
+        UnloadImage(image);
+    } else {
+        // ImageFromImage creates a copy, so we must unload it
+        UnloadImage(image);
+    }
+
+    txinfo[def.txkey].texture = texture;
+    txinfo[def.txkey].contexts = def.contexts;
+    txinfo[def.txkey].num_frames = def.frames;
     return true;
 }
 
-/** @brief Load all textures declared in `textures.txt` into the texture table. */
+/** @brief Load all textures from the compiled texture definitions table. */
 static inline bool load_textures(textureinfo* txinfo) {
     massert(txinfo != NULL, "txinfo is NULL");
-    const char* textures_file = "textures.txt";
-    FILE* file = fopen(textures_file, "r");
-    massert(file, "textures.txt file is NULL");
-    if (!file) {
-        merror("Failed to open file");
-        return false;
-    }
-    char line[1024] = {0};
-    while (fgets(line, sizeof(line), file)) {
-        int txkey = -1;
-        int contexts = -1;
-        int frames = -1;
-        int do_dither = 0;
-        char path[512] = {0};
-        // check if the line begins with a #
-        if (line[0] == '#')
-            continue;
-        sscanf(line, "%d %d %d %d %s", &txkey, &contexts, &frames, &do_dither, path);
-        //minfo("Path: %s", path);
-        massert(txkey >= 0, "txkey is invalid");
-        massert(contexts >= 0, "contexts is invalid");
-        massert(frames >= 0, "frames is invalid");
-        if (txkey < 0 || contexts < 0 || frames < 0)
-            continue;
-        bool tx_loaded = load_texture(txinfo, txkey, contexts, frames, do_dither, path);
-        if (!tx_loaded) {
-            merror("Failed to load %s, hard-crashing!", path);
+
+    for (int i = 0; i < TEXTURE_DEF_COUNT; i++) {
+        const texture_def& def = TEXTURE_DEFS[i];
+        bool loaded = load_texture_from_def(txinfo, def);
+        if (!loaded) {
+            merror("Failed to load texture txkey %d, hard-crashing!", def.txkey);
             exit(-1);
         }
     }
-    fclose(file);
+
+    // Free cached tilemap images now that all textures are on GPU
+    unload_tilemap_cache();
     return true;
 }

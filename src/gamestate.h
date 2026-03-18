@@ -44,8 +44,6 @@
 #define MAX_MSG_LENGTH 256
 #define LIST_INIT_CAPACITY 16
 #define DEFAULT_MAX_HISTORY_SIZE 1024
-#define MAX_MUSIC_PATHS 1024
-#define MAX_MUSIC_PATH_LENGTH 256
 #define GAMESTATE_DEBUGPANEL_DEFAULT_X 0
 #define GAMESTATE_DEBUGPANEL_DEFAULT_Y 0
 #define GAMESTATE_DEBUGPANEL_DEFAULT_WIDTH 200
@@ -196,7 +194,6 @@ public:
     vector<string> msg_system;
     vector<string> msg_history;
     vector<Sound> sfx;
-    vector<string> music_file_paths;
     character_creation chara_creation;
     string version;
     Color message_history_bgcolor;
@@ -248,29 +245,7 @@ public:
         reset();
     }
 
-    void init_music_paths() {
-        const char* music_path_file = "music.txt";
-        FILE* file = fopen(music_path_file, "r");
-        massert(file, "Could not open music path file: %s", music_path_file);
-        char buffer[128];
-        music_file_paths.clear();
-        while (fgets(buffer, sizeof(buffer), file) != NULL) {
-            // Remove newline character if present
-            size_t len = strlen(buffer);
-            if (len > 0 && buffer[len - 1] == '\n') {
-                buffer[len - 1] = '\0';
-            }
-            // if it begins with a #, skip for now
-            if (buffer[0] == '#') {
-                continue;
-            }
-            // copy into g->music_file_paths
-            // need to pre-pend the folder path
-            string fullpath = "audio/music/" + string(buffer);
-            music_file_paths.push_back(fullpath);
-        }
-        fclose(file);
-    }
+    // Music paths are now defined in audio_defs.h (MUSIC_PATHS[])
 
     double get_avg_last_frame_time() {
         double sum = 0;
@@ -433,7 +408,6 @@ public:
         }
         d.floors.clear();
         d.is_initialized = false;
-        init_music_paths();
     }
 
     bool set_hero_id(entityid id) {
