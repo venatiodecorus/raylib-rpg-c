@@ -12,6 +12,8 @@ AUX_DRAW_C = $(addprefix $(SRCDIR)/, \
 	draw_character_creation_screen.cpp \
 	draw_controls_menu.cpp \
 	draw_damage_numbers.cpp \
+	draw_dungeon_floor.cpp \
+	draw_entity_sprite.cpp \
 	draw_handle_debug_panel.cpp \
 	draw_item_detail_text.cpp \
 	draw_help_menu.cpp \
@@ -27,6 +29,7 @@ AUX_DRAW_C = $(addprefix $(SRCDIR)/, \
 	draw_option_menu.cpp \
 	draw_sound_menu.cpp \
 	draw_title_screen.cpp \
+	libdraw_gameplay_scene.cpp \
 	libdraw_frontend_scenes.cpp \
 	draw_window_color_menu.cpp)
 AUDIO_MANAGER_C = $(SRCDIR)/audio_manager.cpp
