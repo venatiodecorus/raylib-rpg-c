@@ -8,10 +8,22 @@ SRCDIR = src
 MAIN_C = $(SRCDIR)/main.cpp
 LIBDRAW_C = $(SRCDIR)/libdraw.cpp
 AUX_DRAW_C = $(addprefix $(SRCDIR)/, \
+	draw_action_menu.cpp \
+	draw_controls_menu.cpp \
 	draw_item_detail_text.cpp \
+	draw_help_menu.cpp \
+	draw_hud.cpp \
+	draw_interaction_modal.cpp \
 	draw_chest_menu.cpp \
 	draw_inventory_menu.cpp \
-	draw_mini_inventory_menu.cpp)
+	draw_level_up_modal.cpp \
+	draw_look_panel.cpp \
+	draw_message_box.cpp \
+	draw_message_history.cpp \
+	draw_mini_inventory_menu.cpp \
+	draw_option_menu.cpp \
+	draw_sound_menu.cpp \
+	draw_window_color_menu.cpp)
 AUDIO_MANAGER_C = $(SRCDIR)/audio_manager.cpp
 MESSAGE_LOG_C = $(SRCDIR)/message_log.cpp
 DAMAGE_POPUPS_C = $(SRCDIR)/damage_popups.cpp
@@ -66,7 +78,7 @@ WEB_OPTIONS = -DPLATFORM_WEB -DWEB -DSPAWN_MONSTERS -DNPCS_ALL_AT_ONCE -DSTART_M
 all: game tests
 
 # Desktop build
-game: $(SRCDIR)/main.o $(SRCDIR)/libdraw.o $(SRCDIR)/draw_item_detail_text.o $(SRCDIR)/draw_chest_menu.o $(SRCDIR)/draw_inventory_menu.o $(SRCDIR)/draw_mini_inventory_menu.o $(SRCDIR)/audio_manager.o $(SRCDIR)/message_log.o $(SRCDIR)/damage_popups.o $(GAMESTATE_O)
+game: $(SRCDIR)/main.o $(SRCDIR)/libdraw.o $(AUX_DRAW_C:.cpp=.o) $(SRCDIR)/audio_manager.o $(SRCDIR)/message_log.o $(SRCDIR)/damage_popups.o $(GAMESTATE_O)
 	$(CXX) $(WFLAGS) $(CXXFLAGS) $(CFLAGS) $^ $(RAYLIB_LIBS) -o $@
 
 $(SRCDIR)/%.o: $(SRCDIR)/%.cpp

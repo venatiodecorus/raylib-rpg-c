@@ -1,0 +1,41 @@
+#include "draw_option_menu.h"
+
+void draw_option_menu(gamestate& g) {
+    constexpr float x = 10, y = 10, p = 20, pa = 10, rotation = 0;
+    constexpr int fsize = 10, thickness = 1;
+    constexpr Vector2 origin = {0, 0};
+    float max_w = 0;
+    for (size_t i = 0; i < g.ui.options_menu.get_option_count(); i++) {
+        const option_type option = g.ui.options_menu.get_option(i);
+        const string option_label =
+            option == OPTION_INVENTORY_MENU
+                ? TextFormat("inventory menu: %s", g.ui.prefer_mini_inventory_menu ? "mini" : "full")
+                : g.ui.options_menu.get_option_str(option);
+        const char* spaced_str = TextFormat("  %s", option_label.c_str());
+        const float w = MeasureText(spaced_str, fsize);
+        if (w > max_w) {
+            max_w = w;
+        }
+    }
+    const float h = fsize * g.ui.options_menu.get_option_count();
+    const float padded_w = max_w + p, padded_h = h + p;
+    const Rectangle r = {x, y, padded_w, padded_h};
+    DrawRectanglePro(r, origin, rotation, g.ui.window_box_bgcolor);
+    DrawRectangleLinesEx(r, thickness, g.ui.window_box_fgcolor);
+    for (size_t i = 0; i < g.ui.options_menu.get_option_count(); i++) {
+        constexpr int x0 = x + pa;
+        const int y0 = y + pa + fsize * i;
+        const option_type otype = g.ui.options_menu.get_option(i);
+        const string ostr =
+            otype == OPTION_INVENTORY_MENU
+                ? TextFormat("inventory menu: %s", g.ui.prefer_mini_inventory_menu ? "mini" : "full")
+                : g.ui.options_menu.get_option_str(otype);
+        const char* cstr = ostr.c_str();
+        if (g.ui.options_menu.get_selection() == i) {
+            DrawText(TextFormat("> %s", cstr), x0, y0, fsize, YELLOW);
+        }
+        else {
+            DrawText(TextFormat("  %s", cstr), x0, y0, fsize, g.ui.window_box_fgcolor);
+        }
+    }
+}
