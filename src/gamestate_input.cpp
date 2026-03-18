@@ -1,10 +1,11 @@
-/** @file gamestate_input_impl.h
+#include "gamestate.h"
+
+/** @file gamestate_input.cpp
  *  @brief Input-handling, modal, and level-up helpers implemented on `gamestate`.
  */
 
-#pragma once
 
-inline void gamestate::open_confirm_prompt(confirm_action_t action, const char* fmt, ...) {
+void gamestate::open_confirm_prompt(confirm_action_t action, const char* fmt, ...) {
     massert(fmt, "format string is NULL");
     char buffer[MAX_MSG_LENGTH] = {0};
     va_list args;
@@ -19,7 +20,7 @@ inline void gamestate::open_confirm_prompt(confirm_action_t action, const char* 
     frame_dirty = true;
 }
 
-inline void gamestate::handle_confirm_quit() {
+void gamestate::handle_confirm_quit() {
 #ifdef WEB
     restart_game();
 #else
@@ -28,7 +29,7 @@ inline void gamestate::handle_confirm_quit() {
     frame_dirty = true;
 }
 
-inline void gamestate::resolve_confirm_prompt(bool confirmed) {
+void gamestate::resolve_confirm_prompt(bool confirmed) {
     const confirm_action_t action = ui.confirm_action;
     ui.display_confirm_prompt = false;
     ui.confirm_action = CONFIRM_ACTION_NONE;
@@ -49,7 +50,7 @@ inline void gamestate::resolve_confirm_prompt(bool confirmed) {
     }
 }
 
-inline void gamestate::open_interaction_modal(entityid id, const string& title, const string& body) {
+void gamestate::open_interaction_modal(entityid id, const string& title, const string& body) {
     ui.active_interaction_entity_id = id;
     ui.interaction_title = title;
     ui.interaction_body = body;
@@ -59,7 +60,7 @@ inline void gamestate::open_interaction_modal(entityid id, const string& title, 
     frame_dirty = true;
 }
 
-inline void gamestate::close_interaction_modal() {
+void gamestate::close_interaction_modal() {
     ui.display_interaction_modal = false;
     ui.active_interaction_entity_id = ENTITYID_INVALID;
     ui.interaction_title.clear();
@@ -69,7 +70,7 @@ inline void gamestate::close_interaction_modal() {
     frame_dirty = true;
 }
 
-inline void gamestate::handle_input_interaction(inputstate& is) {
+void gamestate::handle_input_interaction(inputstate& is) {
     if (controlmode != CONTROLMODE_INTERACTION || !ui.display_interaction_modal) {
         return;
     }
@@ -79,19 +80,19 @@ inline void gamestate::handle_input_interaction(inputstate& is) {
     }
 }
 
-inline int gamestate::get_level_up_xp_threshold(entityid id) {
+int gamestate::get_level_up_xp_threshold(entityid id) {
     const int actor_level = ct.get<level>(id).value_or(1) < 1 ? 1 : ct.get<level>(id).value_or(1);
     return actor_level * 10;
 }
 
-inline void gamestate::open_level_up_modal() {
+void gamestate::open_level_up_modal() {
     ui.display_level_up_modal = true;
     ui.level_up_selection = 0;
     controlmode = CONTROLMODE_LEVEL_UP;
     frame_dirty = true;
 }
 
-inline bool gamestate::apply_permanent_attribute_increase(entityid id, unsigned int attribute_index, int amount) {
+bool gamestate::apply_permanent_attribute_increase(entityid id, unsigned int attribute_index, int amount) {
     if (id == ENTITYID_INVALID || amount == 0) {
         return false;
     }
@@ -121,7 +122,7 @@ inline bool gamestate::apply_permanent_attribute_increase(entityid id, unsigned 
     return false;
 }
 
-inline int gamestate::roll_level_up_max_hp_gain(entityid id) {
+int gamestate::roll_level_up_max_hp_gain(entityid id) {
     if (id == ENTITYID_INVALID) {
         return 0;
     }
@@ -130,7 +131,7 @@ inline int gamestate::roll_level_up_max_hp_gain(entityid id) {
     return rolled > 0 ? rolled : 1;
 }
 
-inline void gamestate::apply_level_up_rewards(entityid id) {
+void gamestate::apply_level_up_rewards(entityid id) {
     if (id == ENTITYID_INVALID) {
         return;
     }
@@ -150,7 +151,7 @@ inline void gamestate::apply_level_up_rewards(entityid id) {
     ct.set<hp>(id, hp_value);
 }
 
-inline void gamestate::apply_level_up_selection() {
+void gamestate::apply_level_up_selection() {
     if (hero_id == ENTITYID_INVALID || !ui.display_level_up_modal) {
         return;
     }
@@ -195,7 +196,7 @@ inline void gamestate::apply_level_up_selection() {
     }
 }
 
-inline void gamestate::maybe_unlock_level_up(entityid id) {
+void gamestate::maybe_unlock_level_up(entityid id) {
     if (id != hero_id || ct.get<entitytype>(id).value_or(ENTITY_NONE) != ENTITY_PLAYER) {
         return;
     }
@@ -215,7 +216,7 @@ inline void gamestate::maybe_unlock_level_up(entityid id) {
     }
 }
 
-inline void gamestate::handle_input_level_up(inputstate& is) {
+void gamestate::handle_input_level_up(inputstate& is) {
     if (controlmode != CONTROLMODE_LEVEL_UP || !ui.display_level_up_modal) {
         return;
     }
@@ -249,7 +250,7 @@ inline void gamestate::handle_input_level_up(inputstate& is) {
     }
 }
 
-inline void gamestate::handle_input_confirm_prompt(inputstate& is) {
+void gamestate::handle_input_confirm_prompt(inputstate& is) {
     if (controlmode != CONTROLMODE_CONFIRM_PROMPT) {
         controlmode = CONTROLMODE_CONFIRM_PROMPT;
     }
@@ -263,7 +264,7 @@ inline void gamestate::handle_input_confirm_prompt(inputstate& is) {
     }
 }
 
-inline void gamestate::handle_camera_move(inputstate& is) {
+void gamestate::handle_camera_move(inputstate& is) {
     if (inputstate_is_held(is, KEY_RIGHT)) {
         cam2d.offset.x += cam2d.zoom;
         frame_dirty = true;
@@ -282,7 +283,7 @@ inline void gamestate::handle_camera_move(inputstate& is) {
     }
 }
 
-inline void gamestate::handle_input_inventory(inputstate& is) {
+void gamestate::handle_input_inventory(inputstate& is) {
     if (controlmode != CONTROLMODE_INVENTORY || !ui.display_inventory_menu) {
         return;
     }
@@ -350,7 +351,7 @@ inline void gamestate::handle_input_inventory(inputstate& is) {
     frame_dirty = true;
 }
 
-inline bool gamestate::handle_cycle_messages(inputstate& is) {
+bool gamestate::handle_cycle_messages(inputstate& is) {
     if (messages.is_active && inputstate_is_pressed(is, KEY_ENTER)) {
         audio.play(SFX_CONFIRM_01);
         messages.cycle();
@@ -359,7 +360,7 @@ inline bool gamestate::handle_cycle_messages(inputstate& is) {
     return false;
 }
 
-inline bool gamestate::handle_cycle_messages_test() {
+bool gamestate::handle_cycle_messages_test() {
     if (!messages.is_active) {
         return false;
     }
@@ -368,7 +369,7 @@ inline bool gamestate::handle_cycle_messages_test() {
     return true;
 }
 
-inline void gamestate::handle_camera_zoom(inputstate& is) {
+void gamestate::handle_camera_zoom(inputstate& is) {
     if (is_action_pressed(is, INPUT_ACTION_ZOOM_IN)) {
         minfo("camera zoom in");
         cam2d.zoom += DEFAULT_ZOOM_INCR;
@@ -381,7 +382,7 @@ inline void gamestate::handle_camera_zoom(inputstate& is) {
     }
 }
 
-inline void gamestate::change_player_dir(direction_t dir) {
+void gamestate::change_player_dir(direction_t dir) {
     if (ct.get<dead>(hero_id).value_or(true)) {
         return;
     }
@@ -391,7 +392,7 @@ inline void gamestate::change_player_dir(direction_t dir) {
     frame_dirty = true;
 }
 
-inline bool gamestate::handle_change_dir(inputstate& is) {
+bool gamestate::handle_change_dir(inputstate& is) {
     if (!player_changing_dir) {
         return false;
     }
@@ -440,7 +441,7 @@ inline bool gamestate::handle_change_dir(inputstate& is) {
     return true;
 }
 
-inline bool gamestate::handle_change_dir_intent(inputstate& is) {
+bool gamestate::handle_change_dir_intent(inputstate& is) {
     if (is_action_pressed(is, INPUT_ACTION_DIRECTION_MODE)) {
         player_changing_dir = true;
         return true;
@@ -448,7 +449,7 @@ inline bool gamestate::handle_change_dir_intent(inputstate& is) {
     return false;
 }
 
-inline bool gamestate::handle_display_inventory(inputstate& is) {
+bool gamestate::handle_display_inventory(inputstate& is) {
     if (is_action_pressed(is, INPUT_ACTION_INVENTORY)) {
         ui.display_inventory_menu = true;
         controlmode = CONTROLMODE_INVENTORY;
@@ -461,7 +462,7 @@ inline bool gamestate::handle_display_inventory(inputstate& is) {
     return false;
 }
 
-inline bool gamestate::handle_toggle_full_light(inputstate& is) {
+bool gamestate::handle_toggle_full_light(inputstate& is) {
     if (!is_action_pressed(is, INPUT_ACTION_TOGGLE_FULL_LIGHT)) {
         return false;
     }
@@ -473,7 +474,7 @@ inline bool gamestate::handle_toggle_full_light(inputstate& is) {
     return true;
 }
 
-inline bool gamestate::handle_restart(inputstate& is) {
+bool gamestate::handle_restart(inputstate& is) {
     if (is_action_pressed(is, INPUT_ACTION_RESTART)) {
         do_restart = true;
         return true;
@@ -481,7 +482,7 @@ inline bool gamestate::handle_restart(inputstate& is) {
     return false;
 }
 
-inline void gamestate::handle_input_gameplay_controlmode_player(inputstate& is) {
+void gamestate::handle_input_gameplay_controlmode_player(inputstate& is) {
     if (flag != GAMESTATE_FLAG_PLAYER_INPUT) {
         return;
     }
@@ -557,7 +558,7 @@ inline void gamestate::handle_input_gameplay_controlmode_player(inputstate& is) 
     }
 }
 
-inline void gamestate::handle_input_action_menu(inputstate& is) {
+void gamestate::handle_input_action_menu(inputstate& is) {
     massert(controlmode == CONTROLMODE_ACTION_MENU, "controlmode isnt in action menu: %d", controlmode);
     if (inputstate_is_pressed(is, KEY_SPACE)) {
         ui.display_action_menu = false;
@@ -572,7 +573,7 @@ inline void gamestate::handle_input_action_menu(inputstate& is) {
     }
 }
 
-inline void gamestate::handle_input_option_menu(inputstate& is) {
+void gamestate::handle_input_option_menu(inputstate& is) {
     massert(controlmode == CONTROLMODE_OPTION_MENU, "controlmode isnt in option menu: %d", controlmode);
     if (inputstate_is_pressed(is, KEY_GRAVE) || inputstate_is_pressed(is, KEY_ESCAPE)) {
         ui.display_option_menu = false;
@@ -607,7 +608,7 @@ inline void gamestate::handle_input_option_menu(inputstate& is) {
     }
 }
 
-inline void gamestate::handle_input_sound_menu(inputstate& is) {
+void gamestate::handle_input_sound_menu(inputstate& is) {
     if (controlmode != CONTROLMODE_SOUND_MENU || !ui.display_sound_menu) {
         return;
     }
@@ -655,7 +656,7 @@ inline void gamestate::handle_input_sound_menu(inputstate& is) {
     }
 }
 
-inline void gamestate::handle_input_window_color_menu(inputstate& is) {
+void gamestate::handle_input_window_color_menu(inputstate& is) {
     if (controlmode != CONTROLMODE_WINDOW_COLOR_MENU || !ui.display_window_color_menu) {
         return;
     }
@@ -699,7 +700,7 @@ inline void gamestate::handle_input_window_color_menu(inputstate& is) {
     }
 }
 
-inline void gamestate::handle_input_help_menu(inputstate& is) {
+void gamestate::handle_input_help_menu(inputstate& is) {
     massert(controlmode == CONTROLMODE_HELP_MENU, "controlmode isnt in help menu: %d", controlmode);
     if (inputstate_any_pressed(is)) {
         ui.display_help_menu = false;
@@ -707,7 +708,7 @@ inline void gamestate::handle_input_help_menu(inputstate& is) {
     }
 }
 
-inline void gamestate::handle_input_gameplay_scene(inputstate& is) {
+void gamestate::handle_input_gameplay_scene(inputstate& is) {
     minfo2("handle input gameplay scene");
     if (controlmode == CONTROLMODE_KEYBOARD_PROFILE) {
         handle_input_keyboard_profile_prompt(is);
@@ -776,7 +777,7 @@ inline void gamestate::handle_input_gameplay_scene(inputstate& is) {
     }
 }
 
-inline void gamestate::handle_input(inputstate& is) {
+void gamestate::handle_input(inputstate& is) {
     minfo2("handle input: current_scene: %d", current_scene);
     if (inputstate_is_pressed(is, KEY_P)) {
         debugpanelon = !debugpanelon;

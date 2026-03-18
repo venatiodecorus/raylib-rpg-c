@@ -1,11 +1,12 @@
-/** @file gamestate_world_impl.h
+#include "gamestate.h"
+
+/** @file gamestate_world.cpp
  *  @brief Dungeon/world generation and placement helpers implemented on `gamestate`.
  */
 
-#pragma once
 
 namespace {
-inline int dungeon_clamp_int(int value, int min_value, int max_value) {
+int dungeon_clamp_int(int value, int min_value, int max_value) {
     if (value < min_value) {
         return min_value;
     }
@@ -15,7 +16,7 @@ inline int dungeon_clamp_int(int value, int min_value, int max_value) {
     return value;
 }
 
-inline int dungeon_random_range(mt19937& mt, int min_value, int max_value) {
+int dungeon_random_range(mt19937& mt, int min_value, int max_value) {
     if (max_value <= min_value) {
         return min_value;
     }
@@ -23,11 +24,11 @@ inline int dungeon_random_range(mt19937& mt, int min_value, int max_value) {
     return dist(mt);
 }
 
-inline Rectangle dungeon_make_rect(int x, int y, int w, int h) {
+Rectangle dungeon_make_rect(int x, int y, int w, int h) {
     return Rectangle{static_cast<float>(x), static_cast<float>(y), static_cast<float>(w), static_cast<float>(h)};
 }
 
-inline bool dungeon_rects_overlap(Rectangle a, Rectangle b, int padding = 0) {
+bool dungeon_rects_overlap(Rectangle a, Rectangle b, int padding = 0) {
     const int ax0 = static_cast<int>(a.x) - padding;
     const int ay0 = static_cast<int>(a.y) - padding;
     const int ax1 = static_cast<int>(a.x + a.width) + padding;
@@ -39,7 +40,7 @@ inline bool dungeon_rects_overlap(Rectangle a, Rectangle b, int padding = 0) {
     return ax0 < bx1 && ax1 > bx0 && ay0 < by1 && ay1 > by0;
 }
 
-inline bool dungeon_room_fits(Rectangle candidate, const vector<room>& rooms, int width, int height, int overlap_padding = 1) {
+bool dungeon_room_fits(Rectangle candidate, const vector<room>& rooms, int width, int height, int overlap_padding = 1) {
     if (candidate.width <= 0 || candidate.height <= 0) {
         return false;
     }
@@ -57,7 +58,7 @@ inline bool dungeon_room_fits(Rectangle candidate, const vector<room>& rooms, in
     return true;
 }
 
-inline bool dungeon_prop_is_solid(proptype_t type) {
+bool dungeon_prop_is_solid(proptype_t type) {
     switch (type) {
     case PROP_DUNGEON_STATUE_00:
     case PROP_DUNGEON_WOODEN_TABLE_00:
@@ -71,7 +72,7 @@ inline bool dungeon_prop_is_solid(proptype_t type) {
     }
 }
 
-inline bool dungeon_prop_is_pushable(proptype_t type) {
+bool dungeon_prop_is_pushable(proptype_t type) {
     switch (type) {
     case PROP_DUNGEON_STATUE_00:
     case PROP_DUNGEON_WOODEN_TABLE_00:
@@ -82,7 +83,7 @@ inline bool dungeon_prop_is_pushable(proptype_t type) {
     }
 }
 
-inline bool dungeon_prop_is_pullable(proptype_t type) {
+bool dungeon_prop_is_pullable(proptype_t type) {
     switch (type) {
     case PROP_DUNGEON_CANDLE_00:
     case PROP_DUNGEON_WOODEN_TABLE_00:
@@ -93,7 +94,7 @@ inline bool dungeon_prop_is_pullable(proptype_t type) {
     }
 }
 
-inline const char* dungeon_prop_name(proptype_t type) {
+const char* dungeon_prop_name(proptype_t type) {
     switch (type) {
     case PROP_DUNGEON_STATUE_00: return "statue";
     case PROP_DUNGEON_TORCH_00: return "torch";
@@ -115,7 +116,7 @@ inline const char* dungeon_prop_name(proptype_t type) {
     }
 }
 
-inline const char* dungeon_prop_description(proptype_t type) {
+const char* dungeon_prop_description(proptype_t type) {
     switch (type) {
     case PROP_DUNGEON_STATUE_00: return "A heavy carved statue worn smooth by years of damp air and passing hands.";
     case PROP_DUNGEON_TORCH_00: return "A soot-blackened torch stand dragged from the wall and left among the rubble.";
@@ -135,7 +136,7 @@ inline const char* dungeon_prop_description(proptype_t type) {
     }
 }
 
-inline with_fun dungeon_prop_init(proptype_t type) {
+with_fun dungeon_prop_init(proptype_t type) {
     return [type](CT& ct, const entityid id) {
         ct.set<name>(id, dungeon_prop_name(type));
         ct.set<description>(id, dungeon_prop_description(type));
@@ -145,7 +146,7 @@ inline with_fun dungeon_prop_init(proptype_t type) {
     };
 }
 
-inline proptype_t dungeon_random_floor_prop_type(mt19937& mt) {
+proptype_t dungeon_random_floor_prop_type(mt19937& mt) {
     static constexpr proptype_t floor_prop_types[] = {
         PROP_DUNGEON_STATUE_00,
         PROP_DUNGEON_TORCH_00,
@@ -162,12 +163,12 @@ inline proptype_t dungeon_random_floor_prop_type(mt19937& mt) {
     return floor_prop_types[dist(mt)];
 }
 
-inline bool dungeon_prop_tile_is_walkable(tile_t& tile) {
+bool dungeon_prop_tile_is_walkable(tile_t& tile) {
     const tiletype_t type = tile.get_type();
     return tile_is_walkable(type) && type != TILE_UPSTAIRS && type != TILE_DOWNSTAIRS;
 }
 
-inline int dungeon_count_walkable_cardinal_neighbors(shared_ptr<dungeon_floor> df, vec3 loc) {
+int dungeon_count_walkable_cardinal_neighbors(shared_ptr<dungeon_floor> df, vec3 loc) {
     static constexpr vec3 offsets[] = {
         vec3{0, -1, 0},
         vec3{-1, 0, 0},
@@ -190,11 +191,11 @@ inline int dungeon_count_walkable_cardinal_neighbors(shared_ptr<dungeon_floor> d
     return count;
 }
 
-inline bool dungeon_is_prop_chokepoint(shared_ptr<dungeon_floor> df, vec3 loc) {
+bool dungeon_is_prop_chokepoint(shared_ptr<dungeon_floor> df, vec3 loc) {
     return dungeon_count_walkable_cardinal_neighbors(df, loc) <= 2;
 }
 
-inline bool dungeon_is_safe_prop_loc(shared_ptr<dungeon_floor> df, vec3 loc) {
+bool dungeon_is_safe_prop_loc(shared_ptr<dungeon_floor> df, vec3 loc) {
     tile_t& tile = df->tile_at(loc);
     if (!dungeon_prop_tile_is_walkable(tile)) {
         return false;
@@ -233,7 +234,7 @@ inline bool dungeon_is_safe_prop_loc(shared_ptr<dungeon_floor> df, vec3 loc) {
 }
 }
 
-inline void gamestate::create_and_add_df_0(biome_t type, int w, int h, int df_count, float parts) {
+void gamestate::create_and_add_df_0(biome_t type, int w, int h, int df_count, float parts) {
     (void)df_count;
     (void)parts;
     auto df = d.create_floor(type, w, h);
@@ -244,7 +245,7 @@ inline void gamestate::create_and_add_df_0(biome_t type, int w, int h, int df_co
     d.add_floor(df);
 }
 
-inline void gamestate::create_and_add_df_1(biome_t type, int w, int h, int df_count, float parts) {
+void gamestate::create_and_add_df_1(biome_t type, int w, int h, int df_count, float parts) {
     (void)df_count;
     auto df = d.create_floor(type, w, h);
     vector<room> rooms;
@@ -296,7 +297,7 @@ inline void gamestate::create_and_add_df_1(biome_t type, int w, int h, int df_co
     d.add_floor(df);
 }
 
-inline bool gamestate::assign_random_stairs_to_floor(shared_ptr<dungeon_floor> df) {
+bool gamestate::assign_random_stairs_to_floor(shared_ptr<dungeon_floor> df) {
     massert(df, "dungeon floor is null");
     auto upstairs_locs = df->df_get_possible_upstairs_locs();
     if (!upstairs_locs || upstairs_locs->empty()) {
@@ -330,7 +331,7 @@ inline bool gamestate::assign_random_stairs_to_floor(shared_ptr<dungeon_floor> d
     return true;
 }
 
-inline bool gamestate::assign_random_stairs() {
+bool gamestate::assign_random_stairs() {
     massert(d.floors.size() > 0, "dungeon has no floors");
     for (size_t i = 0; i < d.floors.size(); i++) {
         if (!assign_random_stairs_to_floor(d.get_floor(i))) {
@@ -340,7 +341,7 @@ inline bool gamestate::assign_random_stairs() {
     return true;
 }
 
-inline void gamestate::init_dungeon(biome_t type, int df_count, float parts, int width, int height) {
+void gamestate::init_dungeon(biome_t type, int df_count, float parts, int width, int height) {
     minfo2("init_dungeon");
     massert(df_count > 0, "df_count is <= 0");
     massert(df_count > 0, "df_count == 0");
@@ -365,7 +366,7 @@ inline void gamestate::init_dungeon(biome_t type, int df_count, float parts, int
     d.is_initialized = true;
 }
 
-inline entityid gamestate::create_door_with(with_fun doorInitFunction) {
+entityid gamestate::create_door_with(with_fun doorInitFunction) {
     entityid id = add_entity();
     ct.set<entitytype>(id, ENTITY_DOOR);
     doorInitFunction(ct, id);
@@ -378,7 +379,7 @@ inline entityid gamestate::create_door_with(with_fun doorInitFunction) {
     return id;
 }
 
-inline entityid gamestate::create_door_at_with(vec3 loc, with_fun doorInitFunction) {
+entityid gamestate::create_door_at_with(vec3 loc, with_fun doorInitFunction) {
     shared_ptr<dungeon_floor> df = d.get_floor(loc.z);
     tile_t& tile = df->tile_at(loc);
     if (!tile_is_walkable(tile.get_type())) {
@@ -403,7 +404,7 @@ inline entityid gamestate::create_door_at_with(vec3 loc, with_fun doorInitFuncti
     return id;
 }
 
-inline size_t gamestate::place_doors() {
+size_t gamestate::place_doors() {
     minfo2("gamestate.place_doors");
     size_t placed_doors = 0;
     for (size_t z = 0; z < d.floors.size(); z++) {
@@ -427,7 +428,7 @@ inline size_t gamestate::place_doors() {
     return placed_doors;
 }
 
-inline entityid gamestate::create_chest_with(with_fun chestInitFunction) {
+entityid gamestate::create_chest_with(with_fun chestInitFunction) {
     entityid id = add_entity();
     ct.set<entitytype>(id, ENTITY_CHEST);
     ct.set<spritemove>(id, (Rectangle){0, 0, 0, 0});
@@ -448,7 +449,7 @@ inline entityid gamestate::create_chest_with(with_fun chestInitFunction) {
     return id;
 }
 
-inline entityid gamestate::create_chest_at_with(vec3 loc, with_fun chestInitFunction) {
+entityid gamestate::create_chest_at_with(vec3 loc, with_fun chestInitFunction) {
     shared_ptr<dungeon_floor> df = d.get_floor(loc.z);
     tile_t& tile = df->tile_at(loc);
     if (!tile_is_walkable(tile.get_type())) {
@@ -471,7 +472,7 @@ inline entityid gamestate::create_chest_at_with(vec3 loc, with_fun chestInitFunc
     return id;
 }
 
-inline entityid gamestate::place_first_floor_chest() {
+entityid gamestate::place_first_floor_chest() {
     if (d.floors.empty()) {
         return ENTITYID_INVALID;
     }
@@ -500,7 +501,7 @@ inline entityid gamestate::place_first_floor_chest() {
     return create_chest_at_with(candidates.front(), [](CT&, const entityid) {});
 }
 
-inline entityid gamestate::create_prop_with(proptype_t type, with_fun initFun) {
+entityid gamestate::create_prop_with(proptype_t type, with_fun initFun) {
     entityid id = add_entity();
     ct.set<entitytype>(id, ENTITY_PROP);
     ct.set<spritemove>(id, (Rectangle){0, 0, 0, 0});
@@ -513,7 +514,7 @@ inline entityid gamestate::create_prop_with(proptype_t type, with_fun initFun) {
     return id;
 }
 
-inline entityid gamestate::create_prop_at_with(proptype_t type, vec3 loc, with_fun initFun) {
+entityid gamestate::create_prop_at_with(proptype_t type, vec3 loc, with_fun initFun) {
     shared_ptr<dungeon_floor> df = d.get_floor(loc.z);
     tile_t& tile = df->tile_at(loc);
     if (!tile_is_walkable(tile.get_type())) {
@@ -534,7 +535,7 @@ inline entityid gamestate::create_prop_at_with(proptype_t type, vec3 loc, with_f
     return id;
 }
 
-inline int gamestate::place_props() {
+int gamestate::place_props() {
     int placed_props = 0;
     for (int z = 0; z < (int)d.floors.size(); z++) {
         if (z == 2) {
@@ -571,7 +572,7 @@ inline int gamestate::place_props() {
     return placed_props;
 }
 
-inline int gamestate::place_floor_three_pullable_props() {
+int gamestate::place_floor_three_pullable_props() {
     if (d.get_floor_count() < 3) {
         return 0;
     }
@@ -608,7 +609,7 @@ inline int gamestate::place_floor_three_pullable_props() {
     return placed;
 }
 
-inline entityid gamestate::place_floor_three_pullable_sign() {
+entityid gamestate::place_floor_three_pullable_sign() {
     if (d.get_floor_count() < 3) {
         return ENTITYID_INVALID;
     }
@@ -641,7 +642,7 @@ inline entityid gamestate::place_floor_three_pullable_sign() {
     return ENTITYID_INVALID;
 }
 
-inline bool gamestate::create_floor_pressure_plate(vec3 loc, entityid linked_door_id) {
+bool gamestate::create_floor_pressure_plate(vec3 loc, entityid linked_door_id) {
     if (vec3_invalid(loc) || loc.z < 0 || static_cast<size_t>(loc.z) >= d.floors.size()) {
         return false;
     }
@@ -668,7 +669,7 @@ inline bool gamestate::create_floor_pressure_plate(vec3 loc, entityid linked_doo
     return true;
 }
 
-inline bool gamestate::destroy_floor_pressure_plate(vec3 loc) {
+bool gamestate::destroy_floor_pressure_plate(vec3 loc) {
     floor_pressure_plate_t* plate = get_floor_pressure_plate(loc);
     if (!plate || plate->destroyed) {
         return false;
@@ -686,7 +687,7 @@ inline bool gamestate::destroy_floor_pressure_plate(vec3 loc) {
     return true;
 }
 
-inline bool gamestate::setup_floor_four_pressure_plate_tutorial() {
+bool gamestate::setup_floor_four_pressure_plate_tutorial() {
     if (d.get_floor_count() < 3) {
         return false;
     }

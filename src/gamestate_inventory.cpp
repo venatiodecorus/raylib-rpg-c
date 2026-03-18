@@ -1,21 +1,22 @@
-/** @file gamestate_inventory_impl.h
+#include "gamestate.h"
+
+/** @file gamestate_inventory.cpp
  *  @brief Inventory/chest management helpers implemented on `gamestate`.
  */
 
-#pragma once
 
-inline bool gamestate::use_mini_inventory_menu() const {
+bool gamestate::use_mini_inventory_menu() const {
     return ui.prefer_mini_inventory_menu;
 }
 
-inline size_t gamestate::get_inventory_selection_index() const {
+size_t gamestate::get_inventory_selection_index() const {
     if (!use_mini_inventory_menu()) {
         return static_cast<size_t>(ui.inventory_cursor.y) * 7 + static_cast<size_t>(ui.inventory_cursor.x);
     }
     return static_cast<size_t>(ui.mini_inventory_scroll_offset) + static_cast<size_t>(ui.inventory_cursor.y);
 }
 
-inline void gamestate::clamp_inventory_selection(size_t item_count) {
+void gamestate::clamp_inventory_selection(size_t item_count) {
     if (!use_mini_inventory_menu()) {
         if (item_count == 0) {
             ui.inventory_cursor = Vector2{0, 0};
@@ -54,7 +55,7 @@ inline void gamestate::clamp_inventory_selection(size_t item_count) {
     ui.inventory_cursor.y = static_cast<float>(index - ui.mini_inventory_scroll_offset);
 }
 
-inline void gamestate::move_inventory_selection(int delta) {
+void gamestate::move_inventory_selection(int delta) {
     if (!use_mini_inventory_menu()) {
         if (delta < 0) {
             if (ui.inventory_cursor.x > 0) {
@@ -85,7 +86,7 @@ inline void gamestate::move_inventory_selection(int delta) {
     ui.inventory_cursor.y = static_cast<float>(current_index - ui.mini_inventory_scroll_offset);
 }
 
-inline bool gamestate::remove_from_inventory(entityid actor_id, entityid item_id) {
+bool gamestate::remove_from_inventory(entityid actor_id, entityid item_id) {
     auto maybe_inventory = ct.get<inventory>(actor_id);
     if (!maybe_inventory.has_value()) {
         merror("maybe_inventory has no value for actor id %d", actor_id);
@@ -110,7 +111,7 @@ inline bool gamestate::remove_from_inventory(entityid actor_id, entityid item_id
     return success;
 }
 
-inline bool gamestate::drop_from_inventory(entityid actor_id, entityid item_id) {
+bool gamestate::drop_from_inventory(entityid actor_id, entityid item_id) {
     if (remove_from_inventory(actor_id, item_id)) {
         auto maybe_loc = ct.get<location>(actor_id);
         if (!maybe_loc.has_value()) {
@@ -132,7 +133,7 @@ inline bool gamestate::drop_from_inventory(entityid actor_id, entityid item_id) 
     return false;
 }
 
-inline bool gamestate::drop_all_from_inventory(entityid actor_id) {
+bool gamestate::drop_all_from_inventory(entityid actor_id) {
     auto maybe_inventory = ct.get<inventory>(actor_id);
     if (!maybe_inventory.has_value()) {
         merror("no inventory");
@@ -146,7 +147,7 @@ inline bool gamestate::drop_all_from_inventory(entityid actor_id) {
     return true;
 }
 
-inline void gamestate::handle_hero_inventory_equip_weapon(entityid item_id) {
+void gamestate::handle_hero_inventory_equip_weapon(entityid item_id) {
     entityid current_weapon = ct.get<equipped_weapon>(hero_id).value_or(ENTITYID_INVALID);
     if (current_weapon == item_id) {
         ct.set<equipped_weapon>(hero_id, ENTITYID_INVALID);
@@ -159,7 +160,7 @@ inline void gamestate::handle_hero_inventory_equip_weapon(entityid item_id) {
     ui.display_inventory_menu = false;
 }
 
-inline void gamestate::handle_hero_inventory_equip_shield(entityid item_id) {
+void gamestate::handle_hero_inventory_equip_shield(entityid item_id) {
     entityid current_shield = ct.get<equipped_shield>(hero_id).value_or(ENTITYID_INVALID);
     if (current_shield == item_id) {
         ct.set<equipped_shield>(hero_id, ENTITYID_INVALID);
@@ -172,7 +173,7 @@ inline void gamestate::handle_hero_inventory_equip_shield(entityid item_id) {
     ui.display_inventory_menu = false;
 }
 
-inline void gamestate::handle_hero_inventory_equip_item(entityid item_id) {
+void gamestate::handle_hero_inventory_equip_item(entityid item_id) {
     itemtype_t item_type = ct.get<itemtype>(item_id).value_or(ITEM_NONE);
     switch (item_type) {
     case ITEM_NONE: break;
@@ -182,7 +183,7 @@ inline void gamestate::handle_hero_inventory_equip_item(entityid item_id) {
     }
 }
 
-inline void gamestate::handle_hero_inventory_equip() {
+void gamestate::handle_hero_inventory_equip() {
     audio.play(SFX_EQUIP_01);
     size_t index = get_inventory_selection_index();
     auto my_inventory = ct.get<inventory>(hero_id);
@@ -200,7 +201,7 @@ inline void gamestate::handle_hero_inventory_equip() {
     }
 }
 
-inline bool gamestate::drop_item_from_hero_inventory() {
+bool gamestate::drop_item_from_hero_inventory() {
     if (!ct.has<inventory>(hero_id)) {
         return false;
     }
@@ -217,7 +218,7 @@ inline bool gamestate::drop_item_from_hero_inventory() {
     return drop_inventory_item(hero_id, item_id);
 }
 
-inline bool gamestate::drop_inventory_item(entityid actor_id, entityid item_id) {
+bool gamestate::drop_inventory_item(entityid actor_id, entityid item_id) {
     if (actor_id == ENTITYID_INVALID || item_id == ENTITYID_INVALID) {
         return false;
     }
@@ -255,7 +256,7 @@ inline bool gamestate::drop_inventory_item(entityid actor_id, entityid item_id) 
     return true;
 }
 
-inline bool gamestate::is_in_inventory(entityid actor_id, entityid item_id) {
+bool gamestate::is_in_inventory(entityid actor_id, entityid item_id) {
     auto maybe_inventory = ct.get<inventory>(actor_id);
     if (!maybe_inventory.has_value()) {
         merror("maybe_inventory has no value for actor id %d", actor_id);
@@ -270,7 +271,7 @@ inline bool gamestate::is_in_inventory(entityid actor_id, entityid item_id) {
     return false;
 }
 
-inline bool gamestate::use_potion(entityid actor_id, entityid item_id) {
+bool gamestate::use_potion(entityid actor_id, entityid item_id) {
     massert(actor_id != ENTITYID_INVALID, "actor_id is invalid");
     massert(item_id != ENTITYID_INVALID, "actor_id is invalid");
     bool is_item = ct.get<entitytype>(item_id).value_or(ENTITY_NONE) == ENTITY_ITEM;
@@ -305,7 +306,7 @@ inline bool gamestate::use_potion(entityid actor_id, entityid item_id) {
     return false;
 }
 
-inline void gamestate::handle_hero_potion_use(entityid id) {
+void gamestate::handle_hero_potion_use(entityid id) {
     entitytype_t type = ct.get<entitytype>(id).value_or(ENTITY_NONE);
     if (type != ENTITY_ITEM) {
         return;
@@ -317,7 +318,7 @@ inline void gamestate::handle_hero_potion_use(entityid id) {
     run_use_item_action(hero_id, id);
 }
 
-inline void gamestate::handle_hero_item_use() {
+void gamestate::handle_hero_item_use() {
     size_t index = get_inventory_selection_index();
     optional<shared_ptr<vector<entityid>>> maybe_inventory = ct.get<inventory>(hero_id);
     if (!maybe_inventory || !maybe_inventory.has_value()) {
@@ -341,7 +342,7 @@ inline void gamestate::handle_hero_item_use() {
     }
 }
 
-inline bool gamestate::transfer_inventory_item(entityid from_id, entityid to_id, entityid item_id) {
+bool gamestate::transfer_inventory_item(entityid from_id, entityid to_id, entityid item_id) {
     if (from_id == ENTITYID_INVALID || to_id == ENTITYID_INVALID || item_id == ENTITYID_INVALID) {
         return false;
     }
@@ -366,7 +367,7 @@ inline bool gamestate::transfer_inventory_item(entityid from_id, entityid to_id,
     return true;
 }
 
-inline bool gamestate::open_chest_menu(entityid chest_id) {
+bool gamestate::open_chest_menu(entityid chest_id) {
     if (chest_id == ENTITYID_INVALID || ct.get<entitytype>(chest_id).value_or(ENTITY_NONE) != ENTITY_CHEST) {
         return false;
     }
@@ -384,7 +385,7 @@ inline bool gamestate::open_chest_menu(entityid chest_id) {
     return true;
 }
 
-inline void gamestate::close_chest_menu() {
+void gamestate::close_chest_menu() {
     if (active_chest_id != ENTITYID_INVALID) {
         ct.set<door_open>(active_chest_id, false);
         ct.set<update>(active_chest_id, true);
@@ -396,7 +397,7 @@ inline void gamestate::close_chest_menu() {
     frame_dirty = true;
 }
 
-inline void gamestate::toggle_chest_menu_mode() {
+void gamestate::toggle_chest_menu_mode() {
     if (!ui.display_chest_menu || active_chest_id == ENTITYID_INVALID) {
         return;
     }
@@ -406,7 +407,7 @@ inline void gamestate::toggle_chest_menu_mode() {
     frame_dirty = true;
 }
 
-inline void gamestate::handle_chest_menu_confirm() {
+void gamestate::handle_chest_menu_confirm() {
     if (!ui.display_chest_menu || active_chest_id == ENTITYID_INVALID) {
         return;
     }
@@ -428,7 +429,7 @@ inline void gamestate::handle_chest_menu_confirm() {
     }
 }
 
-inline void gamestate::handle_input_chest(inputstate& is) {
+void gamestate::handle_input_chest(inputstate& is) {
     if (controlmode != CONTROLMODE_CHEST || !ui.display_chest_menu) {
         return;
     }

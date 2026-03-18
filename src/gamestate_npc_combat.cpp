@@ -1,10 +1,11 @@
-/** @file gamestate_npc_combat_impl.h
+#include "gamestate.h"
+
+/** @file gamestate_npc_combat.cpp
  *  @brief Combat, NPC behavior, and pathing helpers implemented on `gamestate`.
  */
 
-#pragma once
 
-inline int gamestate::compute_armor_class(entityid id) {
+int gamestate::compute_armor_class(entityid id) {
     massert(ENTITYID_INVALID != id, "id is invalid");
     int base_armor_class = ct.get<base_ac>(id).value_or(10);
     int dex_bonus = get_stat_bonus(ct.get<dexterity>(id).value_or(10));
@@ -12,7 +13,7 @@ inline int gamestate::compute_armor_class(entityid id) {
     return total_ac;
 }
 
-inline bool gamestate::compute_attack_roll(entityid attacker, entityid target) {
+bool gamestate::compute_attack_roll(entityid attacker, entityid target) {
     int str = ct.get<strength>(attacker).value_or(10);
     int bonus = get_stat_bonus(str);
     uniform_int_distribution<int> gen(1, 20);
@@ -21,7 +22,7 @@ inline bool gamestate::compute_attack_roll(entityid attacker, entityid target) {
     return roll >= ac;
 }
 
-inline int gamestate::compute_attack_damage(entityid attacker, entityid target) {
+int gamestate::compute_attack_damage(entityid attacker, entityid target) {
     int str = ct.get<strength>(attacker).value_or(10);
     int bonus = std::max(0, get_stat_bonus(str));
     entityid equipped_wpn = ct.get<equipped_weapon>(attacker).value_or(ENTITYID_INVALID);
@@ -31,33 +32,33 @@ inline int gamestate::compute_attack_damage(entityid attacker, entityid target) 
     return dmg + bonus;
 }
 
-inline void gamestate::add_combat_miss_message(entityid attacker_id, entityid target_id) {
+void gamestate::add_combat_miss_message(entityid attacker_id, entityid target_id) {
     const string atk_name = ct.get<name>(attacker_id).value_or("no-name");
     const string tgt_name = ct.get<name>(target_id).value_or("no-name");
     messages.add_history("%s swings at %s and misses!", atk_name.c_str(), tgt_name.c_str());
 }
 
-inline void gamestate::add_combat_block_message(entityid attacker_id, entityid target_id) {
+void gamestate::add_combat_block_message(entityid attacker_id, entityid target_id) {
     const string atk_name = ct.get<name>(attacker_id).value_or("no-name");
     const string tgt_name = ct.get<name>(target_id).value_or("no-name");
     messages.add_history("%s blocked an attack from %s", tgt_name.c_str(), atk_name.c_str());
 }
 
-inline void gamestate::add_combat_damage_message(entityid attacker_id, entityid target_id, int damage) {
+void gamestate::add_combat_damage_message(entityid attacker_id, entityid target_id, int damage) {
     const string atk_name = ct.get<name>(attacker_id).value_or("no-name");
     const string tgt_name = ct.get<name>(target_id).value_or("no-name");
     messages.add_history("%s deals %d damage to %s", atk_name.c_str(), damage, tgt_name.c_str());
 }
 
-inline void gamestate::add_combat_break_message(entityid item_id) {
+void gamestate::add_combat_break_message(entityid item_id) {
     messages.add_history("%s broke!", ct.get<name>(item_id).value_or("no-name-item").c_str());
 }
 
-inline void gamestate::add_combat_player_death_message() {
+void gamestate::add_combat_player_death_message() {
     messages.add("You died");
 }
 
-inline void gamestate::handle_weapon_durability_loss(entityid atk_id, entityid tgt_id) {
+void gamestate::handle_weapon_durability_loss(entityid atk_id, entityid tgt_id) {
     entityid equipped_wpn = ct.get<equipped_weapon>(atk_id).value_or(ENTITYID_INVALID);
     optional<int> maybe_dura = ct.get<durability>(equipped_wpn);
     if (!maybe_dura.has_value()) {
@@ -78,7 +79,7 @@ inline void gamestate::handle_weapon_durability_loss(entityid atk_id, entityid t
     add_combat_break_message(equipped_wpn);
 }
 
-inline void gamestate::handle_shield_durability_loss(entityid defender, entityid attacker) {
+void gamestate::handle_shield_durability_loss(entityid defender, entityid attacker) {
     entityid shield = ct.get<equipped_shield>(defender).value_or(ENTITYID_INVALID);
     optional<int> maybe_dura = ct.get<durability>(shield);
     if (!maybe_dura.has_value()) {
@@ -99,11 +100,11 @@ inline void gamestate::handle_shield_durability_loss(entityid defender, entityid
     add_combat_break_message(shield);
 }
 
-inline int gamestate::get_npc_xp(entityid id) {
+int gamestate::get_npc_xp(entityid id) {
     return ct.get<xp>(id).value_or(0);
 }
 
-inline void gamestate::update_npc_xp(entityid id, entityid target_id) {
+void gamestate::update_npc_xp(entityid id, entityid target_id) {
     (void)target_id;
     int old_xp = get_npc_xp(id);
     int reward_xp = 1;
@@ -112,7 +113,7 @@ inline void gamestate::update_npc_xp(entityid id, entityid target_id) {
     maybe_unlock_level_up(id);
 }
 
-inline void gamestate::provoke_npc(entityid npc_id, entityid source_id) {
+void gamestate::provoke_npc(entityid npc_id, entityid source_id) {
     if (npc_id == ENTITYID_INVALID) {
         return;
     }
@@ -134,14 +135,14 @@ inline void gamestate::provoke_npc(entityid npc_id, entityid source_id) {
     update_npc_behavior(npc_id);
 }
 
-inline void gamestate::handle_shield_block_sfx(entityid target_id) {
+void gamestate::handle_shield_block_sfx(entityid target_id) {
     bool event_heard = check_hearing(hero_id, ct.get<location>(target_id).value_or((vec3){-1, -1, -1}));
     if (event_heard) {
         audio.play(SFX_HIT_METAL_ON_METAL, test);
     }
 }
 
-inline attack_result_t gamestate::resolve_attack_intent(entityid attacker_id, vec3 target_loc) {
+attack_result_t gamestate::resolve_attack_intent(entityid attacker_id, vec3 target_loc) {
     massert(attacker_id != ENTITYID_INVALID, "attacker is NULL");
     massert(!ct.get<dead>(attacker_id).value_or(false), "attacker entity is dead");
     massert(ct.has<location>(attacker_id), "entity %d has no location", attacker_id);
@@ -204,7 +205,7 @@ inline attack_result_t gamestate::resolve_attack_intent(entityid attacker_id, ve
     return ATTACK_RESULT_HIT;
 }
 
-inline void gamestate::resolve_attack_block_event(entityid attacker_id, entityid target_id) {
+void gamestate::resolve_attack_block_event(entityid attacker_id, entityid target_id) {
     if (attacker_id == ENTITYID_INVALID || target_id == ENTITYID_INVALID) {
         return;
     }
@@ -215,7 +216,7 @@ inline void gamestate::resolve_attack_block_event(entityid attacker_id, entityid
     add_combat_block_message(attacker_id, target_id);
 }
 
-inline void gamestate::resolve_attack_damage_event(entityid attacker_id, entityid target_id, int damage) {
+void gamestate::resolve_attack_damage_event(entityid attacker_id, entityid target_id, int damage) {
     if (attacker_id == ENTITYID_INVALID || target_id == ENTITYID_INVALID) {
         return;
     }
@@ -250,7 +251,7 @@ inline void gamestate::resolve_attack_damage_event(entityid attacker_id, entityi
     }
 }
 
-inline void gamestate::resolve_attack_death_event(entityid attacker_id, entityid target_id) {
+void gamestate::resolve_attack_death_event(entityid attacker_id, entityid target_id) {
     if (attacker_id == ENTITYID_INVALID || target_id == ENTITYID_INVALID) {
         return;
     }
@@ -282,32 +283,32 @@ inline void gamestate::resolve_attack_death_event(entityid attacker_id, entityid
     }
 }
 
-inline void gamestate::resolve_attack_award_xp_event(entityid attacker_id, entityid target_id) {
+void gamestate::resolve_attack_award_xp_event(entityid attacker_id, entityid target_id) {
     update_npc_xp(attacker_id, target_id);
 }
 
-inline void gamestate::resolve_attack_drop_inventory_event(entityid target_id) {
+void gamestate::resolve_attack_drop_inventory_event(entityid target_id) {
     drop_all_from_inventory(target_id);
 }
 
-inline void gamestate::resolve_attack_player_death_event(entityid target_id) {
+void gamestate::resolve_attack_player_death_event(entityid target_id) {
     (void)target_id;
     add_combat_player_death_message();
 }
 
-inline void gamestate::resolve_provoke_npc_event(entityid npc_id, entityid source_id) {
+void gamestate::resolve_provoke_npc_event(entityid npc_id, entityid source_id) {
     provoke_npc(npc_id, source_id);
 }
 
-inline void gamestate::resolve_attack_weapon_durability_event(entityid attacker_id, entityid target_id) {
+void gamestate::resolve_attack_weapon_durability_event(entityid attacker_id, entityid target_id) {
     handle_weapon_durability_loss(attacker_id, target_id);
 }
 
-inline void gamestate::resolve_attack_shield_durability_event(entityid defender_id, entityid attacker_id) {
+void gamestate::resolve_attack_shield_durability_event(entityid defender_id, entityid attacker_id) {
     handle_shield_durability_loss(defender_id, attacker_id);
 }
 
-inline void gamestate::handle_attack_sfx(entityid attacker, attack_result_t result) {
+void gamestate::handle_attack_sfx(entityid attacker, attack_result_t result) {
     vec3 loc = ct.get<location>(attacker).value_or(vec3{-1, -1, -1});
     massert(vec3_valid(loc), "loc is invalid");
     if (!check_hearing(hero_id, loc)) {
@@ -332,7 +333,7 @@ inline void gamestate::handle_attack_sfx(entityid attacker, attack_result_t resu
     msuccess("attack sfx played");
 }
 
-inline void gamestate::set_gamestate_flag_for_attack_animation(entitytype_t type) {
+void gamestate::set_gamestate_flag_for_attack_animation(entitytype_t type) {
     massert(type == ENTITY_PLAYER || type == ENTITY_NPC, "type is not player or npc!");
     if (type == ENTITY_PLAYER) {
         flag = GAMESTATE_FLAG_PLAYER_ANIM;
@@ -342,7 +343,7 @@ inline void gamestate::set_gamestate_flag_for_attack_animation(entitytype_t type
     }
 }
 
-inline bool gamestate::is_entity_adjacent(entityid id0, entityid id1) {
+bool gamestate::is_entity_adjacent(entityid id0, entityid id1) {
     massert(id0 != ENTITYID_INVALID, "id0 is invalid");
     massert(id1 != ENTITYID_INVALID, "id1 is invalid");
     massert(id0 != id1, "id0 and id1 are the same");
@@ -355,7 +356,7 @@ inline bool gamestate::is_entity_adjacent(entityid id0, entityid id1) {
            (a.x + 1 == b.x && a.y == b.y) || (a.x - 1 == b.x && a.y + 1 == b.y) || (a.x == b.x && a.y + 1 == b.y) || (a.x + 1 == b.x && a.y + 1 == b.y);
 }
 
-inline void gamestate::update_path_to_target(entityid id) {
+void gamestate::update_path_to_target(entityid id) {
     massert(id != INVALID, "id is invalid");
     if (!ct.has<target_path>(id)) {
         merror("id doesn't have a target_path");
@@ -457,7 +458,7 @@ inline void gamestate::update_path_to_target(entityid id) {
     }
 }
 
-inline bool gamestate::try_entity_move_to_target(entityid id) {
+bool gamestate::try_entity_move_to_target(entityid id) {
     massert(ct.has<target_path>(id), "id has no target_path");
     update_path_to_target(id);
     auto path = ct.get<target_path>(id).value();
@@ -474,7 +475,7 @@ inline bool gamestate::try_entity_move_to_target(entityid id) {
     return false;
 }
 
-inline bool gamestate::try_entity_move_random(entityid id) {
+bool gamestate::try_entity_move_random(entityid id) {
     uniform_int_distribution<int> dist(-1, 1);
     if (run_move_action(id, vec3{dist(mt), dist(mt), 0})) {
         msuccess2("try entity move succeeded");
@@ -483,7 +484,7 @@ inline bool gamestate::try_entity_move_random(entityid id) {
     return false;
 }
 
-inline bool gamestate::handle_npc(entityid id) {
+bool gamestate::handle_npc(entityid id) {
     minfo2("handle npc %d", id);
     massert(id != ENTITYID_INVALID, "Entity is NULL!");
     if (ct.get<entitytype>(id).value_or(ENTITY_NONE) != ENTITY_NPC) {
@@ -547,7 +548,7 @@ inline bool gamestate::handle_npc(entityid id) {
     return false;
 }
 
-inline void gamestate::handle_npcs() {
+void gamestate::handle_npcs() {
     minfo2("handle npcs");
     if (flag == GAMESTATE_FLAG_NPC_TURN) {
 #ifndef NPCS_ALL_AT_ONCE

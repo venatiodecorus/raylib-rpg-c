@@ -1,15 +1,16 @@
-/** @file gamestate_lifecycle_impl.h
+#include "gamestate.h"
+
+/** @file gamestate_lifecycle.cpp
  *  @brief Core gameplay lifecycle, visibility, and tick helpers implemented on `gamestate`.
  */
 
-#pragma once
 
-inline void gamestate::update_tile(tile_t& tile) {
+void gamestate::update_tile(tile_t& tile) {
     tile.set_explored(true);
     tile.set_visible(true);
 }
 
-inline bool gamestate::path_blocked(vec3 a, vec3 b) {
+bool gamestate::path_blocked(vec3 a, vec3 b) {
     vector<vec3> path = calculate_path_with_thickness(a, b);
     auto df = d.get_current_floor();
     for (auto loc : path) {
@@ -31,7 +32,7 @@ inline bool gamestate::path_blocked(vec3 a, vec3 b) {
     return false;
 }
 
-inline bool gamestate::visibility_path_blocked(vec3 a, vec3 b) {
+bool gamestate::visibility_path_blocked(vec3 a, vec3 b) {
     vector<vec3> path = calculate_path_with_thickness(a, b);
     auto df = d.get_current_floor();
     for (auto loc : path) {
@@ -53,7 +54,7 @@ inline bool gamestate::visibility_path_blocked(vec3 a, vec3 b) {
     return false;
 }
 
-inline bool gamestate::update_player_tiles_explored() {
+bool gamestate::update_player_tiles_explored() {
     if (current_scene != SCENE_GAMEPLAY) {
         return false;
     }
@@ -94,7 +95,7 @@ inline bool gamestate::update_player_tiles_explored() {
     return true;
 }
 
-inline bool gamestate::update_player_state() {
+bool gamestate::update_player_state() {
     if (hero_id == ENTITYID_INVALID) {
         merror2("hero_id is invalid");
         return false;
@@ -110,7 +111,7 @@ inline bool gamestate::update_player_state() {
     return true;
 }
 
-inline void gamestate::update_npcs_state() {
+void gamestate::update_npcs_state() {
     minfo2("BEGIN update_npcs_state");
     auto df = d.get_current_floor();
     (void)df;
@@ -124,7 +125,7 @@ inline void gamestate::update_npcs_state() {
     }
 }
 
-inline void gamestate::update_npc_behavior(entityid id) {
+void gamestate::update_npc_behavior(entityid id) {
     if (ct.get<entitytype>(id).value_or(ENTITY_NONE) != ENTITY_NPC) {
         return;
     }
@@ -158,7 +159,7 @@ inline void gamestate::update_npc_behavior(entityid id) {
     ct.set<entity_default_action>(id, ENTITY_DEFAULT_ACTION_MOVE_TO_TARGET_AND_ATTACK_TARGET_IF_ADJACENT);
 }
 
-inline void gamestate::logic_init() {
+void gamestate::logic_init() {
     minfo("gamestate.logic_init");
     srand(time(NULL));
     SetRandomSeed(time(NULL));
@@ -238,7 +239,7 @@ inline void gamestate::logic_init() {
     msuccess("liblogic_init: Game state initialized");
 }
 
-inline void gamestate::restart_game() {
+void gamestate::restart_game() {
     const unsigned int previous_restart_count = restart_count;
     const int previous_target_width = targetwidth;
     const int previous_target_height = targetheight;
@@ -258,7 +259,7 @@ inline void gamestate::restart_game() {
     frame_dirty = true;
 }
 
-inline void gamestate::handle_test_flag() {
+void gamestate::handle_test_flag() {
     minfo2(
         "handle test flag: %s",
         flag == GAMESTATE_FLAG_PLAYER_ANIM    ? "player anim"
@@ -295,7 +296,7 @@ inline void gamestate::handle_test_flag() {
     }
 }
 
-inline void gamestate::tick(inputstate& is) {
+void gamestate::tick(inputstate& is) {
     minfo3("tick");
 
     if (!update_player_tiles_explored()) {

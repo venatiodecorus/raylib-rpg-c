@@ -1,10 +1,11 @@
-/** @file gamestate_scene_impl.h
+#include "gamestate.h"
+
+/** @file gamestate_scene.cpp
  *  @brief Scene-specific input and character-creation helpers implemented on `gamestate`.
  */
 
-#pragma once
 
-inline void gamestate::handle_input_title_scene(inputstate& is) {
+void gamestate::handle_input_title_scene(inputstate& is) {
     if (inputstate_is_pressed(is, KEY_ESCAPE)) {
         do_quit = true;
         return;
@@ -16,7 +17,7 @@ inline void gamestate::handle_input_title_scene(inputstate& is) {
     }
 }
 
-inline void gamestate::handle_input_main_menu_scene(inputstate& is) {
+void gamestate::handle_input_main_menu_scene(inputstate& is) {
     if (inputstate_is_pressed(is, KEY_ENTER) || inputstate_is_pressed(is, KEY_SPACE)) {
         if (ui.title_screen_selection == 0) {
             current_scene = SCENE_CHARACTER_CREATION;
@@ -45,7 +46,7 @@ inline void gamestate::handle_input_main_menu_scene(inputstate& is) {
     frame_dirty = true;
 }
 
-inline void gamestate::make_all_npcs_target_player() {
+void gamestate::make_all_npcs_target_player() {
     massert(hero_id != ENTITYID_INVALID, "hero_id is invalid");
     for (entityid id = 0; id < next_entityid; id++) {
         entitytype_t t = ct.get<entitytype>(id).value_or(ENTITY_NONE);
@@ -56,7 +57,7 @@ inline void gamestate::make_all_npcs_target_player() {
     }
 }
 
-inline bool gamestate::try_append_character_creation_char(int codepoint) {
+bool gamestate::try_append_character_creation_char(int codepoint) {
     constexpr size_t max_name_len = 16;
     if (codepoint < 33 || codepoint > 126) {
         return false;
@@ -68,7 +69,7 @@ inline bool gamestate::try_append_character_creation_char(int codepoint) {
     return true;
 }
 
-inline bool gamestate::backspace_character_creation_name() {
+bool gamestate::backspace_character_creation_name() {
     if (chara_creation.name.empty()) {
         return false;
     }
@@ -76,7 +77,7 @@ inline bool gamestate::backspace_character_creation_name() {
     return true;
 }
 
-inline bool gamestate::handle_character_creation_text_input(inputstate& is) {
+bool gamestate::handle_character_creation_text_input(inputstate& is) {
     bool changed = false;
     if (inputstate_is_pressed(is, KEY_BACKSPACE)) {
         changed = backspace_character_creation_name() || changed;
@@ -89,7 +90,7 @@ inline bool gamestate::handle_character_creation_text_input(inputstate& is) {
     return changed;
 }
 
-inline void gamestate::handle_input_character_creation_scene(inputstate& is) {
+void gamestate::handle_input_character_creation_scene(inputstate& is) {
     if (inputstate_is_pressed(is, KEY_ESCAPE)) {
         do_quit = true;
         return;

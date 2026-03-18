@@ -1,10 +1,11 @@
-/** @file gamestate_keybinding_impl.h
+#include "gamestate.h"
+
+/** @file gamestate_keybinding.cpp
  *  @brief Keybinding/profile management helpers implemented on `gamestate`.
  */
 
-#pragma once
 
-inline bool gamestate::is_action_pressed(const inputstate& is, gameplay_input_action_t action) const {
+bool gamestate::is_action_pressed(const inputstate& is, gameplay_input_action_t action) const {
     const gameplay_keybinding_t& binding = keybindings[keyboard_profile][action];
     for (int key : binding) {
         if (key >= 0 && inputstate_is_pressed(is, key)) {
@@ -14,7 +15,7 @@ inline bool gamestate::is_action_pressed(const inputstate& is, gameplay_input_ac
     return false;
 }
 
-inline bool gamestate::is_action_held(const inputstate& is, gameplay_input_action_t action) const {
+bool gamestate::is_action_held(const inputstate& is, gameplay_input_action_t action) const {
     const gameplay_keybinding_t& binding = keybindings[keyboard_profile][action];
     for (int key : binding) {
         if (key >= 0 && inputstate_is_held(is, key)) {
@@ -24,7 +25,7 @@ inline bool gamestate::is_action_held(const inputstate& is, gameplay_input_actio
     return false;
 }
 
-inline void gamestate::set_default_keybinding(keyboard_profile_t profile, gameplay_input_action_t action) {
+void gamestate::set_default_keybinding(keyboard_profile_t profile, gameplay_input_action_t action) {
     gameplay_keybinding_t binding = {-1, -1, -1};
 
     if (profile == KEYBOARD_PROFILE_FULL) {
@@ -110,27 +111,27 @@ inline void gamestate::set_default_keybinding(keyboard_profile_t profile, gamepl
     keybindings[profile][action] = binding;
 }
 
-inline void gamestate::reset_default_keybindings() {
+void gamestate::reset_default_keybindings() {
     for (int profile = 0; profile < KEYBOARD_PROFILE_COUNT; profile++) {
         reset_profile_keybindings(static_cast<keyboard_profile_t>(profile));
     }
 }
 
-inline void gamestate::reset_profile_keybindings(keyboard_profile_t profile) {
+void gamestate::reset_profile_keybindings(keyboard_profile_t profile) {
     for (int action = 0; action < INPUT_ACTION_COUNT; action++) {
         set_default_keybinding(profile, static_cast<gameplay_input_action_t>(action));
     }
 }
 
-inline void gamestate::set_keybinding_primary(keyboard_profile_t profile, gameplay_input_action_t action, int key) {
+void gamestate::set_keybinding_primary(keyboard_profile_t profile, gameplay_input_action_t action, int key) {
     keybindings[profile][action][0] = key;
 }
 
-inline int gamestate::get_keybinding_primary(keyboard_profile_t profile, gameplay_input_action_t action) const {
+int gamestate::get_keybinding_primary(keyboard_profile_t profile, gameplay_input_action_t action) const {
     return keybindings[profile][action][0];
 }
 
-inline string gamestate::get_keybinding_label(keyboard_profile_t profile, gameplay_input_action_t action) const {
+string gamestate::get_keybinding_label(keyboard_profile_t profile, gameplay_input_action_t action) const {
     const gameplay_keybinding_t& binding = keybindings[profile][action];
     string label;
     for (int slot = 0; slot < GAMEPLAY_KEYBINDING_SLOTS; slot++) {
@@ -145,14 +146,14 @@ inline string gamestate::get_keybinding_label(keyboard_profile_t profile, gamepl
     return label.empty() ? "Unbound" : label;
 }
 
-inline void gamestate::open_keyboard_profile_prompt() {
+void gamestate::open_keyboard_profile_prompt() {
     ui.display_keyboard_profile_prompt = true;
     ui.keyboard_profile_selection = static_cast<unsigned int>(keyboard_profile);
     controlmode = CONTROLMODE_KEYBOARD_PROFILE;
     frame_dirty = true;
 }
 
-inline void gamestate::apply_keyboard_profile_selection() {
+void gamestate::apply_keyboard_profile_selection() {
     keyboard_profile = static_cast<keyboard_profile_t>(ui.keyboard_profile_selection % KEYBOARD_PROFILE_COUNT);
     keyboard_profile_confirmed = true;
     ui.display_keyboard_profile_prompt = false;
@@ -160,7 +161,7 @@ inline void gamestate::apply_keyboard_profile_selection() {
     frame_dirty = true;
 }
 
-inline void gamestate::handle_input_keyboard_profile_prompt(inputstate& is) {
+void gamestate::handle_input_keyboard_profile_prompt(inputstate& is) {
     if (controlmode != CONTROLMODE_KEYBOARD_PROFILE || !ui.display_keyboard_profile_prompt) {
         return;
     }
@@ -179,7 +180,7 @@ inline void gamestate::handle_input_keyboard_profile_prompt(inputstate& is) {
     }
 }
 
-inline void gamestate::open_controls_menu() {
+void gamestate::open_controls_menu() {
     ui.display_option_menu = false;
     ui.display_controls_menu = true;
     controls_menu_waiting_for_key = false;
@@ -188,14 +189,14 @@ inline void gamestate::open_controls_menu() {
     frame_dirty = true;
 }
 
-inline void gamestate::close_controls_menu() {
+void gamestate::close_controls_menu() {
     ui.display_controls_menu = false;
     controls_menu_waiting_for_key = false;
     controlmode = CONTROLMODE_PLAYER;
     frame_dirty = true;
 }
 
-inline void gamestate::handle_input_controls_menu(inputstate& is) {
+void gamestate::handle_input_controls_menu(inputstate& is) {
     if (controlmode != CONTROLMODE_CONTROLS_MENU || !ui.display_controls_menu) {
         return;
     }

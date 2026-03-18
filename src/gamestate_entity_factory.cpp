@@ -1,10 +1,11 @@
-/** @file gamestate_entity_factory_impl.h
+#include "gamestate.h"
+
+/** @file gamestate_entity_factory.cpp
  *  @brief Entity/item/NPC factory helpers implemented on `gamestate`.
  */
 
-#pragma once
 
-inline entityid gamestate::create_weapon_with(with_fun weaponInitFunction) {
+entityid gamestate::create_weapon_with(with_fun weaponInitFunction) {
     entityid id = add_entity();
     ct.set<entitytype>(id, ENTITY_ITEM);
     ct.set<itemtype>(id, ITEM_WEAPON);
@@ -14,7 +15,7 @@ inline entityid gamestate::create_weapon_with(with_fun weaponInitFunction) {
     return id;
 }
 
-inline with_fun gamestate::dagger_init() {
+with_fun gamestate::dagger_init() {
     return [](CT& ct, const entityid id) {
         ct.set<name>(id, "dagger");
         ct.set<description>(id, "Stabby stabby.");
@@ -26,7 +27,7 @@ inline with_fun gamestate::dagger_init() {
     };
 }
 
-inline with_fun gamestate::axe_init() {
+with_fun gamestate::axe_init() {
     return [](CT& ct, const entityid id) {
         ct.set<name>(id, "axe");
         ct.set<description>(id, "Choppy choppy");
@@ -38,7 +39,7 @@ inline with_fun gamestate::axe_init() {
     };
 }
 
-inline with_fun gamestate::sword_init() {
+with_fun gamestate::sword_init() {
     return [](CT& ct, const entityid id) {
         ct.set<name>(id, "short sword");
         ct.set<description>(id, "your basic soldier's short sword");
@@ -50,7 +51,7 @@ inline with_fun gamestate::sword_init() {
     };
 }
 
-inline with_fun gamestate::shield_init() {
+with_fun gamestate::shield_init() {
     return [](CT& ct, const entityid id) {
         ct.set<name>(id, "kite shield");
         ct.set<description>(id, "Standard knight's shield");
@@ -62,7 +63,7 @@ inline with_fun gamestate::shield_init() {
     };
 }
 
-inline with_fun gamestate::potion_init(potiontype_t pt) {
+with_fun gamestate::potion_init(potiontype_t pt) {
     return [pt](CT& ct, const entityid id) {
         ct.set<potiontype>(id, pt);
         if (pt == POTION_HP_SMALL) {
@@ -73,7 +74,7 @@ inline with_fun gamestate::potion_init(potiontype_t pt) {
     };
 }
 
-inline with_fun gamestate::player_init(int maxhp_roll) {
+with_fun gamestate::player_init(int maxhp_roll) {
     return [this, maxhp_roll](CT& ct, const entityid id) {
         ct.set<strength>(id, chara_creation.strength);
         ct.set<dexterity>(id, chara_creation.dexterity);
@@ -87,7 +88,7 @@ inline with_fun gamestate::player_init(int maxhp_roll) {
     };
 }
 
-inline alignment_t gamestate::default_alignment_for_race(race_t rt) {
+alignment_t gamestate::default_alignment_for_race(race_t rt) {
     switch (rt) {
     case RACE_HUMAN: return ALIGNMENT_NEUTRAL_NEUTRAL;
     case RACE_ELF: return ALIGNMENT_GOOD_CHAOTIC;
@@ -109,7 +110,7 @@ inline alignment_t gamestate::default_alignment_for_race(race_t rt) {
     return ALIGNMENT_NONE;
 }
 
-inline bool gamestate::alignment_is_aggressive(alignment_t alignment_value) {
+bool gamestate::alignment_is_aggressive(alignment_t alignment_value) {
     switch (alignment_value) {
     case ALIGNMENT_EVIL_LAWFUL:
     case ALIGNMENT_EVIL_NEUTRAL:
@@ -121,13 +122,13 @@ inline bool gamestate::alignment_is_aggressive(alignment_t alignment_value) {
     return false;
 }
 
-inline with_fun gamestate::npc_alignment_init(alignment_t alignment_value) {
+with_fun gamestate::npc_alignment_init(alignment_t alignment_value) {
     return [alignment_value](CT& ct, const entityid id) {
         ct.set<alignment>(id, alignment_value);
     };
 }
 
-inline entityid gamestate::create_weapon_at_with(ComponentTable& ct, vec3 loc, with_fun weaponInitFunction) {
+entityid gamestate::create_weapon_at_with(ComponentTable& ct, vec3 loc, with_fun weaponInitFunction) {
     minfo2("create weapon at with: %d %d %d", loc.x, loc.y, loc.z);
     if (d.floors.size() == 0) {
         merror2("dungeon floors size is 0");
@@ -160,7 +161,7 @@ inline entityid gamestate::create_weapon_at_with(ComponentTable& ct, vec3 loc, w
     return id;
 }
 
-inline entityid gamestate::create_weapon_at_random_loc_with(CT& ct, with_fun weaponInitFunction) {
+entityid gamestate::create_weapon_at_random_loc_with(CT& ct, with_fun weaponInitFunction) {
     vec3 loc = d.floors[d.current_floor]->get_random_loc();
     if (vec3_invalid(loc)) {
         merror("loc is invalid");
@@ -169,7 +170,7 @@ inline entityid gamestate::create_weapon_at_random_loc_with(CT& ct, with_fun wea
     return create_weapon_at_with(ct, loc, dagger_init());
 }
 
-inline entityid gamestate::create_shield_with(ComponentTable& ct, with_fun shieldInitFunction) {
+entityid gamestate::create_shield_with(ComponentTable& ct, with_fun shieldInitFunction) {
     entityid id = add_entity();
     ct.set<entitytype>(id, ENTITY_ITEM);
     ct.set<itemtype>(id, ITEM_SHIELD);
@@ -181,7 +182,7 @@ inline entityid gamestate::create_shield_with(ComponentTable& ct, with_fun shiel
     return id;
 }
 
-inline entityid gamestate::create_shield_at_with(ComponentTable& ct, vec3 loc, with_fun shieldInitFunction) {
+entityid gamestate::create_shield_at_with(ComponentTable& ct, vec3 loc, with_fun shieldInitFunction) {
     if (d.floors.size() == 0) {
         return INVALID;
     }
@@ -194,7 +195,7 @@ inline entityid gamestate::create_shield_at_with(ComponentTable& ct, vec3 loc, w
     return id;
 }
 
-inline entityid gamestate::create_potion_with(with_fun potionInitFunction) {
+entityid gamestate::create_potion_with(with_fun potionInitFunction) {
     entityid id = add_entity();
     ct.set<entitytype>(id, ENTITY_ITEM);
     ct.set<itemtype>(id, ITEM_POTION);
@@ -203,7 +204,7 @@ inline entityid gamestate::create_potion_with(with_fun potionInitFunction) {
     return id;
 }
 
-inline entityid gamestate::create_potion_at_with(vec3 loc, with_fun potionInitFunction) {
+entityid gamestate::create_potion_at_with(vec3 loc, with_fun potionInitFunction) {
     shared_ptr<dungeon_floor> df = d.get_floor(loc.z);
     tile_t& tile = df->tile_at(loc);
     if (!tile_is_walkable(tile.get_type())) {
@@ -221,14 +222,14 @@ inline entityid gamestate::create_potion_at_with(vec3 loc, with_fun potionInitFu
     return id;
 }
 
-inline race_t gamestate::random_monster_type() {
+race_t gamestate::random_monster_type() {
     vector<race_t> monster_races = {RACE_GOBLIN, RACE_ORC, RACE_BAT, RACE_WOLF, RACE_WARG, RACE_ZOMBIE, RACE_SKELETON, RACE_RAT, RACE_GREEN_SLIME};
     uniform_int_distribution<int> gen(0, monster_races.size() - 1);
     int random_index = gen(mt);
     return monster_races[random_index];
 }
 
-inline void gamestate::set_npc_starting_stats(entityid id) {
+void gamestate::set_npc_starting_stats(entityid id) {
     race_t rt = ct.get<race>(id).value_or(RACE_NONE);
     if (rt == RACE_NONE) {
         return;
@@ -277,7 +278,7 @@ inline void gamestate::set_npc_starting_stats(entityid id) {
     ct.set<hd>(id, hitdie);
 }
 
-inline void gamestate::set_npc_defaults(entityid id) {
+void gamestate::set_npc_defaults(entityid id) {
     ct.set<entitytype>(id, ENTITY_NPC);
     ct.set<spritemove>(id, Rectangle{0, 0, 0, 0});
     ct.set<dead>(id, false);
@@ -299,7 +300,7 @@ inline void gamestate::set_npc_defaults(entityid id) {
     ct.set<target_path>(id, make_shared<vector<vec3>>());
 }
 
-inline entityid gamestate::create_npc_with(race_t rt, with_fun npcInitFunction) {
+entityid gamestate::create_npc_with(race_t rt, with_fun npcInitFunction) {
     entityid id = add_entity();
     set_npc_defaults(id);
     ct.set<race>(id, rt);
@@ -317,7 +318,7 @@ inline entityid gamestate::create_npc_with(race_t rt, with_fun npcInitFunction) 
     return id;
 }
 
-inline entityid gamestate::create_npc_at_with(race_t rt, vec3 loc, with_fun npcInitFunction) {
+entityid gamestate::create_npc_at_with(race_t rt, vec3 loc, with_fun npcInitFunction) {
     minfo2("create npc at with: (%d, %d, %d)", loc.x, loc.y, loc.z);
     auto df = d.get_floor(loc.z);
     tile_t& tile = df->tile_at(loc);
@@ -352,7 +353,7 @@ inline entityid gamestate::create_npc_at_with(race_t rt, vec3 loc, with_fun npcI
     return id;
 }
 
-inline bool gamestate::add_to_inventory(entityid actor_id, entityid item_id) {
+bool gamestate::add_to_inventory(entityid actor_id, entityid item_id) {
     minfo2("adding %d to %d's inventory", actor_id, item_id);
     auto maybe_inventory = ct.get<inventory>(actor_id);
     if (!maybe_inventory.has_value()) {
@@ -365,14 +366,14 @@ inline bool gamestate::add_to_inventory(entityid actor_id, entityid item_id) {
     return true;
 }
 
-inline entityid gamestate::create_orc_with(with_fun monsterInitFunction) {
+entityid gamestate::create_orc_with(with_fun monsterInitFunction) {
     constexpr race_t r = RACE_ORC;
     entityid id = create_npc_with(r, monsterInitFunction);
     ct.set<name>(id, get_random_orc_name());
     return id;
 }
 
-inline entityid gamestate::create_orc_at_with(vec3 loc, with_fun monsterInitFunction) {
+entityid gamestate::create_orc_at_with(vec3 loc, with_fun monsterInitFunction) {
     if (vec3_invalid(loc)) {
         return ENTITYID_INVALID;
     }
@@ -396,7 +397,7 @@ inline entityid gamestate::create_orc_at_with(vec3 loc, with_fun monsterInitFunc
     return id;
 }
 
-inline entityid gamestate::create_player_at_with(vec3 loc, string n, with_fun playerInitFunction) {
+entityid gamestate::create_player_at_with(vec3 loc, string n, with_fun playerInitFunction) {
     minfo2("create player with: loc=(%d, %d, %d), n=%s", loc.x, loc.y, loc.z, n.c_str());
     massert(n != "", "name is empty string");
     race_t rt = chara_creation.race;
@@ -433,7 +434,7 @@ inline entityid gamestate::create_player_at_with(vec3 loc, string n, with_fun pl
     return id;
 }
 
-inline entityid gamestate::create_box_with() {
+entityid gamestate::create_box_with() {
     entityid id = add_entity();
     ct.set<entitytype>(id, ENTITY_BOX);
     ct.set<spritemove>(id, (Rectangle){0, 0, 0, 0});
@@ -445,7 +446,7 @@ inline entityid gamestate::create_box_with() {
     return id;
 }
 
-inline entityid gamestate::create_box_at_with(vec3 loc) {
+entityid gamestate::create_box_at_with(vec3 loc) {
     shared_ptr<dungeon_floor> df = d.get_floor(loc.z);
     tile_t& tile = df->tile_at(loc);
     if (!tile_is_walkable(tile.get_type())) {

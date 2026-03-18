@@ -1332,14 +1332,3 @@ public:
     Color get_debug_panel_bgcolor() const;
 
 };
-
-#include "gamestate_lifecycle_impl.h"
-#include "gamestate_scene_impl.h"
-#include "gamestate_inventory_impl.h"
-#include "gamestate_keybinding_impl.h"
-#include "gamestate_options_impl.h"
-#include "gamestate_input_impl.h"
-#include "gamestate_npc_combat_impl.h"
-#include "gamestate_world_impl.h"
-#include "gamestate_world_interaction_impl.h"
-#include "gamestate_entity_factory_impl.h"
