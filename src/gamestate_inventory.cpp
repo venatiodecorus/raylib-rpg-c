@@ -184,7 +184,7 @@ void gamestate::handle_hero_inventory_equip_item(entityid item_id) {
 }
 
 void gamestate::handle_hero_inventory_equip() {
-    audio.play(SFX_EQUIP_01);
+    audio.queue(SFX_EQUIP_01);
     size_t index = get_inventory_selection_index();
     auto my_inventory = ct.get<inventory>(hero_id);
     if (!my_inventory || !my_inventory.has_value()) {
@@ -381,7 +381,7 @@ bool gamestate::open_chest_menu(entityid chest_id) {
     ui.inventory_cursor = Vector2{0, 0};
     controlmode = CONTROLMODE_CHEST;
     frame_dirty = true;
-    audio.play(SFX_CHEST_OPEN);
+    audio.queue(SFX_CHEST_OPEN);
     return true;
 }
 

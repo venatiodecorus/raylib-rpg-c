@@ -26,7 +26,7 @@ These must be addressed first because everything else depends on them.
   - The _impl.h include-at-bottom pattern must be eliminated — move method
     bodies to .cpp files.
 
-- [ ] **Separate game logic from rendering**
+- [x] **Separate game logic from rendering**
   - Currently the renderer (`libdraw.cpp:532-561`) advances the game state
     machine (`g.flag`, `g.entity_turn`, `g.turn_count`), and game logic
     (`gamestate.h:379`) writes directly to the renderer context

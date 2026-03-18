@@ -75,7 +75,7 @@ void gamestate::handle_input_interaction(inputstate& is) {
         return;
     }
     if (inputstate_any_pressed(is)) {
-        audio.play(SFX_CONFIRM_01, test);
+        audio.queue(SFX_CONFIRM_01);
         close_interaction_modal();
     }
 }
@@ -245,7 +245,7 @@ void gamestate::handle_input_level_up(inputstate& is) {
         frame_dirty = true;
     }
     else if (inputstate_is_pressed(is, KEY_ENTER)) {
-        audio.play(SFX_CONFIRM_01, test);
+        audio.queue(SFX_CONFIRM_01);
         apply_level_up_selection();
     }
 }
@@ -255,11 +255,11 @@ void gamestate::handle_input_confirm_prompt(inputstate& is) {
         controlmode = CONTROLMODE_CONFIRM_PROMPT;
     }
     if (inputstate_is_pressed(is, KEY_Y)) {
-        audio.play(SFX_CONFIRM_01, test);
+        audio.queue(SFX_CONFIRM_01);
         resolve_confirm_prompt(true);
     }
     else if (inputstate_is_pressed(is, KEY_N) || inputstate_is_pressed(is, KEY_ESCAPE)) {
-        audio.play(SFX_CONFIRM_01, test);
+        audio.queue(SFX_CONFIRM_01);
         resolve_confirm_prompt(false);
     }
 }
@@ -290,11 +290,11 @@ void gamestate::handle_input_inventory(inputstate& is) {
     if (inputstate_is_pressed(is, KEY_I) || inputstate_is_pressed(is, KEY_ESCAPE)) {
         controlmode = CONTROLMODE_PLAYER;
         ui.display_inventory_menu = false;
-        audio.play(SFX_BAG_CLOSE);
+        audio.queue(SFX_BAG_CLOSE);
         return;
     }
     if (inputstate_is_pressed(is, KEY_LEFT)) {
-        audio.play(SFX_CONFIRM_01);
+        audio.queue(SFX_CONFIRM_01);
         if (use_mini_inventory_menu()) {
             move_inventory_selection(-1);
         }
@@ -303,7 +303,7 @@ void gamestate::handle_input_inventory(inputstate& is) {
         }
     }
     else if (inputstate_is_pressed(is, KEY_RIGHT)) {
-        audio.play(SFX_CONFIRM_01);
+        audio.queue(SFX_CONFIRM_01);
         if (use_mini_inventory_menu()) {
             move_inventory_selection(1);
         }
@@ -312,7 +312,7 @@ void gamestate::handle_input_inventory(inputstate& is) {
         }
     }
     else if (inputstate_is_pressed(is, KEY_UP)) {
-        audio.play(SFX_CONFIRM_01);
+        audio.queue(SFX_CONFIRM_01);
         if (use_mini_inventory_menu()) {
             move_inventory_selection(-1);
         }
@@ -321,7 +321,7 @@ void gamestate::handle_input_inventory(inputstate& is) {
         }
     }
     else if (inputstate_is_pressed(is, KEY_DOWN)) {
-        audio.play(SFX_CONFIRM_01);
+        audio.queue(SFX_CONFIRM_01);
         if (use_mini_inventory_menu()) {
             move_inventory_selection(1);
         }
@@ -333,7 +333,7 @@ void gamestate::handle_input_inventory(inputstate& is) {
         handle_hero_inventory_equip();
     }
     else if (inputstate_is_pressed(is, KEY_Q)) {
-        audio.play(SFX_DISCARD_ITEM);
+        audio.queue(SFX_DISCARD_ITEM);
         size_t index = get_inventory_selection_index();
         auto maybe_inventory = ct.get<inventory>(hero_id);
         auto inventory = maybe_inventory.value_or(make_shared<vector<entityid>>());
@@ -343,7 +343,7 @@ void gamestate::handle_input_inventory(inputstate& is) {
     }
     else if (inputstate_is_pressed(is, KEY_ENTER)) {
         handle_hero_item_use();
-        audio.play(SFX_CONFIRM_01);
+        audio.queue(SFX_CONFIRM_01);
     }
     auto maybe_inventory = ct.get<inventory>(hero_id);
     auto items = maybe_inventory.value_or(make_shared<vector<entityid>>());
@@ -353,7 +353,7 @@ void gamestate::handle_input_inventory(inputstate& is) {
 
 bool gamestate::handle_cycle_messages(inputstate& is) {
     if (messages.is_active && inputstate_is_pressed(is, KEY_ENTER)) {
-        audio.play(SFX_CONFIRM_01);
+        audio.queue(SFX_CONFIRM_01);
         messages.cycle();
         return true;
     }
@@ -364,7 +364,7 @@ bool gamestate::handle_cycle_messages_test() {
     if (!messages.is_active) {
         return false;
     }
-    audio.play(SFX_CONFIRM_01);
+    audio.queue(SFX_CONFIRM_01);
     messages.cycle();
     return true;
 }
@@ -456,7 +456,7 @@ bool gamestate::handle_display_inventory(inputstate& is) {
         ui.mini_inventory_scroll_offset = 0;
         ui.inventory_cursor = Vector2{0, 0};
         frame_dirty = true;
-        audio.play(SFX_BAG_OPEN);
+        audio.queue(SFX_BAG_OPEN);
         return true;
     }
     return false;

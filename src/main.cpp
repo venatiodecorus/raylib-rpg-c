@@ -27,9 +27,14 @@ static inline void gameloop() {
     g.tick(is);
     drawframe(g);
     g.advance_animation_phase();
+    g.audio.flush(g.test);
+    g.audio.update_music(g.random.mt, g.test);
+    g.finalize_render_feedback();
     if (g.do_restart) {
         msuccess("Restarting game...");
+        g.audio.shutdown();
         g.restart_game();
+        g.audio.init(g.random.mt, g.test);
     }
 }
 
@@ -44,6 +49,7 @@ static inline void gameloop() {
 int main() {
     g.logic_init();
     libdraw_init(g);
+    g.audio.init(g.random.mt, g.test);
 #ifndef WEB
     while (!libdraw_windowshouldclose(g)) {
         gameloop();
@@ -51,6 +57,7 @@ int main() {
 #else
     emscripten_set_main_loop(gameloop, 0, 1);
 #endif
+    g.audio.shutdown();
     libdraw_close();
     g.logic_close();
     return 0;

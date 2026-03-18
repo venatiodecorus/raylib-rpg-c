@@ -41,8 +41,6 @@
 #include "libdraw_to_texture.h"
 #include "libdraw_update_sprites.h"
 #include "libdraw_update_weapon_for_entity.h"
-#include "load_music.h"
-#include "load_sfx.h"
 #include "load_textures.h"
 #include "set_sg.h"
 #include "shaders.h"
@@ -1893,7 +1891,6 @@ void libdraw_set_sg_block_success(gamestate& g, entityid id, spritegroup* const 
         sg->set_current(SG_ANIM_NPC_GUARD_SUCCESS);
     }
     update_shield_for_entity(g, id, sg);
-    g.ct.set<block_success>(id, false);
 }
 
 void libdraw_set_sg_is_damaged(gamestate& g, entityid id, spritegroup* const sg) {
@@ -1949,7 +1946,6 @@ void libdraw_set_sg_is_attacking(gamestate& g, entityid id, spritegroup* const s
         : r == RACE_BAT       ? SG_ANIM_BAT_ATTACK
                               : SG_ANIM_NPC_ATTACK);
     update_weapon_for_entity(g, id, sg);
-    g.ct.set<attacking>(id, false);
 }
 
 void libdraw_update_sprite_context_ptr(gamestate& g, spritegroup* group, direction_t dir) {
@@ -1995,7 +1991,6 @@ void libdraw_update_sprite_position(gamestate& g, entityid id, spritegroup* sg) 
     if (sprite_move.x != 0 || sprite_move.y != 0) {
         sg->move.x = sprite_move.x;
         sg->move.y = sprite_move.y;
-        g.ct.set<spritemove>(id, (Rectangle){0, 0, 0, 0});
         entitytype_t type = g.ct.get<entitytype>(id).value_or(ENTITY_NONE);
         massert(type != ENTITY_NONE, "entity type is none");
         if (type == ENTITY_PLAYER || type == ENTITY_NPC) {
@@ -2027,7 +2022,6 @@ void libdraw_update_sprite_ptr(gamestate& g, entityid id, spritegroup* sg) {
             const direction_t d = g.ct.get<direction>(id).value();
             libdraw_update_sprite_context_ptr(g, sg, d);
         }
-        g.ct.set<update>(id, false);
     }
 
     libdraw_update_sprite_position(g, id, sg);
@@ -2083,15 +2077,11 @@ void libdraw_handle_dirty_entities(gamestate& g) {
         create_sg_byid(g, i);
         libdraw_update_sprite_pre(g, i);
     }
-    g.dirty_entities = false;
-    g.new_entityid_begin = ENTITYID_INVALID;
-    g.new_entityid_end = ENTITYID_INVALID;
     g.frame_dirty = true;
 }
 
 void libdraw_update_sprites_pre(gamestate& g) {
     minfo2("BEGIN update sprites pre");
-    handle_music_stream(g);
     if (g.current_scene == SCENE_GAMEPLAY) {
         libdraw_handle_dirty_entities(g);
         for (entityid id = 0; id < g.next_entityid; id++) {
@@ -2111,7 +2101,6 @@ void libdraw_update_sprites_post(gamestate& g) {
         return;
     }
 
-    libdraw_handle_dirty_entities(g);
     g.frame_dirty = true;
 
     for (entityid id = 0; id < g.next_entityid; id++) {
@@ -2295,11 +2284,6 @@ void libdraw_init_resources(gamestate& g) {
     draw_title_screen_to_texture(g, false);
     draw_char_creation_to_texture(g);
 
-    InitAudioDevice();
-    while (!IsAudioDeviceReady()) {
-    }
-    libdraw_load_music(g);
-    libdraw_load_sfx(g);
 }
 
 void libdraw_init_rest(gamestate& g) {
@@ -2328,8 +2312,6 @@ bool libdraw_windowshouldclose(gamestate& g) {
 }
 
 void libdraw_close_partial() {
-    UnloadMusicStream(libdraw_ctx.audio.music);
-    CloseAudioDevice();
     libdraw_unload_textures(libdraw_ctx.txinfo);
     unload_shaders();
     UnloadRenderTexture(libdraw_ctx.title_target_texture);

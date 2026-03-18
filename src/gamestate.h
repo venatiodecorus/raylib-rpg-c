@@ -574,6 +574,9 @@ public:
     /** @brief Advance high-level gameplay phase after one animation slice completes. */
     void advance_animation_phase();
 
+    /** @brief Clear one-frame render feedback after the renderer has consumed it. */
+    void finalize_render_feedback();
+
     /**
      * @brief Advance one gameplay tick from the latest input snapshot.
      *

@@ -296,6 +296,27 @@ void gamestate::advance_animation_phase() {
     }
 }
 
+void gamestate::finalize_render_feedback() {
+    for (entityid id = 0; id < next_entityid; id++) {
+        if (ct.has<update>(id)) {
+            ct.set<update>(id, false);
+        }
+        if (ct.has<attacking>(id)) {
+            ct.set<attacking>(id, false);
+        }
+        if (ct.has<block_success>(id)) {
+            ct.set<block_success>(id, false);
+        }
+        if (ct.has<spritemove>(id)) {
+            ct.set<spritemove>(id, Rectangle{0, 0, 0, 0});
+        }
+    }
+
+    dirty_entities = false;
+    new_entityid_begin = ENTITYID_INVALID;
+    new_entityid_end = ENTITYID_INVALID;
+}
+
 void gamestate::tick(inputstate& is) {
     minfo3("tick");
 

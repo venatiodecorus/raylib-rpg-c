@@ -74,7 +74,7 @@ void gamestate::handle_weapon_durability_loss(entityid atk_id, entityid tgt_id) 
     ct.set<destroyed>(equipped_wpn, true);
     bool event_heard = check_hearing(hero_id, ct.get<location>(tgt_id).value_or((vec3){-1, -1, -1}));
     if (event_heard) {
-        audio.play(SFX_05_ALCHEMY_GLASS_BREAK, test);
+        audio.queue(SFX_05_ALCHEMY_GLASS_BREAK);
     }
     add_combat_break_message(equipped_wpn);
 }
@@ -95,7 +95,7 @@ void gamestate::handle_shield_durability_loss(entityid defender, entityid attack
     ct.set<destroyed>(shield, true);
     bool event_heard = check_hearing(hero_id, ct.get<location>(defender).value_or((vec3){-1, -1, -1}));
     if (event_heard) {
-        audio.play(SFX_05_ALCHEMY_GLASS_BREAK, test);
+        audio.queue(SFX_05_ALCHEMY_GLASS_BREAK);
     }
     add_combat_break_message(shield);
 }
@@ -138,7 +138,7 @@ void gamestate::provoke_npc(entityid npc_id, entityid source_id) {
 void gamestate::handle_shield_block_sfx(entityid target_id) {
     bool event_heard = check_hearing(hero_id, ct.get<location>(target_id).value_or((vec3){-1, -1, -1}));
     if (event_heard) {
-        audio.play(SFX_HIT_METAL_ON_METAL, test);
+        audio.queue(SFX_HIT_METAL_ON_METAL);
     }
 }
 
@@ -329,7 +329,7 @@ void gamestate::handle_attack_sfx(entityid attacker, attack_result_t result) {
                 : wpn_type == WEAPON_DAGGER    ? SFX_SLASH_ATTACK_LIGHT_1
                                                : SFX_SLASH_ATTACK_SWORD_1;
     }
-    audio.play(index, test);
+    audio.queue(index);
     msuccess("attack sfx played");
 }
 
