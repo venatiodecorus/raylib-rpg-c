@@ -769,7 +769,7 @@ public:
     void testTickInTestModeAdvancesTicksAndTurnsWithHeroPresent() {
         gamestate g;
         g.test = true;
-        g.sfx.resize(71);
+        g.audio.sfx.resize(71);
         g.logic_init();
 
         const vec3 hero_loc = g.d.get_floor(0)->get_random_loc();

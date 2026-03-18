@@ -28,7 +28,7 @@ private:
 public:
     void testTryEntityPickupTakesTopItemFromMultiItemTile() {
         gamestate g;
-        g.sfx.resize(71);
+        g.audio.sfx.resize(71);
         const vec3 loc = add_initialized_floor(g);
         const entityid hero = create_hero(g, loc);
 
@@ -52,7 +52,7 @@ public:
 
     void testRunPickupActionUsesQueuedPickupIntent() {
         gamestate g;
-        g.sfx.resize(71);
+        g.audio.sfx.resize(71);
         const vec3 loc = add_initialized_floor(g);
         const entityid hero = create_hero(g, loc);
 
@@ -349,7 +349,7 @@ public:
 
     void testChestTransferMovesItemsBetweenHeroAndChestInventories() {
         gamestate g;
-        g.sfx.resize(71);
+        g.audio.sfx.resize(71);
         const vec3 loc = add_initialized_floor(g);
         const entityid hero = create_hero(g, loc);
         const entityid chest = g.create_chest_at_with(vec3{2, 1, 0}, [](CT&, const entityid) {});
@@ -438,7 +438,7 @@ public:
 
     void testChestMenuClosesOnKeyDAndNotKeyO() {
         gamestate g;
-        g.sfx.resize(71);
+        g.audio.sfx.resize(71);
         const vec3 loc = add_initialized_floor(g);
         const entityid hero = create_hero(g, loc);
         const entityid chest = g.create_chest_at_with(vec3{2, 1, 0}, [](CT&, const entityid) {});
@@ -462,7 +462,7 @@ public:
 
     void testMiniInventorySelectionScrollsPastVisibleWindow() {
         gamestate g;
-        g.sfx.resize(71);
+        g.audio.sfx.resize(71);
         g.prefer_mini_inventory_menu = true;
         g.mini_inventory_visible_count = 3;
         const vec3 loc = add_initialized_floor(g);

@@ -183,7 +183,7 @@ inline void gamestate::handle_hero_inventory_equip_item(entityid item_id) {
 }
 
 inline void gamestate::handle_hero_inventory_equip() {
-    PlaySound(sfx.at(SFX_EQUIP_01));
+    audio.play(SFX_EQUIP_01);
     size_t index = get_inventory_selection_index();
     auto my_inventory = ct.get<inventory>(hero_id);
     if (!my_inventory || !my_inventory.has_value()) {
@@ -380,9 +380,7 @@ inline bool gamestate::open_chest_menu(entityid chest_id) {
     inventory_cursor = Vector2{0, 0};
     controlmode = CONTROLMODE_CHEST;
     frame_dirty = true;
-    if (IsAudioDeviceReady() && sfx.size() > SFX_CHEST_OPEN) {
-        PlaySound(sfx.at(SFX_CHEST_OPEN));
-    }
+    audio.play(SFX_CHEST_OPEN);
     return true;
 }
 

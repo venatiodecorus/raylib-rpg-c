@@ -72,8 +72,8 @@ inline void gamestate::handle_weapon_durability_loss(entityid atk_id, entityid t
     remove_from_inventory(atk_id, equipped_wpn);
     ct.set<destroyed>(equipped_wpn, true);
     bool event_heard = check_hearing(hero_id, ct.get<location>(tgt_id).value_or((vec3){-1, -1, -1}));
-    if (!test && event_heard && IsAudioDeviceReady() && sfx.size() > SFX_05_ALCHEMY_GLASS_BREAK) {
-        PlaySound(sfx[SFX_05_ALCHEMY_GLASS_BREAK]);
+    if (event_heard) {
+        audio.play(SFX_05_ALCHEMY_GLASS_BREAK, test);
     }
     add_combat_break_message(equipped_wpn);
 }
@@ -93,8 +93,8 @@ inline void gamestate::handle_shield_durability_loss(entityid defender, entityid
     remove_from_inventory(defender, shield);
     ct.set<destroyed>(shield, true);
     bool event_heard = check_hearing(hero_id, ct.get<location>(defender).value_or((vec3){-1, -1, -1}));
-    if (!test && event_heard && IsAudioDeviceReady() && sfx.size() > SFX_05_ALCHEMY_GLASS_BREAK) {
-        PlaySound(sfx[SFX_05_ALCHEMY_GLASS_BREAK]);
+    if (event_heard) {
+        audio.play(SFX_05_ALCHEMY_GLASS_BREAK, test);
     }
     add_combat_break_message(shield);
 }
@@ -135,12 +135,9 @@ inline void gamestate::provoke_npc(entityid npc_id, entityid source_id) {
 }
 
 inline void gamestate::handle_shield_block_sfx(entityid target_id) {
-    if (test || !IsAudioDeviceReady() || sfx.size() <= SFX_HIT_METAL_ON_METAL) {
-        return;
-    }
     bool event_heard = check_hearing(hero_id, ct.get<location>(target_id).value_or((vec3){-1, -1, -1}));
     if (event_heard) {
-        PlaySound(sfx[SFX_HIT_METAL_ON_METAL]);
+        audio.play(SFX_HIT_METAL_ON_METAL, test);
     }
 }
 
@@ -304,9 +301,6 @@ inline void gamestate::resolve_attack_shield_durability_event(entityid defender_
 }
 
 inline void gamestate::handle_attack_sfx(entityid attacker, attack_result_t result) {
-    if (test) {
-        return;
-    }
     vec3 loc = ct.get<location>(attacker).value_or(vec3{-1, -1, -1});
     massert(vec3_valid(loc), "loc is invalid");
     if (!check_hearing(hero_id, loc)) {
@@ -327,7 +321,7 @@ inline void gamestate::handle_attack_sfx(entityid attacker, attack_result_t resu
                 : wpn_type == WEAPON_DAGGER    ? SFX_SLASH_ATTACK_LIGHT_1
                                                : SFX_SLASH_ATTACK_SWORD_1;
     }
-    PlaySound(sfx[index]);
+    audio.play(index, test);
     msuccess("attack sfx played");
 }
 

@@ -7,7 +7,8 @@ SRCDIR = src
 
 MAIN_C = $(SRCDIR)/main.cpp
 LIBDRAW_C = $(SRCDIR)/libdraw.cpp
-GAME_SOURCES = $(MAIN_C) $(LIBDRAW_C)
+AUDIO_MANAGER_C = $(SRCDIR)/audio_manager.cpp
+GAME_SOURCES = $(MAIN_C) $(LIBDRAW_C) $(AUDIO_MANAGER_C)
 
 LINK_MATH = -lm
 
@@ -46,13 +47,16 @@ WEB_OPTIONS = -DPLATFORM_WEB -DWEB -DSPAWN_MONSTERS -DNPCS_ALL_AT_ONCE -DSTART_M
 all: game tests
 
 # Desktop build
-game: $(SRCDIR)/main.o $(SRCDIR)/libdraw.o
+game: $(SRCDIR)/main.o $(SRCDIR)/libdraw.o $(SRCDIR)/audio_manager.o
 	$(CXX) $(WFLAGS) $(CXXFLAGS) $(CFLAGS) $^ $(RAYLIB_LIBS) -o $@
 
 $(SRCDIR)/main.o: $(SRCDIR)/main.cpp
 	$(CXX) $(WFLAGS) $(CXXFLAGS) $(CFLAGS) $(RAYLIB_CFLAGS) -I$(SRCDIR) -c $< -o $@
 
 $(SRCDIR)/libdraw.o: $(SRCDIR)/libdraw.cpp
+	$(CXX) $(WFLAGS) $(CXXFLAGS) $(CFLAGS) $(RAYLIB_CFLAGS) -I$(SRCDIR) -c $< -o $@
+
+$(SRCDIR)/audio_manager.o: $(SRCDIR)/audio_manager.cpp
 	$(CXX) $(WFLAGS) $(CXXFLAGS) $(CFLAGS) $(RAYLIB_CFLAGS) -I$(SRCDIR) -c $< -o $@
 
 # Web build
@@ -63,14 +67,14 @@ index.html: $(GAME_SOURCES)
 $(SRCDIR)/tests.cpp: $(addprefix $(SRCDIR)/,unit_test.h $(wildcard $(SRCDIR)/test_suites/test_*.h))
 	cxxtestgen --error-printer -o $@ $(addprefix $(SRCDIR)/,unit_test.h test_suites/test_gamestate_lifecycle.h test_suites/test_combat_bootstrap.h test_suites/test_dungeon_bootstrap.h test_suites/test_entity_factory.h test_suites/test_entity_placement.h test_suites/test_inventory.h test_suites/test_renderer_seams.h test_suites/test_tile_cache.h test_suites/test_component_table.h test_suites/test_utility_helpers.h test_suites/test_world_interaction.h)
 
-tests: $(SRCDIR)/tests.cpp
-	$(CXX) -o $@ $< $(RAYLIB_CFLAGS) $(RAYLIB_LIBS) -I$(SRCDIR) $(CXXFLAGS) $(CFLAGS)
+tests: $(SRCDIR)/tests.cpp $(SRCDIR)/audio_manager.o
+	$(CXX) -o $@ $^ $(RAYLIB_CFLAGS) $(RAYLIB_LIBS) -I$(SRCDIR) $(CXXFLAGS) $(CFLAGS)
 
 $(SRCDIR)/tests_heavy.cpp: $(addprefix $(SRCDIR)/,unit_test_heavy.h unit_test.h $(wildcard $(SRCDIR)/test_suites/test_*.h))
 	cxxtestgen --error-printer -o $@ $(addprefix $(SRCDIR)/,unit_test_heavy.h unit_test.h test_suites/test_gamestate_lifecycle.h test_suites/test_combat_bootstrap.h test_suites/test_dungeon_bootstrap.h test_suites/test_entity_factory.h test_suites/test_entity_placement.h test_suites/test_heavy_simulation.h test_suites/test_inventory.h test_suites/test_renderer_seams.h test_suites/test_tile_cache.h test_suites/test_component_table.h test_suites/test_utility_helpers.h test_suites/test_world_interaction.h)
 
-tests_heavy: $(SRCDIR)/tests_heavy.cpp
-	$(CXX) -o $@ $< $(RAYLIB_CFLAGS) $(RAYLIB_LIBS) -I$(SRCDIR) $(CXXFLAGS) $(CFLAGS)
+tests_heavy: $(SRCDIR)/tests_heavy.cpp $(SRCDIR)/audio_manager.o
+	$(CXX) -o $@ $^ $(RAYLIB_CFLAGS) $(RAYLIB_LIBS) -I$(SRCDIR) $(CXXFLAGS) $(CFLAGS)
 
 # Documentation
 docs:

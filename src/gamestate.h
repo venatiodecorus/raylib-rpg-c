@@ -26,6 +26,7 @@
 #include "orc_names.h"
 #include "roll.h"
 #include "scene.h"
+#include "audio_manager.h"
 #include "sfx.h"
 #include "stat_bonus.h"
 #include "texture_ids.h"
@@ -72,8 +73,6 @@ using std::chrono::time_point;
 
 constexpr Color DEFAULT_WINDOW_BOX_BGCOLOR = Color{0, 0, 255, 128};
 constexpr Color DEFAULT_WINDOW_BOX_FGCOLOR = Color{255, 255, 255, 255};
-constexpr float AUDIO_VOLUME_STEP = 0.1f;
-
 typedef enum {
     CONFIRM_ACTION_NONE = 0,
     CONFIRM_ACTION_QUIT,
@@ -193,7 +192,7 @@ public:
     scene_t current_scene;
     vector<string> msg_system;
     vector<string> msg_history;
-    vector<Sound> sfx;
+    AudioManager audio;
     character_creation chara_creation;
     string version;
     Color message_history_bgcolor;
@@ -376,11 +375,7 @@ public:
         chara_creation.alignment = ALIGNMENT_NEUTRAL_NEUTRAL;
         chara_creation.hitdie = get_racial_hd(RACE_HUMAN);
         current_scene = SCENE_TITLE;
-        libdraw_ctx.audio.master_volume = DEFAULT_MASTER_VOLUME;
-        libdraw_ctx.audio.music_volume = DEFAULT_MUSIC_VOLUME;
-        libdraw_ctx.audio.sfx_volume = DEFAULT_MASTER_VOLUME;
-        libdraw_ctx.audio.music_volume_changed = false;
-        libdraw_ctx.audio.current_music_index = 0;
+        audio.reset_defaults();
         window_box_bgcolor = DEFAULT_WINDOW_BOX_BGCOLOR;
         window_box_fgcolor = DEFAULT_WINDOW_BOX_FGCOLOR;
         message_history_bgcolor = DEFAULT_WINDOW_BOX_BGCOLOR;
@@ -1407,7 +1402,7 @@ public:
             full_light,
             god_mode,
             player_dir,
-            get_master_volume());
+            audio.get_master_volume());
 
         msuccess2("successfully updated debug panel buffer");
     }
@@ -1434,20 +1429,6 @@ public:
     void close_sound_menu();
     void open_window_color_menu();
     void close_window_color_menu();
-    void apply_audio_settings();
-    void adjust_master_volume(int dir);
-    void adjust_music_volume(int dir);
-    void adjust_sfx_volume(int dir);
-    float get_master_volume() const;
-    float get_music_volume() const;
-    float get_sfx_volume() const;
-    bool get_music_volume_changed() const;
-    unsigned int get_current_music_index() const;
-    void set_master_volume(float value);
-    void set_music_volume(float value);
-    void set_sfx_volume(float value);
-    void set_music_volume_changed(bool value);
-    void set_current_music_index(unsigned int value);
     void adjust_window_box_bg_channel(size_t channel, int dir);
     void adjust_window_box_fg_channel(size_t channel, int dir);
     void reset_window_box_colors();

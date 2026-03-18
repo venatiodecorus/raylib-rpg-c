@@ -428,7 +428,7 @@ public:
 
     void testRunOpenDoorActionUsesQueuedDoorIntent() {
         gamestate g;
-        g.sfx.resize(71);
+        g.audio.sfx.resize(71);
         add_floor(g);
 
         const entityid hero = create_hero(g, vec3{1, 1, 0});
@@ -483,7 +483,7 @@ public:
 
     void testTryEntityOpenChestUsesChestLocationFloorAndOpensMenu() {
         gamestate g;
-        g.sfx.resize(71);
+        g.audio.sfx.resize(71);
         add_floor(g);
         add_floor(g);
         g.d.current_floor = 0;
@@ -504,7 +504,7 @@ public:
 
     void testRunOpenChestActionUsesQueuedChestIntent() {
         gamestate g;
-        g.sfx.resize(71);
+        g.audio.sfx.resize(71);
         add_floor(g);
 
         const entityid hero = create_hero(g, vec3{1, 1, 0});
@@ -524,7 +524,7 @@ public:
 
     void testRunOpenChestActionClosesExistingChestMenu() {
         gamestate g;
-        g.sfx.resize(71);
+        g.audio.sfx.resize(71);
         add_floor(g);
 
         const entityid hero = create_hero(g, vec3{1, 1, 0});
@@ -546,7 +546,7 @@ public:
 
     void testRunTraverseStairsActionUsesQueuedStairsIntent() {
         gamestate g;
-        g.sfx.resize(71);
+        g.audio.sfx.resize(71);
         add_floor(g);
         add_floor(g);
 
@@ -568,7 +568,7 @@ public:
 
     void testRunTraverseStairsActionRefreshesSourceAndDestinationPressurePlateDoors() {
         gamestate g;
-        g.sfx.resize(71);
+        g.audio.sfx.resize(71);
         add_floor(g);
         add_floor(g);
 
@@ -634,7 +634,7 @@ public:
 
     void testHandleOpenDoorUsesKeyDInsteadOfKeyO() {
         gamestate g;
-        g.sfx.resize(71);
+        g.audio.sfx.resize(71);
         add_floor(g);
 
         const entityid hero = create_hero(g, vec3{1, 1, 0});

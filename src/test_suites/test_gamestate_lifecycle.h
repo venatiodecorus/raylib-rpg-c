@@ -43,8 +43,8 @@ public:
         TS_ASSERT_EQUALS(g.current_scene, SCENE_TITLE);
         TS_ASSERT_EQUALS(g.controlmode, CONTROLMODE_PLAYER);
         TS_ASSERT_EQUALS(g.confirm_action, CONFIRM_ACTION_NONE);
-        TS_ASSERT_DELTA(g.get_music_volume(), DEFAULT_MUSIC_VOLUME, 0.001f);
-        TS_ASSERT_DELTA(g.get_sfx_volume(), DEFAULT_MASTER_VOLUME, 0.001f);
+        TS_ASSERT_DELTA(g.audio.get_music_volume(), DEFAULT_MUSIC_VOLUME, 0.001f);
+        TS_ASSERT_DELTA(g.audio.get_sfx_volume(), DEFAULT_MASTER_VOLUME, 0.001f);
         TS_ASSERT_EQUALS(g.window_box_bgcolor.r, 0);
         TS_ASSERT_EQUALS(g.window_box_bgcolor.g, 0);
         TS_ASSERT_EQUALS(g.window_box_bgcolor.b, 255);
@@ -132,7 +132,7 @@ public:
         g.confirm_action = CONFIRM_ACTION_QUIT;
         g.confirm_prompt_message = "quit?";
         g.current_scene = SCENE_GAMEPLAY;
-        g.set_music_volume(0.25f);
+        g.audio.set_music_volume(0.25f);
         g.cam2d.target = Vector2{12.0f, 34.0f};
         g.cam2d.offset = Vector2{56.0f, 78.0f};
         g.cam2d.zoom = 9.0f;
@@ -150,7 +150,7 @@ public:
         TS_ASSERT_EQUALS(g.confirm_action, CONFIRM_ACTION_NONE);
         TS_ASSERT_EQUALS(g.confirm_prompt_message, "");
         TS_ASSERT_EQUALS(g.current_scene, SCENE_TITLE);
-        TS_ASSERT_DELTA(g.get_music_volume(), DEFAULT_MUSIC_VOLUME, 0.001f);
+        TS_ASSERT_DELTA(g.audio.get_music_volume(), DEFAULT_MUSIC_VOLUME, 0.001f);
         TS_ASSERT_DELTA(g.cam2d.target.x, 0.0f, 0.001f);
         TS_ASSERT_DELTA(g.cam2d.target.y, 0.0f, 0.001f);
         TS_ASSERT_DELTA(g.cam2d.offset.x, 0.0f, 0.001f);
@@ -162,19 +162,19 @@ public:
     void testGamestateMusicDefaultsAndResetBehavior() {
         gamestate g;
 
-        TS_ASSERT_DELTA(g.get_music_volume(), DEFAULT_MUSIC_VOLUME, 0.001f);
-        TS_ASSERT(!g.get_music_volume_changed());
-        TS_ASSERT_EQUALS(g.get_current_music_index(), 0U);
+        TS_ASSERT_DELTA(g.audio.get_music_volume(), DEFAULT_MUSIC_VOLUME, 0.001f);
+        TS_ASSERT(!g.audio.get_music_volume_changed());
+        TS_ASSERT_EQUALS(g.audio.get_current_music_index(), 0U);
 
-        g.set_music_volume(0.25f);
-        g.set_music_volume_changed(true);
-        g.set_current_music_index(9);
+        g.audio.set_music_volume(0.25f);
+        g.audio.set_music_volume_changed(true);
+        g.audio.set_current_music_index(9);
 
         g.reset();
 
-        TS_ASSERT_DELTA(g.get_music_volume(), DEFAULT_MUSIC_VOLUME, 0.001f);
-        TS_ASSERT(!g.get_music_volume_changed());
-        TS_ASSERT_EQUALS(g.get_current_music_index(), 0U);
+        TS_ASSERT_DELTA(g.audio.get_music_volume(), DEFAULT_MUSIC_VOLUME, 0.001f);
+        TS_ASSERT(!g.audio.get_music_volume_changed());
+        TS_ASSERT_EQUALS(g.audio.get_current_music_index(), 0U);
     }
 
     void testRestartGameReinitializesGameplayWithoutLeavingTitleScene() {
@@ -338,7 +338,7 @@ public:
     void testCharacterCreationTransitionsIntoKeyboardProfilePrompt() {
         gamestate g;
         g.test = true;
-        g.sfx.resize(71);
+        g.audio.sfx.resize(71);
         add_floor(g);
         g.current_scene = SCENE_CHARACTER_CREATION;
 
@@ -379,7 +379,7 @@ public:
     void testCharacterCreationSkipsKeyboardPromptAfterProfileAlreadyConfirmed() {
         gamestate g;
         g.test = true;
-        g.sfx.resize(71);
+        g.audio.sfx.resize(71);
         add_floor(g);
         g.current_scene = SCENE_CHARACTER_CREATION;
         g.keyboard_profile = KEYBOARD_PROFILE_LAPTOP;
@@ -458,7 +458,7 @@ public:
         inputstate_reset(is);
         press_key(is, KEY_RIGHT);
         g.handle_input_sound_menu(is);
-        TS_ASSERT_DELTA(g.get_master_volume(), DEFAULT_MASTER_VOLUME, 0.001f);
+        TS_ASSERT_DELTA(g.audio.get_master_volume(), DEFAULT_MASTER_VOLUME, 0.001f);
 
         inputstate_reset(is);
         press_key(is, KEY_DOWN);
@@ -466,7 +466,7 @@ public:
         inputstate_reset(is);
         press_key(is, KEY_LEFT);
         g.handle_input_sound_menu(is);
-        TS_ASSERT_DELTA(g.get_music_volume(), DEFAULT_MUSIC_VOLUME - AUDIO_VOLUME_STEP, 0.001f);
+        TS_ASSERT_DELTA(g.audio.get_music_volume(), DEFAULT_MUSIC_VOLUME - AudioManager::VOLUME_STEP, 0.001f);
 
         inputstate_reset(is);
         press_key(is, KEY_DOWN);
@@ -474,7 +474,7 @@ public:
         inputstate_reset(is);
         press_key(is, KEY_LEFT);
         g.handle_input_sound_menu(is);
-        TS_ASSERT_DELTA(g.get_sfx_volume(), DEFAULT_MASTER_VOLUME - AUDIO_VOLUME_STEP, 0.001f);
+        TS_ASSERT_DELTA(g.audio.get_sfx_volume(), DEFAULT_MASTER_VOLUME - AudioManager::VOLUME_STEP, 0.001f);
 
         inputstate_reset(is);
         press_key(is, KEY_ESCAPE);

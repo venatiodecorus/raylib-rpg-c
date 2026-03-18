@@ -271,8 +271,8 @@ inline void gamestate::resolve_pressure_plate_set_door_event(entityid door_id, b
     const bool was_open = ct.get<door_open>(door_id).value_or(false);
     ct.set<door_open>(door_id, should_open);
     ct.set<update>(door_id, true);
-    if (!was_open && should_open && IsAudioDeviceReady() && sfx.size() > SFX_CHEST_OPEN) {
-        PlaySound(sfx.at(SFX_CHEST_OPEN));
+    if (!was_open && should_open) {
+        audio.play(SFX_CHEST_OPEN);
     }
 }
 
@@ -632,9 +632,7 @@ inline gameplay_event_result_t gamestate::process_gameplay_event(const gameplay_
         result.succeeded = transfer_inventory_item(event.actor_id, event.target_id, event.item_id);
         if (result.succeeded) {
             frame_dirty = true;
-            if (IsAudioDeviceReady() && sfx.size() > SFX_CONFIRM_01) {
-                PlaySound(sfx.at(SFX_CONFIRM_01));
-            }
+            audio.play(SFX_CONFIRM_01);
             auto updated_inventory = ct.get<inventory>(event.actor_id).value_or(make_shared<vector<entityid>>());
             clamp_inventory_selection(updated_inventory->size());
         }
@@ -864,9 +862,7 @@ inline bool gamestate::try_entity_move(entityid id, vec3 v) {
     float my = v.y * DEFAULT_TILE_SIZE;
     ct.set<spritemove>(id, (Rectangle){mx, my, 0, 0});
     if (check_hearing(hero_id, aloc)) {
-        if (IsAudioDeviceReady()) {
-            PlaySound(sfx[SFX_STEP_STONE_1]);
-        }
+        audio.play(SFX_STEP_STONE_1);
     }
     ct.set<steps_taken>(id, ct.get<steps_taken>(id).value_or(0) + 1);
     if (!processing_actions) {
@@ -1104,8 +1100,8 @@ inline bool gamestate::try_entity_pull(entityid id) {
     float mx = v.x * DEFAULT_TILE_SIZE;
     float my = v.y * DEFAULT_TILE_SIZE;
     ct.set<spritemove>(id, (Rectangle){mx, my, 0, 0});
-    if (check_hearing(hero_id, aloc) && IsAudioDeviceReady()) {
-        PlaySound(sfx[SFX_STEP_STONE_1]);
+    if (check_hearing(hero_id, aloc)) {
+        audio.play(SFX_STEP_STONE_1);
     }
 
     ct.set<steps_taken>(id, ct.get<steps_taken>(id).value_or(0) + 1);
@@ -1133,7 +1129,7 @@ inline bool gamestate::try_entity_pickup(entityid id) {
     entityid item_id = tile.get_cached_item();
     if (item_id != ENTITYID_INVALID && add_to_inventory(id, item_id)) {
         tile.tile_remove(item_id);
-        PlaySound(sfx[SFX_CONFIRM_01]);
+        audio.play(SFX_CONFIRM_01);
         item_picked_up = true;
         string item_name = ct.get<name>(item_id).value_or("no-name-item");
         add_message_history("You picked up %s", item_name.c_str());
@@ -1187,7 +1183,7 @@ inline bool gamestate::try_entity_stairs(entityid id) {
                 refresh_pressure_plates();
             }
             flag = GAMESTATE_FLAG_PLAYER_ANIM;
-            PlaySound(sfx.at(SFX_STEP_STONE_1));
+            audio.play(SFX_STEP_STONE_1);
             return true;
         }
     }
@@ -1208,7 +1204,7 @@ inline bool gamestate::try_entity_stairs(entityid id) {
                 refresh_pressure_plates();
             }
             flag = GAMESTATE_FLAG_PLAYER_ANIM;
-            PlaySound(sfx.at(SFX_STEP_STONE_1));
+            audio.play(SFX_STEP_STONE_1);
             return true;
         }
         else {
@@ -1242,9 +1238,7 @@ inline bool gamestate::try_entity_open_door(entityid id, vec3 loc) {
     optional<bool> maybe_is_open = ct.get<door_open>(door_id);
     massert(maybe_is_open.has_value(), "door %d has no `is_open` component", door_id);
     ct.set<door_open>(door_id, !maybe_is_open.value());
-    if (IsAudioDeviceReady() && sfx.size() > SFX_CHEST_OPEN) {
-        PlaySound(sfx.at(SFX_CHEST_OPEN));
-    }
+    audio.play(SFX_CHEST_OPEN);
     return true;
 }
 

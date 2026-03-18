@@ -9,10 +9,10 @@
 
 /** @brief Load all sound effects from the compiled SFX_PATHS table. */
 static inline void libdraw_load_sfx(gamestate& g) {
-    g.sfx.clear();
+    g.audio.sfx.clear();
     for (int i = 0; i < SFX_DEF_COUNT; i++) {
         Sound sound = LoadSound(SFX_PATHS[i]);
-        SetSoundVolume(sound, g.get_sfx_volume());
-        g.sfx.push_back(sound);
+        SetSoundVolume(sound, g.audio.get_sfx_volume());
+        g.audio.sfx.push_back(sound);
     }
 }

@@ -174,9 +174,7 @@ inline void gamestate::handle_input_keyboard_profile_prompt(inputstate& is) {
         frame_dirty = true;
     }
     else if (inputstate_is_pressed(is, KEY_ENTER)) {
-        if (!test && IsAudioDeviceReady()) {
-            PlaySound(sfx[SFX_CONFIRM_01]);
-        }
+        audio.play(SFX_CONFIRM_01, test);
         apply_keyboard_profile_selection();
     }
 }
