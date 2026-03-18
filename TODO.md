@@ -78,7 +78,7 @@ These must be addressed first because everything else depends on them.
   - Pass dependencies explicitly or use a service-locator / DI pattern.
   - The renderer context should be owned by a `Renderer` class, not a global.
 
-- [ ] **Break up `libdraw.cpp` (2,379 lines)**
+- [x] **Break up `libdraw.cpp` (2,379 lines)**
   - This single file contains all rendering: sprite management, every UI screen,
     HUD, dungeon rendering, scene composition, resource loading, and init/shutdown.
   - Split into: `Renderer` (core pipeline), `UIRenderer` (menus, HUD, modals),
