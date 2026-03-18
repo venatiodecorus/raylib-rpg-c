@@ -18,23 +18,23 @@ inline void gamestate::handle_input_title_scene(inputstate& is) {
 
 inline void gamestate::handle_input_main_menu_scene(inputstate& is) {
     if (inputstate_is_pressed(is, KEY_ENTER) || inputstate_is_pressed(is, KEY_SPACE)) {
-        if (title_screen_selection == 0) {
+        if (ui.title_screen_selection == 0) {
             current_scene = SCENE_CHARACTER_CREATION;
             frame_dirty = true;
         }
         audio.play(SFX_CONFIRM_01);
     }
     else if (inputstate_is_pressed(is, KEY_DOWN)) {
-        title_screen_selection++;
-        if (title_screen_selection >= max_title_screen_selections) {
-            title_screen_selection = 0;
+        ui.title_screen_selection++;
+        if (ui.title_screen_selection >= ui.max_title_screen_selections) {
+            ui.title_screen_selection = 0;
         }
         audio.play(SFX_CONFIRM_01);
     }
     else if (inputstate_is_pressed(is, KEY_UP)) {
-        title_screen_selection--;
-        if (title_screen_selection < 0) {
-            title_screen_selection = max_title_screen_selections - 1;
+        ui.title_screen_selection--;
+        if (ui.title_screen_selection < 0) {
+            ui.title_screen_selection = ui.max_title_screen_selections - 1;
         }
         audio.play(SFX_CONFIRM_01);
     }

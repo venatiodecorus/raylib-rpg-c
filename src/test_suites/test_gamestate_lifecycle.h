@@ -42,13 +42,13 @@ public:
         TS_ASSERT(!g.messages.is_active);
         TS_ASSERT_EQUALS(g.current_scene, SCENE_TITLE);
         TS_ASSERT_EQUALS(g.controlmode, CONTROLMODE_PLAYER);
-        TS_ASSERT_EQUALS(g.confirm_action, CONFIRM_ACTION_NONE);
+        TS_ASSERT_EQUALS(g.ui.confirm_action, CONFIRM_ACTION_NONE);
         TS_ASSERT_DELTA(g.audio.get_music_volume(), DEFAULT_MUSIC_VOLUME, 0.001f);
         TS_ASSERT_DELTA(g.audio.get_sfx_volume(), DEFAULT_MASTER_VOLUME, 0.001f);
-        TS_ASSERT_EQUALS(g.window_box_bgcolor.r, 0);
-        TS_ASSERT_EQUALS(g.window_box_bgcolor.g, 0);
-        TS_ASSERT_EQUALS(g.window_box_bgcolor.b, 255);
-        TS_ASSERT_EQUALS(g.window_box_bgcolor.a, 128);
+        TS_ASSERT_EQUALS(g.ui.window_box_bgcolor.r, 0);
+        TS_ASSERT_EQUALS(g.ui.window_box_bgcolor.g, 0);
+        TS_ASSERT_EQUALS(g.ui.window_box_bgcolor.b, 255);
+        TS_ASSERT_EQUALS(g.ui.window_box_bgcolor.a, 128);
         TS_ASSERT_EQUALS(g.get_debug_panel_bgcolor().a, 255);
         TS_ASSERT_EQUALS(g.chara_creation.race, RACE_HUMAN);
         TS_ASSERT_EQUALS(g.chara_creation.alignment, ALIGNMENT_NEUTRAL_NEUTRAL);
@@ -124,13 +124,13 @@ public:
 
         g.cam_lockon = false;
         g.cam_changed = true;
-        g.display_inventory_menu = true;
-        g.display_action_menu = true;
-        g.display_help_menu = true;
-        g.display_confirm_prompt = true;
+        g.ui.display_inventory_menu = true;
+        g.ui.display_action_menu = true;
+        g.ui.display_help_menu = true;
+        g.ui.display_confirm_prompt = true;
         g.do_quit = true;
-        g.confirm_action = CONFIRM_ACTION_QUIT;
-        g.confirm_prompt_message = "quit?";
+        g.ui.confirm_action = CONFIRM_ACTION_QUIT;
+        g.ui.confirm_prompt_message = "quit?";
         g.current_scene = SCENE_GAMEPLAY;
         g.audio.set_music_volume(0.25f);
         g.cam2d.target = Vector2{12.0f, 34.0f};
@@ -142,13 +142,13 @@ public:
 
         TS_ASSERT(g.cam_lockon);
         TS_ASSERT(!g.cam_changed);
-        TS_ASSERT(!g.display_inventory_menu);
-        TS_ASSERT(!g.display_action_menu);
-        TS_ASSERT(!g.display_help_menu);
-        TS_ASSERT(!g.display_confirm_prompt);
+        TS_ASSERT(!g.ui.display_inventory_menu);
+        TS_ASSERT(!g.ui.display_action_menu);
+        TS_ASSERT(!g.ui.display_help_menu);
+        TS_ASSERT(!g.ui.display_confirm_prompt);
         TS_ASSERT(!g.do_quit);
-        TS_ASSERT_EQUALS(g.confirm_action, CONFIRM_ACTION_NONE);
-        TS_ASSERT_EQUALS(g.confirm_prompt_message, "");
+        TS_ASSERT_EQUALS(g.ui.confirm_action, CONFIRM_ACTION_NONE);
+        TS_ASSERT_EQUALS(g.ui.confirm_prompt_message, "");
         TS_ASSERT_EQUALS(g.current_scene, SCENE_TITLE);
         TS_ASSERT_DELTA(g.audio.get_music_volume(), DEFAULT_MUSIC_VOLUME, 0.001f);
         TS_ASSERT_DELTA(g.cam2d.target.x, 0.0f, 0.001f);
@@ -236,7 +236,7 @@ public:
         g.update_npc_xp(hero, slime);
 
         TS_ASSERT_EQUALS(g.ct.get<xp>(hero).value_or(0), 10);
-        TS_ASSERT(g.display_level_up_modal);
+        TS_ASSERT(g.ui.display_level_up_modal);
         TS_ASSERT_EQUALS(g.controlmode, CONTROLMODE_LEVEL_UP);
 
         inputstate is;
@@ -244,7 +244,7 @@ public:
         press_key(is, KEY_ENTER);
         g.handle_input(is);
 
-        TS_ASSERT(!g.display_level_up_modal);
+        TS_ASSERT(!g.ui.display_level_up_modal);
         TS_ASSERT_EQUALS(g.controlmode, CONTROLMODE_PLAYER);
         TS_ASSERT_EQUALS(g.ct.get<level>(hero).value_or(0), 2);
         TS_ASSERT_EQUALS(g.ct.get<strength>(hero).value_or(0), old_str + 1);
@@ -285,8 +285,8 @@ public:
 
         g.handle_input(is);
 
-        TS_ASSERT(!g.display_confirm_prompt);
-        TS_ASSERT_EQUALS(g.confirm_action, CONFIRM_ACTION_NONE);
+        TS_ASSERT(!g.ui.display_confirm_prompt);
+        TS_ASSERT_EQUALS(g.ui.confirm_action, CONFIRM_ACTION_NONE);
         TS_ASSERT(g.do_quit);
     }
 
@@ -302,8 +302,8 @@ public:
 
         g.handle_input(is);
 
-        TS_ASSERT(!g.display_confirm_prompt);
-        TS_ASSERT_EQUALS(g.confirm_action, CONFIRM_ACTION_NONE);
+        TS_ASSERT(!g.ui.display_confirm_prompt);
+        TS_ASSERT_EQUALS(g.ui.confirm_action, CONFIRM_ACTION_NONE);
         TS_ASSERT(!g.do_quit);
         TS_ASSERT_EQUALS(g.controlmode, CONTROLMODE_PLAYER);
     }
@@ -349,7 +349,7 @@ public:
         g.handle_input_character_creation_scene(is);
 
         TS_ASSERT_EQUALS(g.current_scene, SCENE_GAMEPLAY);
-        TS_ASSERT(g.display_keyboard_profile_prompt);
+        TS_ASSERT(g.ui.display_keyboard_profile_prompt);
         TS_ASSERT_EQUALS(g.controlmode, CONTROLMODE_KEYBOARD_PROFILE);
         TS_ASSERT_DIFFERS(g.hero_id, ENTITYID_INVALID);
     }
@@ -364,7 +364,7 @@ public:
         inputstate_reset(is);
         press_key(is, KEY_RIGHT);
         g.handle_input_keyboard_profile_prompt(is);
-        TS_ASSERT_EQUALS(g.keyboard_profile_selection, static_cast<unsigned int>(KEYBOARD_PROFILE_LAPTOP));
+        TS_ASSERT_EQUALS(g.ui.keyboard_profile_selection, static_cast<unsigned int>(KEYBOARD_PROFILE_LAPTOP));
 
         inputstate_reset(is);
         press_key(is, KEY_ENTER);
@@ -372,7 +372,7 @@ public:
 
         TS_ASSERT_EQUALS(g.keyboard_profile, KEYBOARD_PROFILE_LAPTOP);
         TS_ASSERT(g.keyboard_profile_confirmed);
-        TS_ASSERT(!g.display_keyboard_profile_prompt);
+        TS_ASSERT(!g.ui.display_keyboard_profile_prompt);
         TS_ASSERT_EQUALS(g.controlmode, CONTROLMODE_PLAYER);
     }
 
@@ -392,7 +392,7 @@ public:
         g.handle_input_character_creation_scene(is);
 
         TS_ASSERT_EQUALS(g.current_scene, SCENE_GAMEPLAY);
-        TS_ASSERT(!g.display_keyboard_profile_prompt);
+        TS_ASSERT(!g.ui.display_keyboard_profile_prompt);
         TS_ASSERT_EQUALS(g.controlmode, CONTROLMODE_PLAYER);
         TS_ASSERT_EQUALS(g.keyboard_profile, KEYBOARD_PROFILE_LAPTOP);
         TS_ASSERT_DIFFERS(g.hero_id, ENTITYID_INVALID);
@@ -423,7 +423,7 @@ public:
         g.current_scene = SCENE_GAMEPLAY;
         g.keyboard_profile = KEYBOARD_PROFILE_LAPTOP;
         g.open_controls_menu();
-        g.controls_menu_selection = INPUT_ACTION_ATTACK + 2;
+        g.ui.controls_menu_selection = INPUT_ACTION_ATTACK + 2;
 
         inputstate is = {};
         inputstate_reset(is);
@@ -443,7 +443,7 @@ public:
         gamestate g;
         g.test = true;
         g.current_scene = SCENE_GAMEPLAY;
-        g.display_option_menu = true;
+        g.ui.display_option_menu = true;
         g.controlmode = CONTROLMODE_OPTION_MENU;
 
         inputstate is = {};
@@ -451,8 +451,8 @@ public:
         press_key(is, KEY_ENTER);
         g.handle_input_option_menu(is);
 
-        TS_ASSERT(g.display_sound_menu);
-        TS_ASSERT(!g.display_option_menu);
+        TS_ASSERT(g.ui.display_sound_menu);
+        TS_ASSERT(!g.ui.display_option_menu);
         TS_ASSERT_EQUALS(g.controlmode, CONTROLMODE_SOUND_MENU);
 
         inputstate_reset(is);
@@ -479,8 +479,8 @@ public:
         inputstate_reset(is);
         press_key(is, KEY_ESCAPE);
         g.handle_input_sound_menu(is);
-        TS_ASSERT(!g.display_sound_menu);
-        TS_ASSERT(g.display_option_menu);
+        TS_ASSERT(!g.ui.display_sound_menu);
+        TS_ASSERT(g.ui.display_option_menu);
         TS_ASSERT_EQUALS(g.controlmode, CONTROLMODE_OPTION_MENU);
     }
 
@@ -488,22 +488,22 @@ public:
         gamestate g;
         g.test = true;
         g.current_scene = SCENE_GAMEPLAY;
-        g.display_option_menu = true;
+        g.ui.display_option_menu = true;
         g.controlmode = CONTROLMODE_OPTION_MENU;
-        g.options_menu.incr_selection();
+        g.ui.options_menu.incr_selection();
 
         inputstate is = {};
         inputstate_reset(is);
         press_key(is, KEY_ENTER);
         g.handle_input_option_menu(is);
 
-        TS_ASSERT(g.display_window_color_menu);
+        TS_ASSERT(g.ui.display_window_color_menu);
         TS_ASSERT_EQUALS(g.controlmode, CONTROLMODE_WINDOW_COLOR_MENU);
 
         inputstate_reset(is);
         hold_key(is, KEY_RIGHT);
         g.handle_input_window_color_menu(is);
-        TS_ASSERT_EQUALS(g.window_box_bgcolor.r, 1);
+        TS_ASSERT_EQUALS(g.ui.window_box_bgcolor.r, 1);
 
         for (int i = 0; i < 8; i++) {
             inputstate_reset(is);
@@ -514,33 +514,33 @@ public:
         press_key(is, KEY_ENTER);
         g.handle_input_window_color_menu(is);
 
-        TS_ASSERT_EQUALS(g.window_box_bgcolor.r, 0);
-        TS_ASSERT_EQUALS(g.window_box_bgcolor.g, 0);
-        TS_ASSERT_EQUALS(g.window_box_bgcolor.b, 255);
-        TS_ASSERT_EQUALS(g.window_box_bgcolor.a, 128);
-        TS_ASSERT_EQUALS(g.window_box_fgcolor.r, 255);
-        TS_ASSERT_EQUALS(g.window_box_fgcolor.g, 255);
-        TS_ASSERT_EQUALS(g.window_box_fgcolor.b, 255);
-        TS_ASSERT_EQUALS(g.window_box_fgcolor.a, 255);
+        TS_ASSERT_EQUALS(g.ui.window_box_bgcolor.r, 0);
+        TS_ASSERT_EQUALS(g.ui.window_box_bgcolor.g, 0);
+        TS_ASSERT_EQUALS(g.ui.window_box_bgcolor.b, 255);
+        TS_ASSERT_EQUALS(g.ui.window_box_bgcolor.a, 128);
+        TS_ASSERT_EQUALS(g.ui.window_box_fgcolor.r, 255);
+        TS_ASSERT_EQUALS(g.ui.window_box_fgcolor.g, 255);
+        TS_ASSERT_EQUALS(g.ui.window_box_fgcolor.b, 255);
+        TS_ASSERT_EQUALS(g.ui.window_box_fgcolor.a, 255);
     }
 
     void testOptionMenuCanToggleMiniInventoryPreference() {
         gamestate g;
         g.test = true;
         g.current_scene = SCENE_GAMEPLAY;
-        g.display_option_menu = true;
+        g.ui.display_option_menu = true;
         g.controlmode = CONTROLMODE_OPTION_MENU;
-        g.options_menu.incr_selection();
-        g.options_menu.incr_selection();
-        g.options_menu.incr_selection();
+        g.ui.options_menu.incr_selection();
+        g.ui.options_menu.incr_selection();
+        g.ui.options_menu.incr_selection();
 
         inputstate is = {};
         inputstate_reset(is);
         press_key(is, KEY_ENTER);
         g.handle_input_option_menu(is);
 
-        TS_ASSERT(g.prefer_mini_inventory_menu);
-        TS_ASSERT(g.display_option_menu);
+        TS_ASSERT(g.ui.prefer_mini_inventory_menu);
+        TS_ASSERT(g.ui.display_option_menu);
         TS_ASSERT_EQUALS(g.controlmode, CONTROLMODE_OPTION_MENU);
     }
 

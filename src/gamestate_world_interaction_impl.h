@@ -604,7 +604,7 @@ inline gameplay_event_result_t gamestate::process_gameplay_event(const gameplay_
             if (event.actor_id == hero_id) {
                 flag = GAMESTATE_FLAG_PLAYER_ANIM;
                 controlmode = CONTROLMODE_PLAYER;
-                display_inventory_menu = false;
+                ui.display_inventory_menu = false;
             }
             result.succeeded = true;
         }

@@ -24,6 +24,7 @@
 #include "magic_values.h"
 #include "option_menu.h"
 #include "orc_names.h"
+#include "ui_state.h"
 #include "roll.h"
 #include "scene.h"
 #include "audio_manager.h"
@@ -73,13 +74,6 @@ using std::chrono::nanoseconds;
 using std::chrono::system_clock;
 using std::chrono::time_point;
 
-constexpr Color DEFAULT_WINDOW_BOX_BGCOLOR = Color{0, 0, 255, 128};
-constexpr Color DEFAULT_WINDOW_BOX_FGCOLOR = Color{255, 255, 255, 255};
-typedef enum {
-    CONFIRM_ACTION_NONE = 0,
-    CONFIRM_ACTION_QUIT,
-} confirm_action_t;
-
 struct floor_pressure_plate_t {
     vec3 loc;
     entityid linked_door_id;
@@ -126,24 +120,11 @@ public:
     bool gameover;
     bool player_changing_dir;
     bool test_guard;
-    bool display_inventory_menu;
-    bool display_chest_menu;
-    bool display_action_menu;
-    bool display_option_menu;
-    bool display_sound_menu;
-    bool display_window_color_menu;
-    bool display_controls_menu;
-    bool display_keyboard_profile_prompt;
-    bool display_confirm_prompt;
-    bool display_interaction_modal;
-    bool display_level_up_modal;
     bool do_quit;
     bool dirty_entities;
-    bool display_help_menu;
     bool cam_changed;
     bool frame_dirty;
     bool do_restart;
-    bool chest_deposit_mode;
     int lock;
     int pad;
     unsigned int framecount;
@@ -153,21 +134,10 @@ public:
     unsigned int windowwidth;
     unsigned int windowheight;
     unsigned int frame_updates;
-    unsigned int inventory_menu_selection;
-    unsigned int level_up_selection;
-    unsigned int gameplay_settings_menu_selection;
-    unsigned int sound_menu_selection;
-    unsigned int window_color_menu_selection;
-    unsigned int keyboard_profile_selection;
-    unsigned int mini_inventory_visible_count;
-    unsigned int mini_inventory_scroll_offset;
-    unsigned int title_screen_selection;
-    unsigned int max_title_screen_selections;
     unsigned int restart_count;
     unsigned int font_size;
     unsigned int turn_count;
     unsigned long int ticks;
-    size_t action_selection;
     float line_spacing;
     double last_frame_time;
     double max_frame_time;
@@ -181,28 +151,16 @@ public:
     AudioManager audio;
     character_creation chara_creation;
     string version;
-    Color message_history_bgcolor;
-    Color window_box_bgcolor;
-    Color window_box_fgcolor;
     Vector2 last_click_screen_pos;
-    Vector2 inventory_cursor = {0, 0};
     Camera2D cam2d;
     Font font;
     ComponentTable ct;
-    option_menu options_menu;
+    UIState ui;
     keyboard_profile_t keyboard_profile = KEYBOARD_PROFILE_FULL;
     bool keyboard_profile_confirmed = false;
     bool controls_menu_waiting_for_key;
-    bool prefer_mini_inventory_menu;
-    size_t controls_menu_selection;
     gameplay_input_action_t controls_menu_pending_action;
     std::array<std::array<gameplay_keybinding_t, INPUT_ACTION_COUNT>, KEYBOARD_PROFILE_COUNT> keybindings;
-    confirm_action_t confirm_action;
-    string confirm_prompt_message;
-    entityid active_interaction_entity_id;
-    string interaction_title;
-    string interaction_body;
-    int pending_level_ups;
     DamagePopups damage_popups_sys;
     vector<floor_pressure_plate_t> floor_pressure_plates;
     vector<gameplay_event_t> gameplay_events;
@@ -271,25 +229,25 @@ public:
         player_input_received = false;
         is_locked = false;
         gridon = false;
-        display_action_menu = false;
-        display_inventory_menu = false;
-        display_chest_menu = false;
-        display_option_menu = false;
-        display_sound_menu = false;
-        display_window_color_menu = false;
-        display_help_menu = false;
-        display_controls_menu = false;
-        display_keyboard_profile_prompt = false;
-        display_confirm_prompt = false;
-        display_interaction_modal = false;
-        display_level_up_modal = false;
+        ui.display_action_menu = false;
+        ui.display_inventory_menu = false;
+        ui.display_chest_menu = false;
+        ui.display_option_menu = false;
+        ui.display_sound_menu = false;
+        ui.display_window_color_menu = false;
+        ui.display_help_menu = false;
+        ui.display_controls_menu = false;
+        ui.display_keyboard_profile_prompt = false;
+        ui.display_confirm_prompt = false;
+        ui.display_interaction_modal = false;
+        ui.display_level_up_modal = false;
         do_quit = false;
         cam_changed = false;
         gameover = dirty_entities = false;
         processing_actions = false;
         test_guard = false;
         player_changing_dir = false;
-        chest_deposit_mode = false;
+        ui.chest_deposit_mode = false;
         #ifndef TEST
         test = false;
 #else
@@ -305,12 +263,12 @@ public:
 #else
         god_mode = true;
 #endif
-        gameplay_settings_menu_selection = 0;
-        sound_menu_selection = 0;
-        window_color_menu_selection = 0;
-        keyboard_profile_selection = 0;
-        mini_inventory_visible_count = 10;
-        mini_inventory_scroll_offset = 0;
+        ui.gameplay_settings_menu_selection = 0;
+        ui.sound_menu_selection = 0;
+        ui.window_color_menu_selection = 0;
+        ui.keyboard_profile_selection = 0;
+        ui.mini_inventory_visible_count = 10;
+        ui.mini_inventory_scroll_offset = 0;
         cam2d.target = cam2d.offset = Vector2{0, 0};
         cam2d.zoom = DEFAULT_ZOOM_LEVEL;
         cam2d.rotation = 0.0;
@@ -325,7 +283,7 @@ public:
         // weird bug maybe when set to 0?
         next_entityid = 1;
         do_restart = 0;
-        title_screen_selection = 0;
+        ui.title_screen_selection = 0;
         lock = 0;
         frame_updates = 0;
         framecount = 0;
@@ -338,14 +296,14 @@ public:
             last_frame_times[i] = 0;
         }
         turn_count = 0;
-        action_selection = 0;
-        inventory_menu_selection = 0;
-        level_up_selection = 0;
+        ui.action_selection = 0;
+        ui.inventory_menu_selection = 0;
+        ui.level_up_selection = 0;
         debugpanel.pad_top = 0;
         debugpanel.pad_left = 0;
         debugpanel.pad_right = 0;
         debugpanel.pad_bottom = 0;
-        max_title_screen_selections = 2;
+        ui.max_title_screen_selections = 2;
         // initialize character creation
         chara_creation.name = "hero";
         chara_creation.strength = 10;
@@ -359,23 +317,23 @@ public:
         chara_creation.hitdie = get_racial_hd(RACE_HUMAN);
         current_scene = SCENE_TITLE;
         audio.reset_defaults();
-        window_box_bgcolor = DEFAULT_WINDOW_BOX_BGCOLOR;
-        window_box_fgcolor = DEFAULT_WINDOW_BOX_FGCOLOR;
-        message_history_bgcolor = DEFAULT_WINDOW_BOX_BGCOLOR;
+        ui.window_box_bgcolor = DEFAULT_WINDOW_BOX_BGCOLOR;
+        ui.window_box_fgcolor = DEFAULT_WINDOW_BOX_FGCOLOR;
+        ui.message_history_bgcolor = DEFAULT_WINDOW_BOX_BGCOLOR;
         last_click_screen_pos = Vector2{-1, -1};
-        confirm_action = CONFIRM_ACTION_NONE;
-        confirm_prompt_message.clear();
-        active_interaction_entity_id = ENTITYID_INVALID;
-        interaction_title.clear();
-        interaction_body.clear();
-        pending_level_ups = 0;
+        ui.confirm_action = CONFIRM_ACTION_NONE;
+        ui.confirm_prompt_message.clear();
+        ui.active_interaction_entity_id = ENTITYID_INVALID;
+        ui.interaction_title.clear();
+        ui.interaction_body.clear();
+        ui.pending_level_ups = 0;
         damage_popups_sys = DamagePopups();
         floor_pressure_plates.clear();
         gameplay_events.clear();
         floor_four_tutorial_orc_spawn = vec3{-1, -1, -1};
-        prefer_mini_inventory_menu = false;
+        ui.prefer_mini_inventory_menu = false;
         controls_menu_waiting_for_key = false;
-        controls_menu_selection = 0;
+        ui.controls_menu_selection = 0;
         controls_menu_pending_action = INPUT_ACTION_MOVE_UP;
         reset_default_keybindings();
         messages = MessageLog();

@@ -146,31 +146,31 @@ inline string gamestate::get_keybinding_label(keyboard_profile_t profile, gamepl
 }
 
 inline void gamestate::open_keyboard_profile_prompt() {
-    display_keyboard_profile_prompt = true;
-    keyboard_profile_selection = static_cast<unsigned int>(keyboard_profile);
+    ui.display_keyboard_profile_prompt = true;
+    ui.keyboard_profile_selection = static_cast<unsigned int>(keyboard_profile);
     controlmode = CONTROLMODE_KEYBOARD_PROFILE;
     frame_dirty = true;
 }
 
 inline void gamestate::apply_keyboard_profile_selection() {
-    keyboard_profile = static_cast<keyboard_profile_t>(keyboard_profile_selection % KEYBOARD_PROFILE_COUNT);
+    keyboard_profile = static_cast<keyboard_profile_t>(ui.keyboard_profile_selection % KEYBOARD_PROFILE_COUNT);
     keyboard_profile_confirmed = true;
-    display_keyboard_profile_prompt = false;
+    ui.display_keyboard_profile_prompt = false;
     controlmode = CONTROLMODE_PLAYER;
     frame_dirty = true;
 }
 
 inline void gamestate::handle_input_keyboard_profile_prompt(inputstate& is) {
-    if (controlmode != CONTROLMODE_KEYBOARD_PROFILE || !display_keyboard_profile_prompt) {
+    if (controlmode != CONTROLMODE_KEYBOARD_PROFILE || !ui.display_keyboard_profile_prompt) {
         return;
     }
 
     if (inputstate_is_pressed(is, KEY_LEFT) || inputstate_is_pressed(is, KEY_UP)) {
-        keyboard_profile_selection = keyboard_profile_selection == 0 ? KEYBOARD_PROFILE_COUNT - 1 : keyboard_profile_selection - 1;
+        ui.keyboard_profile_selection = ui.keyboard_profile_selection == 0 ? KEYBOARD_PROFILE_COUNT - 1 : ui.keyboard_profile_selection - 1;
         frame_dirty = true;
     }
     else if (inputstate_is_pressed(is, KEY_RIGHT) || inputstate_is_pressed(is, KEY_DOWN)) {
-        keyboard_profile_selection = (keyboard_profile_selection + 1) % KEYBOARD_PROFILE_COUNT;
+        ui.keyboard_profile_selection = (ui.keyboard_profile_selection + 1) % KEYBOARD_PROFILE_COUNT;
         frame_dirty = true;
     }
     else if (inputstate_is_pressed(is, KEY_ENTER)) {
@@ -180,23 +180,23 @@ inline void gamestate::handle_input_keyboard_profile_prompt(inputstate& is) {
 }
 
 inline void gamestate::open_controls_menu() {
-    display_option_menu = false;
-    display_controls_menu = true;
+    ui.display_option_menu = false;
+    ui.display_controls_menu = true;
     controls_menu_waiting_for_key = false;
-    controls_menu_selection = 0;
+    ui.controls_menu_selection = 0;
     controlmode = CONTROLMODE_CONTROLS_MENU;
     frame_dirty = true;
 }
 
 inline void gamestate::close_controls_menu() {
-    display_controls_menu = false;
+    ui.display_controls_menu = false;
     controls_menu_waiting_for_key = false;
     controlmode = CONTROLMODE_PLAYER;
     frame_dirty = true;
 }
 
 inline void gamestate::handle_input_controls_menu(inputstate& is) {
-    if (controlmode != CONTROLMODE_CONTROLS_MENU || !display_controls_menu) {
+    if (controlmode != CONTROLMODE_CONTROLS_MENU || !ui.display_controls_menu) {
         return;
     }
 
@@ -222,28 +222,28 @@ inline void gamestate::handle_input_controls_menu(inputstate& is) {
         return;
     }
     if (inputstate_is_pressed(is, KEY_UP)) {
-        controls_menu_selection = controls_menu_selection == 0 ? option_count - 1 : controls_menu_selection - 1;
+        ui.controls_menu_selection = ui.controls_menu_selection == 0 ? option_count - 1 : ui.controls_menu_selection - 1;
         frame_dirty = true;
         return;
     }
     if (inputstate_is_pressed(is, KEY_DOWN)) {
-        controls_menu_selection = (controls_menu_selection + 1) % option_count;
+        ui.controls_menu_selection = (ui.controls_menu_selection + 1) % option_count;
         frame_dirty = true;
         return;
     }
     if (inputstate_is_pressed(is, KEY_LEFT) || inputstate_is_pressed(is, KEY_RIGHT) || inputstate_is_pressed(is, KEY_ENTER)) {
-        if (controls_menu_selection == 0) {
+        if (ui.controls_menu_selection == 0) {
             keyboard_profile = keyboard_profile == KEYBOARD_PROFILE_FULL ? KEYBOARD_PROFILE_LAPTOP : KEYBOARD_PROFILE_FULL;
             frame_dirty = true;
             return;
         }
-        if (controls_menu_selection == 1) {
+        if (ui.controls_menu_selection == 1) {
             reset_profile_keybindings(keyboard_profile);
             frame_dirty = true;
             return;
         }
 
-        controls_menu_pending_action = static_cast<gameplay_input_action_t>(controls_menu_selection - 2);
+        controls_menu_pending_action = static_cast<gameplay_input_action_t>(ui.controls_menu_selection - 2);
         controls_menu_waiting_for_key = true;
         frame_dirty = true;
     }

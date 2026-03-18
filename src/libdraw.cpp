@@ -206,7 +206,7 @@ void draw_item_detail_panel(gamestate& g, const Rectangle& right_box, entityid s
     const int y_incr = 20;
     const vector<string> lines = build_item_detail_lines(g, selection_id);
     for (const string& line : lines) {
-        DrawText(line.c_str(), cur_x, cur_y, fontsize, g.window_box_fgcolor);
+        DrawText(line.c_str(), cur_x, cur_y, fontsize, g.ui.window_box_fgcolor);
         cur_y += y_incr;
     }
 }
@@ -238,14 +238,14 @@ void draw_inventory_grid(gamestate& g, shared_ptr<vector<entityid>> inventory, c
                             const bool cur_wpn_selected = selection_id == cur_wpn_id && cur_wpn_id != ENTITYID_INVALID;
                             const bool cur_shield_selected = selection_id == cur_shield_id && cur_shield_id != ENTITYID_INVALID;
                             if (cur_wpn_selected || cur_shield_selected) {
-                                DrawText("equipped", grid_box2.x, grid_box2.y + grid_box2.height - 10, 10, g.window_box_fgcolor);
+                                DrawText("equipped", grid_box2.x, grid_box2.y + grid_box2.height - 10, 10, g.ui.window_box_fgcolor);
                             }
                         }
                     }
                 }
                 ++it;
             }
-            if ((float)i == g.inventory_cursor.x && (float)j == g.inventory_cursor.y) {
+            if ((float)i == g.ui.inventory_cursor.x && (float)j == g.ui.inventory_cursor.y) {
                 DrawRectangleLinesEx(grid_box, 2, GREEN);
             }
             x += w;
@@ -256,7 +256,7 @@ void draw_inventory_grid(gamestate& g, shared_ptr<vector<entityid>> inventory, c
 }
 
 void draw_inventory_menu(gamestate& g) {
-    if (!g.display_inventory_menu) {
+    if (!g.ui.display_inventory_menu) {
         return;
     }
 
@@ -276,16 +276,16 @@ void draw_inventory_menu(gamestate& g) {
     float half_width = (menu_box.width - section_gap) / 2.0f;
     float half_height = menu_box.height - title_size.y - g.pad * 3.0f;
 
-    DrawRectangleRec(menu_box, g.window_box_bgcolor);
-    DrawRectangleLinesEx(menu_box, 2, g.window_box_fgcolor);
-    DrawText(menu_title, title_x, title_y, font_size, g.window_box_fgcolor);
+    DrawRectangleRec(menu_box, g.ui.window_box_bgcolor);
+    DrawRectangleLinesEx(menu_box, 2, g.ui.window_box_fgcolor);
+    DrawText(menu_title, title_x, title_y, font_size, g.ui.window_box_fgcolor);
 
     Rectangle left_box = {menu_box.x + g.pad, title_y + title_size.y + g.pad, half_width - g.pad, half_height};
     Rectangle right_box = {left_box.x + half_width + section_gap, left_box.y, half_width - g.pad * 2, half_height};
-    DrawRectangleRec(left_box, g.window_box_bgcolor);
-    DrawRectangleLinesEx(left_box, 2, g.window_box_fgcolor);
-    DrawRectangleRec(right_box, g.window_box_bgcolor);
-    DrawRectangleLinesEx(right_box, 2, g.window_box_fgcolor);
+    DrawRectangleRec(left_box, g.ui.window_box_bgcolor);
+    DrawRectangleLinesEx(left_box, 2, g.ui.window_box_fgcolor);
+    DrawRectangleRec(right_box, g.ui.window_box_bgcolor);
+    DrawRectangleLinesEx(right_box, 2, g.ui.window_box_fgcolor);
 
     auto maybe_inventory = g.ct.get<inventory>(g.hero_id);
     if (!maybe_inventory.has_value()) {
@@ -296,7 +296,7 @@ void draw_inventory_menu(gamestate& g) {
     draw_inventory_grid(g, inventory, left_box, true);
 
     if (!inventory->empty()) {
-        size_t index = static_cast<size_t>(g.inventory_cursor.y) * 7 + static_cast<size_t>(g.inventory_cursor.x);
+        size_t index = static_cast<size_t>(g.ui.inventory_cursor.y) * 7 + static_cast<size_t>(g.ui.inventory_cursor.x);
         if (index < inventory->size()) {
             draw_item_detail_panel(g, right_box, inventory->at(index));
         }
@@ -304,18 +304,18 @@ void draw_inventory_menu(gamestate& g) {
 }
 
 void draw_chest_menu(gamestate& g) {
-    if (!g.display_chest_menu || g.active_chest_id == ENTITYID_INVALID) {
+    if (!g.ui.display_chest_menu || g.active_chest_id == ENTITYID_INVALID) {
         return;
     }
 
-    auto maybe_inventory = g.ct.get<inventory>(g.chest_deposit_mode ? g.hero_id : g.active_chest_id);
+    auto maybe_inventory = g.ct.get<inventory>(g.ui.chest_deposit_mode ? g.hero_id : g.active_chest_id);
     if (!maybe_inventory.has_value()) {
         return;
     }
 
     auto inventory = maybe_inventory.value();
-    const char* menu_title = g.chest_deposit_mode ? "Treasure Chest - Deposit" : "Treasure Chest";
-    const char* hint_text = g.chest_deposit_mode ? "TAB: chest view  ENTER: deposit  ESC/D: close" : "TAB: hero inventory  ENTER: take  ESC/D: close";
+    const char* menu_title = g.ui.chest_deposit_mode ? "Treasure Chest - Deposit" : "Treasure Chest";
+    const char* hint_text = g.ui.chest_deposit_mode ? "TAB: chest view  ENTER: deposit  ESC/D: close" : "TAB: hero inventory  ENTER: take  ESC/D: close";
     const int section_gap = 8;
     const int font_size = 10;
     const Vector2 title_size = MeasureTextEx(GetFontDefault(), menu_title, font_size, g.line_spacing);
@@ -329,22 +329,22 @@ void draw_chest_menu(gamestate& g) {
     float half_width = (menu_box.width - section_gap) / 2.0f;
     float half_height = menu_box.height - title_size.y - g.pad * 3.0f;
 
-    DrawRectangleRec(menu_box, g.window_box_bgcolor);
-    DrawRectangleLinesEx(menu_box, 2, g.window_box_fgcolor);
-    DrawText(menu_title, title_x, title_y, font_size, g.window_box_fgcolor);
-    DrawText(hint_text, menu_box.x + g.pad, menu_box.y + menu_box.height - g.pad, font_size, g.window_box_fgcolor);
+    DrawRectangleRec(menu_box, g.ui.window_box_bgcolor);
+    DrawRectangleLinesEx(menu_box, 2, g.ui.window_box_fgcolor);
+    DrawText(menu_title, title_x, title_y, font_size, g.ui.window_box_fgcolor);
+    DrawText(hint_text, menu_box.x + g.pad, menu_box.y + menu_box.height - g.pad, font_size, g.ui.window_box_fgcolor);
 
     Rectangle left_box = {menu_box.x + g.pad, title_y + title_size.y + g.pad, half_width - g.pad, half_height};
     Rectangle right_box = {left_box.x + half_width + section_gap, left_box.y, half_width - g.pad * 2, half_height};
-    DrawRectangleRec(left_box, g.window_box_bgcolor);
-    DrawRectangleLinesEx(left_box, 2, g.window_box_fgcolor);
-    DrawRectangleRec(right_box, g.window_box_bgcolor);
-    DrawRectangleLinesEx(right_box, 2, g.window_box_fgcolor);
+    DrawRectangleRec(left_box, g.ui.window_box_bgcolor);
+    DrawRectangleLinesEx(left_box, 2, g.ui.window_box_fgcolor);
+    DrawRectangleRec(right_box, g.ui.window_box_bgcolor);
+    DrawRectangleLinesEx(right_box, 2, g.ui.window_box_fgcolor);
 
-    draw_inventory_grid(g, inventory, left_box, g.chest_deposit_mode);
+    draw_inventory_grid(g, inventory, left_box, g.ui.chest_deposit_mode);
 
     if (!inventory->empty()) {
-        size_t index = static_cast<size_t>(g.inventory_cursor.y) * 7 + static_cast<size_t>(g.inventory_cursor.x);
+        size_t index = static_cast<size_t>(g.ui.inventory_cursor.y) * 7 + static_cast<size_t>(g.ui.inventory_cursor.x);
         if (index < inventory->size()) {
             draw_item_detail_panel(g, right_box, inventory->at(index));
         }
@@ -371,21 +371,21 @@ void draw_mini_inventory_menu(gamestate& g, shared_ptr<vector<entityid>> invento
     const float preview_h = 118.0f;
     const float padding = 10.0f;
     const float footer_h = 18.0f;
-    const size_t visible_count = std::max(1U, g.mini_inventory_visible_count);
+    const size_t visible_count = std::max(1U, g.ui.mini_inventory_visible_count);
     const float list_h = row_h * static_cast<float>(visible_count);
     const Rectangle panel = mini_inventory_panel_for_hero(g, width, padding * 3.0f + 14.0f + list_h + preview_h + footer_h + 12.0f);
-    DrawRectangleRec(panel, g.window_box_bgcolor);
-    DrawRectangleLinesEx(panel, 2, g.window_box_fgcolor);
-    DrawText(title, static_cast<int>(panel.x + padding), static_cast<int>(panel.y + padding), 12, g.window_box_fgcolor);
+    DrawRectangleRec(panel, g.ui.window_box_bgcolor);
+    DrawRectangleLinesEx(panel, 2, g.ui.window_box_fgcolor);
+    DrawText(title, static_cast<int>(panel.x + padding), static_cast<int>(panel.y + padding), 12, g.ui.window_box_fgcolor);
 
     const float hint_y = panel.y + panel.height - footer_h;
-    DrawText(hint, static_cast<int>(panel.x + padding), static_cast<int>(hint_y), 10, g.window_box_fgcolor);
+    DrawText(hint, static_cast<int>(panel.x + padding), static_cast<int>(hint_y), 10, g.ui.window_box_fgcolor);
 
     const Rectangle list_box = {panel.x + padding, panel.y + 28.0f, panel.width - padding * 2.0f, list_h};
-    DrawRectangleLinesEx(list_box, 1, g.window_box_fgcolor);
+    DrawRectangleLinesEx(list_box, 1, g.ui.window_box_fgcolor);
 
     const size_t selected_index = g.get_inventory_selection_index();
-    const size_t scroll = g.mini_inventory_scroll_offset;
+    const size_t scroll = g.ui.mini_inventory_scroll_offset;
     for (size_t i = 0; i < visible_count; i++) {
         const float row_y = list_box.y + row_h * static_cast<float>(i);
         const Rectangle row = {list_box.x, row_y, list_box.width, row_h};
@@ -409,27 +409,27 @@ void draw_mini_inventory_menu(gamestate& g, shared_ptr<vector<entityid>> invento
             static_cast<int>(row.x + 6),
             static_cast<int>(row.y + 4),
             10,
-            item_index == selected_index ? YELLOW : g.window_box_fgcolor);
+            item_index == selected_index ? YELLOW : g.ui.window_box_fgcolor);
         if (equipped) {
-            DrawText("E", static_cast<int>(row.x + row.width - 14), static_cast<int>(row.y + 4), 10, g.window_box_fgcolor);
+            DrawText("E", static_cast<int>(row.x + row.width - 14), static_cast<int>(row.y + 4), 10, g.ui.window_box_fgcolor);
         }
     }
 
     if (scroll > 0) {
-        DrawText("^", static_cast<int>(list_box.x + list_box.width - 12), static_cast<int>(list_box.y - 10), 10, g.window_box_fgcolor);
+        DrawText("^", static_cast<int>(list_box.x + list_box.width - 12), static_cast<int>(list_box.y - 10), 10, g.ui.window_box_fgcolor);
     }
     if (scroll + visible_count < inventory->size()) {
-        DrawText("v", static_cast<int>(list_box.x + list_box.width - 12), static_cast<int>(list_box.y + list_box.height), 10, g.window_box_fgcolor);
+        DrawText("v", static_cast<int>(list_box.x + list_box.width - 12), static_cast<int>(list_box.y + list_box.height), 10, g.ui.window_box_fgcolor);
     }
 
     if (inventory->empty() || selected_index >= inventory->size()) {
-        DrawText("empty", static_cast<int>(panel.x + padding), static_cast<int>(list_box.y + list_box.height + 10), 10, g.window_box_fgcolor);
+        DrawText("empty", static_cast<int>(panel.x + padding), static_cast<int>(list_box.y + list_box.height + 10), 10, g.ui.window_box_fgcolor);
         return;
     }
 
     const entityid selection_id = inventory->at(selected_index);
     const Rectangle preview = {panel.x + padding, list_box.y + list_box.height + 10.0f, panel.width - padding * 2.0f, preview_h};
-    DrawRectangleLinesEx(preview, 1, g.window_box_fgcolor);
+    DrawRectangleLinesEx(preview, 1, g.ui.window_box_fgcolor);
     spritegroup* sg = libdraw_ctx.spritegroups[selection_id];
     const float preview_sprite_size = 72.0f;
     if (sg) {
@@ -446,11 +446,11 @@ void draw_mini_inventory_menu(gamestate& g, shared_ptr<vector<entityid>> invento
     const float text_x = preview.x + preview_sprite_size + 18.0f;
     float text_y = preview.y + 8.0f;
     for (size_t i = 0; i < lines.size() && i < 3; i++) {
-        DrawText(lines[i].c_str(), static_cast<int>(text_x), static_cast<int>(text_y), i == 0 ? 11 : 10, g.window_box_fgcolor);
+        DrawText(lines[i].c_str(), static_cast<int>(text_x), static_cast<int>(text_y), i == 0 ? 11 : 10, g.ui.window_box_fgcolor);
         text_y += 20.0f;
     }
     if (!lines.empty()) {
-        DrawText(lines.back().c_str(), static_cast<int>(preview.x + 8), static_cast<int>(preview.y + preview_sprite_size + 14.0f), 10, g.window_box_fgcolor);
+        DrawText(lines.back().c_str(), static_cast<int>(preview.x + 8), static_cast<int>(preview.y + preview_sprite_size + 14.0f), 10, g.ui.window_box_fgcolor);
     }
 }
 
@@ -503,8 +503,8 @@ void draw_debug_panel(gamestate& g) {
     const Rectangle r = {x, y - yp, w + wp, h + hp};
 
     DrawRectanglePro(r, origin, rotation, g.get_debug_panel_bgcolor());
-    DrawRectangleLinesEx(r, thickness, g.window_box_fgcolor);
-    DrawText(g.debugpanel.buffer, x + xp, y, fontsize, g.window_box_fgcolor);
+    DrawRectangleLinesEx(r, thickness, g.ui.window_box_fgcolor);
+    DrawText(g.debugpanel.buffer, x + xp, y, fontsize, g.ui.window_box_fgcolor);
     msuccess3("draw debug panel");
 }
 
@@ -759,7 +759,7 @@ void draw_title_screen(gamestate& g, bool show_menu) {
     }
 
     const float start_y = pos.y + sm_font_size + pad * 4;
-    const int current_selection_index = g.title_screen_selection;
+    const int current_selection_index = g.ui.title_screen_selection;
     for (int i = 0; i < menu_count; i++) {
         bzero(buffer, sizeof(buffer));
         const float menu_x = (g.targetwidth - MeasureText(menu_text[i], sm_font_size)) / 2.0f;
@@ -817,13 +817,13 @@ void draw_hud(gamestate& g) {
     const float box_x = g.targetwidth / 2.0f - (box_w / 2.0f);
     const float box_y = g.targetheight - box_h - g.pad;
 
-    DrawRectangleRec(Rectangle{box_x, box_y, box_w, box_h}, g.window_box_bgcolor);
-    DrawRectangleLinesEx(Rectangle{box_x, box_y, box_w, box_h}, line_thickness, g.window_box_fgcolor);
+    DrawRectangleRec(Rectangle{box_x, box_y, box_w, box_h}, g.ui.window_box_bgcolor);
+    DrawRectangleLinesEx(Rectangle{box_x, box_y, box_w, box_h}, line_thickness, g.ui.window_box_fgcolor);
 
     const int text_x = box_x + inner_pad;
     int text_y = box_y + inner_pad;
     for (const std::string& line : lines) {
-        DrawText(line.c_str(), text_x, text_y, font_size, g.window_box_fgcolor);
+        DrawText(line.c_str(), text_x, text_y, font_size, g.ui.window_box_fgcolor);
         text_y += font_size + line_gap;
     }
 }
@@ -844,14 +844,14 @@ void draw_action_menu(gamestate& g) {
     const string s = "> Inventory";
     const float w = MeasureText(s.c_str(), fontsize);
     const Rectangle r = {x, y, w + wp, h + hp};
-    DrawRectanglePro(r, origin, rotation, g.window_box_bgcolor);
-    DrawRectangleLinesEx(r, thickness, g.window_box_fgcolor);
+    DrawRectanglePro(r, origin, rotation, g.ui.window_box_bgcolor);
+    DrawRectangleLinesEx(r, thickness, g.ui.window_box_fgcolor);
     for (size_t i = 0; i < actions.size(); i++) {
-        if (g.action_selection == i) {
+        if (g.ui.action_selection == i) {
             DrawText(TextFormat("> %s", actions[i].c_str()), x + xp, y + yp + (fontsize * i), fontsize, YELLOW);
         }
         else {
-            DrawText(TextFormat("  %s", actions[i].c_str()), x + xp, y + yp + (fontsize * i), fontsize, g.window_box_fgcolor);
+            DrawText(TextFormat("  %s", actions[i].c_str()), x + xp, y + yp + (fontsize * i), fontsize, g.ui.window_box_fgcolor);
         }
     }
 }
@@ -861,43 +861,43 @@ void draw_option_menu(gamestate& g) {
     constexpr int fsize = 10, thickness = 1;
     constexpr Vector2 origin = {0, 0};
     float max_w = 0;
-    for (size_t i = 0; i < g.options_menu.get_option_count(); i++) {
-        const option_type option = g.options_menu.get_option(i);
+    for (size_t i = 0; i < g.ui.options_menu.get_option_count(); i++) {
+        const option_type option = g.ui.options_menu.get_option(i);
         const string option_label =
             option == OPTION_INVENTORY_MENU
-                ? TextFormat("inventory menu: %s", g.prefer_mini_inventory_menu ? "mini" : "full")
-                : g.options_menu.get_option_str(option);
+                ? TextFormat("inventory menu: %s", g.ui.prefer_mini_inventory_menu ? "mini" : "full")
+                : g.ui.options_menu.get_option_str(option);
         const char* spaced_str = TextFormat("  %s", option_label.c_str());
         const float w = MeasureText(spaced_str, fsize);
         if (w > max_w) {
             max_w = w;
         }
     }
-    const float h = fsize * g.options_menu.get_option_count();
+    const float h = fsize * g.ui.options_menu.get_option_count();
     const float padded_w = max_w + p, padded_h = h + p;
     const Rectangle r = {x, y, padded_w, padded_h};
-    DrawRectanglePro(r, origin, rotation, g.window_box_bgcolor);
-    DrawRectangleLinesEx(r, thickness, g.window_box_fgcolor);
-    for (size_t i = 0; i < g.options_menu.get_option_count(); i++) {
+    DrawRectanglePro(r, origin, rotation, g.ui.window_box_bgcolor);
+    DrawRectangleLinesEx(r, thickness, g.ui.window_box_fgcolor);
+    for (size_t i = 0; i < g.ui.options_menu.get_option_count(); i++) {
         constexpr int x0 = x + pa;
         const int y0 = y + pa + fsize * i;
-        const option_type otype = g.options_menu.get_option(i);
+        const option_type otype = g.ui.options_menu.get_option(i);
         const string ostr =
             otype == OPTION_INVENTORY_MENU
-                ? TextFormat("inventory menu: %s", g.prefer_mini_inventory_menu ? "mini" : "full")
-                : g.options_menu.get_option_str(otype);
+                ? TextFormat("inventory menu: %s", g.ui.prefer_mini_inventory_menu ? "mini" : "full")
+                : g.ui.options_menu.get_option_str(otype);
         const char* cstr = ostr.c_str();
-        if (g.options_menu.get_selection() == i) {
+        if (g.ui.options_menu.get_selection() == i) {
             DrawText(TextFormat("> %s", cstr), x0, y0, fsize, YELLOW);
         }
         else {
-            DrawText(TextFormat("  %s", cstr), x0, y0, fsize, g.window_box_fgcolor);
+            DrawText(TextFormat("  %s", cstr), x0, y0, fsize, g.ui.window_box_fgcolor);
         }
     }
 }
 
 void draw_sound_menu(gamestate& g) {
-    if (!g.display_sound_menu) {
+    if (!g.ui.display_sound_menu) {
         return;
     }
 
@@ -911,28 +911,28 @@ void draw_sound_menu(gamestate& g) {
     const int box_y = (DEFAULT_TARGET_HEIGHT - box_h) / 2;
     const Rectangle box = {(float)box_x, (float)box_y, (float)box_w, (float)box_h};
 
-    DrawRectangleRec(box, g.window_box_bgcolor);
-    DrawRectangleLinesEx(box, 2.0f, g.window_box_fgcolor);
-    DrawText("Sound", box_x + padding, box_y + padding, title_font_size, g.window_box_fgcolor);
-    DrawText("Up/Down select, Left/Right adjust, Esc returns", box_x + padding, box_y + padding + 22, font_size, g.window_box_fgcolor);
+    DrawRectangleRec(box, g.ui.window_box_bgcolor);
+    DrawRectangleLinesEx(box, 2.0f, g.ui.window_box_fgcolor);
+    DrawText("Sound", box_x + padding, box_y + padding, title_font_size, g.ui.window_box_fgcolor);
+    DrawText("Up/Down select, Left/Right adjust, Esc returns", box_x + padding, box_y + padding + 22, font_size, g.ui.window_box_fgcolor);
 
     const char* labels[] = {"Master", "Music", "Sound Effects"};
     const float values[] = {g.audio.get_master_volume(), g.audio.get_music_volume(), g.audio.get_sfx_volume()};
     int y = box_y + padding + 48;
     for (size_t i = 0; i < 3; i++) {
-        const bool selected = g.sound_menu_selection == i;
+        const bool selected = g.ui.sound_menu_selection == i;
         DrawText(selected ? TextFormat("> %-14s %3d%%", labels[i], (int)(values[i] * 100.0f))
                           : TextFormat("  %-14s %3d%%", labels[i], (int)(values[i] * 100.0f)),
             box_x + padding,
             y,
             font_size,
-            selected ? YELLOW : g.window_box_fgcolor);
+            selected ? YELLOW : g.ui.window_box_fgcolor);
         y += line_height;
     }
 }
 
 void draw_window_color_menu(gamestate& g) {
-    if (!g.display_window_color_menu) {
+    if (!g.ui.display_window_color_menu) {
         return;
     }
 
@@ -946,14 +946,14 @@ void draw_window_color_menu(gamestate& g) {
     const int box_y = (DEFAULT_TARGET_HEIGHT - box_h) / 2;
     const Rectangle box = {(float)box_x, (float)box_y, (float)box_w, (float)box_h};
 
-    DrawRectangleRec(box, g.window_box_bgcolor);
-    DrawRectangleLinesEx(box, 2.0f, g.window_box_fgcolor);
-    DrawText("Window Box Colors", box_x + padding, box_y + padding, title_font_size, g.window_box_fgcolor);
-    DrawText("Up/Down select, Left/Right adjust, Enter reset, Esc returns", box_x + padding, box_y + padding + 22, font_size, g.window_box_fgcolor);
+    DrawRectangleRec(box, g.ui.window_box_bgcolor);
+    DrawRectangleLinesEx(box, 2.0f, g.ui.window_box_fgcolor);
+    DrawText("Window Box Colors", box_x + padding, box_y + padding, title_font_size, g.ui.window_box_fgcolor);
+    DrawText("Up/Down select, Left/Right adjust, Enter reset, Esc returns", box_x + padding, box_y + padding + 22, font_size, g.ui.window_box_fgcolor);
 
     const unsigned char values[] = {
-        g.window_box_bgcolor.r, g.window_box_bgcolor.g, g.window_box_bgcolor.b, g.window_box_bgcolor.a,
-        g.window_box_fgcolor.r, g.window_box_fgcolor.g, g.window_box_fgcolor.b, g.window_box_fgcolor.a
+        g.ui.window_box_bgcolor.r, g.ui.window_box_bgcolor.g, g.ui.window_box_bgcolor.b, g.ui.window_box_bgcolor.a,
+        g.ui.window_box_fgcolor.r, g.ui.window_box_fgcolor.g, g.ui.window_box_fgcolor.b, g.ui.window_box_fgcolor.a
     };
     const char* labels[] = {
         "Background R", "Background G", "Background B", "Background A",
@@ -963,21 +963,21 @@ void draw_window_color_menu(gamestate& g) {
 
     int y = box_y + padding + 48;
     for (size_t i = 0; i < 9; i++) {
-        const bool selected = g.window_color_menu_selection == i;
+        const bool selected = g.ui.window_color_menu_selection == i;
         const char* text = i < 8 ? TextFormat("%c %-14s %3d", selected ? '>' : ' ', labels[i], values[i])
                                  : (selected ? "> Reset Defaults" : "  Reset Defaults");
-        DrawText(text, box_x + padding, y, font_size, selected ? YELLOW : g.window_box_fgcolor);
+        DrawText(text, box_x + padding, y, font_size, selected ? YELLOW : g.ui.window_box_fgcolor);
         y += line_height;
     }
 
     Rectangle preview = {(float)(box_x + box_w - 112), (float)(box_y + 60), 84.0f, 84.0f};
-    DrawRectangleRec(preview, g.window_box_bgcolor);
-    DrawRectangleLinesEx(preview, 2.0f, g.window_box_fgcolor);
-    DrawText("Preview", (int)preview.x + 10, (int)preview.y + 32, font_size, g.window_box_fgcolor);
+    DrawRectangleRec(preview, g.ui.window_box_bgcolor);
+    DrawRectangleLinesEx(preview, 2.0f, g.ui.window_box_fgcolor);
+    DrawText("Preview", (int)preview.x + 10, (int)preview.y + 32, font_size, g.ui.window_box_fgcolor);
 }
 
 void draw_controls_menu(gamestate& g) {
-    if (!g.display_controls_menu) {
+    if (!g.ui.display_controls_menu) {
         return;
     }
 
@@ -991,33 +991,33 @@ void draw_controls_menu(gamestate& g) {
     const int box_y = (DEFAULT_TARGET_HEIGHT - box_h) / 2;
     const Rectangle box = {(float)box_x, (float)box_y, (float)box_w, (float)box_h};
 
-    DrawRectangleRec(box, g.window_box_bgcolor);
-    DrawRectangleLinesEx(box, 2.0f, g.window_box_fgcolor);
-    DrawText("Keyboard Controls", box_x + padding, box_y + padding, 18, g.window_box_fgcolor);
+    DrawRectangleRec(box, g.ui.window_box_bgcolor);
+    DrawRectangleLinesEx(box, 2.0f, g.ui.window_box_fgcolor);
+    DrawText("Keyboard Controls", box_x + padding, box_y + padding, 18, g.ui.window_box_fgcolor);
     const char* subtitle = g.controls_menu_waiting_for_key
         ? TextFormat("Press a new key for %s. Esc cancels.", gameplay_input_action_label(g.controls_menu_pending_action))
         : "Up/Down select, Enter edit, Left/Right swap profile, Esc closes";
-    DrawText(subtitle, box_x + padding, box_y + padding + 20, font_size, g.window_box_fgcolor);
+    DrawText(subtitle, box_x + padding, box_y + padding + 20, font_size, g.ui.window_box_fgcolor);
 
     int y = box_y + padding + 38;
-    const bool profile_selected = g.controls_menu_selection == 0;
+    const bool profile_selected = g.ui.controls_menu_selection == 0;
     DrawText(profile_selected ? TextFormat("> Profile: %s", keyboard_profile_label(g.keyboard_profile))
                               : TextFormat("  Profile: %s", keyboard_profile_label(g.keyboard_profile)),
-        box_x + padding, y, font_size, profile_selected ? YELLOW : g.window_box_fgcolor);
+        box_x + padding, y, font_size, profile_selected ? YELLOW : g.ui.window_box_fgcolor);
     y += line_height;
 
-    const bool reset_selected = g.controls_menu_selection == 1;
+    const bool reset_selected = g.ui.controls_menu_selection == 1;
     DrawText(reset_selected ? "> Reset Current Profile To Defaults" : "  Reset Current Profile To Defaults",
-        box_x + padding, y, font_size, reset_selected ? YELLOW : g.window_box_fgcolor);
+        box_x + padding, y, font_size, reset_selected ? YELLOW : g.ui.window_box_fgcolor);
     y += line_height;
 
     for (int action = 0; action < INPUT_ACTION_COUNT; action++) {
-        const bool selected = g.controls_menu_selection == static_cast<size_t>(action + 2);
+        const bool selected = g.ui.controls_menu_selection == static_cast<size_t>(action + 2);
         const char* action_label = gameplay_input_action_label(static_cast<gameplay_input_action_t>(action));
         const string binding = g.get_keybinding_label(g.keyboard_profile, static_cast<gameplay_input_action_t>(action));
         DrawText(selected ? TextFormat("> %-22s %s", action_label, binding.c_str())
                           : TextFormat("  %-22s %s", action_label, binding.c_str()),
-            box_x + padding, y, font_size, selected ? YELLOW : g.window_box_fgcolor);
+            box_x + padding, y, font_size, selected ? YELLOW : g.ui.window_box_fgcolor);
         y += line_height;
     }
 }
@@ -1108,8 +1108,8 @@ void draw_help_menu(gamestate& g) {
     const int box_x = (DEFAULT_TARGET_WIDTH - box_width) / 2;
     const int box_y = (DEFAULT_TARGET_HEIGHT - box_height) / 2;
 
-    DrawRectangle(box_x, box_y, box_width, box_height, g.window_box_bgcolor);
-    DrawRectangleLinesEx({(float)box_x, (float)box_y, (float)box_width, (float)box_height}, 2, g.window_box_fgcolor);
+    DrawRectangle(box_x, box_y, box_width, box_height, g.ui.window_box_bgcolor);
+    DrawRectangleLinesEx({(float)box_x, (float)box_y, (float)box_width, (float)box_height}, 2, g.ui.window_box_fgcolor);
 
     const int text_x = box_x + padding;
     int text_y = box_y + padding;
@@ -1117,7 +1117,7 @@ void draw_help_menu(gamestate& g) {
     while (line_start <= text.size()) {
         const size_t line_end = text.find('\n', line_start);
         const string line = line_end == string::npos ? text.substr(line_start) : text.substr(line_start, line_end - line_start);
-        DrawText(line.c_str(), text_x, text_y, font_size, g.window_box_fgcolor);
+        DrawText(line.c_str(), text_x, text_y, font_size, g.ui.window_box_fgcolor);
         text_y += font_size + line_spacing;
         if (line_end == string::npos) {
             break;
@@ -1127,7 +1127,7 @@ void draw_help_menu(gamestate& g) {
 }
 
 void draw_keyboard_profile_prompt(gamestate& g) {
-    if (!g.display_keyboard_profile_prompt) {
+    if (!g.ui.display_keyboard_profile_prompt) {
         return;
     }
 
@@ -1137,20 +1137,20 @@ void draw_keyboard_profile_prompt(gamestate& g) {
     const int box_y = (DEFAULT_TARGET_HEIGHT - box_h) / 2;
     const Rectangle box = {(float)box_x, (float)box_y, (float)box_w, (float)box_h};
 
-    DrawRectangleRec(box, g.window_box_bgcolor);
-    DrawRectangleLinesEx(box, 2.0f, g.window_box_fgcolor);
-    DrawText("Choose Keyboard Layout", box_x + 16, box_y + 14, 20, g.window_box_fgcolor);
-    DrawText("Select a default gameplay profile before entering the dungeon.", box_x + 16, box_y + 42, 10, g.window_box_fgcolor);
-    DrawText("You can change this later in ` -> controls.", box_x + 16, box_y + 56, 10, g.window_box_fgcolor);
+    DrawRectangleRec(box, g.ui.window_box_bgcolor);
+    DrawRectangleLinesEx(box, 2.0f, g.ui.window_box_fgcolor);
+    DrawText("Choose Keyboard Layout", box_x + 16, box_y + 14, 20, g.ui.window_box_fgcolor);
+    DrawText("Select a default gameplay profile before entering the dungeon.", box_x + 16, box_y + 42, 10, g.ui.window_box_fgcolor);
+    DrawText("You can change this later in ` -> controls.", box_x + 16, box_y + 56, 10, g.ui.window_box_fgcolor);
 
     for (int i = 0; i < KEYBOARD_PROFILE_COUNT; i++) {
-        const bool selected = g.keyboard_profile_selection == (unsigned int)i;
+        const bool selected = g.ui.keyboard_profile_selection == (unsigned int)i;
         const int option_y = box_y + 88 + i * 18;
         const char* label = keyboard_profile_label(static_cast<keyboard_profile_t>(i));
-        DrawText(selected ? TextFormat("> %s", label) : TextFormat("  %s", label), box_x + 24, option_y, 12, selected ? YELLOW : g.window_box_fgcolor);
+        DrawText(selected ? TextFormat("> %s", label) : TextFormat("  %s", label), box_x + 24, option_y, 12, selected ? YELLOW : g.ui.window_box_fgcolor);
     }
 
-    DrawText("Arrows to choose, Enter to confirm", box_x + 16, box_y + box_h - 20, 10, g.window_box_fgcolor);
+    DrawText("Arrows to choose, Enter to confirm", box_x + 16, box_y + box_h - 20, 10, g.ui.window_box_fgcolor);
 }
 
 void draw_entity_sprite(gamestate& g, spritegroup* sg) {
@@ -1222,7 +1222,7 @@ void draw_sprite_and_shadow(gamestate& g, entityid id) {
 }
 
 void draw_message_box(gamestate& g) {
-    if (!g.display_confirm_prompt && (!g.messages.is_active || g.messages.system.size() == 0)) {
+    if (!g.ui.display_confirm_prompt && (!g.messages.is_active || g.messages.system.size() == 0)) {
         return;
     }
 
@@ -1231,7 +1231,7 @@ void draw_message_box(gamestate& g) {
     constexpr float text_height = font_size;
     constexpr float y = (DEFAULT_TARGET_HEIGHT - text_height) / 2.0 - DEFAULT_PAD;
 
-    const string msg = g.display_confirm_prompt ? g.confirm_prompt_message : g.messages.system.at(0);
+    const string msg = g.ui.display_confirm_prompt ? g.ui.confirm_prompt_message : g.messages.system.at(0);
     char tmp[1024] = {0};
     snprintf(tmp, sizeof(tmp), "%s", msg.c_str());
 
@@ -1242,12 +1242,12 @@ void draw_message_box(gamestate& g) {
     const float box_height = text_height + g.pad * 2;
     const Rectangle box = {x, y, box_width, box_height};
 
-    DrawRectangleRec(box, g.window_box_bgcolor);
-    DrawRectangleLinesEx(box, 1, g.window_box_fgcolor);
+    DrawRectangleRec(box, g.ui.window_box_bgcolor);
+    DrawRectangleLinesEx(box, 1, g.ui.window_box_fgcolor);
 
     const int text_x = box.x + g.pad;
     const int text_y = box.y + g.pad;
-    DrawText(tmp, text_x, text_y, font_size, g.window_box_fgcolor);
+    DrawText(tmp, text_x, text_y, font_size, g.ui.window_box_fgcolor);
 }
 
 void draw_message_history(gamestate& g) {
@@ -1265,8 +1265,8 @@ void draw_message_history(gamestate& g) {
     const float x = g.targetwidth - w;
     constexpr float y = 0;
     const Rectangle box = {x, y, w, h};
-    DrawRectangleRec(box, g.window_box_bgcolor);
-    DrawRectangleLinesEx(box, 1, g.window_box_fgcolor);
+    DrawRectangleRec(box, g.ui.window_box_bgcolor);
+    DrawRectangleLinesEx(box, 1, g.ui.window_box_fgcolor);
 
     if (msg_count > max_messages) {
         int outer_count = 0;
@@ -1276,7 +1276,7 @@ void draw_message_history(gamestate& g) {
             snprintf(tmp, sizeof(tmp), "%s", msg.c_str());
             const float msg_x = box.x + g.pad / 2.0;
             const float msg_y = box.y + g.pad / 2.0 + (outer_count * (font_size + 2));
-            DrawText(tmp, msg_x, msg_y, font_size, g.window_box_fgcolor);
+            DrawText(tmp, msg_x, msg_y, font_size, g.ui.window_box_fgcolor);
             outer_count++;
         }
         return;
@@ -1287,7 +1287,7 @@ void draw_message_history(gamestate& g) {
         snprintf(tmp, sizeof(tmp), "%s", msg.c_str());
         const float msg_x = box.x + g.pad / 2.0;
         const float msg_y = box.y + g.pad / 2.0 + (i * (font_size + 2));
-        DrawText(tmp, msg_x, msg_y, font_size, g.window_box_fgcolor);
+        DrawText(tmp, msg_x, msg_y, font_size, g.ui.window_box_fgcolor);
     }
 }
 
@@ -1308,19 +1308,19 @@ void draw_look_panel(gamestate& g) {
     const float base_y = g.targetheight - h;
     Rectangle r = {base_x, base_y, w, h};
 
-    DrawRectanglePro(r, Vector2{0, 0}, 0.0f, g.window_box_bgcolor);
-    DrawRectangleLinesEx(r, 1, g.window_box_fgcolor);
-    DrawText("Look Panel", r.x + pad_w, r.y + pad_h + (font_size + 5) * 0, font_size, g.window_box_fgcolor);
-    DrawText(TextFormat("There are %d things here", entity_count), r.x + pad_w, r.y + pad_h + (font_size + 5) * 1, font_size, g.window_box_fgcolor);
-    DrawText(TextFormat("living npc %d", tile.get_cached_live_npc()), r.x + pad_w, r.y + pad_h + (font_size + 5) * 2, font_size, g.window_box_fgcolor);
-    DrawText(TextFormat("dead npc %d", tile.get_cached_dead_npc()), r.x + pad_w, r.y + pad_h + (font_size + 5) * 3, font_size, g.window_box_fgcolor);
-    DrawText(TextFormat("items %d (%d)", (int)tile.get_item_count(), tile.get_cached_item()), r.x + pad_w, r.y + pad_h + (font_size + 5) * 4, font_size, g.window_box_fgcolor);
-    DrawText(TextFormat("door %d", tile.get_cached_door()), r.x + pad_w, r.y + pad_h + (font_size + 5) * 5, font_size, g.window_box_fgcolor);
-    DrawText(TextFormat("box %d", tile.get_cached_box()), r.x + pad_w, r.y + pad_h + (font_size + 5) * 6, font_size, g.window_box_fgcolor);
+    DrawRectanglePro(r, Vector2{0, 0}, 0.0f, g.ui.window_box_bgcolor);
+    DrawRectangleLinesEx(r, 1, g.ui.window_box_fgcolor);
+    DrawText("Look Panel", r.x + pad_w, r.y + pad_h + (font_size + 5) * 0, font_size, g.ui.window_box_fgcolor);
+    DrawText(TextFormat("There are %d things here", entity_count), r.x + pad_w, r.y + pad_h + (font_size + 5) * 1, font_size, g.ui.window_box_fgcolor);
+    DrawText(TextFormat("living npc %d", tile.get_cached_live_npc()), r.x + pad_w, r.y + pad_h + (font_size + 5) * 2, font_size, g.ui.window_box_fgcolor);
+    DrawText(TextFormat("dead npc %d", tile.get_cached_dead_npc()), r.x + pad_w, r.y + pad_h + (font_size + 5) * 3, font_size, g.ui.window_box_fgcolor);
+    DrawText(TextFormat("items %d (%d)", (int)tile.get_item_count(), tile.get_cached_item()), r.x + pad_w, r.y + pad_h + (font_size + 5) * 4, font_size, g.ui.window_box_fgcolor);
+    DrawText(TextFormat("door %d", tile.get_cached_door()), r.x + pad_w, r.y + pad_h + (font_size + 5) * 5, font_size, g.ui.window_box_fgcolor);
+    DrawText(TextFormat("box %d", tile.get_cached_box()), r.x + pad_w, r.y + pad_h + (font_size + 5) * 6, font_size, g.ui.window_box_fgcolor);
 }
 
 void draw_interaction_modal(gamestate& g) {
-    if (!g.display_interaction_modal || g.interaction_body.empty()) {
+    if (!g.ui.display_interaction_modal || g.ui.interaction_body.empty()) {
         return;
     }
 
@@ -1330,14 +1330,14 @@ void draw_interaction_modal(gamestate& g) {
     constexpr int padding = DEFAULT_PAD;
     constexpr int min_width = 360;
     vector<string> lines;
-    if (!g.interaction_title.empty()) {
-        lines.push_back(g.interaction_title);
+    if (!g.ui.interaction_title.empty()) {
+        lines.push_back(g.ui.interaction_title);
     }
 
     size_t line_start = 0;
-    while (line_start <= g.interaction_body.size()) {
-        const size_t line_end = g.interaction_body.find('\n', line_start);
-        const string line = line_end == string::npos ? g.interaction_body.substr(line_start) : g.interaction_body.substr(line_start, line_end - line_start);
+    while (line_start <= g.ui.interaction_body.size()) {
+        const size_t line_end = g.ui.interaction_body.find('\n', line_start);
+        const string line = line_end == string::npos ? g.ui.interaction_body.substr(line_start) : g.ui.interaction_body.substr(line_start, line_end - line_start);
         lines.push_back(line);
         if (line_end == string::npos) {
             break;
@@ -1347,39 +1347,39 @@ void draw_interaction_modal(gamestate& g) {
 
     int max_text_width = 0;
     for (size_t i = 0; i < lines.size(); i++) {
-        const int font_size = i == 0 && !g.interaction_title.empty() ? title_font_size : body_font_size;
+        const int font_size = i == 0 && !g.ui.interaction_title.empty() ? title_font_size : body_font_size;
         max_text_width = std::max(max_text_width, MeasureText(lines[i].c_str(), font_size));
     }
 
     const int box_width = std::max(min_width, max_text_width + padding * 2);
-    const int title_height = g.interaction_title.empty() ? 0 : title_font_size;
-    const int body_lines = static_cast<int>(lines.size()) - static_cast<int>(!g.interaction_title.empty());
+    const int title_height = g.ui.interaction_title.empty() ? 0 : title_font_size;
+    const int body_lines = static_cast<int>(lines.size()) - static_cast<int>(!g.ui.interaction_title.empty());
     const int body_height = body_lines > 0 ? body_lines * body_font_size + (body_lines - 1) * line_spacing : 0;
-    const int section_gap = (!g.interaction_title.empty() && body_lines > 0) ? line_spacing + 4 : 0;
+    const int section_gap = (!g.ui.interaction_title.empty() && body_lines > 0) ? line_spacing + 4 : 0;
     const int box_height = padding * 2 + title_height + body_height + section_gap;
     const int box_x = (DEFAULT_TARGET_WIDTH - box_width) / 2;
     const int box_y = (DEFAULT_TARGET_HEIGHT - box_height) / 2;
 
-    DrawRectangle(box_x, box_y, box_width, box_height, g.window_box_bgcolor);
-    DrawRectangleLinesEx(Rectangle{static_cast<float>(box_x), static_cast<float>(box_y), static_cast<float>(box_width), static_cast<float>(box_height)}, 2, g.window_box_fgcolor);
+    DrawRectangle(box_x, box_y, box_width, box_height, g.ui.window_box_bgcolor);
+    DrawRectangleLinesEx(Rectangle{static_cast<float>(box_x), static_cast<float>(box_y), static_cast<float>(box_width), static_cast<float>(box_height)}, 2, g.ui.window_box_fgcolor);
 
     int text_y = box_y + padding;
-    if (!g.interaction_title.empty()) {
-        const int title_width = MeasureText(g.interaction_title.c_str(), title_font_size);
+    if (!g.ui.interaction_title.empty()) {
+        const int title_width = MeasureText(g.ui.interaction_title.c_str(), title_font_size);
         const int title_x = box_x + (box_width - title_width) / 2;
-        DrawText(g.interaction_title.c_str(), title_x, text_y, title_font_size, g.window_box_fgcolor);
+        DrawText(g.ui.interaction_title.c_str(), title_x, text_y, title_font_size, g.ui.window_box_fgcolor);
         text_y += title_font_size + section_gap;
     }
 
     const int body_x = box_x + padding;
-    for (size_t i = g.interaction_title.empty() ? 0 : 1; i < lines.size(); i++) {
-        DrawText(lines[i].c_str(), body_x, text_y, body_font_size, g.window_box_fgcolor);
+    for (size_t i = g.ui.interaction_title.empty() ? 0 : 1; i < lines.size(); i++) {
+        DrawText(lines[i].c_str(), body_x, text_y, body_font_size, g.ui.window_box_fgcolor);
         text_y += body_font_size + line_spacing;
     }
 }
 
 void draw_level_up_modal(gamestate& g) {
-    if (!g.display_level_up_modal) {
+    if (!g.ui.display_level_up_modal) {
         return;
     }
 
@@ -1409,15 +1409,15 @@ void draw_level_up_modal(gamestate& g) {
     const int box_x = (DEFAULT_TARGET_WIDTH - box_w) / 2;
     const int box_y = (DEFAULT_TARGET_HEIGHT - box_h) / 2;
 
-    DrawRectangle(box_x, box_y, box_w, box_h, g.window_box_bgcolor);
-    DrawRectangleLinesEx(Rectangle{static_cast<float>(box_x), static_cast<float>(box_y), static_cast<float>(box_w), static_cast<float>(box_h)}, 2, g.window_box_fgcolor);
+    DrawRectangle(box_x, box_y, box_w, box_h, g.ui.window_box_bgcolor);
+    DrawRectangleLinesEx(Rectangle{static_cast<float>(box_x), static_cast<float>(box_y), static_cast<float>(box_w), static_cast<float>(box_h)}, 2, g.ui.window_box_fgcolor);
 
     const char* title = "Level Up";
     const char* subtitle = "Choose one attribute to permanently increase by 1";
     const int title_x = box_x + (box_w - MeasureText(title, title_font_size)) / 2;
     const int subtitle_x = box_x + (box_w - MeasureText(subtitle, body_font_size)) / 2;
-    DrawText(title, title_x, box_y + padding, title_font_size, g.window_box_fgcolor);
-    DrawText(subtitle, subtitle_x, box_y + padding + title_font_size + 8, body_font_size, g.window_box_fgcolor);
+    DrawText(title, title_x, box_y + padding, title_font_size, g.ui.window_box_fgcolor);
+    DrawText(subtitle, subtitle_x, box_y + padding + title_font_size + 8, body_font_size, g.ui.window_box_fgcolor);
 
     const int grid_x = box_x + padding;
     const int grid_y = box_y + padding + title_font_size + body_font_size + 20;
@@ -1426,15 +1426,15 @@ void draw_level_up_modal(gamestate& g) {
         const int row = i / cols;
         const int cell_x = grid_x + col * (cell_w + cell_gap);
         const int cell_y = grid_y + row * (cell_h + cell_gap);
-        const bool selected = static_cast<int>(g.level_up_selection % 6) == i;
+        const bool selected = static_cast<int>(g.ui.level_up_selection % 6) == i;
         const Color fill = selected ? Color{0x00, 0x88, 0x44, 220} : Color{0x11, 0x11, 0x66, 180};
         DrawRectangle(cell_x, cell_y, cell_w, cell_h, fill);
-        DrawRectangleLinesEx(Rectangle{static_cast<float>(cell_x), static_cast<float>(cell_y), static_cast<float>(cell_w), static_cast<float>(cell_h)}, 2, g.window_box_fgcolor);
+        DrawRectangleLinesEx(Rectangle{static_cast<float>(cell_x), static_cast<float>(cell_y), static_cast<float>(cell_w), static_cast<float>(cell_h)}, 2, g.ui.window_box_fgcolor);
 
         const int text_w = MeasureText(labels[i], cell_font_size);
         const int text_x = cell_x + (cell_w - text_w) / 2;
         const int text_y = cell_y + (cell_h - cell_font_size) / 2;
-        DrawText(labels[i], text_x, text_y, cell_font_size, g.window_box_fgcolor);
+        DrawText(labels[i], text_x, text_y, cell_font_size, g.ui.window_box_fgcolor);
     }
 }
 
@@ -1476,7 +1476,7 @@ void libdraw_drawframe_2d(gamestate& g, int vision_dist, int light_rad) {
     draw_interaction_modal(g);
     draw_level_up_modal(g);
 
-    if (g.display_inventory_menu) {
+    if (g.ui.display_inventory_menu) {
         if (g.use_mini_inventory_menu()) {
             auto maybe_inventory = g.ct.get<inventory>(g.hero_id);
             auto items = maybe_inventory.value_or(nullptr);
@@ -1489,18 +1489,18 @@ void libdraw_drawframe_2d(gamestate& g, int vision_dist, int light_rad) {
         }
     }
 
-    if (g.display_chest_menu) {
+    if (g.ui.display_chest_menu) {
         if (g.use_mini_inventory_menu()) {
-            const entityid source_id = g.chest_deposit_mode ? g.hero_id : g.active_chest_id;
+            const entityid source_id = g.ui.chest_deposit_mode ? g.hero_id : g.active_chest_id;
             auto maybe_inventory = g.ct.get<inventory>(source_id);
             auto items = maybe_inventory.value_or(nullptr);
             if (items) {
                 draw_mini_inventory_menu(
                     g,
                     items,
-                    g.chest_deposit_mode ? "Chest Deposit" : "Chest",
-                    g.chest_deposit_mode ? "Tab chest  Enter deposit  D close" : "Tab hero  Enter take  D close",
-                    g.chest_deposit_mode);
+                    g.ui.chest_deposit_mode ? "Chest Deposit" : "Chest",
+                    g.ui.chest_deposit_mode ? "Tab chest  Enter deposit  D close" : "Tab hero  Enter take  D close",
+                    g.ui.chest_deposit_mode);
             }
         }
         else {
@@ -1508,22 +1508,22 @@ void libdraw_drawframe_2d(gamestate& g, int vision_dist, int light_rad) {
         }
     }
 
-    if (g.display_action_menu) {
+    if (g.ui.display_action_menu) {
         draw_action_menu(g);
     }
-    if (g.display_option_menu) {
+    if (g.ui.display_option_menu) {
         draw_option_menu(g);
     }
-    if (g.display_sound_menu) {
+    if (g.ui.display_sound_menu) {
         draw_sound_menu(g);
     }
-    if (g.display_window_color_menu) {
+    if (g.ui.display_window_color_menu) {
         draw_window_color_menu(g);
     }
-    if (g.display_controls_menu) {
+    if (g.ui.display_controls_menu) {
         draw_controls_menu(g);
     }
-    if (g.display_help_menu) {
+    if (g.ui.display_help_menu) {
         draw_help_menu(g);
     }
 

@@ -5,71 +5,71 @@
 #pragma once
 
 inline bool gamestate::use_mini_inventory_menu() const {
-    return prefer_mini_inventory_menu;
+    return ui.prefer_mini_inventory_menu;
 }
 
 inline size_t gamestate::get_inventory_selection_index() const {
     if (!use_mini_inventory_menu()) {
-        return static_cast<size_t>(inventory_cursor.y) * 7 + static_cast<size_t>(inventory_cursor.x);
+        return static_cast<size_t>(ui.inventory_cursor.y) * 7 + static_cast<size_t>(ui.inventory_cursor.x);
     }
-    return static_cast<size_t>(mini_inventory_scroll_offset) + static_cast<size_t>(inventory_cursor.y);
+    return static_cast<size_t>(ui.mini_inventory_scroll_offset) + static_cast<size_t>(ui.inventory_cursor.y);
 }
 
 inline void gamestate::clamp_inventory_selection(size_t item_count) {
     if (!use_mini_inventory_menu()) {
         if (item_count == 0) {
-            inventory_cursor = Vector2{0, 0};
+            ui.inventory_cursor = Vector2{0, 0};
             return;
         }
         const size_t max_index = item_count - 1;
-        size_t index = static_cast<size_t>(inventory_cursor.y) * 7 + static_cast<size_t>(inventory_cursor.x);
+        size_t index = static_cast<size_t>(ui.inventory_cursor.y) * 7 + static_cast<size_t>(ui.inventory_cursor.x);
         if (index > max_index) {
-            inventory_cursor.x = static_cast<float>(max_index % 7);
-            inventory_cursor.y = static_cast<float>(max_index / 7);
+            ui.inventory_cursor.x = static_cast<float>(max_index % 7);
+            ui.inventory_cursor.y = static_cast<float>(max_index / 7);
         }
         return;
     }
 
     if (item_count == 0) {
-        mini_inventory_scroll_offset = 0;
-        inventory_cursor = Vector2{0, 0};
+        ui.mini_inventory_scroll_offset = 0;
+        ui.inventory_cursor = Vector2{0, 0};
         return;
     }
 
-    const size_t visible_count = std::max(1U, mini_inventory_visible_count);
+    const size_t visible_count = std::max(1U, ui.mini_inventory_visible_count);
     const size_t max_index = item_count - 1;
     size_t index = get_inventory_selection_index();
     if (index > max_index) {
         index = max_index;
     }
     const size_t max_scroll = item_count > visible_count ? item_count - visible_count : 0;
-    if (index < mini_inventory_scroll_offset) {
-        mini_inventory_scroll_offset = static_cast<unsigned int>(index);
+    if (index < ui.mini_inventory_scroll_offset) {
+        ui.mini_inventory_scroll_offset = static_cast<unsigned int>(index);
     }
-    else if (index >= mini_inventory_scroll_offset + visible_count) {
-        mini_inventory_scroll_offset = static_cast<unsigned int>(index - visible_count + 1);
+    else if (index >= ui.mini_inventory_scroll_offset + visible_count) {
+        ui.mini_inventory_scroll_offset = static_cast<unsigned int>(index - visible_count + 1);
     }
-    mini_inventory_scroll_offset = static_cast<unsigned int>(std::min(static_cast<size_t>(mini_inventory_scroll_offset), max_scroll));
-    inventory_cursor.x = 0.0f;
-    inventory_cursor.y = static_cast<float>(index - mini_inventory_scroll_offset);
+    ui.mini_inventory_scroll_offset = static_cast<unsigned int>(std::min(static_cast<size_t>(ui.mini_inventory_scroll_offset), max_scroll));
+    ui.inventory_cursor.x = 0.0f;
+    ui.inventory_cursor.y = static_cast<float>(index - ui.mini_inventory_scroll_offset);
 }
 
 inline void gamestate::move_inventory_selection(int delta) {
     if (!use_mini_inventory_menu()) {
         if (delta < 0) {
-            if (inventory_cursor.x > 0) {
-                inventory_cursor.x--;
+            if (ui.inventory_cursor.x > 0) {
+                ui.inventory_cursor.x--;
             }
-            else if (inventory_cursor.y > 0) {
-                inventory_cursor.y--;
-                inventory_cursor.x = 6;
+            else if (ui.inventory_cursor.y > 0) {
+                ui.inventory_cursor.y--;
+                ui.inventory_cursor.x = 6;
             }
         }
         else if (delta > 0) {
-            inventory_cursor.x++;
-            if (inventory_cursor.x > 6) {
-                inventory_cursor.x = 0;
-                inventory_cursor.y++;
+            ui.inventory_cursor.x++;
+            if (ui.inventory_cursor.x > 6) {
+                ui.inventory_cursor.x = 0;
+                ui.inventory_cursor.y++;
             }
         }
         return;
@@ -80,9 +80,9 @@ inline void gamestate::move_inventory_selection(int delta) {
         next_index = 0;
     }
     const size_t current_index = static_cast<size_t>(next_index);
-    mini_inventory_scroll_offset = static_cast<unsigned int>(std::min(static_cast<size_t>(mini_inventory_scroll_offset), current_index));
-    inventory_cursor.x = 0.0f;
-    inventory_cursor.y = static_cast<float>(current_index - mini_inventory_scroll_offset);
+    ui.mini_inventory_scroll_offset = static_cast<unsigned int>(std::min(static_cast<size_t>(ui.mini_inventory_scroll_offset), current_index));
+    ui.inventory_cursor.x = 0.0f;
+    ui.inventory_cursor.y = static_cast<float>(current_index - ui.mini_inventory_scroll_offset);
 }
 
 inline bool gamestate::remove_from_inventory(entityid actor_id, entityid item_id) {
@@ -156,7 +156,7 @@ inline void gamestate::handle_hero_inventory_equip_weapon(entityid item_id) {
     }
     flag = GAMESTATE_FLAG_PLAYER_ANIM;
     controlmode = CONTROLMODE_PLAYER;
-    display_inventory_menu = false;
+    ui.display_inventory_menu = false;
 }
 
 inline void gamestate::handle_hero_inventory_equip_shield(entityid item_id) {
@@ -169,7 +169,7 @@ inline void gamestate::handle_hero_inventory_equip_shield(entityid item_id) {
     }
     flag = GAMESTATE_FLAG_PLAYER_ANIM;
     controlmode = CONTROLMODE_PLAYER;
-    display_inventory_menu = false;
+    ui.display_inventory_menu = false;
 }
 
 inline void gamestate::handle_hero_inventory_equip_item(entityid item_id) {
@@ -373,11 +373,11 @@ inline bool gamestate::open_chest_menu(entityid chest_id) {
     ct.set<door_open>(chest_id, true);
     ct.set<update>(chest_id, true);
     active_chest_id = chest_id;
-    display_chest_menu = true;
-    display_inventory_menu = false;
-    chest_deposit_mode = false;
-    mini_inventory_scroll_offset = 0;
-    inventory_cursor = Vector2{0, 0};
+    ui.display_chest_menu = true;
+    ui.display_inventory_menu = false;
+    ui.chest_deposit_mode = false;
+    ui.mini_inventory_scroll_offset = 0;
+    ui.inventory_cursor = Vector2{0, 0};
     controlmode = CONTROLMODE_CHEST;
     frame_dirty = true;
     audio.play(SFX_CHEST_OPEN);
@@ -389,29 +389,29 @@ inline void gamestate::close_chest_menu() {
         ct.set<door_open>(active_chest_id, false);
         ct.set<update>(active_chest_id, true);
     }
-    display_chest_menu = false;
-    chest_deposit_mode = false;
+    ui.display_chest_menu = false;
+    ui.chest_deposit_mode = false;
     active_chest_id = ENTITYID_INVALID;
     controlmode = CONTROLMODE_PLAYER;
     frame_dirty = true;
 }
 
 inline void gamestate::toggle_chest_menu_mode() {
-    if (!display_chest_menu || active_chest_id == ENTITYID_INVALID) {
+    if (!ui.display_chest_menu || active_chest_id == ENTITYID_INVALID) {
         return;
     }
-    chest_deposit_mode = !chest_deposit_mode;
-    mini_inventory_scroll_offset = 0;
-    inventory_cursor = Vector2{0, 0};
+    ui.chest_deposit_mode = !ui.chest_deposit_mode;
+    ui.mini_inventory_scroll_offset = 0;
+    ui.inventory_cursor = Vector2{0, 0};
     frame_dirty = true;
 }
 
 inline void gamestate::handle_chest_menu_confirm() {
-    if (!display_chest_menu || active_chest_id == ENTITYID_INVALID) {
+    if (!ui.display_chest_menu || active_chest_id == ENTITYID_INVALID) {
         return;
     }
-    entityid source_id = chest_deposit_mode ? hero_id : active_chest_id;
-    entityid target_id = chest_deposit_mode ? active_chest_id : hero_id;
+    entityid source_id = ui.chest_deposit_mode ? hero_id : active_chest_id;
+    entityid target_id = ui.chest_deposit_mode ? active_chest_id : hero_id;
     auto maybe_inventory = ct.get<inventory>(source_id);
     if (!maybe_inventory.has_value()) {
         return;
@@ -429,7 +429,7 @@ inline void gamestate::handle_chest_menu_confirm() {
 }
 
 inline void gamestate::handle_input_chest(inputstate& is) {
-    if (controlmode != CONTROLMODE_CHEST || !display_chest_menu) {
+    if (controlmode != CONTROLMODE_CHEST || !ui.display_chest_menu) {
         return;
     }
     if (inputstate_is_pressed(is, KEY_D) || inputstate_is_pressed(is, KEY_ESCAPE)) {
@@ -444,8 +444,8 @@ inline void gamestate::handle_input_chest(inputstate& is) {
         if (use_mini_inventory_menu()) {
             move_inventory_selection(-1);
         }
-        else if (inventory_cursor.x > 0) {
-            inventory_cursor.x--;
+        else if (ui.inventory_cursor.x > 0) {
+            ui.inventory_cursor.x--;
         }
     }
     else if (inputstate_is_pressed(is, KEY_RIGHT)) {
@@ -453,15 +453,15 @@ inline void gamestate::handle_input_chest(inputstate& is) {
             move_inventory_selection(1);
         }
         else {
-            inventory_cursor.x++;
+            ui.inventory_cursor.x++;
         }
     }
     else if (inputstate_is_pressed(is, KEY_UP)) {
         if (use_mini_inventory_menu()) {
             move_inventory_selection(-1);
         }
-        else if (inventory_cursor.y > 0) {
-            inventory_cursor.y--;
+        else if (ui.inventory_cursor.y > 0) {
+            ui.inventory_cursor.y--;
         }
     }
     else if (inputstate_is_pressed(is, KEY_DOWN)) {
@@ -469,13 +469,13 @@ inline void gamestate::handle_input_chest(inputstate& is) {
             move_inventory_selection(1);
         }
         else {
-            inventory_cursor.y++;
+            ui.inventory_cursor.y++;
         }
     }
     else if (inputstate_is_pressed(is, KEY_ENTER)) {
         handle_chest_menu_confirm();
     }
-    auto items = ct.get<inventory>(chest_deposit_mode ? hero_id : active_chest_id).value_or(make_shared<vector<entityid>>());
+    auto items = ct.get<inventory>(ui.chest_deposit_mode ? hero_id : active_chest_id).value_or(make_shared<vector<entityid>>());
     clamp_inventory_selection(items->size());
     frame_dirty = true;
 }

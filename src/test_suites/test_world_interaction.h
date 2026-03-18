@@ -498,7 +498,7 @@ public:
         TS_ASSERT(g.try_entity_open_chest(hero, vec3{2, 1, 1}));
         TS_ASSERT(g.ct.get<door_open>(chest).value_or(false));
         TS_ASSERT_EQUALS(g.active_chest_id, chest);
-        TS_ASSERT(g.display_chest_menu);
+        TS_ASSERT(g.ui.display_chest_menu);
         TS_ASSERT_EQUALS(g.controlmode, CONTROLMODE_CHEST);
     }
 
@@ -517,7 +517,7 @@ public:
         TS_ASSERT(g.run_open_chest_action(hero, vec3{2, 1, 0}));
         TS_ASSERT(g.ct.get<door_open>(chest).value_or(false));
         TS_ASSERT_EQUALS(g.active_chest_id, chest);
-        TS_ASSERT(g.display_chest_menu);
+        TS_ASSERT(g.ui.display_chest_menu);
         TS_ASSERT_EQUALS(g.controlmode, CONTROLMODE_CHEST);
         TS_ASSERT(g.gameplay_events.empty());
     }
@@ -533,13 +533,13 @@ public:
         TS_ASSERT_DIFFERS(hero, ENTITYID_INVALID);
         TS_ASSERT_DIFFERS(chest, ENTITYID_INVALID);
         TS_ASSERT(g.run_open_chest_action(hero, vec3{2, 1, 0}));
-        TS_ASSERT(g.display_chest_menu);
+        TS_ASSERT(g.ui.display_chest_menu);
         TS_ASSERT_EQUALS(g.active_chest_id, chest);
 
         TS_ASSERT(g.run_open_chest_action(hero, vec3{2, 1, 0}));
         TS_ASSERT(!g.ct.get<door_open>(chest).value_or(true));
         TS_ASSERT_EQUALS(g.active_chest_id, ENTITYID_INVALID);
-        TS_ASSERT(!g.display_chest_menu);
+        TS_ASSERT(!g.ui.display_chest_menu);
         TS_ASSERT_EQUALS(g.controlmode, CONTROLMODE_PLAYER);
         TS_ASSERT(g.gameplay_events.empty());
     }
@@ -670,11 +670,11 @@ public:
         TS_ASSERT_DIFFERS(hero, ENTITYID_INVALID);
         TS_ASSERT_DIFFERS(npc, ENTITYID_INVALID);
         TS_ASSERT(g.try_entity_interact(hero, vec3{2, 1, 0}));
-        TS_ASSERT(g.display_interaction_modal);
+        TS_ASSERT(g.ui.display_interaction_modal);
         TS_ASSERT_EQUALS(g.controlmode, CONTROLMODE_INTERACTION);
-        TS_ASSERT_EQUALS(g.active_interaction_entity_id, npc);
-        TS_ASSERT_EQUALS(g.interaction_title, "Borin");
-        TS_ASSERT_EQUALS(g.interaction_body, "Keep your torch high.");
+        TS_ASSERT_EQUALS(g.ui.active_interaction_entity_id, npc);
+        TS_ASSERT_EQUALS(g.ui.interaction_title, "Borin");
+        TS_ASSERT_EQUALS(g.ui.interaction_body, "Keep your torch high.");
     }
 
     void testRunInteractActionUsesQueuedInteractIntent() {
@@ -690,11 +690,11 @@ public:
         TS_ASSERT_DIFFERS(hero, ENTITYID_INVALID);
         TS_ASSERT_DIFFERS(npc, ENTITYID_INVALID);
         TS_ASSERT(g.run_interact_action(hero, vec3{2, 1, 0}));
-        TS_ASSERT(g.display_interaction_modal);
+        TS_ASSERT(g.ui.display_interaction_modal);
         TS_ASSERT_EQUALS(g.controlmode, CONTROLMODE_INTERACTION);
-        TS_ASSERT_EQUALS(g.active_interaction_entity_id, npc);
-        TS_ASSERT_EQUALS(g.interaction_title, "Borin");
-        TS_ASSERT_EQUALS(g.interaction_body, "Keep your torch high.");
+        TS_ASSERT_EQUALS(g.ui.active_interaction_entity_id, npc);
+        TS_ASSERT_EQUALS(g.ui.interaction_title, "Borin");
+        TS_ASSERT_EQUALS(g.ui.interaction_body, "Keep your torch high.");
         TS_ASSERT(g.gameplay_events.empty());
     }
 
@@ -706,7 +706,7 @@ public:
         TS_ASSERT_DIFFERS(hero, ENTITYID_INVALID);
 
         TS_ASSERT(!g.run_interact_action(hero, vec3{2, 1, 0}));
-        TS_ASSERT(!g.display_interaction_modal);
+        TS_ASSERT(!g.ui.display_interaction_modal);
         TS_ASSERT(g.gameplay_events.empty());
     }
 
@@ -723,11 +723,11 @@ public:
         TS_ASSERT_DIFFERS(hero, ENTITYID_INVALID);
         TS_ASSERT_DIFFERS(prop, ENTITYID_INVALID);
         TS_ASSERT(g.try_entity_interact(hero, vec3{2, 1, 0}));
-        TS_ASSERT(g.display_interaction_modal);
+        TS_ASSERT(g.ui.display_interaction_modal);
         TS_ASSERT_EQUALS(g.controlmode, CONTROLMODE_INTERACTION);
-        TS_ASSERT_EQUALS(g.active_interaction_entity_id, prop);
-        TS_ASSERT_EQUALS(g.interaction_title, "jar");
-        TS_ASSERT_EQUALS(g.interaction_body, "A cracked jar with dry clay inside.");
+        TS_ASSERT_EQUALS(g.ui.active_interaction_entity_id, prop);
+        TS_ASSERT_EQUALS(g.ui.interaction_title, "jar");
+        TS_ASSERT_EQUALS(g.ui.interaction_body, "A cracked jar with dry clay inside.");
     }
 
     void testTryEntityInteractOpensBoxDescriptionModal() {
@@ -740,10 +740,10 @@ public:
         TS_ASSERT_DIFFERS(hero, ENTITYID_INVALID);
         TS_ASSERT_DIFFERS(box, ENTITYID_INVALID);
         TS_ASSERT(g.try_entity_interact(hero, vec3{2, 1, 0}));
-        TS_ASSERT(g.display_interaction_modal);
-        TS_ASSERT_EQUALS(g.active_interaction_entity_id, box);
-        TS_ASSERT_EQUALS(g.interaction_title, "box");
-        TS_ASSERT_EQUALS(g.interaction_body, "A plain wooden box with rough handles cut into the sides for hauling.");
+        TS_ASSERT(g.ui.display_interaction_modal);
+        TS_ASSERT_EQUALS(g.ui.active_interaction_entity_id, box);
+        TS_ASSERT_EQUALS(g.ui.interaction_title, "box");
+        TS_ASSERT_EQUALS(g.ui.interaction_body, "A plain wooden box with rough handles cut into the sides for hauling.");
     }
 
     void testTryEntityInteractOpensChestDescriptionModal() {
@@ -756,15 +756,15 @@ public:
         TS_ASSERT_DIFFERS(hero, ENTITYID_INVALID);
         TS_ASSERT_DIFFERS(chest, ENTITYID_INVALID);
         TS_ASSERT(g.try_entity_interact(hero, vec3{2, 1, 0}));
-        TS_ASSERT(g.display_interaction_modal);
-        TS_ASSERT_EQUALS(g.active_interaction_entity_id, chest);
-        TS_ASSERT_EQUALS(g.interaction_title, "treasure chest");
-        TS_ASSERT_EQUALS(g.interaction_body, "A stout treasure chest reinforced with iron bands and built to survive rough handling. The lid stands closed.");
+        TS_ASSERT(g.ui.display_interaction_modal);
+        TS_ASSERT_EQUALS(g.ui.active_interaction_entity_id, chest);
+        TS_ASSERT_EQUALS(g.ui.interaction_title, "treasure chest");
+        TS_ASSERT_EQUALS(g.ui.interaction_body, "A stout treasure chest reinforced with iron bands and built to survive rough handling. The lid stands closed.");
 
         g.close_interaction_modal();
         g.ct.set<door_open>(chest, true);
         TS_ASSERT(g.try_entity_interact(hero, vec3{2, 1, 0}));
-        TS_ASSERT_EQUALS(g.interaction_body, "A stout treasure chest reinforced with iron bands and built to survive rough handling. The lid stands open.");
+        TS_ASSERT_EQUALS(g.ui.interaction_body, "A stout treasure chest reinforced with iron bands and built to survive rough handling. The lid stands open.");
     }
 
     void testTryEntityInteractOpensDoorDescriptionModal() {
@@ -777,15 +777,15 @@ public:
         TS_ASSERT_DIFFERS(hero, ENTITYID_INVALID);
         TS_ASSERT_DIFFERS(door, ENTITYID_INVALID);
         TS_ASSERT(g.try_entity_interact(hero, vec3{2, 1, 0}));
-        TS_ASSERT(g.display_interaction_modal);
-        TS_ASSERT_EQUALS(g.active_interaction_entity_id, door);
-        TS_ASSERT_EQUALS(g.interaction_title, "door");
-        TS_ASSERT_EQUALS(g.interaction_body, "A heavy wooden door bound with iron straps and swollen from the dungeon damp. The door stands closed.");
+        TS_ASSERT(g.ui.display_interaction_modal);
+        TS_ASSERT_EQUALS(g.ui.active_interaction_entity_id, door);
+        TS_ASSERT_EQUALS(g.ui.interaction_title, "door");
+        TS_ASSERT_EQUALS(g.ui.interaction_body, "A heavy wooden door bound with iron straps and swollen from the dungeon damp. The door stands closed.");
 
         g.close_interaction_modal();
         g.ct.set<door_open>(door, true);
         TS_ASSERT(g.try_entity_interact(hero, vec3{2, 1, 0}));
-        TS_ASSERT_EQUALS(g.interaction_body, "A heavy wooden door bound with iron straps and swollen from the dungeon damp. The door stands open.");
+        TS_ASSERT_EQUALS(g.ui.interaction_body, "A heavy wooden door bound with iron straps and swollen from the dungeon damp. The door stands open.");
     }
 
     void testHandleInputInteractionClosesModalAndRestoresPlayerControl() {
@@ -799,11 +799,11 @@ public:
         press_key(is, KEY_ENTER);
         g.handle_input_interaction(is);
 
-        TS_ASSERT(!g.display_interaction_modal);
+        TS_ASSERT(!g.ui.display_interaction_modal);
         TS_ASSERT_EQUALS(g.controlmode, CONTROLMODE_PLAYER);
-        TS_ASSERT_EQUALS(g.active_interaction_entity_id, ENTITYID_INVALID);
-        TS_ASSERT(g.interaction_title.empty());
-        TS_ASSERT(g.interaction_body.empty());
+        TS_ASSERT_EQUALS(g.ui.active_interaction_entity_id, ENTITYID_INVALID);
+        TS_ASSERT(g.ui.interaction_title.empty());
+        TS_ASSERT(g.ui.interaction_body.empty());
     }
 
     void testUpdatePlayerTilesExploredRevealsClosedDoorTileButNotBeyond() {
