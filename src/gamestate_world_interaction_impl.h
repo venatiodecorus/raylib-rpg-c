@@ -875,7 +875,7 @@ inline bool gamestate::try_entity_move(entityid id, vec3 v) {
 inline bool gamestate::handle_move_up(inputstate& is, bool is_dead) {
     if (is_action_pressed(is, INPUT_ACTION_MOVE_UP)) {
         if (is_dead) {
-            return add_message("You cannot move while dead");
+            return messages.add("You cannot move while dead");
         }
         run_move_action(hero_id, (vec3){0, -1, 0});
         flag = GAMESTATE_FLAG_PLAYER_ANIM;
@@ -887,7 +887,7 @@ inline bool gamestate::handle_move_up(inputstate& is, bool is_dead) {
 inline bool gamestate::handle_move_down(inputstate& is, bool is_dead) {
     if (is_action_pressed(is, INPUT_ACTION_MOVE_DOWN)) {
         if (is_dead) {
-            return add_message("You cannot move while dead");
+            return messages.add("You cannot move while dead");
         }
         run_move_action(hero_id, (vec3){0, 1, 0});
         flag = GAMESTATE_FLAG_PLAYER_ANIM;
@@ -899,7 +899,7 @@ inline bool gamestate::handle_move_down(inputstate& is, bool is_dead) {
 inline bool gamestate::handle_move_left(inputstate& is, bool is_dead) {
     if (is_action_pressed(is, INPUT_ACTION_MOVE_LEFT)) {
         if (is_dead) {
-            return add_message("You cannot move while dead");
+            return messages.add("You cannot move while dead");
         }
         run_move_action(hero_id, (vec3){-1, 0, 0});
         flag = GAMESTATE_FLAG_PLAYER_ANIM;
@@ -911,7 +911,7 @@ inline bool gamestate::handle_move_left(inputstate& is, bool is_dead) {
 inline bool gamestate::handle_move_right(inputstate& is, bool is_dead) {
     if (is_action_pressed(is, INPUT_ACTION_MOVE_RIGHT)) {
         if (is_dead) {
-            return add_message("You cannot move while dead");
+            return messages.add("You cannot move while dead");
         }
         run_move_action(hero_id, (vec3){1, 0, 0});
         flag = GAMESTATE_FLAG_PLAYER_ANIM;
@@ -923,7 +923,7 @@ inline bool gamestate::handle_move_right(inputstate& is, bool is_dead) {
 inline bool gamestate::handle_move_up_left(inputstate& is, bool is_dead) {
     if (is_action_pressed(is, INPUT_ACTION_MOVE_UP_LEFT)) {
         if (is_dead) {
-            return add_message("You cannot move while dead");
+            return messages.add("You cannot move while dead");
         }
         run_move_action(hero_id, (vec3){-1, -1, 0});
         flag = GAMESTATE_FLAG_PLAYER_ANIM;
@@ -935,7 +935,7 @@ inline bool gamestate::handle_move_up_left(inputstate& is, bool is_dead) {
 inline bool gamestate::handle_move_up_right(inputstate& is, bool is_dead) {
     if (is_action_pressed(is, INPUT_ACTION_MOVE_UP_RIGHT)) {
         if (is_dead) {
-            add_message("You cannot move while dead");
+            messages.add("You cannot move while dead");
             return true;
         }
         run_move_action(hero_id, (vec3){1, -1, 0});
@@ -948,7 +948,7 @@ inline bool gamestate::handle_move_up_right(inputstate& is, bool is_dead) {
 inline bool gamestate::handle_move_down_left(inputstate& is, bool is_dead) {
     if (is_action_pressed(is, INPUT_ACTION_MOVE_DOWN_LEFT)) {
         if (is_dead) {
-            return add_message("You cannot move while dead");
+            return messages.add("You cannot move while dead");
         }
         run_move_action(hero_id, (vec3){-1, 1, 0});
         flag = GAMESTATE_FLAG_PLAYER_ANIM;
@@ -960,7 +960,7 @@ inline bool gamestate::handle_move_down_left(inputstate& is, bool is_dead) {
 inline bool gamestate::handle_move_down_right(inputstate& is, bool is_dead) {
     if (is_action_pressed(is, INPUT_ACTION_MOVE_DOWN_RIGHT)) {
         if (is_dead) {
-            return add_message("You cannot move while dead");
+            return messages.add("You cannot move while dead");
         }
         run_move_action(hero_id, (vec3){1, 1, 0});
         flag = GAMESTATE_FLAG_PLAYER_ANIM;
@@ -1132,7 +1132,7 @@ inline bool gamestate::try_entity_pickup(entityid id) {
         audio.play(SFX_CONFIRM_01);
         item_picked_up = true;
         string item_name = ct.get<name>(item_id).value_or("no-name-item");
-        add_message_history("You picked up %s", item_name.c_str());
+        messages.add_history("You picked up %s", item_name.c_str());
     }
     else if (item_id == ENTITYID_INVALID) {
         mwarning("No item cached");
@@ -1149,7 +1149,7 @@ inline bool gamestate::handle_pickup_item(inputstate& is, bool is_dead) {
         return false;
     }
     if (is_dead) {
-        return add_message("You cannot pick up items while dead");
+        return messages.add("You cannot pick up items while dead");
     }
     run_pickup_action(hero_id);
     flag = GAMESTATE_FLAG_PLAYER_ANIM;
@@ -1165,7 +1165,7 @@ inline bool gamestate::try_entity_stairs(entityid id) {
     tile_t& t = df->tile_at(loc);
     if (t.get_type() == TILE_UPSTAIRS) {
         if (current_floor == 0) {
-            add_message("You are already on the top floor!");
+            messages.add("You are already on the top floor!");
         }
         else {
             df->df_remove_at(hero_id, loc);
@@ -1208,7 +1208,7 @@ inline bool gamestate::try_entity_stairs(entityid id) {
             return true;
         }
         else {
-            add_message("You can't go downstairs anymore!");
+            messages.add("You can't go downstairs anymore!");
         }
     }
     return false;
@@ -1217,7 +1217,7 @@ inline bool gamestate::try_entity_stairs(entityid id) {
 inline bool gamestate::handle_traverse_stairs(inputstate& is, bool is_dead) {
     if (is_action_pressed(is, INPUT_ACTION_STAIRS)) {
         if (is_dead) {
-            return add_message("You cannot traverse stairs while dead");
+            return messages.add("You cannot traverse stairs while dead");
         }
         run_traverse_stairs_action(hero_id);
         return true;
@@ -1233,7 +1233,7 @@ inline bool gamestate::try_entity_open_door(entityid id, vec3 loc) {
     }
     massert(tile_has_door(loc) == door_id, "door cache mismatch at (%d, %d, %d)", loc.x, loc.y, loc.z);
     if (door_is_pressure_plate_controlled(door_id)) {
-        return add_message("You cannot open this door with your hands");
+        return messages.add("You cannot open this door with your hands");
     }
     optional<bool> maybe_is_open = ct.get<door_open>(door_id);
     massert(maybe_is_open.has_value(), "door %d has no `is_open` component", door_id);
@@ -1313,11 +1313,11 @@ inline bool gamestate::handle_interact(inputstate& is, bool is_dead) {
         return false;
     }
     if (is_dead) {
-        return add_message("You cannot interact while dead");
+        return messages.add("You cannot interact while dead");
     }
     vec3 loc = get_loc_facing_player();
     if (!run_interact_action(hero_id, loc)) {
-        return add_message("There is nothing to interact with");
+        return messages.add("There is nothing to interact with");
     }
     flag = GAMESTATE_FLAG_PLAYER_ANIM;
     return true;
@@ -1326,7 +1326,7 @@ inline bool gamestate::handle_interact(inputstate& is, bool is_dead) {
 inline bool gamestate::handle_open_door(inputstate& is, bool is_dead) {
     if (is_action_pressed(is, INPUT_ACTION_OPEN)) {
         if (is_dead) {
-            return add_message("You cannot open doors while dead");
+            return messages.add("You cannot open doors while dead");
         }
         vec3 loc = get_loc_facing_player();
         if (!run_open_chest_action(hero_id, loc)) {

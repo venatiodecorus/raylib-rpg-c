@@ -233,8 +233,8 @@ inline void gamestate::logic_init() {
     const vec3 floor_two_orc_loc = vec3_valid(floor_four_tutorial_orc_spawn) ? floor_four_tutorial_orc_spawn : d.get_floor(2)->get_random_loc();
     create_orc_at_with(floor_two_orc_loc, armed_orc_init);
     msuccess("end creating monsters...");
-    add_message("Welcome to the game! Press enter to cycle messages.");
-    add_message("For help, press ?");
+    messages.add("Welcome to the game! Press enter to cycle messages.");
+    messages.add("For help, press ?");
     msuccess("liblogic_init: Game state initialized");
 }
 
@@ -309,7 +309,11 @@ inline void gamestate::tick(inputstate& is) {
     update_npcs_state();
     handle_input(is);
     handle_npcs();
-    update_damage_popups(test ? (1.0f / DEFAULT_TARGET_FPS) : std::max(GetFrameTime(), 1.0f / 240.0f));
+    damage_popups_sys.update(test ? (1.0f / DEFAULT_TARGET_FPS) : std::max(GetFrameTime(), 1.0f / 240.0f));
+    if (damage_popups_sys.dirty) {
+        frame_dirty = true;
+        damage_popups_sys.dirty = false;
+    }
 #ifdef DEBUG
     update_debug_panel_buffer(is);
 #endif

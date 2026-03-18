@@ -290,8 +290,8 @@ inline bool gamestate::use_potion(entityid actor_id, entityid item_id) {
             ct.set<hp>(actor_id, actor_hp);
             if (actor_id == hero_id) {
                 string n = ct.get<name>(actor_id).value_or("no-name");
-                add_message_history("%s used a healing potion", n.c_str());
-                add_message_history("%s restored %d hp", n.c_str(), amount);
+                messages.add_history("%s used a healing potion", n.c_str());
+                messages.add_history("%s restored %d hp", n.c_str(), amount);
             }
         }
         else {

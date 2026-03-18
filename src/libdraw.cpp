@@ -455,11 +455,11 @@ void draw_mini_inventory_menu(gamestate& g, shared_ptr<vector<entityid>> invento
 }
 
 void draw_damage_numbers(gamestate& g) {
-    if (g.damage_popups.empty()) {
+    if (g.damage_popups_sys.popups.empty()) {
         return;
     }
 
-    for (const damage_popup_t& popup : g.damage_popups) {
+    for (const damage_popup_t& popup : g.damage_popups_sys.popups) {
         if (popup.floor != g.d.current_floor) {
             continue;
         }
@@ -1222,7 +1222,7 @@ void draw_sprite_and_shadow(gamestate& g, entityid id) {
 }
 
 void draw_message_box(gamestate& g) {
-    if (!g.display_confirm_prompt && (!g.msg_system_is_active || g.msg_system.size() == 0)) {
+    if (!g.display_confirm_prompt && (!g.messages.is_active || g.messages.system.size() == 0)) {
         return;
     }
 
@@ -1231,7 +1231,7 @@ void draw_message_box(gamestate& g) {
     constexpr float text_height = font_size;
     constexpr float y = (DEFAULT_TARGET_HEIGHT - text_height) / 2.0 - DEFAULT_PAD;
 
-    const string msg = g.display_confirm_prompt ? g.confirm_prompt_message : g.msg_system.at(0);
+    const string msg = g.display_confirm_prompt ? g.confirm_prompt_message : g.messages.system.at(0);
     char tmp[1024] = {0};
     snprintf(tmp, sizeof(tmp), "%s", msg.c_str());
 
@@ -1254,11 +1254,11 @@ void draw_message_history(gamestate& g) {
     char tmp[1024] = {0};
     const int font_size = DEFAULT_MSG_HISTORY_FONT_SIZE;
     constexpr int max_messages = 30;
-    const int msg_count = g.msg_history.size();
+    const int msg_count = g.messages.history.size();
     if (msg_count == 0) {
         return;
     }
-    const int max_measure = g.msg_history_max_len_msg_measure;
+    const int max_measure = g.messages.max_len_msg_measure;
 
     const float w = max_measure + g.pad;
     const float h = (font_size + 2) * std::min(msg_count, max_messages) + g.pad;
@@ -1271,7 +1271,7 @@ void draw_message_history(gamestate& g) {
     if (msg_count > max_messages) {
         int outer_count = 0;
         for (int i = msg_count - max_messages; i < msg_count; i++) {
-            const string msg = g.msg_history.at(i);
+            const string msg = g.messages.history.at(i);
             bzero(tmp, 1024);
             snprintf(tmp, sizeof(tmp), "%s", msg.c_str());
             const float msg_x = box.x + g.pad / 2.0;
@@ -1282,7 +1282,7 @@ void draw_message_history(gamestate& g) {
         return;
     }
     for (int i = 0; i < msg_count; i++) {
-        const string msg = g.msg_history.at(i);
+        const string msg = g.messages.history.at(i);
         bzero(tmp, 1024);
         snprintf(tmp, sizeof(tmp), "%s", msg.c_str());
         const float msg_x = box.x + g.pad / 2.0;

@@ -186,8 +186,8 @@ inline void gamestate::apply_level_up_selection() {
     pending_level_ups = pending_level_ups > 0 ? pending_level_ups - 1 : 0;
     display_level_up_modal = false;
     controlmode = CONTROLMODE_PLAYER;
-    add_message("%s increased by 1", stat_name);
-    add_message_history("%s reached level %d", ct.get<name>(hero_id).value_or("hero").c_str(), ct.get<level>(hero_id).value_or(1));
+    messages.add("%s increased by 1", stat_name);
+    messages.add_history("%s reached level %d", ct.get<name>(hero_id).value_or("hero").c_str(), ct.get<level>(hero_id).value_or(1));
     frame_dirty = true;
 
     if (pending_level_ups > 0) {
@@ -350,39 +350,21 @@ inline void gamestate::handle_input_inventory(inputstate& is) {
     frame_dirty = true;
 }
 
-inline void gamestate::cycle_messages() {
-    if (msg_system.size() > 0) {
-        string msg = msg_system.front();
-        unsigned int len = msg.length();
-        if (len > msg_history_max_len_msg) {
-            msg_history_max_len_msg = len;
-            constexpr int font_size = DEFAULT_MSG_HISTORY_FONT_SIZE;
-            int measure = MeasureText(msg.c_str(), font_size);
-            msg_history_max_len_msg_measure = measure;
-        }
-        msg_history.push_back(msg_system.front());
-        msg_system.erase(msg_system.begin());
-    }
-    if (msg_system.size() == 0) {
-        msg_system_is_active = false;
-    }
-}
-
 inline bool gamestate::handle_cycle_messages(inputstate& is) {
-    if (msg_system_is_active && inputstate_is_pressed(is, KEY_ENTER)) {
+    if (messages.is_active && inputstate_is_pressed(is, KEY_ENTER)) {
         audio.play(SFX_CONFIRM_01);
-        cycle_messages();
+        messages.cycle();
         return true;
     }
     return false;
 }
 
 inline bool gamestate::handle_cycle_messages_test() {
-    if (!msg_system_is_active) {
+    if (!messages.is_active) {
         return false;
     }
     audio.play(SFX_CONFIRM_01);
-    cycle_messages();
+    messages.cycle();
     return true;
 }
 
@@ -448,7 +430,7 @@ inline bool gamestate::handle_change_dir(inputstate& is) {
     }
     else if (is_action_pressed(is, INPUT_ACTION_FACE_ATTACK)) {
         if (is_dead) {
-            return add_message("You cannot attack while dead");
+            return messages.add("You cannot attack while dead");
         }
         ct.set<attacking>(hero_id, true);
         ct.set<update>(hero_id, true);
@@ -486,7 +468,7 @@ inline bool gamestate::handle_toggle_full_light(inputstate& is) {
     shared_ptr<dungeon_floor> df = d.get_current_floor();
     massert(df, "current floor is null");
     df->toggle_full_light();
-    add_message_history("Floor %d full-light %s", df->get_floor(), df->get_full_light() ? "enabled" : "disabled");
+    messages.add_history("Floor %d full-light %s", df->get_floor(), df->get_full_light() ? "enabled" : "disabled");
     frame_dirty = true;
     return true;
 }

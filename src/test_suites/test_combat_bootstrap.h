@@ -160,7 +160,7 @@ public:
         TS_ASSERT(count_live_npcs_on_floor(g, 0) >= 1U);
         TS_ASSERT(count_live_npcs_on_floor(g, 1) >= 9U);
         TS_ASSERT(count_live_npcs_on_floor(g, 2) >= 1U);
-        TS_ASSERT(g.msg_system.size() >= 2U);
+        TS_ASSERT(g.messages.system.size() >= 2U);
     }
 
     void testLogicInitPlacesFriendlyNpcGreenSlimesAndArmedOrc() {
@@ -516,14 +516,14 @@ public:
         g.ct.set<base_ac>(orc, 1);
         g.ct.set<dexterity>(orc, 1);
 
-        const size_t initial_history_size = g.msg_history.size();
+        const size_t initial_history_size = g.messages.history.size();
         const attack_result_t result = g.run_attack_action(hero, vec3{2, 1, 0});
 
         TS_ASSERT_EQUALS(result, ATTACK_RESULT_BLOCK);
-        TS_ASSERT_EQUALS(g.msg_history.size(), initial_history_size + 1);
-        TS_ASSERT(g.msg_history.back().find("blocked an attack") != string::npos);
-        TS_ASSERT(g.msg_history.back().find("broke") == string::npos);
-        TS_ASSERT(g.msg_history.back().find("deals") == string::npos);
+        TS_ASSERT_EQUALS(g.messages.history.size(), initial_history_size + 1);
+        TS_ASSERT(g.messages.history.back().find("blocked an attack") != string::npos);
+        TS_ASSERT(g.messages.history.back().find("broke") == string::npos);
+        TS_ASSERT(g.messages.history.back().find("deals") == string::npos);
         TS_ASSERT(g.gameplay_events.empty());
     }
 
@@ -551,15 +551,15 @@ public:
         g.ct.set<dexterity>(orc, 1);
         g.ct.set<hp>(orc, vec2{12, 12});
 
-        const size_t initial_history_size = g.msg_history.size();
+        const size_t initial_history_size = g.messages.history.size();
         const attack_result_t result = g.run_attack_action(hero, vec3{2, 1, 0});
 
         TS_ASSERT_EQUALS(result, ATTACK_RESULT_HIT);
-        TS_ASSERT_EQUALS(g.msg_history.size(), initial_history_size + 1);
-        TS_ASSERT(g.msg_history.back().find("deals") != string::npos);
-        TS_ASSERT(g.msg_history.back().find("broke") == string::npos);
-        TS_ASSERT(g.msg_history.back().find("blocked") == string::npos);
-        TS_ASSERT(!g.msg_system_is_active);
+        TS_ASSERT_EQUALS(g.messages.history.size(), initial_history_size + 1);
+        TS_ASSERT(g.messages.history.back().find("deals") != string::npos);
+        TS_ASSERT(g.messages.history.back().find("broke") == string::npos);
+        TS_ASSERT(g.messages.history.back().find("blocked") == string::npos);
+        TS_ASSERT(!g.messages.is_active);
         TS_ASSERT(g.gameplay_events.empty());
     }
 
@@ -583,7 +583,7 @@ public:
         g.ct.set<dexterity>(hero, 18);
         g.ct.set<base_ac>(orc, 1);
         g.ct.set<dexterity>(orc, 1);
-        const size_t initial_history_size = g.msg_history.size();
+        const size_t initial_history_size = g.messages.history.size();
 
         const attack_result_t result = g.run_attack_action(hero, vec3{2, 1, 0});
 
@@ -591,9 +591,9 @@ public:
         TS_ASSERT_EQUALS(g.ct.get<equipped_weapon>(hero).value_or(ENTITYID_INVALID), ENTITYID_INVALID);
         TS_ASSERT(g.ct.get<destroyed>(hero_weapon).value_or(false));
         TS_ASSERT(!g.is_in_inventory(hero, hero_weapon));
-        TS_ASSERT_EQUALS(g.msg_history.size(), initial_history_size + 2);
-        TS_ASSERT(g.msg_history[initial_history_size].find("deals") != string::npos);
-        TS_ASSERT(g.msg_history[initial_history_size + 1].find("broke!") != string::npos);
+        TS_ASSERT_EQUALS(g.messages.history.size(), initial_history_size + 2);
+        TS_ASSERT(g.messages.history[initial_history_size].find("deals") != string::npos);
+        TS_ASSERT(g.messages.history[initial_history_size + 1].find("broke!") != string::npos);
         TS_ASSERT(g.gameplay_events.empty());
     }
 
@@ -622,7 +622,7 @@ public:
         g.ct.set<dexterity>(hero, 18);
         g.ct.set<base_ac>(orc, 1);
         g.ct.set<dexterity>(orc, 1);
-        const size_t initial_history_size = g.msg_history.size();
+        const size_t initial_history_size = g.messages.history.size();
 
         const attack_result_t result = g.run_attack_action(hero, vec3{2, 1, 0});
 
@@ -630,9 +630,9 @@ public:
         TS_ASSERT_EQUALS(g.ct.get<equipped_shield>(orc).value_or(ENTITYID_INVALID), ENTITYID_INVALID);
         TS_ASSERT(g.ct.get<destroyed>(shield).value_or(false));
         TS_ASSERT(!g.is_in_inventory(orc, shield));
-        TS_ASSERT_EQUALS(g.msg_history.size(), initial_history_size + 2);
-        TS_ASSERT(g.msg_history[initial_history_size].find("blocked an attack") != string::npos);
-        TS_ASSERT(g.msg_history[initial_history_size + 1].find("broke!") != string::npos);
+        TS_ASSERT_EQUALS(g.messages.history.size(), initial_history_size + 2);
+        TS_ASSERT(g.messages.history[initial_history_size].find("blocked an attack") != string::npos);
+        TS_ASSERT(g.messages.history[initial_history_size + 1].find("broke!") != string::npos);
         TS_ASSERT(g.gameplay_events.empty());
     }
 
@@ -664,7 +664,7 @@ public:
         g.ct.set<dexterity>(orc, 18);
         g.ct.set<hp>(orc, vec2{12, 12});
 
-        const size_t initial_history_size = g.msg_history.size();
+        const size_t initial_history_size = g.messages.history.size();
         const attack_result_t result = g.run_attack_action(hero, vec3{2, 1, 0});
 
         TS_ASSERT_EQUALS(result, ATTACK_RESULT_MISS);
@@ -676,13 +676,13 @@ public:
         TS_ASSERT_EQUALS(g.ct.get<durability>(shield).value_or(-1), 5);
         TS_ASSERT(g.ct.get<aggro>(orc).value_or(false));
         TS_ASSERT_EQUALS(g.ct.get<target_id>(orc).value_or(ENTITYID_INVALID), hero);
-        TS_ASSERT(g.damage_popups.empty());
+        TS_ASSERT(g.damage_popups_sys.popups.empty());
         TS_ASSERT_EQUALS(g.ct.get<xp>(hero).value_or(0), 0);
-        TS_ASSERT_EQUALS(g.msg_history.size(), initial_history_size + 1);
-        TS_ASSERT(g.msg_history.back().find("misses!") != string::npos);
-        TS_ASSERT(g.msg_history.back().find("deals") == string::npos);
-        TS_ASSERT(g.msg_history.back().find("blocked") == string::npos);
-        TS_ASSERT(g.msg_history.back().find("broke") == string::npos);
+        TS_ASSERT_EQUALS(g.messages.history.size(), initial_history_size + 1);
+        TS_ASSERT(g.messages.history.back().find("misses!") != string::npos);
+        TS_ASSERT(g.messages.history.back().find("deals") == string::npos);
+        TS_ASSERT(g.messages.history.back().find("blocked") == string::npos);
+        TS_ASSERT(g.messages.history.back().find("broke") == string::npos);
         TS_ASSERT(g.gameplay_events.empty());
     }
 
@@ -710,17 +710,17 @@ public:
         g.ct.set<dexterity>(orc, 1);
         g.ct.set<hp>(orc, vec2{1, 1});
 
-        const size_t initial_history_size = g.msg_history.size();
+        const size_t initial_history_size = g.messages.history.size();
         const attack_result_t result = g.run_attack_action(hero, vec3{2, 1, 0});
 
         TS_ASSERT_EQUALS(result, ATTACK_RESULT_HIT);
         TS_ASSERT(g.ct.get<dead>(orc).value_or(false));
-        TS_ASSERT_EQUALS(g.msg_history.size(), initial_history_size + 1);
-        TS_ASSERT(g.msg_history.back().find("deals") != string::npos);
-        TS_ASSERT(g.msg_history.back().find("broke") == string::npos);
-        TS_ASSERT(g.msg_history.back().find("blocked") == string::npos);
+        TS_ASSERT_EQUALS(g.messages.history.size(), initial_history_size + 1);
+        TS_ASSERT(g.messages.history.back().find("deals") != string::npos);
+        TS_ASSERT(g.messages.history.back().find("broke") == string::npos);
+        TS_ASSERT(g.messages.history.back().find("blocked") == string::npos);
         TS_ASSERT_EQUALS(g.ct.get<xp>(hero).value_or(0), 1);
-        TS_ASSERT(!g.msg_system_is_active);
+        TS_ASSERT(!g.messages.is_active);
         TS_ASSERT(g.gameplay_events.empty());
     }
 
@@ -749,7 +749,7 @@ public:
         g.ct.set<hp>(hero, vec2{1, 1});
 
         tile_t& hero_tile = g.d.get_floor(0)->tile_at(vec3{1, 1, 0});
-        const size_t initial_history_size = g.msg_history.size();
+        const size_t initial_history_size = g.messages.history.size();
         const attack_result_t result = g.run_attack_action(orc, vec3{1, 1, 0});
 
         TS_ASSERT_EQUALS(result, ATTACK_RESULT_HIT);
@@ -757,12 +757,12 @@ public:
         TS_ASSERT(g.ct.get<pullable>(hero).value_or(false));
         TS_ASSERT_EQUALS(hero_tile.get_cached_live_npc(), ENTITYID_INVALID);
         TS_ASSERT_EQUALS(hero_tile.get_cached_dead_npc(), hero);
-        TS_ASSERT_EQUALS(g.damage_popups.size(), 1U);
-        TS_ASSERT_EQUALS(g.msg_history.size(), initial_history_size + 1);
-        TS_ASSERT(g.msg_history.back().find("deals") != string::npos);
-        TS_ASSERT(g.msg_system_is_active);
-        TS_ASSERT(!g.msg_system.empty());
-        TS_ASSERT_EQUALS(g.msg_system.front(), "You died");
+        TS_ASSERT_EQUALS(g.damage_popups_sys.popups.size(), 1U);
+        TS_ASSERT_EQUALS(g.messages.history.size(), initial_history_size + 1);
+        TS_ASSERT(g.messages.history.back().find("deals") != string::npos);
+        TS_ASSERT(g.messages.is_active);
+        TS_ASSERT(!g.messages.system.empty());
+        TS_ASSERT_EQUALS(g.messages.system.front(), "You died");
         TS_ASSERT(g.gameplay_events.empty());
     }
 
@@ -810,9 +810,9 @@ public:
 
         g.resolve_attack_damage_event(attacker, target, 3);
 
-        TS_ASSERT_EQUALS(g.damage_popups.size(), 1U);
-        TS_ASSERT_EQUALS(g.damage_popups[0].amount, 3);
-        TS_ASSERT_EQUALS(g.damage_popups[0].floor, 0);
+        TS_ASSERT_EQUALS(g.damage_popups_sys.popups.size(), 1U);
+        TS_ASSERT_EQUALS(g.damage_popups_sys.popups[0].amount, 3);
+        TS_ASSERT_EQUALS(g.damage_popups_sys.popups[0].floor, 0);
         TS_ASSERT(g.frame_dirty);
     }
 
@@ -823,14 +823,17 @@ public:
         const entityid target = g.create_orc_at_with(vec3{2, 2, 0}, [](CT&, const entityid) {});
         TS_ASSERT_DIFFERS(target, ENTITYID_INVALID);
 
-        g.add_damage_popup(target, 3, false);
-        TS_ASSERT_EQUALS(g.damage_popups.size(), 1U);
+        {
+            const vec3 loc = g.ct.get<location>(target).value();
+            g.damage_popups_sys.add(loc.x, loc.y, loc.z, 3, false, g.mt);
+        }
+        TS_ASSERT_EQUALS(g.damage_popups_sys.popups.size(), 1U);
 
-        g.update_damage_popups(0.35f);
-        TS_ASSERT_EQUALS(g.damage_popups.size(), 1U);
+        g.damage_popups_sys.update(0.35f);
+        TS_ASSERT_EQUALS(g.damage_popups_sys.popups.size(), 1U);
 
-        g.update_damage_popups(0.40f);
-        TS_ASSERT(g.damage_popups.empty());
+        g.damage_popups_sys.update(0.40f);
+        TS_ASSERT(g.damage_popups_sys.popups.empty());
         TS_ASSERT(g.frame_dirty);
     }
 };

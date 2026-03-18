@@ -34,27 +34,27 @@ inline int gamestate::compute_attack_damage(entityid attacker, entityid target) 
 inline void gamestate::add_combat_miss_message(entityid attacker_id, entityid target_id) {
     const string atk_name = ct.get<name>(attacker_id).value_or("no-name");
     const string tgt_name = ct.get<name>(target_id).value_or("no-name");
-    add_message_history("%s swings at %s and misses!", atk_name.c_str(), tgt_name.c_str());
+    messages.add_history("%s swings at %s and misses!", atk_name.c_str(), tgt_name.c_str());
 }
 
 inline void gamestate::add_combat_block_message(entityid attacker_id, entityid target_id) {
     const string atk_name = ct.get<name>(attacker_id).value_or("no-name");
     const string tgt_name = ct.get<name>(target_id).value_or("no-name");
-    add_message_history("%s blocked an attack from %s", tgt_name.c_str(), atk_name.c_str());
+    messages.add_history("%s blocked an attack from %s", tgt_name.c_str(), atk_name.c_str());
 }
 
 inline void gamestate::add_combat_damage_message(entityid attacker_id, entityid target_id, int damage) {
     const string atk_name = ct.get<name>(attacker_id).value_or("no-name");
     const string tgt_name = ct.get<name>(target_id).value_or("no-name");
-    add_message_history("%s deals %d damage to %s", atk_name.c_str(), damage, tgt_name.c_str());
+    messages.add_history("%s deals %d damage to %s", atk_name.c_str(), damage, tgt_name.c_str());
 }
 
 inline void gamestate::add_combat_break_message(entityid item_id) {
-    add_message_history("%s broke!", ct.get<name>(item_id).value_or("no-name-item").c_str());
+    messages.add_history("%s broke!", ct.get<name>(item_id).value_or("no-name-item").c_str());
 }
 
 inline void gamestate::add_combat_player_death_message() {
-    add_message("You died");
+    messages.add("You died");
 }
 
 inline void gamestate::handle_weapon_durability_loss(entityid atk_id, entityid tgt_id) {
@@ -236,7 +236,14 @@ inline void gamestate::resolve_attack_damage_event(entityid attacker_id, entityi
     tgt_hp.x -= damage;
     add_combat_damage_message(attacker_id, target_id, damage);
     ct.set<hp>(target_id, tgt_hp);
-    add_damage_popup(target_id, damage, false);
+    {
+        const optional<vec3> popup_loc = ct.get<location>(target_id);
+        if (popup_loc.has_value()) {
+            const vec3 loc = popup_loc.value();
+            damage_popups_sys.add(loc.x, loc.y, loc.z, damage, false, mt);
+            frame_dirty = true;
+        }
+    }
     queue_attack_weapon_durability_event(attacker_id, target_id);
     if (tgt_hp.x <= 0) {
         queue_attack_death_event(attacker_id, target_id);

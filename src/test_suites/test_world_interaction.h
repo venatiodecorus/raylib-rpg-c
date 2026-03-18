@@ -421,9 +421,9 @@ public:
 
         TS_ASSERT(g.try_entity_open_door(hero, vec3{2, 1, 0}));
         TS_ASSERT(!g.ct.get<door_open>(door).value_or(true));
-        TS_ASSERT(g.msg_system_is_active);
-        TS_ASSERT(!g.msg_system.empty());
-        TS_ASSERT_EQUALS(g.msg_system.front(), "You cannot open this door with your hands");
+        TS_ASSERT(g.messages.is_active);
+        TS_ASSERT(!g.messages.system.empty());
+        TS_ASSERT_EQUALS(g.messages.system.front(), "You cannot open this door with your hands");
     }
 
     void testRunOpenDoorActionUsesQueuedDoorIntent() {
@@ -454,9 +454,9 @@ public:
 
         TS_ASSERT(g.run_open_door_action(hero, vec3{2, 1, 0}));
         TS_ASSERT(!g.ct.get<door_open>(door).value_or(true));
-        TS_ASSERT(g.msg_system_is_active);
-        TS_ASSERT(!g.msg_system.empty());
-        TS_ASSERT_EQUALS(g.msg_system.front(), "You cannot open this door with your hands");
+        TS_ASSERT(g.messages.is_active);
+        TS_ASSERT(!g.messages.system.empty());
+        TS_ASSERT_EQUALS(g.messages.system.front(), "You cannot open this door with your hands");
         TS_ASSERT(g.gameplay_events.empty());
     }
 
@@ -626,9 +626,9 @@ public:
         TS_ASSERT(!g.run_traverse_stairs_action(hero));
         TS_ASSERT_EQUALS(g.d.current_floor, 0);
         TS_ASSERT(vec3_equal(g.ct.get<location>(hero).value_or(vec3{-1, -1, -1}), vec3{1, 1, 0}));
-        TS_ASSERT(g.msg_system_is_active);
-        TS_ASSERT(!g.msg_system.empty());
-        TS_ASSERT_EQUALS(g.msg_system.front(), "You are already on the top floor!");
+        TS_ASSERT(g.messages.is_active);
+        TS_ASSERT(!g.messages.system.empty());
+        TS_ASSERT_EQUALS(g.messages.system.front(), "You are already on the top floor!");
         TS_ASSERT(g.gameplay_events.empty());
     }
 

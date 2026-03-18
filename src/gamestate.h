@@ -27,6 +27,8 @@
 #include "roll.h"
 #include "scene.h"
 #include "audio_manager.h"
+#include "message_log.h"
+#include "damage_popups.h"
 #include "sfx.h"
 #include "stat_bonus.h"
 #include "texture_ids.h"
@@ -77,18 +79,6 @@ typedef enum {
     CONFIRM_ACTION_NONE = 0,
     CONFIRM_ACTION_QUIT,
 } confirm_action_t;
-
-struct damage_popup_t {
-    entityid target_id;
-    int amount;
-    bool critical;
-    int floor;
-    Vector2 world_anchor;
-    float age_seconds;
-    float lifetime_seconds;
-    float drift_x;
-    float rise_distance;
-};
 
 struct floor_pressure_plate_t {
     vec3 loc;
@@ -153,7 +143,6 @@ public:
     bool cam_changed;
     bool frame_dirty;
     bool do_restart;
-    bool msg_system_is_active;
     bool chest_deposit_mode;
     int lock;
     int pad;
@@ -174,8 +163,6 @@ public:
     unsigned int mini_inventory_scroll_offset;
     unsigned int title_screen_selection;
     unsigned int max_title_screen_selections;
-    unsigned int msg_history_max_len_msg;
-    unsigned int msg_history_max_len_msg_measure;
     unsigned int restart_count;
     unsigned int font_size;
     unsigned int turn_count;
@@ -190,8 +177,7 @@ public:
     char frame_time_str[32];
     gamestate_flag_t flag;
     scene_t current_scene;
-    vector<string> msg_system;
-    vector<string> msg_history;
+    MessageLog messages;
     AudioManager audio;
     character_creation chara_creation;
     string version;
@@ -217,7 +203,7 @@ public:
     string interaction_title;
     string interaction_body;
     int pending_level_ups;
-    vector<damage_popup_t> damage_popups;
+    DamagePopups damage_popups_sys;
     vector<floor_pressure_plate_t> floor_pressure_plates;
     vector<gameplay_event_t> gameplay_events;
     vec3 floor_four_tutorial_orc_spawn = vec3{-1, -1, -1};
@@ -303,7 +289,6 @@ public:
         processing_actions = false;
         test_guard = false;
         player_changing_dir = false;
-        msg_system_is_active = false;
         chest_deposit_mode = false;
         #ifndef TEST
         test = false;
@@ -356,8 +341,6 @@ public:
         action_selection = 0;
         inventory_menu_selection = 0;
         level_up_selection = 0;
-        msg_history_max_len_msg_measure = 0;
-        msg_history_max_len_msg = 0;
         debugpanel.pad_top = 0;
         debugpanel.pad_left = 0;
         debugpanel.pad_right = 0;
@@ -386,7 +369,7 @@ public:
         interaction_title.clear();
         interaction_body.clear();
         pending_level_ups = 0;
-        damage_popups.clear();
+        damage_popups_sys = DamagePopups();
         floor_pressure_plates.clear();
         gameplay_events.clear();
         floor_four_tutorial_orc_spawn = vec3{-1, -1, -1};
@@ -395,8 +378,7 @@ public:
         controls_menu_selection = 0;
         controls_menu_pending_action = INPUT_ACTION_MOVE_UP;
         reset_default_keybindings();
-        msg_system.clear();
-        msg_history.clear();
+        messages = MessageLog();
         ct.clear();
         for (size_t i = 0; i < d.floors.size(); i++) {
             d.floors[i]->df_free();
@@ -628,40 +610,6 @@ public:
      * @return The created entity id, or `ENTITYID_INVALID` on failure.
      */
     entityid create_orc_at_with(vec3 loc, with_fun monsterInitFunction);
-
-    /**
-     * @brief Push a formatted message into the active message queue.
-     *
-     * @return `true` after the message is queued.
-     */
-    bool add_message(const char* fmt, ...) {
-        massert(fmt, "format string is NULL");
-        char buffer[MAX_MSG_LENGTH];
-        va_list args;
-        va_start(args, fmt);
-        vsnprintf(buffer, MAX_MSG_LENGTH - 1, fmt, args);
-        va_end(args);
-        string s(buffer);
-        msg_system.push_back(s);
-        msg_system_is_active = true;
-        return true;
-    }
-
-    /**
-     * @brief Append a formatted message to the persistent message history.
-     *
-     * @warning This does not activate the transient on-screen message queue.
-     */
-    void add_message_history(const char* fmt, ...) {
-        massert(fmt, "format string is NULL");
-        char buffer[MAX_MSG_LENGTH];
-        va_list args;
-        va_start(args, fmt);
-        vsnprintf(buffer, MAX_MSG_LENGTH - 1, fmt, args);
-        va_end(args);
-        string s(buffer);
-        msg_history.push_back(s);
-    }
 
     /** @brief Refresh derived per-tile state after gameplay mutations. */
     void update_tile(tile_t& tile);
@@ -920,9 +868,6 @@ public:
     //    return false;
     //}
 
-    /** @brief Advance the visible message queue to the next pending message. */
-    void cycle_messages();
-
     /** @brief Handle player input that advances the message queue. */
     bool handle_cycle_messages(inputstate& is);
 
@@ -1169,12 +1114,6 @@ public:
     /** @brief Flip an NPC into hostile state in response to a violation. */
     void provoke_npc(entityid npc_id, entityid source_id);
 
-    /** @brief Queue a floating damage-number popup at the target entity's current world position. */
-    void add_damage_popup(entityid target_id, int amount, bool critical = false);
-
-    /** @brief Advance and expire active floating damage-number popups. */
-    void update_damage_popups(float dt_seconds);
-
     /** @brief Play shield-block audio feedback for a defending entity. */
     void handle_shield_block_sfx(entityid target_id);
 
@@ -1217,7 +1156,7 @@ public:
     bool handle_attack(inputstate& is, bool is_dead) {
         if (is_action_pressed(is, INPUT_ACTION_ATTACK)) {
             if (is_dead) {
-                return add_message("You cannot attack while dead");
+                return messages.add("You cannot attack while dead");
             }
             if (ct.has<location>(hero_id) && ct.has<direction>(hero_id)) {
                 vec3 loc = get_loc_facing_player();
@@ -1311,7 +1250,7 @@ public:
     void update_debug_panel_buffer(inputstate& is) {
         minfo2("update debug panel buffer");
         // Static buffers to avoid reallocating every frame
-        int message_count = msg_history.size();
+        int message_count = messages.history.size();
         int inventory_count;
         vec3 loc = {0, 0, 0};
         inventory_count = -1;
@@ -1443,7 +1382,6 @@ public:
 #include "gamestate_options_impl.h"
 #include "gamestate_input_impl.h"
 #include "gamestate_npc_combat_impl.h"
-#include "gamestate_damage_popups_impl.h"
 #include "gamestate_world_impl.h"
 #include "gamestate_world_interaction_impl.h"
 #include "gamestate_entity_factory_impl.h"

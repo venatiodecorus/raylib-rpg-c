@@ -39,7 +39,7 @@ public:
         TS_ASSERT(g.cam_lockon);
         TS_ASSERT(!g.cam_changed);
         TS_ASSERT(!g.dirty_entities);
-        TS_ASSERT(!g.msg_system_is_active);
+        TS_ASSERT(!g.messages.is_active);
         TS_ASSERT_EQUALS(g.current_scene, SCENE_TITLE);
         TS_ASSERT_EQUALS(g.controlmode, CONTROLMODE_PLAYER);
         TS_ASSERT_EQUALS(g.confirm_action, CONFIRM_ACTION_NONE);
@@ -58,8 +58,8 @@ public:
         TS_ASSERT_EQUALS(g.cam2d.target.y, 0.0f);
         TS_ASSERT_EQUALS(g.cam2d.offset.x, 0.0f);
         TS_ASSERT_EQUALS(g.cam2d.offset.y, 0.0f);
-        TS_ASSERT_EQUALS(g.msg_system.size(), 0U);
-        TS_ASSERT_EQUALS(g.msg_history.size(), 0U);
+        TS_ASSERT_EQUALS(g.messages.system.size(), 0U);
+        TS_ASSERT_EQUALS(g.messages.history.size(), 0U);
         TS_ASSERT_EQUALS(g.d.floors.size(), 0U);
         TS_ASSERT(!g.d.is_initialized);
     }
@@ -96,27 +96,27 @@ public:
         TS_ASSERT_EQUALS(g.chara_creation.alignment, ALIGNMENT_NEUTRAL_NEUTRAL);
         TS_ASSERT(!g.dirty_entities);
         TS_ASSERT_EQUALS(g.d.floors.size(), 0U);
-        TS_ASSERT_EQUALS(g.msg_system.size(), 0U);
-        TS_ASSERT_EQUALS(g.msg_history.size(), 0U);
+        TS_ASSERT_EQUALS(g.messages.system.size(), 0U);
+        TS_ASSERT_EQUALS(g.messages.history.size(), 0U);
     }
 
     void testGamestateMessageQueuesAndReset() {
         gamestate g;
 
-        TS_ASSERT(g.add_message("hello %d", 1));
-        g.add_message_history("history %s", "entry");
+        TS_ASSERT(g.messages.add("hello %d", 1));
+        g.messages.add_history("history %s", "entry");
 
-        TS_ASSERT(g.msg_system_is_active);
-        TS_ASSERT_EQUALS(g.msg_system.size(), 1U);
-        TS_ASSERT_EQUALS(g.msg_system.front(), "hello 1");
-        TS_ASSERT_EQUALS(g.msg_history.size(), 1U);
-        TS_ASSERT_EQUALS(g.msg_history.front(), "history entry");
+        TS_ASSERT(g.messages.is_active);
+        TS_ASSERT_EQUALS(g.messages.system.size(), 1U);
+        TS_ASSERT_EQUALS(g.messages.system.front(), "hello 1");
+        TS_ASSERT_EQUALS(g.messages.history.size(), 1U);
+        TS_ASSERT_EQUALS(g.messages.history.front(), "history entry");
 
         g.reset();
 
-        TS_ASSERT(!g.msg_system_is_active);
-        TS_ASSERT_EQUALS(g.msg_system.size(), 0U);
-        TS_ASSERT_EQUALS(g.msg_history.size(), 0U);
+        TS_ASSERT(!g.messages.is_active);
+        TS_ASSERT_EQUALS(g.messages.system.size(), 0U);
+        TS_ASSERT_EQUALS(g.messages.history.size(), 0U);
     }
 
     void testGamestateResetRestoresCameraAndUiState() {
@@ -192,7 +192,7 @@ public:
         g.do_quit = true;
         g.gameover = true;
         g.restart_count = 7;
-        g.add_message("stale");
+        g.messages.add("stale");
 
         g.restart_game();
 
@@ -204,8 +204,8 @@ public:
         TS_ASSERT(!g.do_quit);
         TS_ASSERT(!g.gameover);
         TS_ASSERT(g.frame_dirty);
-        TS_ASSERT(g.msg_system.size() >= 2U);
-        TS_ASSERT_EQUALS(g.msg_system.front(), "Welcome to the game! Press enter to cycle messages.");
+        TS_ASSERT(g.messages.system.size() >= 2U);
+        TS_ASSERT_EQUALS(g.messages.system.front(), "Welcome to the game! Press enter to cycle messages.");
         TS_ASSERT_EQUALS(g.targetwidth, DEFAULT_TARGET_WIDTH);
         TS_ASSERT_EQUALS(g.targetheight, DEFAULT_TARGET_HEIGHT);
         TS_ASSERT_EQUALS(g.windowwidth, 1234);

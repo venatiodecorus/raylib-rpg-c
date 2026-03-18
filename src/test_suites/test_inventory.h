@@ -305,7 +305,7 @@ public:
         TS_ASSERT(hp_value.x >= 3);
         TS_ASSERT(hp_value.x <= 8);
         TS_ASSERT_EQUALS(hp_value.y, 10);
-        TS_ASSERT(g.msg_history.size() >= 2U);
+        TS_ASSERT(g.messages.history.size() >= 2U);
     }
 
     void testRunUseItemActionUsesQueuedPotionIntent() {
