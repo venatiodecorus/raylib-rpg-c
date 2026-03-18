@@ -1,8 +1,10 @@
 #include "create_sg_byid.h"
 
+#include "ecs_prop_components.h"
 #include "entitytype.h"
 #include "item.h"
 #include "libdraw_create_spritegroup.h"
+#include "prop_definitions.h"
 #include "tx_keys_boxes.h"
 #include "tx_keys_chests.h"
 #include "tx_keys_doors.h"
@@ -105,6 +107,15 @@ void create_item_sg_byid(gamestate& g, entityid id) {
 
 void create_prop_sg_byid(gamestate& g, entityid id) {
     massert(id != ENTITYID_INVALID, "entityid is invalid");
+    const entt::entity registry_entity = g.lookup_registry_entity(id);
+    if (registry_entity != entt::null && g.registry.all_of<PropVisual>(registry_entity)) {
+        const PropVisual& visual = g.registry.get<PropVisual>(registry_entity);
+        if (visual.keys != nullptr && visual.key_count > 0) {
+            create_sg(g, id, const_cast<int*>(visual.keys), visual.key_count);
+            return;
+        }
+    }
+
     switch (g.ct.get<proptype>(id).value_or(PROP_NONE)) {
     case PROP_DUNGEON_BANNER_00: create_sg(g, id, TX_PROP_DUNGEON_BANNER_00_KEYS, TX_PROP_DUNGEON_BANNER_00_COUNT); break;
     case PROP_DUNGEON_BANNER_01: create_sg(g, id, TX_PROP_DUNGEON_BANNER_01_KEYS, TX_PROP_DUNGEON_BANNER_01_COUNT); break;

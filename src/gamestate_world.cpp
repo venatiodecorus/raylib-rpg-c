@@ -1,5 +1,8 @@
 #include "gamestate.h"
 
+#include "ecs_prop_components.h"
+#include "prop_definitions.h"
+
 /** @file gamestate_world.cpp
  *  @brief Dungeon/world generation and placement helpers implemented on `gamestate`.
  */
@@ -58,91 +61,14 @@ bool dungeon_room_fits(Rectangle candidate, const vector<room>& rooms, int width
     return true;
 }
 
-bool dungeon_prop_is_solid(proptype_t type) {
-    switch (type) {
-    case PROP_DUNGEON_STATUE_00:
-    case PROP_DUNGEON_WOODEN_TABLE_00:
-    case PROP_DUNGEON_WOODEN_TABLE_01:
-    case PROP_DUNGEON_WOODEN_BARREL_OPEN_TOP_EMPTY:
-    case PROP_DUNGEON_WOODEN_BARREL_OPEN_TOP_WATER:
-    case PROP_DUNGEON_WOODEN_SIGN:
-        return true;
-    default:
-        return false;
-    }
-}
-
-bool dungeon_prop_is_pushable(proptype_t type) {
-    switch (type) {
-    case PROP_DUNGEON_STATUE_00:
-    case PROP_DUNGEON_WOODEN_TABLE_00:
-    case PROP_DUNGEON_WOODEN_TABLE_01:
-        return true;
-    default:
-        return false;
-    }
-}
-
-bool dungeon_prop_is_pullable(proptype_t type) {
-    switch (type) {
-    case PROP_DUNGEON_CANDLE_00:
-    case PROP_DUNGEON_WOODEN_TABLE_00:
-    case PROP_DUNGEON_WOODEN_TABLE_01:
-        return true;
-    default:
-        return false;
-    }
-}
-
-const char* dungeon_prop_name(proptype_t type) {
-    switch (type) {
-    case PROP_DUNGEON_STATUE_00: return "statue";
-    case PROP_DUNGEON_TORCH_00: return "torch";
-    case PROP_DUNGEON_CANDLE_00: return "candle";
-    case PROP_DUNGEON_JAR_00: return "jar";
-    case PROP_DUNGEON_PLATE_00: return "plate";
-    case PROP_DUNGEON_WOODEN_BARREL_OPEN_TOP_EMPTY: return "empty barrel";
-    case PROP_DUNGEON_WOODEN_BARREL_OPEN_TOP_WATER: return "water barrel";
-    case PROP_DUNGEON_WOODEN_CHAIR_00: return "wooden chair";
-    case PROP_DUNGEON_WOODEN_TABLE_00: return "wooden table";
-    case PROP_DUNGEON_WOODEN_TABLE_01: return "wooden table";
-    case PROP_DUNGEON_WOODEN_SIGN: return "wooden sign";
-    case PROP_DUNGEON_BANNER_00:
-    case PROP_DUNGEON_BANNER_01:
-    case PROP_DUNGEON_BANNER_02:
-        return "banner";
-    default:
-        return "prop";
-    }
-}
-
-const char* dungeon_prop_description(proptype_t type) {
-    switch (type) {
-    case PROP_DUNGEON_STATUE_00: return "A heavy carved statue worn smooth by years of damp air and passing hands.";
-    case PROP_DUNGEON_TORCH_00: return "A soot-blackened torch stand dragged from the wall and left among the rubble.";
-    case PROP_DUNGEON_CANDLE_00: return "A stubby candle with wax pooled around its base.";
-    case PROP_DUNGEON_JAR_00: return "A ceramic jar with a chipped lip and a dusting of old clay inside.";
-    case PROP_DUNGEON_PLATE_00: return "A dusty plate left behind by some long-finished meal.";
-    case PROP_DUNGEON_WOODEN_BARREL_OPEN_TOP_EMPTY: return "An open-topped barrel that smells faintly of stale ale.";
-    case PROP_DUNGEON_WOODEN_BARREL_OPEN_TOP_WATER: return "An open-topped barrel filled with still water dark enough to hide the bottom.";
-    case PROP_DUNGEON_WOODEN_CHAIR_00: return "A wooden chair with scraped legs and a backrest polished by use.";
-    case PROP_DUNGEON_WOODEN_TABLE_00:
-    case PROP_DUNGEON_WOODEN_TABLE_01:
-        return "A sturdy wooden table scarred by cuts, heat marks, and years of hard use.";
-    case PROP_DUNGEON_WOODEN_SIGN:
-        return "Pull something onto the\npressure plate to keep the door open.";
-    default:
-        return "A bit of dungeon clutter left to rot in the dark.";
-    }
-}
-
 with_fun dungeon_prop_init(proptype_t type) {
     return [type](CT& ct, const entityid id) {
-        ct.set<name>(id, dungeon_prop_name(type));
-        ct.set<description>(id, dungeon_prop_description(type));
-        ct.set<solid>(id, dungeon_prop_is_solid(type));
-        ct.set<pushable>(id, dungeon_prop_is_pushable(type));
-        ct.set<pullable>(id, dungeon_prop_is_pullable(type));
+        const PropDefinition& definition = get_prop_definition(type);
+        ct.set<name>(id, definition.name);
+        ct.set<description>(id, definition.description);
+        ct.set<solid>(id, definition.solid);
+        ct.set<pushable>(id, definition.pushable);
+        ct.set<pullable>(id, definition.pullable);
     };
 }
 
@@ -503,6 +429,7 @@ entityid gamestate::place_first_floor_chest() {
 
 entityid gamestate::create_prop_with(proptype_t type, with_fun initFun) {
     entityid id = add_entity();
+    const PropDefinition& definition = get_prop_definition(type);
     ct.set<entitytype>(id, ENTITY_PROP);
     ct.set<spritemove>(id, (Rectangle){0, 0, 0, 0});
     ct.set<update>(id, true);
@@ -511,6 +438,16 @@ entityid gamestate::create_prop_with(proptype_t type, with_fun initFun) {
     if (!ct.get<description>(id).has_value()) {
         ct.set<description>(id, "A neglected dungeon furnishing that has outlasted whoever left it here.");
     }
+
+    const entt::entity registry_entity = ensure_registry_entity(id);
+    registry.emplace_or_replace<DefinitionRef>(registry_entity, DefinitionRef{definition.id});
+    registry.emplace_or_replace<PropVisual>(registry_entity, PropVisual{definition.sprite_keys, definition.sprite_key_count});
+    registry.emplace_or_replace<InteractableText>(registry_entity, InteractableText{definition.name, definition.description});
+    registry.emplace_or_replace<SolidTag>(registry_entity, SolidTag{definition.solid});
+    registry.emplace_or_replace<PushableTag>(registry_entity, PushableTag{definition.pushable});
+    registry.emplace_or_replace<PullableTag>(registry_entity, PullableTag{definition.pullable});
+    registry.emplace_or_replace<PropKind>(registry_entity, PropKind{definition.type});
+
     return id;
 }
 
@@ -532,6 +469,8 @@ entityid gamestate::create_prop_at_with(proptype_t type, vec3 loc, with_fun init
         return ENTITYID_INVALID;
     }
     ct.set<location>(id, loc);
+    const entt::entity registry_entity = ensure_registry_entity(id);
+    registry.emplace_or_replace<GridPosition>(registry_entity, GridPosition{loc});
     return id;
 }
 

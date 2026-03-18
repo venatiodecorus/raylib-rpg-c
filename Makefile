@@ -49,6 +49,7 @@ GAMESTATE_C = $(addprefix $(SRCDIR)/, \
 	gamestate_input.cpp \
 	gamestate_npc_combat.cpp \
 	gamestate_world.cpp \
+	prop_definitions.cpp \
 	gamestate_world_interaction.cpp \
 	gamestate_entity_factory.cpp)
 GAMESTATE_O = $(GAMESTATE_C:.cpp=.o)
@@ -76,7 +77,7 @@ CFLAGS ?= # Allow override
 # Web build setup
 WEB_CC = emcc
 WEB_SOURCES = $(GAME_SOURCES)
-WEB_INCLUDES = -I$(SRCDIR) -I /usr/local/include
+WEB_INCLUDES = -I$(SRCDIR) -Iinclude -I /usr/local/include
 WEB_LINKS = -L$(SRCDIR) -l:libraylib.web.a
 EMCC_OPTIONS = -s USE_GLFW=3 -s EXPORTED_RUNTIME_METHODS=ccall -s ALLOW_MEMORY_GROWTH
 SHELL_FILE = --shell-file $(SRCDIR)/minshell.html
@@ -95,7 +96,7 @@ game: $(SRCDIR)/main.o $(SRCDIR)/libdraw.o $(LIBDRAW_SPLIT_C:.cpp=.o) $(AUX_DRAW
 	$(CXX) $(WFLAGS) $(CXXFLAGS) $(CFLAGS) $^ $(RAYLIB_LIBS) -o $@
 
 $(SRCDIR)/%.o: $(SRCDIR)/%.cpp
-	$(CXX) $(WFLAGS) $(CXXFLAGS) $(CFLAGS) $(RAYLIB_CFLAGS) -I$(SRCDIR) -c $< -o $@
+	$(CXX) $(WFLAGS) $(CXXFLAGS) $(CFLAGS) $(RAYLIB_CFLAGS) -I$(SRCDIR) -Iinclude -c $< -o $@
 
 # Web build
 index.html: $(GAME_SOURCES)
@@ -106,13 +107,13 @@ $(SRCDIR)/tests.cpp: $(SRCDIR)/unit_test.h $(wildcard $(SRCDIR)/test_suites/test
 	cxxtestgen --error-printer -o $@ $(SRCDIR)/unit_test.h $(SRCDIR)/test_suites/test_gamestate_lifecycle.h $(SRCDIR)/test_suites/test_combat_bootstrap.h $(SRCDIR)/test_suites/test_dungeon_bootstrap.h $(SRCDIR)/test_suites/test_entity_factory.h $(SRCDIR)/test_suites/test_entity_placement.h $(SRCDIR)/test_suites/test_inventory.h $(SRCDIR)/test_suites/test_renderer_seams.h $(SRCDIR)/test_suites/test_tile_cache.h $(SRCDIR)/test_suites/test_component_table.h $(SRCDIR)/test_suites/test_utility_helpers.h $(SRCDIR)/test_suites/test_world_interaction.h
 
 tests: $(SRCDIR)/tests.cpp $(SRCDIR)/audio_manager.o $(SRCDIR)/message_log.o $(SRCDIR)/damage_popups.o $(GAMESTATE_O)
-	$(CXX) -o $@ $^ $(RAYLIB_CFLAGS) $(RAYLIB_LIBS) -I$(SRCDIR) $(CXXFLAGS) $(CFLAGS)
+	$(CXX) -o $@ $^ $(RAYLIB_CFLAGS) $(RAYLIB_LIBS) -I$(SRCDIR) -Iinclude $(CXXFLAGS) $(CFLAGS)
 
 $(SRCDIR)/tests_heavy.cpp: $(SRCDIR)/unit_test_heavy.h $(SRCDIR)/unit_test.h $(wildcard $(SRCDIR)/test_suites/test_*.h)
 	cxxtestgen --error-printer -o $@ $(SRCDIR)/unit_test_heavy.h $(SRCDIR)/unit_test.h $(SRCDIR)/test_suites/test_gamestate_lifecycle.h $(SRCDIR)/test_suites/test_combat_bootstrap.h $(SRCDIR)/test_suites/test_dungeon_bootstrap.h $(SRCDIR)/test_suites/test_entity_factory.h $(SRCDIR)/test_suites/test_entity_placement.h $(SRCDIR)/test_suites/test_heavy_simulation.h $(SRCDIR)/test_suites/test_inventory.h $(SRCDIR)/test_suites/test_renderer_seams.h $(SRCDIR)/test_suites/test_tile_cache.h $(SRCDIR)/test_suites/test_component_table.h $(SRCDIR)/test_suites/test_utility_helpers.h $(SRCDIR)/test_suites/test_world_interaction.h
 
 tests_heavy: $(SRCDIR)/tests_heavy.cpp $(SRCDIR)/audio_manager.o $(SRCDIR)/message_log.o $(SRCDIR)/damage_popups.o $(GAMESTATE_O)
-	$(CXX) -o $@ $^ $(RAYLIB_CFLAGS) $(RAYLIB_LIBS) -I$(SRCDIR) $(CXXFLAGS) $(CFLAGS)
+	$(CXX) -o $@ $^ $(RAYLIB_CFLAGS) $(RAYLIB_LIBS) -I$(SRCDIR) -Iinclude $(CXXFLAGS) $(CFLAGS)
 
 # Documentation
 docs:

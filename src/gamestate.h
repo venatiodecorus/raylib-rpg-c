@@ -40,6 +40,7 @@
 #include "sfx.h"
 #include "stat_bonus.h"
 #include "texture_ids.h"
+#include <entt/entt.hpp>
 #include <algorithm>
 #include <functional>
 #include <map>
@@ -48,6 +49,7 @@
 #include <raylib.h>
 #include <raymath.h>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 #define GAMESTATE_SIZEOFTIMEBUF 64
@@ -117,6 +119,8 @@ public:
     rpg::AudioManager audio;
     character_creation chara_creation;
     ComponentTable ct;
+    entt::registry registry;
+    std::unordered_map<entityid, entt::entity> legacy_to_entt;
     rpg::UIState ui;
     rpg::KeybindingState keybind;
     rpg::RandomState random;
@@ -271,6 +275,8 @@ public:
         reset_default_keybindings();
         messages = rpg::MessageLog();
         ct.clear();
+        registry.clear();
+        legacy_to_entt.clear();
         d.floors.clear();
         d.is_initialized = false;
     }
@@ -293,6 +299,29 @@ public:
         }
         next_entityid++;
         return id;
+    }
+
+    entt::entity ensure_registry_entity(entityid id) {
+        massert(id != ENTITYID_INVALID, "id is invalid");
+        const entt::entity entity = lookup_registry_entity(id);
+        if (entity != entt::null) {
+            return entity;
+        }
+        const entt::entity created = registry.create();
+        legacy_to_entt[id] = created;
+        return created;
+    }
+
+    entt::entity lookup_registry_entity(entityid id) const {
+        const auto it = legacy_to_entt.find(id);
+        if (it == legacy_to_entt.end()) {
+            return entt::null;
+        }
+        return registry.valid(it->second) ? it->second : entt::null;
+    }
+
+    bool has_registry_entity(entityid id) const {
+        return lookup_registry_entity(id) != entt::null;
     }
 
     tile_t& tile_at_cur_floor(vec3 loc) {
