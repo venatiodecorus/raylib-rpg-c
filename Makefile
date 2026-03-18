@@ -9,7 +9,9 @@ MAIN_C = $(SRCDIR)/main.cpp
 LIBDRAW_C = $(SRCDIR)/libdraw.cpp
 LIBDRAW_SPLIT_C = $(addprefix $(SRCDIR)/, \
 	create_sg_byid.cpp \
-	libdraw_create_spritegroup.cpp)
+	libdraw_create_spritegroup.cpp \
+	libdraw_update_sprites.cpp \
+	set_sg.cpp)
 AUX_DRAW_C = $(addprefix $(SRCDIR)/, \
 	draw_action_menu.cpp \
 	draw_character_creation_screen.cpp \
