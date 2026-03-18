@@ -436,13 +436,16 @@ entityid gamestate::create_player_at_with(vec3 loc, string n, with_fun playerIni
 
 entityid gamestate::create_box_with() {
     entityid id = add_entity();
+    const StaticWorldDefinition& definition = get_static_world_definition(ENTITY_BOX);
     ct.set<entitytype>(id, ENTITY_BOX);
     ct.set<spritemove>(id, (Rectangle){0, 0, 0, 0});
     ct.set<update>(id, true);
-    ct.set<pushable>(id, true);
-    ct.set<pullable>(id, true);
-    ct.set<name>(id, "box");
-    ct.set<description>(id, "A plain wooden box with rough handles cut into the sides for hauling.");
+    ct.set<pushable>(id, definition.pushable);
+    ct.set<pullable>(id, definition.pullable);
+    ct.set<solid>(id, definition.solid);
+    ct.set<name>(id, definition.name);
+    ct.set<description>(id, definition.description);
+    attach_static_world_definition(id, definition);
     return id;
 }
 
@@ -463,5 +466,6 @@ entityid gamestate::create_box_at_with(vec3 loc) {
         return ENTITYID_INVALID;
     }
     ct.set<location>(id, loc);
+    sync_registry_grid_position(id, loc);
     return id;
 }

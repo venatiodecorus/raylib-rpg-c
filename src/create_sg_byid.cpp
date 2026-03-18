@@ -1,10 +1,10 @@
 #include "create_sg_byid.h"
 
-#include "ecs_prop_components.h"
+#include "ecs_world_object_components.h"
 #include "entitytype.h"
 #include "item.h"
 #include "libdraw_create_spritegroup.h"
-#include "prop_definitions.h"
+#include "world_object_definitions.h"
 #include "tx_keys_boxes.h"
 #include "tx_keys_chests.h"
 #include "tx_keys_doors.h"
@@ -14,6 +14,23 @@
 #include "tx_keys_props.h"
 #include "tx_keys_shields.h"
 #include "tx_keys_weapons.h"
+
+namespace {
+bool create_static_world_sg_from_registry(gamestate& g, entityid id) {
+    const entt::entity registry_entity = g.lookup_registry_entity(id);
+    if (registry_entity == entt::null || !g.registry.all_of<StaticVisual>(registry_entity)) {
+        return false;
+    }
+
+    const StaticVisual& visual = g.registry.get<StaticVisual>(registry_entity);
+    if (visual.keys == nullptr || visual.key_count <= 0) {
+        return false;
+    }
+
+    create_sg(g, id, const_cast<int*>(visual.keys), visual.key_count);
+    return true;
+}
+}
 
 void create_npc_sg_byid(gamestate& g, entityid id) {
     massert(id != ENTITYID_INVALID, "entityid is invalid");
@@ -49,16 +66,25 @@ void create_npc_sg_byid(gamestate& g, entityid id) {
 void create_door_sg_byid(gamestate& g, entityid id) {
     massert(id != ENTITYID_INVALID, "entityid is invalid");
     minfo("create_door_sg_byid: %d", id);
+    if (create_static_world_sg_from_registry(g, id)) {
+        return;
+    }
     create_sg(g, id, TX_WOODEN_DOOR_KEYS, TX_WOODEN_DOOR_COUNT);
 }
 
 void create_box_sg_byid(gamestate& g, entityid id) {
     massert(id != ENTITYID_INVALID, "entityid is invalid");
+    if (create_static_world_sg_from_registry(g, id)) {
+        return;
+    }
     create_sg(g, id, TX_WOODEN_BOX_KEYS, TX_WOODEN_BOX_COUNT);
 }
 
 void create_chest_sg_byid(gamestate& g, entityid id) {
     massert(id != ENTITYID_INVALID, "entityid is invalid");
+    if (create_static_world_sg_from_registry(g, id)) {
+        return;
+    }
     create_sg(g, id, TX_TREASURE_CHEST_KEYS, TX_TREASURE_CHEST_COUNT);
 }
 
@@ -107,13 +133,8 @@ void create_item_sg_byid(gamestate& g, entityid id) {
 
 void create_prop_sg_byid(gamestate& g, entityid id) {
     massert(id != ENTITYID_INVALID, "entityid is invalid");
-    const entt::entity registry_entity = g.lookup_registry_entity(id);
-    if (registry_entity != entt::null && g.registry.all_of<PropVisual>(registry_entity)) {
-        const PropVisual& visual = g.registry.get<PropVisual>(registry_entity);
-        if (visual.keys != nullptr && visual.key_count > 0) {
-            create_sg(g, id, const_cast<int*>(visual.keys), visual.key_count);
-            return;
-        }
+    if (create_static_world_sg_from_registry(g, id)) {
+        return;
     }
 
     switch (g.ct.get<proptype>(id).value_or(PROP_NONE)) {

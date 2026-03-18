@@ -372,6 +372,7 @@ bool gamestate::open_chest_menu(entityid chest_id) {
         return false;
     }
     ct.set<door_open>(chest_id, true);
+    sync_registry_open_state(chest_id, true);
     ct.set<update>(chest_id, true);
     ui.active_chest_id = chest_id;
     ui.display_chest_menu = true;
@@ -388,6 +389,7 @@ bool gamestate::open_chest_menu(entityid chest_id) {
 void gamestate::close_chest_menu() {
     if (ui.active_chest_id != ENTITYID_INVALID) {
         ct.set<door_open>(ui.active_chest_id, false);
+        sync_registry_open_state(ui.active_chest_id, false);
         ct.set<update>(ui.active_chest_id, true);
     }
     ui.display_chest_menu = false;

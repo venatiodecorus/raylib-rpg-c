@@ -13,6 +13,7 @@
 #include "controlmode.h"
 #include "debugpanel.h"
 #include "dungeon.h"
+#include "ecs_world_object_components.h"
 #include "event_type.h"
 #include "gameplay_keybindings.h"
 #include "gameplay_queue_state.h"
@@ -40,6 +41,7 @@
 #include "sfx.h"
 #include "stat_bonus.h"
 #include "texture_ids.h"
+#include "world_object_definitions.h"
 #include <entt/entt.hpp>
 #include <algorithm>
 #include <functional>
@@ -322,6 +324,52 @@ public:
 
     bool has_registry_entity(entityid id) const {
         return lookup_registry_entity(id) != entt::null;
+    }
+
+    void attach_static_world_definition(entityid id, const StaticWorldDefinition& definition) {
+        const entt::entity registry_entity = ensure_registry_entity(id);
+        registry.emplace_or_replace<DefinitionRef>(registry_entity, DefinitionRef{definition.id});
+        registry.emplace_or_replace<StaticVisual>(registry_entity, StaticVisual{definition.sprite_keys, definition.sprite_key_count});
+        registry.emplace_or_replace<InteractableText>(registry_entity, InteractableText{definition.name, definition.description});
+        registry.emplace_or_replace<SolidTag>(registry_entity, SolidTag{definition.solid});
+        registry.emplace_or_replace<PushableTag>(registry_entity, PushableTag{definition.pushable});
+        registry.emplace_or_replace<PullableTag>(registry_entity, PullableTag{definition.pullable});
+        registry.emplace_or_replace<LegacyEntityType>(registry_entity, LegacyEntityType{definition.legacy_type});
+
+        if (definition.legacy_type == ENTITY_PROP) {
+            registry.emplace_or_replace<PropKind>(registry_entity, PropKind{definition.type});
+        }
+        else if (registry.any_of<PropKind>(registry_entity)) {
+            registry.remove<PropKind>(registry_entity);
+        }
+
+        if (definition.openable) {
+            registry.emplace_or_replace<OpenState>(registry_entity, OpenState{ct.get<door_open>(id).value_or(false)});
+        }
+        else if (registry.any_of<OpenState>(registry_entity)) {
+            registry.remove<OpenState>(registry_entity);
+        }
+
+        if (definition.has_inventory) {
+            registry.emplace_or_replace<HasInventoryTag>(registry_entity, HasInventoryTag{true});
+        }
+        else if (registry.any_of<HasInventoryTag>(registry_entity)) {
+            registry.remove<HasInventoryTag>(registry_entity);
+        }
+    }
+
+    void sync_registry_grid_position(entityid id, vec3 loc) {
+        const entt::entity registry_entity = lookup_registry_entity(id);
+        if (registry_entity != entt::null) {
+            registry.emplace_or_replace<GridPosition>(registry_entity, GridPosition{loc});
+        }
+    }
+
+    void sync_registry_open_state(entityid id, bool is_open) {
+        const entt::entity registry_entity = lookup_registry_entity(id);
+        if (registry_entity != entt::null) {
+            registry.emplace_or_replace<OpenState>(registry_entity, OpenState{is_open});
+        }
     }
 
     tile_t& tile_at_cur_floor(vec3 loc) {

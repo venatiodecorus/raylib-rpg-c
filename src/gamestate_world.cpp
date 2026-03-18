@@ -1,7 +1,7 @@
 #include "gamestate.h"
 
-#include "ecs_prop_components.h"
-#include "prop_definitions.h"
+#include "ecs_world_object_components.h"
+#include "world_object_definitions.h"
 
 /** @file gamestate_world.cpp
  *  @brief Dungeon/world generation and placement helpers implemented on `gamestate`.
@@ -63,7 +63,7 @@ bool dungeon_room_fits(Rectangle candidate, const vector<room>& rooms, int width
 
 with_fun dungeon_prop_init(proptype_t type) {
     return [type](CT& ct, const entityid id) {
-        const PropDefinition& definition = get_prop_definition(type);
+        const StaticWorldDefinition& definition = get_prop_definition(type);
         ct.set<name>(id, definition.name);
         ct.set<description>(id, definition.description);
         ct.set<solid>(id, definition.solid);
@@ -294,14 +294,16 @@ void gamestate::init_dungeon(biome_t type, int df_count, float parts, int width,
 
 entityid gamestate::create_door_with(with_fun doorInitFunction) {
     entityid id = add_entity();
+    const StaticWorldDefinition& definition = get_static_world_definition(ENTITY_DOOR);
     ct.set<entitytype>(id, ENTITY_DOOR);
     doorInitFunction(ct, id);
     if (!ct.get<name>(id).has_value()) {
-        ct.set<name>(id, "door");
+        ct.set<name>(id, definition.name);
     }
     if (!ct.get<description>(id).has_value()) {
-        ct.set<description>(id, "A heavy wooden door bound with iron straps and swollen from the dungeon damp.");
+        ct.set<description>(id, definition.description);
     }
+    attach_static_world_definition(id, definition);
     return id;
 }
 
@@ -327,6 +329,8 @@ entityid gamestate::create_door_at_with(vec3 loc, with_fun doorInitFunction) {
     ct.set<location>(id, loc);
     ct.set<door_open>(id, false);
     ct.set<update>(id, true);
+    sync_registry_grid_position(id, loc);
+    sync_registry_open_state(id, false);
     return id;
 }
 
@@ -356,22 +360,24 @@ size_t gamestate::place_doors() {
 
 entityid gamestate::create_chest_with(with_fun chestInitFunction) {
     entityid id = add_entity();
+    const StaticWorldDefinition& definition = get_static_world_definition(ENTITY_CHEST);
     ct.set<entitytype>(id, ENTITY_CHEST);
     ct.set<spritemove>(id, (Rectangle){0, 0, 0, 0});
     ct.set<update>(id, true);
-    ct.set<pushable>(id, true);
-    ct.set<pullable>(id, true);
-    ct.set<solid>(id, true);
+    ct.set<pushable>(id, definition.pushable);
+    ct.set<pullable>(id, definition.pullable);
+    ct.set<solid>(id, definition.solid);
     ct.set<door_open>(id, false);
     ct.set<hp>(id, vec2{10, 10});
     ct.set<inventory>(id, make_shared<vector<entityid>>());
     chestInitFunction(ct, id);
     if (!ct.get<name>(id).has_value()) {
-        ct.set<name>(id, "treasure chest");
+        ct.set<name>(id, definition.name);
     }
     if (!ct.get<description>(id).has_value()) {
-        ct.set<description>(id, "A stout treasure chest reinforced with iron bands and built to survive rough handling.");
+        ct.set<description>(id, definition.description);
     }
+    attach_static_world_definition(id, definition);
     return id;
 }
 
@@ -395,6 +401,8 @@ entityid gamestate::create_chest_at_with(vec3 loc, with_fun chestInitFunction) {
         return ENTITYID_INVALID;
     }
     ct.set<location>(id, loc);
+    sync_registry_grid_position(id, loc);
+    sync_registry_open_state(id, ct.get<door_open>(id).value_or(false));
     return id;
 }
 
@@ -429,7 +437,7 @@ entityid gamestate::place_first_floor_chest() {
 
 entityid gamestate::create_prop_with(proptype_t type, with_fun initFun) {
     entityid id = add_entity();
-    const PropDefinition& definition = get_prop_definition(type);
+    const StaticWorldDefinition& definition = get_prop_definition(type);
     ct.set<entitytype>(id, ENTITY_PROP);
     ct.set<spritemove>(id, (Rectangle){0, 0, 0, 0});
     ct.set<update>(id, true);
@@ -439,14 +447,7 @@ entityid gamestate::create_prop_with(proptype_t type, with_fun initFun) {
         ct.set<description>(id, "A neglected dungeon furnishing that has outlasted whoever left it here.");
     }
 
-    const entt::entity registry_entity = ensure_registry_entity(id);
-    registry.emplace_or_replace<DefinitionRef>(registry_entity, DefinitionRef{definition.id});
-    registry.emplace_or_replace<PropVisual>(registry_entity, PropVisual{definition.sprite_keys, definition.sprite_key_count});
-    registry.emplace_or_replace<InteractableText>(registry_entity, InteractableText{definition.name, definition.description});
-    registry.emplace_or_replace<SolidTag>(registry_entity, SolidTag{definition.solid});
-    registry.emplace_or_replace<PushableTag>(registry_entity, PushableTag{definition.pushable});
-    registry.emplace_or_replace<PullableTag>(registry_entity, PullableTag{definition.pullable});
-    registry.emplace_or_replace<PropKind>(registry_entity, PropKind{definition.type});
+    attach_static_world_definition(id, definition);
 
     return id;
 }
@@ -469,8 +470,7 @@ entityid gamestate::create_prop_at_with(proptype_t type, vec3 loc, with_fun init
         return ENTITYID_INVALID;
     }
     ct.set<location>(id, loc);
-    const entt::entity registry_entity = ensure_registry_entity(id);
-    registry.emplace_or_replace<GridPosition>(registry_entity, GridPosition{loc});
+    sync_registry_grid_position(id, loc);
     return id;
 }
 

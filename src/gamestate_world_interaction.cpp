@@ -271,6 +271,7 @@ void gamestate::resolve_pressure_plate_set_door_event(entityid door_id, bool sho
 
     const bool was_open = ct.get<door_open>(door_id).value_or(false);
     ct.set<door_open>(door_id, should_open);
+    sync_registry_open_state(door_id, should_open);
     ct.set<update>(door_id, true);
     if (!was_open && should_open) {
         audio.queue(SFX_CHEST_OPEN);
@@ -859,6 +860,7 @@ bool gamestate::try_entity_move(entityid id, vec3 v) {
     }
 
     ct.set<location>(id, aloc);
+    sync_registry_grid_position(id, aloc);
     float mx = v.x * DEFAULT_TILE_SIZE;
     float my = v.y * DEFAULT_TILE_SIZE;
     ct.set<spritemove>(id, (Rectangle){mx, my, 0, 0});
@@ -1098,6 +1100,7 @@ bool gamestate::try_entity_pull(entityid id) {
     }
 
     ct.set<location>(id, aloc);
+    sync_registry_grid_position(id, aloc);
     float mx = v.x * DEFAULT_TILE_SIZE;
     float my = v.y * DEFAULT_TILE_SIZE;
     ct.set<spritemove>(id, (Rectangle){mx, my, 0, 0});
@@ -1239,6 +1242,7 @@ bool gamestate::try_entity_open_door(entityid id, vec3 loc) {
     optional<bool> maybe_is_open = ct.get<door_open>(door_id);
     massert(maybe_is_open.has_value(), "door %d has no `is_open` component", door_id);
     ct.set<door_open>(door_id, !maybe_is_open.value());
+    sync_registry_open_state(door_id, !maybe_is_open.value());
     audio.queue(SFX_CHEST_OPEN);
     return true;
 }

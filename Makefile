@@ -49,6 +49,7 @@ GAMESTATE_C = $(addprefix $(SRCDIR)/, \
 	gamestate_input.cpp \
 	gamestate_npc_combat.cpp \
 	gamestate_world.cpp \
+	world_object_definitions.cpp \
 	prop_definitions.cpp \
 	gamestate_world_interaction.cpp \
 	gamestate_entity_factory.cpp)
