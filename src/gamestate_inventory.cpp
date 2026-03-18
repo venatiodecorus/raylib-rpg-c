@@ -373,7 +373,7 @@ bool gamestate::open_chest_menu(entityid chest_id) {
     }
     ct.set<door_open>(chest_id, true);
     ct.set<update>(chest_id, true);
-    active_chest_id = chest_id;
+    ui.active_chest_id = chest_id;
     ui.display_chest_menu = true;
     ui.display_inventory_menu = false;
     ui.chest_deposit_mode = false;
@@ -386,19 +386,19 @@ bool gamestate::open_chest_menu(entityid chest_id) {
 }
 
 void gamestate::close_chest_menu() {
-    if (active_chest_id != ENTITYID_INVALID) {
-        ct.set<door_open>(active_chest_id, false);
-        ct.set<update>(active_chest_id, true);
+    if (ui.active_chest_id != ENTITYID_INVALID) {
+        ct.set<door_open>(ui.active_chest_id, false);
+        ct.set<update>(ui.active_chest_id, true);
     }
     ui.display_chest_menu = false;
     ui.chest_deposit_mode = false;
-    active_chest_id = ENTITYID_INVALID;
+    ui.active_chest_id = ENTITYID_INVALID;
     controlmode = CONTROLMODE_PLAYER;
     frame_dirty = true;
 }
 
 void gamestate::toggle_chest_menu_mode() {
-    if (!ui.display_chest_menu || active_chest_id == ENTITYID_INVALID) {
+    if (!ui.display_chest_menu || ui.active_chest_id == ENTITYID_INVALID) {
         return;
     }
     ui.chest_deposit_mode = !ui.chest_deposit_mode;
@@ -408,11 +408,11 @@ void gamestate::toggle_chest_menu_mode() {
 }
 
 void gamestate::handle_chest_menu_confirm() {
-    if (!ui.display_chest_menu || active_chest_id == ENTITYID_INVALID) {
+    if (!ui.display_chest_menu || ui.active_chest_id == ENTITYID_INVALID) {
         return;
     }
-    entityid source_id = ui.chest_deposit_mode ? hero_id : active_chest_id;
-    entityid target_id = ui.chest_deposit_mode ? active_chest_id : hero_id;
+    entityid source_id = ui.chest_deposit_mode ? hero_id : ui.active_chest_id;
+    entityid target_id = ui.chest_deposit_mode ? ui.active_chest_id : hero_id;
     auto maybe_inventory = ct.get<inventory>(source_id);
     if (!maybe_inventory.has_value()) {
         return;
@@ -476,7 +476,7 @@ void gamestate::handle_input_chest(inputstate& is) {
     else if (inputstate_is_pressed(is, KEY_ENTER)) {
         handle_chest_menu_confirm();
     }
-    auto items = ct.get<inventory>(ui.chest_deposit_mode ? hero_id : active_chest_id).value_or(make_shared<vector<entityid>>());
+    auto items = ct.get<inventory>(ui.chest_deposit_mode ? hero_id : ui.active_chest_id).value_or(make_shared<vector<entityid>>());
     clamp_inventory_selection(items->size());
     frame_dirty = true;
 }

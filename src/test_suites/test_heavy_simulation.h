@@ -129,7 +129,7 @@ public:
         gamestate g;
         g.test = true;
         g.audio.sfx.resize(71);
-        g.mt.seed(12345);
+        g.random.mt.seed(12345);
         g.logic_init();
 
         g.d.current_floor = 2;

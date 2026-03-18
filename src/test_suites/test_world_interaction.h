@@ -165,7 +165,7 @@ public:
 
         TS_ASSERT(g.run_move_action(hero, vec3{1, 0, 0}));
         TS_ASSERT(vec3_equal(g.ct.get<location>(hero).value_or(vec3{-1, -1, -1}), vec3{2, 1, 0}));
-        TS_ASSERT(g.gameplay_events.empty());
+        TS_ASSERT(g.queue_state.gameplay_events.empty());
     }
 
     void testRunPushActionUsesQueuedPushIntent() {
@@ -177,7 +177,7 @@ public:
 
         TS_ASSERT(g.run_push_action(box, vec3{1, 0, 0}));
         TS_ASSERT(vec3_equal(g.ct.get<location>(box).value_or(vec3{-1, -1, -1}), vec3{3, 2, 0}));
-        TS_ASSERT(g.gameplay_events.empty());
+        TS_ASSERT(g.queue_state.gameplay_events.empty());
     }
 
     void testRunMoveActionQueuesPushIntentForPushableTarget() {
@@ -195,7 +195,7 @@ public:
         TS_ASSERT(g.run_move_action(hero, vec3{1, 0, 0}));
         TS_ASSERT(vec3_equal(g.ct.get<location>(hero).value_or(vec3{-1, -1, -1}), vec3{2, 2, 0}));
         TS_ASSERT(vec3_equal(g.ct.get<location>(table).value_or(vec3{-1, -1, -1}), vec3{4, 2, 0}));
-        TS_ASSERT(g.gameplay_events.empty());
+        TS_ASSERT(g.queue_state.gameplay_events.empty());
     }
 
     void testTryEntityPullMovesPullableTableProp() {
@@ -229,7 +229,7 @@ public:
         TS_ASSERT(g.run_pull_action(hero));
         TS_ASSERT(vec3_equal(g.ct.get<location>(hero).value_or(vec3{-1, -1, -1}), vec3{1, 2, 0}));
         TS_ASSERT(vec3_equal(g.ct.get<location>(box).value_or(vec3{-1, -1, -1}), vec3{2, 2, 0}));
-        TS_ASSERT(g.gameplay_events.empty());
+        TS_ASSERT(g.queue_state.gameplay_events.empty());
     }
 
     void testTryEntityMoveRespectsDoorOnEntityFloorNotCurrentFloor() {
@@ -328,7 +328,7 @@ public:
         TS_ASSERT(g.run_move_action(hero, vec3{1, 0, 0}));
         TS_ASSERT(g.ct.get<door_open>(door).value_or(false));
         TS_ASSERT(plate->active);
-        TS_ASSERT(g.gameplay_events.empty());
+        TS_ASSERT(g.queue_state.gameplay_events.empty());
     }
 
     void testQueuedPressurePlateRefreshSchedulesDoorStateFollowup() {
@@ -355,7 +355,7 @@ public:
         TS_ASSERT(result.succeeded);
         TS_ASSERT(plate->active);
         TS_ASSERT(g.ct.get<door_open>(door).value_or(false));
-        TS_ASSERT(g.gameplay_events.empty());
+        TS_ASSERT(g.queue_state.gameplay_events.empty());
     }
 
     void testRunPullActionQueuesPressurePlateRefreshFollowUp() {
@@ -380,7 +380,7 @@ public:
         TS_ASSERT(plate->active);
         TS_ASSERT(vec3_equal(g.ct.get<location>(hero).value_or(vec3{-1, -1, -1}), vec3{1, 1, 0}));
         TS_ASSERT(vec3_equal(g.ct.get<location>(box).value_or(vec3{-1, -1, -1}), vec3{2, 1, 0}));
-        TS_ASSERT(g.gameplay_events.empty());
+        TS_ASSERT(g.queue_state.gameplay_events.empty());
     }
 
     void testRunMoveActionQueuesPressurePlateCloseAfterLastOccupantLeaves() {
@@ -406,7 +406,7 @@ public:
         TS_ASSERT(vec3_equal(g.ct.get<location>(hero).value_or(vec3{-1, -1, -1}), vec3{2, 1, 0}));
         TS_ASSERT(!plate->active);
         TS_ASSERT(!g.ct.get<door_open>(door).value_or(true));
-        TS_ASSERT(g.gameplay_events.empty());
+        TS_ASSERT(g.queue_state.gameplay_events.empty());
     }
 
     void testPressurePlateControlledDoorCannotBeOpenedManually() {
@@ -439,7 +439,7 @@ public:
 
         TS_ASSERT(g.run_open_door_action(hero, vec3{2, 1, 0}));
         TS_ASSERT(g.ct.get<door_open>(door).value_or(false));
-        TS_ASSERT(g.gameplay_events.empty());
+        TS_ASSERT(g.queue_state.gameplay_events.empty());
     }
 
     void testRunOpenDoorActionRejectsPressurePlateControlledDoor() {
@@ -457,7 +457,7 @@ public:
         TS_ASSERT(g.messages.is_active);
         TS_ASSERT(!g.messages.system.empty());
         TS_ASSERT_EQUALS(g.messages.system.front(), "You cannot open this door with your hands");
-        TS_ASSERT(g.gameplay_events.empty());
+        TS_ASSERT(g.queue_state.gameplay_events.empty());
     }
 
     void testDestroyPressurePlateSeversLinkAndClosesDoor() {
@@ -497,7 +497,7 @@ public:
 
         TS_ASSERT(g.try_entity_open_chest(hero, vec3{2, 1, 1}));
         TS_ASSERT(g.ct.get<door_open>(chest).value_or(false));
-        TS_ASSERT_EQUALS(g.active_chest_id, chest);
+        TS_ASSERT_EQUALS(g.ui.active_chest_id, chest);
         TS_ASSERT(g.ui.display_chest_menu);
         TS_ASSERT_EQUALS(g.controlmode, CONTROLMODE_CHEST);
     }
@@ -516,10 +516,10 @@ public:
 
         TS_ASSERT(g.run_open_chest_action(hero, vec3{2, 1, 0}));
         TS_ASSERT(g.ct.get<door_open>(chest).value_or(false));
-        TS_ASSERT_EQUALS(g.active_chest_id, chest);
+        TS_ASSERT_EQUALS(g.ui.active_chest_id, chest);
         TS_ASSERT(g.ui.display_chest_menu);
         TS_ASSERT_EQUALS(g.controlmode, CONTROLMODE_CHEST);
-        TS_ASSERT(g.gameplay_events.empty());
+        TS_ASSERT(g.queue_state.gameplay_events.empty());
     }
 
     void testRunOpenChestActionClosesExistingChestMenu() {
@@ -534,14 +534,14 @@ public:
         TS_ASSERT_DIFFERS(chest, ENTITYID_INVALID);
         TS_ASSERT(g.run_open_chest_action(hero, vec3{2, 1, 0}));
         TS_ASSERT(g.ui.display_chest_menu);
-        TS_ASSERT_EQUALS(g.active_chest_id, chest);
+        TS_ASSERT_EQUALS(g.ui.active_chest_id, chest);
 
         TS_ASSERT(g.run_open_chest_action(hero, vec3{2, 1, 0}));
         TS_ASSERT(!g.ct.get<door_open>(chest).value_or(true));
-        TS_ASSERT_EQUALS(g.active_chest_id, ENTITYID_INVALID);
+        TS_ASSERT_EQUALS(g.ui.active_chest_id, ENTITYID_INVALID);
         TS_ASSERT(!g.ui.display_chest_menu);
         TS_ASSERT_EQUALS(g.controlmode, CONTROLMODE_PLAYER);
-        TS_ASSERT(g.gameplay_events.empty());
+        TS_ASSERT(g.queue_state.gameplay_events.empty());
     }
 
     void testRunTraverseStairsActionUsesQueuedStairsIntent() {
@@ -563,7 +563,7 @@ public:
         TS_ASSERT(g.run_traverse_stairs_action(hero));
         TS_ASSERT_EQUALS(g.d.current_floor, 1);
         TS_ASSERT(vec3_equal(g.ct.get<location>(hero).value_or(vec3{-1, -1, -1}), vec3{2, 2, 1}));
-        TS_ASSERT(g.gameplay_events.empty());
+        TS_ASSERT(g.queue_state.gameplay_events.empty());
     }
 
     void testRunTraverseStairsActionRefreshesSourceAndDestinationPressurePlateDoors() {
@@ -608,7 +608,7 @@ public:
         TS_ASSERT(!g.ct.get<door_open>(source_door).value_or(true));
         TS_ASSERT(destination_plate->active);
         TS_ASSERT(g.ct.get<door_open>(destination_door).value_or(false));
-        TS_ASSERT(g.gameplay_events.empty());
+        TS_ASSERT(g.queue_state.gameplay_events.empty());
     }
 
     void testRunTraverseStairsActionReportsTopFloorMessage() {
@@ -629,7 +629,7 @@ public:
         TS_ASSERT(g.messages.is_active);
         TS_ASSERT(!g.messages.system.empty());
         TS_ASSERT_EQUALS(g.messages.system.front(), "You are already on the top floor!");
-        TS_ASSERT(g.gameplay_events.empty());
+        TS_ASSERT(g.queue_state.gameplay_events.empty());
     }
 
     void testHandleOpenDoorUsesKeyDInsteadOfKeyO() {
@@ -695,7 +695,7 @@ public:
         TS_ASSERT_EQUALS(g.ui.active_interaction_entity_id, npc);
         TS_ASSERT_EQUALS(g.ui.interaction_title, "Borin");
         TS_ASSERT_EQUALS(g.ui.interaction_body, "Keep your torch high.");
-        TS_ASSERT(g.gameplay_events.empty());
+        TS_ASSERT(g.queue_state.gameplay_events.empty());
     }
 
     void testRunInteractActionReturnsFalseWhenNothingIsThere() {
@@ -707,7 +707,7 @@ public:
 
         TS_ASSERT(!g.run_interact_action(hero, vec3{2, 1, 0}));
         TS_ASSERT(!g.ui.display_interaction_modal);
-        TS_ASSERT(g.gameplay_events.empty());
+        TS_ASSERT(g.queue_state.gameplay_events.empty());
     }
 
     void testTryEntityInteractOpensPropDescriptionModal() {

@@ -211,7 +211,7 @@ void gamestate::logic_init() {
             axe_init(),
         };
         uniform_int_distribution<int> weapon_dist(0, static_cast<int>(weapon_inits.size()) - 1);
-        const entityid weapon_id = create_weapon_with(weapon_inits[weapon_dist(mt)]);
+        const entityid weapon_id = create_weapon_with(weapon_inits[weapon_dist(random.mt)]);
         const entityid potion_id = create_potion_with(potion_init(POTION_HP_SMALL));
         add_to_inventory(id, weapon_id);
         add_to_inventory(id, potion_id);

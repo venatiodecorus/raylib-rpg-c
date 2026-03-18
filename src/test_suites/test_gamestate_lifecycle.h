@@ -30,14 +30,14 @@ public:
     void testGamestateDefaults() {
         gamestate g;
 
-        TS_ASSERT_EQUALS(g.version, std::string(GAME_VERSION));
+        TS_ASSERT_EQUALS(g.session.version, std::string(GAME_VERSION));
         TS_ASSERT_EQUALS(g.hero_id, ENTITYID_INVALID);
         TS_ASSERT_EQUALS(g.entity_turn, 1);
         TS_ASSERT_EQUALS(g.next_entityid, 1);
         TS_ASSERT_EQUALS(g.new_entityid_begin, ENTITYID_INVALID);
         TS_ASSERT_EQUALS(g.new_entityid_end, ENTITYID_INVALID);
-        TS_ASSERT(g.cam_lockon);
-        TS_ASSERT(!g.cam_changed);
+        TS_ASSERT(g.presentation.cam_lockon);
+        TS_ASSERT(!g.presentation.cam_changed);
         TS_ASSERT(!g.dirty_entities);
         TS_ASSERT(!g.messages.is_active);
         TS_ASSERT_EQUALS(g.current_scene, SCENE_TITLE);
@@ -52,12 +52,12 @@ public:
         TS_ASSERT_EQUALS(g.get_debug_panel_bgcolor().a, 255);
         TS_ASSERT_EQUALS(g.chara_creation.race, RACE_HUMAN);
         TS_ASSERT_EQUALS(g.chara_creation.alignment, ALIGNMENT_NEUTRAL_NEUTRAL);
-        TS_ASSERT_DELTA(g.cam2d.zoom, DEFAULT_ZOOM_LEVEL, 0.001f);
-        TS_ASSERT_DELTA(g.cam2d.rotation, 0.0f, 0.001f);
-        TS_ASSERT_EQUALS(g.cam2d.target.x, 0.0f);
-        TS_ASSERT_EQUALS(g.cam2d.target.y, 0.0f);
-        TS_ASSERT_EQUALS(g.cam2d.offset.x, 0.0f);
-        TS_ASSERT_EQUALS(g.cam2d.offset.y, 0.0f);
+        TS_ASSERT_DELTA(g.presentation.cam2d.zoom, DEFAULT_ZOOM_LEVEL, 0.001f);
+        TS_ASSERT_DELTA(g.presentation.cam2d.rotation, 0.0f, 0.001f);
+        TS_ASSERT_EQUALS(g.presentation.cam2d.target.x, 0.0f);
+        TS_ASSERT_EQUALS(g.presentation.cam2d.target.y, 0.0f);
+        TS_ASSERT_EQUALS(g.presentation.cam2d.offset.x, 0.0f);
+        TS_ASSERT_EQUALS(g.presentation.cam2d.offset.y, 0.0f);
         TS_ASSERT_EQUALS(g.messages.system.size(), 0U);
         TS_ASSERT_EQUALS(g.messages.history.size(), 0U);
         TS_ASSERT_EQUALS(g.d.floors.size(), 0U);
@@ -122,8 +122,8 @@ public:
     void testGamestateResetRestoresCameraAndUiState() {
         gamestate g;
 
-        g.cam_lockon = false;
-        g.cam_changed = true;
+        g.presentation.cam_lockon = false;
+        g.presentation.cam_changed = true;
         g.ui.display_inventory_menu = true;
         g.ui.display_action_menu = true;
         g.ui.display_help_menu = true;
@@ -133,15 +133,15 @@ public:
         g.ui.confirm_prompt_message = "quit?";
         g.current_scene = SCENE_GAMEPLAY;
         g.audio.set_music_volume(0.25f);
-        g.cam2d.target = Vector2{12.0f, 34.0f};
-        g.cam2d.offset = Vector2{56.0f, 78.0f};
-        g.cam2d.zoom = 9.0f;
-        g.cam2d.rotation = 45.0f;
+        g.presentation.cam2d.target = Vector2{12.0f, 34.0f};
+        g.presentation.cam2d.offset = Vector2{56.0f, 78.0f};
+        g.presentation.cam2d.zoom = 9.0f;
+        g.presentation.cam2d.rotation = 45.0f;
 
         g.reset();
 
-        TS_ASSERT(g.cam_lockon);
-        TS_ASSERT(!g.cam_changed);
+        TS_ASSERT(g.presentation.cam_lockon);
+        TS_ASSERT(!g.presentation.cam_changed);
         TS_ASSERT(!g.ui.display_inventory_menu);
         TS_ASSERT(!g.ui.display_action_menu);
         TS_ASSERT(!g.ui.display_help_menu);
@@ -151,12 +151,12 @@ public:
         TS_ASSERT_EQUALS(g.ui.confirm_prompt_message, "");
         TS_ASSERT_EQUALS(g.current_scene, SCENE_TITLE);
         TS_ASSERT_DELTA(g.audio.get_music_volume(), DEFAULT_MUSIC_VOLUME, 0.001f);
-        TS_ASSERT_DELTA(g.cam2d.target.x, 0.0f, 0.001f);
-        TS_ASSERT_DELTA(g.cam2d.target.y, 0.0f, 0.001f);
-        TS_ASSERT_DELTA(g.cam2d.offset.x, 0.0f, 0.001f);
-        TS_ASSERT_DELTA(g.cam2d.offset.y, 0.0f, 0.001f);
-        TS_ASSERT_DELTA(g.cam2d.zoom, DEFAULT_ZOOM_LEVEL, 0.001f);
-        TS_ASSERT_DELTA(g.cam2d.rotation, 0.0f, 0.001f);
+        TS_ASSERT_DELTA(g.presentation.cam2d.target.x, 0.0f, 0.001f);
+        TS_ASSERT_DELTA(g.presentation.cam2d.target.y, 0.0f, 0.001f);
+        TS_ASSERT_DELTA(g.presentation.cam2d.offset.x, 0.0f, 0.001f);
+        TS_ASSERT_DELTA(g.presentation.cam2d.offset.y, 0.0f, 0.001f);
+        TS_ASSERT_DELTA(g.presentation.cam2d.zoom, DEFAULT_ZOOM_LEVEL, 0.001f);
+        TS_ASSERT_DELTA(g.presentation.cam2d.rotation, 0.0f, 0.001f);
     }
 
     void testGamestateMusicDefaultsAndResetBehavior() {
@@ -180,18 +180,18 @@ public:
     void testRestartGameReinitializesGameplayWithoutLeavingTitleScene() {
         gamestate g;
         g.test = true;
-        g.mt.seed(12345);
+        g.random.mt.seed(12345);
         g.logic_init();
-        g.targetwidth = DEFAULT_TARGET_WIDTH;
-        g.targetheight = DEFAULT_TARGET_HEIGHT;
-        g.windowwidth = 1234;
-        g.windowheight = 777;
+        g.presentation.targetwidth = DEFAULT_TARGET_WIDTH;
+        g.presentation.targetheight = DEFAULT_TARGET_HEIGHT;
+        g.presentation.windowwidth = 1234;
+        g.presentation.windowheight = 777;
 
         g.current_scene = SCENE_GAMEPLAY;
         g.do_restart = true;
         g.do_quit = true;
         g.gameover = true;
-        g.restart_count = 7;
+        g.session.restart_count = 7;
         g.messages.add("stale");
 
         g.restart_game();
@@ -199,19 +199,19 @@ public:
         TS_ASSERT(g.d.is_initialized);
         TS_ASSERT_EQUALS(g.d.get_floor_count(), 4U);
         TS_ASSERT_EQUALS(g.current_scene, SCENE_TITLE);
-        TS_ASSERT_EQUALS(g.restart_count, 8U);
+        TS_ASSERT_EQUALS(g.session.restart_count, 8U);
         TS_ASSERT(!g.do_restart);
         TS_ASSERT(!g.do_quit);
         TS_ASSERT(!g.gameover);
         TS_ASSERT(g.frame_dirty);
         TS_ASSERT(g.messages.system.size() >= 2U);
         TS_ASSERT_EQUALS(g.messages.system.front(), "Welcome to the game! Press enter to cycle messages.");
-        TS_ASSERT_EQUALS(g.targetwidth, DEFAULT_TARGET_WIDTH);
-        TS_ASSERT_EQUALS(g.targetheight, DEFAULT_TARGET_HEIGHT);
-        TS_ASSERT_EQUALS(g.windowwidth, 1234);
-        TS_ASSERT_EQUALS(g.windowheight, 777);
-        TS_ASSERT_DELTA(g.cam2d.offset.x, DEFAULT_TARGET_WIDTH / 4.0f, 0.001f);
-        TS_ASSERT_DELTA(g.cam2d.offset.y, DEFAULT_TARGET_HEIGHT / 4.0f, 0.001f);
+        TS_ASSERT_EQUALS(g.presentation.targetwidth, DEFAULT_TARGET_WIDTH);
+        TS_ASSERT_EQUALS(g.presentation.targetheight, DEFAULT_TARGET_HEIGHT);
+        TS_ASSERT_EQUALS(g.presentation.windowwidth, 1234);
+        TS_ASSERT_EQUALS(g.presentation.windowheight, 777);
+        TS_ASSERT_DELTA(g.presentation.cam2d.offset.x, DEFAULT_TARGET_WIDTH / 4.0f, 0.001f);
+        TS_ASSERT_DELTA(g.presentation.cam2d.offset.y, DEFAULT_TARGET_HEIGHT / 4.0f, 0.001f);
     }
 
     void testHeroOpensLevelUpModalAtTenXpAndCanApplySelection() {
@@ -370,8 +370,8 @@ public:
         press_key(is, KEY_ENTER);
         g.handle_input_keyboard_profile_prompt(is);
 
-        TS_ASSERT_EQUALS(g.keyboard_profile, KEYBOARD_PROFILE_LAPTOP);
-        TS_ASSERT(g.keyboard_profile_confirmed);
+        TS_ASSERT_EQUALS(g.keybind.keyboard_profile, KEYBOARD_PROFILE_LAPTOP);
+        TS_ASSERT(g.keybind.keyboard_profile_confirmed);
         TS_ASSERT(!g.ui.display_keyboard_profile_prompt);
         TS_ASSERT_EQUALS(g.controlmode, CONTROLMODE_PLAYER);
     }
@@ -382,8 +382,8 @@ public:
         g.audio.sfx.resize(71);
         add_floor(g);
         g.current_scene = SCENE_CHARACTER_CREATION;
-        g.keyboard_profile = KEYBOARD_PROFILE_LAPTOP;
-        g.keyboard_profile_confirmed = true;
+        g.keybind.keyboard_profile = KEYBOARD_PROFILE_LAPTOP;
+        g.keybind.keyboard_profile_confirmed = true;
 
         inputstate is = {};
         inputstate_reset(is);
@@ -394,7 +394,7 @@ public:
         TS_ASSERT_EQUALS(g.current_scene, SCENE_GAMEPLAY);
         TS_ASSERT(!g.ui.display_keyboard_profile_prompt);
         TS_ASSERT_EQUALS(g.controlmode, CONTROLMODE_PLAYER);
-        TS_ASSERT_EQUALS(g.keyboard_profile, KEYBOARD_PROFILE_LAPTOP);
+        TS_ASSERT_EQUALS(g.keybind.keyboard_profile, KEYBOARD_PROFILE_LAPTOP);
         TS_ASSERT_DIFFERS(g.hero_id, ENTITYID_INVALID);
     }
 
@@ -407,7 +407,7 @@ public:
 
         g.current_scene = SCENE_GAMEPLAY;
         g.hero_id = hero;
-        g.keyboard_profile = KEYBOARD_PROFILE_LAPTOP;
+        g.keybind.keyboard_profile = KEYBOARD_PROFILE_LAPTOP;
 
         inputstate is = {};
         inputstate_reset(is);
@@ -421,7 +421,7 @@ public:
         gamestate g;
         g.test = true;
         g.current_scene = SCENE_GAMEPLAY;
-        g.keyboard_profile = KEYBOARD_PROFILE_LAPTOP;
+        g.keybind.keyboard_profile = KEYBOARD_PROFILE_LAPTOP;
         g.open_controls_menu();
         g.ui.controls_menu_selection = INPUT_ACTION_ATTACK + 2;
 
@@ -429,13 +429,13 @@ public:
         inputstate_reset(is);
         press_key(is, KEY_ENTER);
         g.handle_input_controls_menu(is);
-        TS_ASSERT(g.controls_menu_waiting_for_key);
+        TS_ASSERT(g.keybind.controls_menu_waiting_for_key);
 
         inputstate_reset(is);
         press_key(is, KEY_T);
         g.handle_input_controls_menu(is);
 
-        TS_ASSERT(!g.controls_menu_waiting_for_key);
+        TS_ASSERT(!g.keybind.controls_menu_waiting_for_key);
         TS_ASSERT_EQUALS(g.get_keybinding_primary(KEYBOARD_PROFILE_LAPTOP, INPUT_ACTION_ATTACK), KEY_T);
     }
 
@@ -554,7 +554,7 @@ public:
         g.current_scene = SCENE_GAMEPLAY;
         g.hero_id = hero;
         g.player_changing_dir = true;
-        g.keyboard_profile = KEYBOARD_PROFILE_FULL;
+        g.keybind.keyboard_profile = KEYBOARD_PROFILE_FULL;
 
         inputstate is = {};
         inputstate_reset(is);
@@ -596,9 +596,9 @@ public:
     void testRestartGamePreservesConfirmedKeyboardProfileChoice() {
         gamestate g;
         g.test = true;
-        g.mt.seed(12345);
-        g.keyboard_profile = KEYBOARD_PROFILE_LAPTOP;
-        g.keyboard_profile_confirmed = true;
+        g.random.mt.seed(12345);
+        g.keybind.keyboard_profile = KEYBOARD_PROFILE_LAPTOP;
+        g.keybind.keyboard_profile_confirmed = true;
 
         g.logic_init();
         g.current_scene = SCENE_GAMEPLAY;
@@ -606,22 +606,22 @@ public:
         g.restart_game();
 
         TS_ASSERT_EQUALS(g.current_scene, SCENE_TITLE);
-        TS_ASSERT_EQUALS(g.keyboard_profile, KEYBOARD_PROFILE_LAPTOP);
-        TS_ASSERT(g.keyboard_profile_confirmed);
+        TS_ASSERT_EQUALS(g.keybind.keyboard_profile, KEYBOARD_PROFILE_LAPTOP);
+        TS_ASSERT(g.keybind.keyboard_profile_confirmed);
     }
 
     void testLogicInitAddsFloorFourPressurePlateTutorialSetup() {
         gamestate g;
         g.test = true;
-        g.mt.seed(12345);
+        g.random.mt.seed(12345);
 
         g.logic_init();
 
         TS_ASSERT_EQUALS(g.d.get_floor_count(), 4U);
-        TS_ASSERT_EQUALS(g.floor_pressure_plates.size(), 2U);
-        const entityid linked_door_id = g.floor_pressure_plates.front().linked_door_id;
+        TS_ASSERT_EQUALS(g.pressure_plate_state.floor_pressure_plates.size(), 2U);
+        const entityid linked_door_id = g.pressure_plate_state.floor_pressure_plates.front().linked_door_id;
         TS_ASSERT_DIFFERS(linked_door_id, ENTITYID_INVALID);
-        for (const floor_pressure_plate_t& plate : g.floor_pressure_plates) {
+        for (const floor_pressure_plate_t& plate : g.pressure_plate_state.floor_pressure_plates) {
             TS_ASSERT_EQUALS(plate.loc.z, 2);
             TS_ASSERT(!plate.destroyed);
             TS_ASSERT_EQUALS(plate.txkey_up, TX_SWITCHES_PRESSURE_PLATE_UP_00);
@@ -632,8 +632,8 @@ public:
         const vec3 tutorial_door_loc = g.ct.get<location>(linked_door_id).value_or(vec3{-1, -1, -1});
         TS_ASSERT(vec3_valid(tutorial_door_loc));
         TS_ASSERT_EQUALS(tutorial_door_loc.z, 2);
-        TS_ASSERT(vec3_valid(g.floor_four_tutorial_orc_spawn));
-        TS_ASSERT_EQUALS(g.floor_four_tutorial_orc_spawn.z, 2);
+        TS_ASSERT(vec3_valid(g.pressure_plate_state.floor_four_tutorial_orc_spawn));
+        TS_ASSERT_EQUALS(g.pressure_plate_state.floor_four_tutorial_orc_spawn.z, 2);
 
         auto floor_four = g.d.get_floor(2);
         TS_ASSERT_EQUALS(floor_four->tile_at(vec3{tutorial_door_loc.x, tutorial_door_loc.y - 1, tutorial_door_loc.z}).get_type(), TILE_STONE_WALL_00);
@@ -642,7 +642,7 @@ public:
         TS_ASSERT_EQUALS(tutorial_downstairs.z, 2);
         TS_ASSERT(tutorial_downstairs.x > 6);
         TS_ASSERT_EQUALS(floor_four->tile_at(tutorial_downstairs).get_type(), TILE_DOWNSTAIRS);
-        TS_ASSERT(tile_is_walkable(floor_four->tile_at(g.floor_four_tutorial_orc_spawn).get_type()));
+        TS_ASSERT(tile_is_walkable(floor_four->tile_at(g.pressure_plate_state.floor_four_tutorial_orc_spawn).get_type()));
 
         size_t floor_four_orc_count = 0;
         bool found_orc_in_tutorial_room = false;
@@ -658,7 +658,7 @@ public:
                 continue;
             }
             floor_four_orc_count++;
-            found_orc_in_tutorial_room = vec3_equal(loc, g.floor_four_tutorial_orc_spawn);
+            found_orc_in_tutorial_room = vec3_equal(loc, g.pressure_plate_state.floor_four_tutorial_orc_spawn);
         }
 
         TS_ASSERT_EQUALS(floor_four_orc_count, 1U);
@@ -668,7 +668,7 @@ public:
     void testLogicInitAddsFloorThreePullablesTutorialSign() {
         gamestate g;
         g.test = true;
-        g.mt.seed(12345);
+        g.random.mt.seed(12345);
 
         g.logic_init();
 
@@ -698,7 +698,7 @@ public:
     void testLogicInitAddsFloorThreePullableTutorialProps() {
         gamestate g;
         g.test = true;
-        g.mt.seed(12345);
+        g.random.mt.seed(12345);
 
         g.logic_init();
 
@@ -728,7 +728,7 @@ public:
     void testLogicInitAddsPlaceholderFourthFloorWithPropsAndBoxes() {
         gamestate g;
         g.test = true;
-        g.mt.seed(12345);
+        g.random.mt.seed(12345);
 
         g.logic_init();
 

@@ -49,6 +49,7 @@ struct UIState {
     size_t action_selection = 0;
     size_t controls_menu_selection = 0;
     Vector2 inventory_cursor = {0, 0};
+    entityid active_chest_id = ENTITYID_INVALID;
 
     // Confirm prompt
     confirm_action_t confirm_action = CONFIRM_ACTION_NONE;

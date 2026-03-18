@@ -72,7 +72,7 @@ public:
         TS_ASSERT(g.is_in_inventory(hero, potion));
         TS_ASSERT(!g.is_in_inventory(hero, dagger));
         TS_ASSERT_EQUALS(g.d.get_floor(0)->tile_at(loc).get_cached_item(), dagger);
-        TS_ASSERT(g.gameplay_events.empty());
+        TS_ASSERT(g.queue_state.gameplay_events.empty());
     }
 
     void testRunPickupActionReturnsFalseWithoutItem() {
@@ -85,7 +85,7 @@ public:
         auto inv = g.ct.get<inventory>(hero);
         TS_ASSERT(inv.has_value());
         TS_ASSERT_EQUALS(inv.value()->size(), 0U);
-        TS_ASSERT(g.gameplay_events.empty());
+        TS_ASSERT(g.queue_state.gameplay_events.empty());
     }
 
     void testAddAndRemoveInventoryBookkeeping() {
@@ -144,7 +144,7 @@ public:
         TS_ASSERT_EQUALS(g.flag, GAMESTATE_FLAG_PLAYER_ANIM);
         TS_ASSERT_EQUALS(g.controlmode, CONTROLMODE_PLAYER);
         TS_ASSERT(!g.ui.display_inventory_menu);
-        TS_ASSERT(g.gameplay_events.empty());
+        TS_ASSERT(g.queue_state.gameplay_events.empty());
 
         g.ui.display_inventory_menu = true;
         g.controlmode = CONTROLMODE_INVENTORY;
@@ -152,7 +152,7 @@ public:
         TS_ASSERT_EQUALS(g.ct.get<equipped_weapon>(hero).value_or(ENTITYID_INVALID), ENTITYID_INVALID);
         TS_ASSERT_EQUALS(g.controlmode, CONTROLMODE_PLAYER);
         TS_ASSERT(!g.ui.display_inventory_menu);
-        TS_ASSERT(g.gameplay_events.empty());
+        TS_ASSERT(g.queue_state.gameplay_events.empty());
     }
 
     void testEquipAndUnequipShieldFlow() {
@@ -192,7 +192,7 @@ public:
         TS_ASSERT_EQUALS(g.flag, GAMESTATE_FLAG_PLAYER_ANIM);
         TS_ASSERT_EQUALS(g.controlmode, CONTROLMODE_PLAYER);
         TS_ASSERT(!g.ui.display_inventory_menu);
-        TS_ASSERT(g.gameplay_events.empty());
+        TS_ASSERT(g.queue_state.gameplay_events.empty());
 
         g.ui.display_inventory_menu = true;
         g.controlmode = CONTROLMODE_INVENTORY;
@@ -200,7 +200,7 @@ public:
         TS_ASSERT_EQUALS(g.ct.get<equipped_shield>(hero).value_or(ENTITYID_INVALID), ENTITYID_INVALID);
         TS_ASSERT_EQUALS(g.controlmode, CONTROLMODE_PLAYER);
         TS_ASSERT(!g.ui.display_inventory_menu);
-        TS_ASSERT(g.gameplay_events.empty());
+        TS_ASSERT(g.queue_state.gameplay_events.empty());
     }
 
     void testRunEquipItemActionReturnsFalseForPotion() {
@@ -219,7 +219,7 @@ public:
         TS_ASSERT_EQUALS(g.ct.get<equipped_shield>(hero).value_or(ENTITYID_INVALID), ENTITYID_INVALID);
         TS_ASSERT(g.ui.display_inventory_menu);
         TS_ASSERT_EQUALS(g.controlmode, CONTROLMODE_INVENTORY);
-        TS_ASSERT(g.gameplay_events.empty());
+        TS_ASSERT(g.queue_state.gameplay_events.empty());
     }
 
     void testDropItemFromHeroInventoryClearsEquipmentAndPlacesItemOnTile() {
@@ -258,7 +258,7 @@ public:
         TS_ASSERT_EQUALS(g.d.get_floor(0)->tile_at(loc).get_cached_item(), dagger);
         TS_ASSERT(g.ui.display_inventory_menu);
         TS_ASSERT_EQUALS(g.controlmode, CONTROLMODE_INVENTORY);
-        TS_ASSERT(g.gameplay_events.empty());
+        TS_ASSERT(g.queue_state.gameplay_events.empty());
     }
 
     void testRunDropItemActionClearsEquippedWeapon() {
@@ -274,7 +274,7 @@ public:
         TS_ASSERT(g.run_drop_item_action(hero, dagger));
         TS_ASSERT_EQUALS(g.ct.get<equipped_weapon>(hero).value_or(ENTITYID_INVALID), ENTITYID_INVALID);
         TS_ASSERT_EQUALS(g.d.get_floor(0)->tile_at(loc).get_cached_item(), dagger);
-        TS_ASSERT(g.gameplay_events.empty());
+        TS_ASSERT(g.queue_state.gameplay_events.empty());
     }
 
     void testRunDropItemActionReturnsFalseForItemNotInInventory() {
@@ -285,7 +285,7 @@ public:
 
         g.hero_id = hero;
         TS_ASSERT(!g.run_drop_item_action(hero, dagger));
-        TS_ASSERT(g.gameplay_events.empty());
+        TS_ASSERT(g.queue_state.gameplay_events.empty());
     }
 
     void testUsePotionConsumesPotionAndUpdatesHp() {
@@ -326,7 +326,7 @@ public:
         TS_ASSERT_EQUALS(g.flag, GAMESTATE_FLAG_PLAYER_ANIM);
         TS_ASSERT_EQUALS(g.controlmode, CONTROLMODE_PLAYER);
         TS_ASSERT(!g.ui.display_inventory_menu);
-        TS_ASSERT(g.gameplay_events.empty());
+        TS_ASSERT(g.queue_state.gameplay_events.empty());
     }
 
     void testRunUseItemActionReturnsFalseForNonPotionItem() {
@@ -344,7 +344,7 @@ public:
         TS_ASSERT(g.is_in_inventory(hero, dagger));
         TS_ASSERT(g.ui.display_inventory_menu);
         TS_ASSERT_EQUALS(g.controlmode, CONTROLMODE_INVENTORY);
-        TS_ASSERT(g.gameplay_events.empty());
+        TS_ASSERT(g.queue_state.gameplay_events.empty());
     }
 
     void testChestTransferMovesItemsBetweenHeroAndChestInventories() {
@@ -388,14 +388,14 @@ public:
 
         TS_ASSERT_DIFFERS(chest, ENTITYID_INVALID);
         TS_ASSERT(g.add_to_inventory(chest, dagger));
-        g.active_chest_id = chest;
+        g.ui.active_chest_id = chest;
         g.ui.display_chest_menu = true;
         g.controlmode = CONTROLMODE_CHEST;
 
         TS_ASSERT(g.run_chest_transfer_action(chest, hero, dagger));
         TS_ASSERT(g.is_in_inventory(hero, dagger));
         TS_ASSERT(!g.is_in_inventory(chest, dagger));
-        TS_ASSERT(g.gameplay_events.empty());
+        TS_ASSERT(g.queue_state.gameplay_events.empty());
     }
 
     void testRunChestTransferActionDepositsItemThroughQueue() {
@@ -408,7 +408,7 @@ public:
         TS_ASSERT_DIFFERS(chest, ENTITYID_INVALID);
         TS_ASSERT(g.add_to_inventory(hero, dagger));
         g.hero_id = hero;
-        g.active_chest_id = chest;
+        g.ui.active_chest_id = chest;
         g.ui.display_chest_menu = true;
         g.controlmode = CONTROLMODE_CHEST;
         g.ui.chest_deposit_mode = true;
@@ -416,7 +416,7 @@ public:
         TS_ASSERT(g.run_chest_transfer_action(hero, chest, dagger));
         TS_ASSERT(!g.is_in_inventory(hero, dagger));
         TS_ASSERT(g.is_in_inventory(chest, dagger));
-        TS_ASSERT(g.gameplay_events.empty());
+        TS_ASSERT(g.queue_state.gameplay_events.empty());
     }
 
     void testRunChestTransferActionClearsEquippedWeaponWhenDepositing() {
@@ -433,7 +433,7 @@ public:
         TS_ASSERT(g.run_chest_transfer_action(hero, chest, dagger));
         TS_ASSERT_EQUALS(g.ct.get<equipped_weapon>(hero).value_or(ENTITYID_INVALID), ENTITYID_INVALID);
         TS_ASSERT(g.is_in_inventory(chest, dagger));
-        TS_ASSERT(g.gameplay_events.empty());
+        TS_ASSERT(g.queue_state.gameplay_events.empty());
     }
 
     void testChestMenuClosesOnKeyDAndNotKeyO() {

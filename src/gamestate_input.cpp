@@ -512,11 +512,11 @@ void gamestate::handle_input_gameplay_controlmode_player(inputstate& is) {
             return;
         }
         uniform_int_distribution<int> dist(-1, 1);
-        int vx = dist(mt);
-        int vy = dist(mt);
+        int vx = dist(random.mt);
+        int vy = dist(random.mt);
         while (vx == 0 && vy == 0) {
-            vx = dist(mt);
-            vy = dist(mt);
+            vx = dist(random.mt);
+            vy = dist(random.mt);
         }
         if (run_move_action(hero_id, vec3{vx, vy, 0})) {
             msuccess2("hero moved randomly successfully");

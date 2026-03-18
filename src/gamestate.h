@@ -15,17 +15,24 @@
 #include "dungeon.h"
 #include "event_type.h"
 #include "gameplay_keybindings.h"
+#include "gameplay_queue_state.h"
 #include "gamestate_flag.h"
 #include "get_racial_hd.h"
 #include "get_racial_modifiers.h"
+#include "frame_timing_state.h"
 #include "inputstate.h"
+#include "keybinding_state.h"
 #include "libdraw_context.h"
 #include "libgame_defines.h"
 #include "magic_values.h"
 #include "option_menu.h"
 #include "orc_names.h"
 #include "ui_state.h"
+#include "presentation_state.h"
+#include "pressure_plate_state.h"
+#include "random_state.h"
 #include "roll.h"
+#include "runtime_session_state.h"
 #include "scene.h"
 #include "audio_manager.h"
 #include "message_log.h"
@@ -33,14 +40,15 @@
 #include "sfx.h"
 #include "stat_bonus.h"
 #include "texture_ids.h"
-#include <array>
 #include <algorithm>
-#include <chrono>
+#include <functional>
 #include <map>
+#include <optional>
 #include <queue>
-#include <random>
 #include <raylib.h>
 #include <raymath.h>
+#include <string>
+#include <vector>
 
 #define GAMESTATE_SIZEOFTIMEBUF 64
 #define GAMESTATE_SIZEOFDEBUGPANELBUF 1024
@@ -64,24 +72,14 @@ using std::make_pair;
 using std::map;
 using std::mt19937;
 using std::pair;
+using std::function;
+using std::optional;
 using std::priority_queue;
 using std::round;
-using std::seed_seq;
+using std::string;
 using std::uniform_int_distribution;
 using std::uniform_real_distribution;
-using std::chrono::duration_cast;
-using std::chrono::nanoseconds;
-using std::chrono::system_clock;
-using std::chrono::time_point;
-
-struct floor_pressure_plate_t {
-    vec3 loc;
-    entityid linked_door_id;
-    bool active;
-    bool destroyed;
-    int txkey_up;
-    int txkey_down;
-};
+using std::vector;
 
 /**
  * @brief Central runtime object for gameplay, world state, entities, UI state, and high-level flow.
@@ -94,93 +92,45 @@ class gamestate {
 public:
     controlmode_t controlmode;
     controlmode_t controlmode_before_confirm;
-    debugpanel_t debugpanel;
     entityid hero_id;
-    entityid active_chest_id;
     entityid new_entityid_begin;
     entityid new_entityid_end;
     entityid next_entityid;
     entityid entity_turn;
-    time_t timebegan;
-    time_t currenttime;
-    struct tm* timebegantm;
-    struct tm* currenttimetm;
-    char timebeganbuf[GAMESTATE_SIZEOFTIMEBUF];
-    char currenttimebuf[GAMESTATE_SIZEOFTIMEBUF];
-    mt19937 mt;
-    string seed;
     bool god_mode;
     bool test;
-    bool debugpanelon;
-    bool gridon;
-    bool cam_lockon;
     bool player_input_received;
     bool is_locked;
-    bool processing_actions;
     bool gameover;
     bool player_changing_dir;
     bool test_guard;
     bool do_quit;
     bool dirty_entities;
-    bool cam_changed;
     bool frame_dirty;
     bool do_restart;
     int lock;
-    int pad;
-    unsigned int framecount;
-    unsigned int fadealpha;
-    unsigned int targetwidth;
-    unsigned int targetheight;
-    unsigned int windowwidth;
-    unsigned int windowheight;
-    unsigned int frame_updates;
-    unsigned int restart_count;
-    unsigned int font_size;
     unsigned int turn_count;
-    unsigned long int ticks;
-    float line_spacing;
-    double last_frame_time;
-    double max_frame_time;
-    size_t last_frame_times_current;
-    vector<double> last_frame_times;
     dungeon d;
-    char frame_time_str[32];
     gamestate_flag_t flag;
     scene_t current_scene;
     MessageLog messages;
     AudioManager audio;
     character_creation chara_creation;
-    string version;
-    Vector2 last_click_screen_pos;
-    Camera2D cam2d;
-    Font font;
     ComponentTable ct;
     UIState ui;
-    keyboard_profile_t keyboard_profile = KEYBOARD_PROFILE_FULL;
-    bool keyboard_profile_confirmed = false;
-    bool controls_menu_waiting_for_key;
-    gameplay_input_action_t controls_menu_pending_action;
-    std::array<std::array<gameplay_keybinding_t, INPUT_ACTION_COUNT>, KEYBOARD_PROFILE_COUNT> keybindings;
+    KeybindingState keybind;
+    RandomState random;
+    FrameTimingState timing;
+    RuntimeSessionState session;
+    PresentationState presentation;
+    GameplayQueueState queue_state;
+    PressurePlateState pressure_plate_state;
     DamagePopups damage_popups_sys;
-    vector<floor_pressure_plate_t> floor_pressure_plates;
-    vector<gameplay_event_t> gameplay_events;
-    vec3 floor_four_tutorial_orc_spawn = vec3{-1, -1, -1};
-
-    void set_seed() {
-        srand(time(NULL));
-        SetRandomSeed(time(NULL));
-        time_point<system_clock> now = system_clock::now();
-        auto dur = duration_cast<nanoseconds>(now.time_since_epoch());
-        long long nanoseconds_since_epoch = dur.count();
-        seed = std::to_string(nanoseconds_since_epoch);
-        seed_seq seedseq(seed.begin(), seed.end());
-        mt.seed(seedseq);
-    }
 
     gamestate() {
         minfo2("Initializing gamestate");
-        set_seed();
-        minfo2("The gamestate seed was set to: %s", seed.c_str());
+        random.set_seed();
+        minfo2("The gamestate seed was set to: %s", random.seed.c_str());
         reset();
     }
 
@@ -190,45 +140,37 @@ public:
 
     // Music paths are now defined in audio_defs.h (MUSIC_PATHS[])
 
-    double get_avg_last_frame_time() {
-        double sum = 0;
-        for (int i = 0; i < LAST_FRAME_TIMES_MAX; i++) {
-            sum += last_frame_times[i];
-        }
-        return sum / LAST_FRAME_TIMES_MAX;
-    }
-
     void reset() {
-        version = GAME_VERSION;
-        debugpanel.x = GAMESTATE_DEBUGPANEL_DEFAULT_X;
-        debugpanel.y = GAMESTATE_DEBUGPANEL_DEFAULT_Y;
-        debugpanel.w = GAMESTATE_DEBUGPANEL_DEFAULT_WIDTH;
-        debugpanel.h = GAMESTATE_DEBUGPANEL_DEFAULT_HEIGHT;
-        debugpanel.fg_color = RAYWHITE;
-        debugpanel.bg_color = RED;
-        debugpanel.font_size = GAMESTATE_DEBUGPANEL_DEFAULT_FONT_SIZE;
-        targetwidth = -1;
-        targetheight = -1;
-        windowwidth = -1;
-        windowheight = -1;
+        session = RuntimeSessionState();
+        session.version = GAME_VERSION;
+        presentation = PresentationState();
+        presentation.debugpanel.x = GAMESTATE_DEBUGPANEL_DEFAULT_X;
+        presentation.debugpanel.y = GAMESTATE_DEBUGPANEL_DEFAULT_Y;
+        presentation.debugpanel.w = GAMESTATE_DEBUGPANEL_DEFAULT_WIDTH;
+        presentation.debugpanel.h = GAMESTATE_DEBUGPANEL_DEFAULT_HEIGHT;
+        presentation.debugpanel.fg_color = RAYWHITE;
+        presentation.debugpanel.bg_color = RED;
+        presentation.debugpanel.font_size = GAMESTATE_DEBUGPANEL_DEFAULT_FONT_SIZE;
+        presentation.targetwidth = static_cast<unsigned int>(-1);
+        presentation.targetheight = static_cast<unsigned int>(-1);
+        presentation.windowwidth = static_cast<unsigned int>(-1);
+        presentation.windowheight = static_cast<unsigned int>(-1);
         hero_id = INVALID;
-        active_chest_id = INVALID;
+        ui.active_chest_id = INVALID;
         entity_turn = 1;
         new_entityid_begin = ENTITYID_INVALID;
         new_entityid_end = ENTITYID_INVALID;
-        timebegan = currenttime = time(NULL);
-        timebegantm = localtime(&timebegan);
-        currenttimetm = localtime(&currenttime);
-        bzero(timebeganbuf, GAMESTATE_SIZEOFTIMEBUF);
-        bzero(currenttimebuf, GAMESTATE_SIZEOFTIMEBUF);
-        strftime(timebeganbuf, GAMESTATE_SIZEOFTIMEBUF, "Start Time: %Y-%m-%d %H:%M:%S", timebegantm);
-        strftime(currenttimebuf, GAMESTATE_SIZEOFTIMEBUF, "Current Time: %Y-%m-%d %H:%M:%S", currenttimetm);
-        cam_lockon = true;
+        session.timebegan = session.currenttime = time(NULL);
+        session.timebegantm = localtime(&session.timebegan);
+        session.currenttimetm = localtime(&session.currenttime);
+        bzero(session.timebeganbuf, GAMESTATE_SIZEOFTIMEBUF);
+        bzero(session.currenttimebuf, GAMESTATE_SIZEOFTIMEBUF);
+        strftime(session.timebeganbuf, GAMESTATE_SIZEOFTIMEBUF, "Start Time: %Y-%m-%d %H:%M:%S", session.timebegantm);
+        strftime(session.currenttimebuf, GAMESTATE_SIZEOFTIMEBUF, "Current Time: %Y-%m-%d %H:%M:%S", session.currenttimetm);
+        presentation.cam_lockon = true;
         frame_dirty = true;
-        debugpanelon = false;
         player_input_received = false;
         is_locked = false;
-        gridon = false;
         ui.display_action_menu = false;
         ui.display_inventory_menu = false;
         ui.display_chest_menu = false;
@@ -242,9 +184,9 @@ public:
         ui.display_interaction_modal = false;
         ui.display_level_up_modal = false;
         do_quit = false;
-        cam_changed = false;
+        presentation.cam_changed = false;
         gameover = dirty_entities = false;
-        processing_actions = false;
+        queue_state.processing_actions = false;
         test_guard = false;
         player_changing_dir = false;
         ui.chest_deposit_mode = false;
@@ -269,40 +211,32 @@ public:
         ui.keyboard_profile_selection = 0;
         ui.mini_inventory_visible_count = 10;
         ui.mini_inventory_scroll_offset = 0;
-        cam2d.target = cam2d.offset = Vector2{0, 0};
-        cam2d.zoom = DEFAULT_ZOOM_LEVEL;
-        cam2d.rotation = 0.0;
-        fadealpha = 0.0;
+        presentation.cam2d.target = presentation.cam2d.offset = Vector2{0, 0};
+        presentation.cam2d.zoom = DEFAULT_ZOOM_LEVEL;
+        presentation.cam2d.rotation = 0.0;
+        presentation.fadealpha = 0.0;
         controlmode = CONTROLMODE_PLAYER;
         controlmode_before_confirm = CONTROLMODE_PLAYER;
         // current displayed dungeon floor
         flag = GAMESTATE_FLAG_PLAYER_INPUT;
-        font_size = GAMESTATE_DEBUGPANEL_DEFAULT_FONT_SIZE;
-        pad = 20;
-        line_spacing = 1.0f;
+        presentation.font_size = GAMESTATE_DEBUGPANEL_DEFAULT_FONT_SIZE;
+        presentation.pad = 20;
+        presentation.line_spacing = 1.0f;
         // weird bug maybe when set to 0?
         next_entityid = 1;
         do_restart = 0;
         ui.title_screen_selection = 0;
         lock = 0;
-        frame_updates = 0;
-        framecount = 0;
-        restart_count = 0;
-        last_frame_time = 0;
-        max_frame_time = 0;
-        last_frame_times_current = 0;
-        last_frame_times.reserve(LAST_FRAME_TIMES_MAX);
-        for (size_t i = 0; i < last_frame_times.size(); i++) {
-            last_frame_times[i] = 0;
-        }
+        timing = FrameTimingState();
+        session.restart_count = 0;
         turn_count = 0;
         ui.action_selection = 0;
         ui.inventory_menu_selection = 0;
         ui.level_up_selection = 0;
-        debugpanel.pad_top = 0;
-        debugpanel.pad_left = 0;
-        debugpanel.pad_right = 0;
-        debugpanel.pad_bottom = 0;
+        presentation.debugpanel.pad_top = 0;
+        presentation.debugpanel.pad_left = 0;
+        presentation.debugpanel.pad_right = 0;
+        presentation.debugpanel.pad_bottom = 0;
         ui.max_title_screen_selections = 2;
         // initialize character creation
         chara_creation.name = "hero";
@@ -320,7 +254,7 @@ public:
         ui.window_box_bgcolor = DEFAULT_WINDOW_BOX_BGCOLOR;
         ui.window_box_fgcolor = DEFAULT_WINDOW_BOX_FGCOLOR;
         ui.message_history_bgcolor = DEFAULT_WINDOW_BOX_BGCOLOR;
-        last_click_screen_pos = Vector2{-1, -1};
+        presentation.last_click_screen_pos = Vector2{-1, -1};
         ui.confirm_action = CONFIRM_ACTION_NONE;
         ui.confirm_prompt_message.clear();
         ui.active_interaction_entity_id = ENTITYID_INVALID;
@@ -328,13 +262,12 @@ public:
         ui.interaction_body.clear();
         ui.pending_level_ups = 0;
         damage_popups_sys = DamagePopups();
-        floor_pressure_plates.clear();
-        gameplay_events.clear();
-        floor_four_tutorial_orc_spawn = vec3{-1, -1, -1};
+        pressure_plate_state = PressurePlateState();
+        queue_state.gameplay_events.clear();
         ui.prefer_mini_inventory_menu = false;
-        controls_menu_waiting_for_key = false;
+        keybind.controls_menu_waiting_for_key = false;
         ui.controls_menu_selection = 0;
-        controls_menu_pending_action = INPUT_ACTION_MOVE_UP;
+        keybind.controls_menu_pending_action = INPUT_ACTION_MOVE_UP;
         reset_default_keybindings();
         messages = MessageLog();
         ct.clear();
@@ -1227,14 +1160,14 @@ public:
 
         direction_t player_dir = ct.get<direction>(hero_id).value_or(DIR_NONE);
 
-        bzero(debugpanel.buffer, sizeof(debugpanel.buffer));
+        bzero(presentation.debugpanel.buffer, sizeof(presentation.debugpanel.buffer));
         // Format the string in one pass
 
         minfo2("calling snprintf...");
 
         snprintf(
-            debugpanel.buffer,
-            sizeof(debugpanel.buffer),
+            presentation.debugpanel.buffer,
+            sizeof(presentation.debugpanel.buffer),
             "@evildojo666\n"
             "project.rpg\n"
             //"%s\n" // timebeganbuf
@@ -1264,16 +1197,16 @@ public:
             "player direction: %d\n"
             "master volume: %0.1f\n"
             "\n",
-            framecount,
-            frame_updates,
+            timing.framecount,
+            timing.frame_updates,
             frame_dirty,
-            last_frame_time * 1000,
+            timing.last_frame_time * 1000,
             LAST_FRAME_TIMES_MAX,
-            (get_avg_last_frame_time() * 1000),
-            max_frame_time * 1000,
-            cam2d.offset.x,
-            cam2d.offset.y,
-            cam2d.zoom,
+            (timing.get_avg_last_frame_time() * 1000),
+            timing.max_frame_time * 1000,
+            presentation.cam2d.offset.x,
+            presentation.cam2d.offset.y,
+            presentation.cam2d.zoom,
             control_mode,
             0,
             0,
@@ -1330,5 +1263,56 @@ public:
     void adjust_window_box_fg_channel(size_t channel, int dir);
     void reset_window_box_colors();
     Color get_debug_panel_bgcolor() const;
+
+    debugpanel_t& debugpanel = presentation.debugpanel;
+    bool& debugpanelon = presentation.debugpanelon;
+    bool& gridon = presentation.gridon;
+    bool& cam_lockon = presentation.cam_lockon;
+    bool& cam_changed = presentation.cam_changed;
+    unsigned int& fadealpha = presentation.fadealpha;
+    unsigned int& targetwidth = presentation.targetwidth;
+    unsigned int& targetheight = presentation.targetheight;
+    unsigned int& windowwidth = presentation.windowwidth;
+    unsigned int& windowheight = presentation.windowheight;
+    unsigned int& font_size = presentation.font_size;
+    int& pad = presentation.pad;
+    float& line_spacing = presentation.line_spacing;
+    Vector2& last_click_screen_pos = presentation.last_click_screen_pos;
+    Camera2D& cam2d = presentation.cam2d;
+    Font& font = presentation.font;
+
+    mt19937& mt = random.mt;
+    string& seed = random.seed;
+
+    unsigned int& framecount = timing.framecount;
+    unsigned int& frame_updates = timing.frame_updates;
+    unsigned long int& ticks = timing.ticks;
+    double& last_frame_time = timing.last_frame_time;
+    double& max_frame_time = timing.max_frame_time;
+    size_t& last_frame_times_current = timing.last_frame_times_current;
+    vector<double>& last_frame_times = timing.last_frame_times;
+    char (&frame_time_str)[32] = timing.frame_time_str;
+
+    time_t& timebegan = session.timebegan;
+    time_t& currenttime = session.currenttime;
+    struct tm*& timebegantm = session.timebegantm;
+    struct tm*& currenttimetm = session.currenttimetm;
+    char (&timebeganbuf)[GAMESTATE_SIZEOFTIMEBUF] = session.timebeganbuf;
+    char (&currenttimebuf)[GAMESTATE_SIZEOFTIMEBUF] = session.currenttimebuf;
+    string& version = session.version;
+    unsigned int& restart_count = session.restart_count;
+
+    keyboard_profile_t& keyboard_profile = keybind.keyboard_profile;
+    bool& keyboard_profile_confirmed = keybind.keyboard_profile_confirmed;
+    bool& controls_menu_waiting_for_key = keybind.controls_menu_waiting_for_key;
+    gameplay_input_action_t& controls_menu_pending_action = keybind.controls_menu_pending_action;
+    std::array<std::array<gameplay_keybinding_t, INPUT_ACTION_COUNT>, KEYBOARD_PROFILE_COUNT>& keybindings = keybind.keybindings;
+
+    bool& processing_actions = queue_state.processing_actions;
+    vector<gameplay_event_t>& gameplay_events = queue_state.gameplay_events;
+
+    vector<floor_pressure_plate_t>& floor_pressure_plates = pressure_plate_state.floor_pressure_plates;
+    vec3& floor_four_tutorial_orc_spawn = pressure_plate_state.floor_four_tutorial_orc_spawn;
+    entityid& active_chest_id = ui.active_chest_id;
 
 };
