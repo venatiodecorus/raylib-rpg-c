@@ -52,9 +52,8 @@ src/graphs/*
 */*/*/*.png
 */*/*/*/*.png
 src/minifantasy
-
-# Allow gfx/ asset PNGs to be tracked
-!gfx/**/*.png
+gfx/
+sfx/
 .aider*
 test
 old_stats
