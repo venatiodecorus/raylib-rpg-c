@@ -17,9 +17,6 @@ typedef enum {
     OPTION_INVENTORY_MENU,
 } option_type;
 
-using std::string;
-using std::vector;
-
 /**
  * @brief Lightweight selection model for the gameplay options menu.
  *
@@ -27,7 +24,7 @@ using std::vector;
  */
 class option_menu {
 private:
-    vector<option_type> options;
+    std::vector<option_type> options;
     size_t selection;
 
 
@@ -62,7 +59,7 @@ public:
     }
 
     /** @brief Return mutable access to the ordered option list. */
-    vector<option_type>& get_options() {
+    std::vector<option_type>& get_options() {
         return options;
     }
 
@@ -77,7 +74,7 @@ public:
     }
 
     /** @brief Return a display string for the provided option type. */
-    string get_option_str(option_type t) {
+    std::string get_option_str(option_type t) {
         switch (t) {
         case OPTION_NONE: return "none";
         case OPTION_CONTROLS: return "controls";

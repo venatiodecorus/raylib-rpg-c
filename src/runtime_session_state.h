@@ -7,7 +7,7 @@
 #define GAMESTATE_SIZEOFTIMEBUF 64
 #endif
 
-using std::string;
+namespace rpg {
 
 struct RuntimeSessionState {
     time_t timebegan = 0;
@@ -16,6 +16,8 @@ struct RuntimeSessionState {
     struct tm* currenttimetm = nullptr;
     char timebeganbuf[GAMESTATE_SIZEOFTIMEBUF] = {0};
     char currenttimebuf[GAMESTATE_SIZEOFTIMEBUF] = {0};
-    string version;
+    std::string version;
     unsigned int restart_count = 0;
 };
+
+} // namespace rpg

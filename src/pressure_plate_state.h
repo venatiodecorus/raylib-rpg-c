@@ -4,8 +4,6 @@
 #include "vec3.h"
 #include <vector>
 
-using std::vector;
-
 struct floor_pressure_plate_t {
     vec3 loc;
     entityid linked_door_id;
@@ -15,7 +13,11 @@ struct floor_pressure_plate_t {
     int txkey_down;
 };
 
+namespace rpg {
+
 struct PressurePlateState {
-    vector<floor_pressure_plate_t> floor_pressure_plates;
+    std::vector<floor_pressure_plate_t> floor_pressure_plates;
     vec3 floor_four_tutorial_orc_spawn = vec3{-1, -1, -1};
 };
+
+} // namespace rpg

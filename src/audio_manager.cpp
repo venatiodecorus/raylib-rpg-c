@@ -6,6 +6,8 @@
 #include "audio_defs.h"
 #include <algorithm>
 
+namespace rpg {
+
 AudioManager::~AudioManager() {
     shutdown();
 }
@@ -207,3 +209,5 @@ void AudioManager::reset_defaults() {
     audio_device_initialized = false;
     music_loaded = false;
 }
+
+} // namespace rpg

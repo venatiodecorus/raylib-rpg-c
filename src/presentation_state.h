@@ -3,6 +3,8 @@
 #include "debugpanel.h"
 #include <raylib.h>
 
+namespace rpg {
+
 struct PresentationState {
     debugpanel_t debugpanel{};
     bool debugpanelon = false;
@@ -21,3 +23,5 @@ struct PresentationState {
     Camera2D cam2d{};
     Font font{};
 };
+
+} // namespace rpg

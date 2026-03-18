@@ -23,6 +23,8 @@ struct damage_popup_t {
     float rise_distance;
 };
 
+namespace rpg {
+
 class DamagePopups {
 public:
     std::vector<damage_popup_t> popups;
@@ -31,3 +33,5 @@ public:
     void add(int x, int y, int floor, int amount, bool critical, std::mt19937& rng);
     void update(float dt_seconds);
 };
+
+} // namespace rpg

@@ -3,9 +3,11 @@
 #include "event_type.h"
 #include <vector>
 
-using std::vector;
+namespace rpg {
 
 struct GameplayQueueState {
     bool processing_actions = false;
-    vector<gameplay_event_t> gameplay_events;
+    std::vector<gameplay_event_t> gameplay_events;
 };
+
+} // namespace rpg

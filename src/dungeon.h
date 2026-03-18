@@ -13,7 +13,6 @@
 #include <optional>
 #include <vector>
 
-using std::function;
 using std::make_shared;
 using std::shared_ptr;
 using std::vector;

@@ -60,9 +60,9 @@ void gamestate::adjust_window_box_fg_channel(size_t channel, int dir) {
 }
 
 void gamestate::reset_window_box_colors() {
-    ui.window_box_bgcolor = DEFAULT_WINDOW_BOX_BGCOLOR;
-    ui.window_box_fgcolor = DEFAULT_WINDOW_BOX_FGCOLOR;
-    ui.message_history_bgcolor = DEFAULT_WINDOW_BOX_BGCOLOR;
+    ui.window_box_bgcolor = rpg::DEFAULT_WINDOW_BOX_BGCOLOR;
+    ui.window_box_fgcolor = rpg::DEFAULT_WINDOW_BOX_FGCOLOR;
+    ui.message_history_bgcolor = rpg::DEFAULT_WINDOW_BOX_BGCOLOR;
     frame_dirty = true;
 }
 

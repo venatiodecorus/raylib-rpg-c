@@ -12,9 +12,6 @@
 #include <raylib.h>
 #include <unordered_map>
 
-using std::unique_ptr;
-using std::unordered_map;
-
 /**
  * @brief Process-lifetime renderer state shared across the libdraw subsystem.
  *
@@ -23,11 +20,11 @@ using std::unordered_map;
  */
 struct libdraw_context_t {
     /// @brief Active spritegroup instances keyed by owning entity id.
-    unordered_map<entityid, unique_ptr<spritegroup>> spritegroups;
+    std::unordered_map<entityid, std::unique_ptr<spritegroup>> spritegroups;
     /// @brief Texture metadata table indexed by generated texture id.
     textureinfo txinfo[GAMESTATE_SIZEOFTEXINFOARRAY];
     /// @brief Loaded shaders keyed by project-specific shader identifiers.
-    unordered_map<int, Shader> shaders;
+    std::unordered_map<int, Shader> shaders;
     /// @brief Off-screen target used to compose the title screen.
     RenderTexture2D title_target_texture = {};
     /// @brief Off-screen target used to compose the character-creation scene.

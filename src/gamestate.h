@@ -113,19 +113,19 @@ public:
     dungeon d;
     gamestate_flag_t flag;
     scene_t current_scene;
-    MessageLog messages;
-    AudioManager audio;
+    rpg::MessageLog messages;
+    rpg::AudioManager audio;
     character_creation chara_creation;
     ComponentTable ct;
-    UIState ui;
-    KeybindingState keybind;
-    RandomState random;
-    FrameTimingState timing;
-    RuntimeSessionState session;
-    PresentationState presentation;
-    GameplayQueueState queue_state;
-    PressurePlateState pressure_plate_state;
-    DamagePopups damage_popups_sys;
+    rpg::UIState ui;
+    rpg::KeybindingState keybind;
+    rpg::RandomState random;
+    rpg::FrameTimingState timing;
+    rpg::RuntimeSessionState session;
+    rpg::PresentationState presentation;
+    rpg::GameplayQueueState queue_state;
+    rpg::PressurePlateState pressure_plate_state;
+    rpg::DamagePopups damage_popups_sys;
 
     gamestate() {
         minfo2("Initializing gamestate");
@@ -141,9 +141,9 @@ public:
     // Music paths are now defined in audio_defs.h (MUSIC_PATHS[])
 
     void reset() {
-        session = RuntimeSessionState();
+        session = rpg::RuntimeSessionState();
         session.version = GAME_VERSION;
-        presentation = PresentationState();
+        presentation = rpg::PresentationState();
         presentation.debugpanel.x = GAMESTATE_DEBUGPANEL_DEFAULT_X;
         presentation.debugpanel.y = GAMESTATE_DEBUGPANEL_DEFAULT_Y;
         presentation.debugpanel.w = GAMESTATE_DEBUGPANEL_DEFAULT_WIDTH;
@@ -227,7 +227,7 @@ public:
         do_restart = 0;
         ui.title_screen_selection = 0;
         lock = 0;
-        timing = FrameTimingState();
+        timing = rpg::FrameTimingState();
         session.restart_count = 0;
         turn_count = 0;
         ui.action_selection = 0;
@@ -251,25 +251,25 @@ public:
         chara_creation.hitdie = get_racial_hd(RACE_HUMAN);
         current_scene = SCENE_TITLE;
         audio.reset_defaults();
-        ui.window_box_bgcolor = DEFAULT_WINDOW_BOX_BGCOLOR;
-        ui.window_box_fgcolor = DEFAULT_WINDOW_BOX_FGCOLOR;
-        ui.message_history_bgcolor = DEFAULT_WINDOW_BOX_BGCOLOR;
+        ui.window_box_bgcolor = rpg::DEFAULT_WINDOW_BOX_BGCOLOR;
+        ui.window_box_fgcolor = rpg::DEFAULT_WINDOW_BOX_FGCOLOR;
+        ui.message_history_bgcolor = rpg::DEFAULT_WINDOW_BOX_BGCOLOR;
         presentation.last_click_screen_pos = Vector2{-1, -1};
-        ui.confirm_action = CONFIRM_ACTION_NONE;
+        ui.confirm_action = rpg::CONFIRM_ACTION_NONE;
         ui.confirm_prompt_message.clear();
         ui.active_interaction_entity_id = ENTITYID_INVALID;
         ui.interaction_title.clear();
         ui.interaction_body.clear();
         ui.pending_level_ups = 0;
-        damage_popups_sys = DamagePopups();
-        pressure_plate_state = PressurePlateState();
+        damage_popups_sys = rpg::DamagePopups();
+        pressure_plate_state = rpg::PressurePlateState();
         queue_state.gameplay_events.clear();
         ui.prefer_mini_inventory_menu = false;
         keybind.controls_menu_waiting_for_key = false;
         ui.controls_menu_selection = 0;
         keybind.controls_menu_pending_action = INPUT_ACTION_MOVE_UP;
         reset_default_keybindings();
-        messages = MessageLog();
+        messages = rpg::MessageLog();
         ct.clear();
         d.floors.clear();
         d.is_initialized = false;
@@ -707,7 +707,7 @@ public:
     void handle_input_chest(inputstate& is);
 
     /** @brief Open the yes/no confirmation prompt with a formatted message. */
-    void open_confirm_prompt(confirm_action_t action, const char* fmt, ...);
+    void open_confirm_prompt(rpg::confirm_action_t action, const char* fmt, ...);
 
     /** @brief Resolve the active confirmation prompt with the chosen answer. */
     void resolve_confirm_prompt(bool confirmed);

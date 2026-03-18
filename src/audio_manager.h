@@ -9,6 +9,8 @@
 #include <raylib.h>
 #include <vector>
 
+namespace rpg {
+
 /**
  * @brief Manages all audio state: loaded sound effects, music stream,
  *        volume levels, and queued gameplay audio requests.
@@ -59,3 +61,5 @@ public:
     /** @brief Reset all volumes and transient playback state to defaults. */
     void reset_defaults();
 };
+
+} // namespace rpg

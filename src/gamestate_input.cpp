@@ -5,7 +5,7 @@
  */
 
 
-void gamestate::open_confirm_prompt(confirm_action_t action, const char* fmt, ...) {
+void gamestate::open_confirm_prompt(rpg::confirm_action_t action, const char* fmt, ...) {
     massert(fmt, "format string is NULL");
     char buffer[MAX_MSG_LENGTH] = {0};
     va_list args;
@@ -30,9 +30,9 @@ void gamestate::handle_confirm_quit() {
 }
 
 void gamestate::resolve_confirm_prompt(bool confirmed) {
-    const confirm_action_t action = ui.confirm_action;
+    const rpg::confirm_action_t action = ui.confirm_action;
     ui.display_confirm_prompt = false;
-    ui.confirm_action = CONFIRM_ACTION_NONE;
+    ui.confirm_action = rpg::CONFIRM_ACTION_NONE;
     ui.confirm_prompt_message.clear();
     controlmode = controlmode_before_confirm == CONTROLMODE_CONFIRM_PROMPT ? CONTROLMODE_PLAYER : controlmode_before_confirm;
     controlmode_before_confirm = CONTROLMODE_PLAYER;
@@ -41,10 +41,10 @@ void gamestate::resolve_confirm_prompt(bool confirmed) {
         return;
     }
     switch (action) {
-    case CONFIRM_ACTION_QUIT:
+    case rpg::CONFIRM_ACTION_QUIT:
         handle_confirm_quit();
         break;
-    case CONFIRM_ACTION_NONE:
+    case rpg::CONFIRM_ACTION_NONE:
     default:
         break;
     }
@@ -487,7 +487,7 @@ void gamestate::handle_input_gameplay_controlmode_player(inputstate& is) {
         return;
     }
     if (inputstate_is_pressed(is, KEY_ESCAPE)) {
-        open_confirm_prompt(CONFIRM_ACTION_QUIT, "Do You Want To Exit? Press Y or N");
+        open_confirm_prompt(rpg::CONFIRM_ACTION_QUIT, "Do You Want To Exit? Press Y or N");
         return;
     }
     handle_camera_zoom(is);

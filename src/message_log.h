@@ -7,6 +7,8 @@
 #include <string>
 #include <vector>
 
+namespace rpg {
+
 class MessageLog {
 public:
     std::vector<std::string> system;      // active on-screen messages
@@ -19,3 +21,5 @@ public:
     void add_history(const char* fmt, ...);
     void cycle();
 };
+
+} // namespace rpg

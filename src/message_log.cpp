@@ -8,6 +8,8 @@
 #include <cstdio>
 #include <cassert>
 
+namespace rpg {
+
 bool MessageLog::add(const char* fmt, ...) {
     assert(fmt && "format string is NULL");
     char buffer[256];
@@ -49,3 +51,5 @@ void MessageLog::cycle() {
         is_active = false;
     }
 }
+
+} // namespace rpg

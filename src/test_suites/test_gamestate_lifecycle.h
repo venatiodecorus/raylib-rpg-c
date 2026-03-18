@@ -466,7 +466,7 @@ public:
         inputstate_reset(is);
         press_key(is, KEY_LEFT);
         g.handle_input_sound_menu(is);
-        TS_ASSERT_DELTA(g.audio.get_music_volume(), DEFAULT_MUSIC_VOLUME - AudioManager::VOLUME_STEP, 0.001f);
+        TS_ASSERT_DELTA(g.audio.get_music_volume(), DEFAULT_MUSIC_VOLUME - rpg::AudioManager::VOLUME_STEP, 0.001f);
 
         inputstate_reset(is);
         press_key(is, KEY_DOWN);
@@ -474,7 +474,7 @@ public:
         inputstate_reset(is);
         press_key(is, KEY_LEFT);
         g.handle_input_sound_menu(is);
-        TS_ASSERT_DELTA(g.audio.get_sfx_volume(), DEFAULT_MASTER_VOLUME - AudioManager::VOLUME_STEP, 0.001f);
+        TS_ASSERT_DELTA(g.audio.get_sfx_volume(), DEFAULT_MASTER_VOLUME - rpg::AudioManager::VOLUME_STEP, 0.001f);
 
         inputstate_reset(is);
         press_key(is, KEY_ESCAPE);

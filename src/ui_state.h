@@ -8,7 +8,7 @@
 #include "entityid.h"
 #include "option_menu.h"
 
-using std::string;
+namespace rpg {
 
 typedef enum {
     CONFIRM_ACTION_NONE = 0,
@@ -53,12 +53,12 @@ struct UIState {
 
     // Confirm prompt
     confirm_action_t confirm_action = CONFIRM_ACTION_NONE;
-    string confirm_prompt_message;
+    std::string confirm_prompt_message;
 
     // Interaction modal
     entityid active_interaction_entity_id = -1;
-    string interaction_title;
-    string interaction_body;
+    std::string interaction_title;
+    std::string interaction_body;
 
     // Options menu
     option_menu options_menu;
@@ -71,3 +71,5 @@ struct UIState {
     Color window_box_fgcolor = DEFAULT_WINDOW_BOX_FGCOLOR;
     Color message_history_bgcolor = DEFAULT_WINDOW_BOX_BGCOLOR;
 };
+
+} // namespace rpg

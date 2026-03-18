@@ -4,6 +4,8 @@
 
 #include "damage_popups.h"
 
+namespace rpg {
+
 void DamagePopups::add(int x, int y, int floor, int amount, bool critical, std::mt19937& rng) {
     if (amount <= 0) {
         return;
@@ -60,3 +62,5 @@ void DamagePopups::update(float dt_seconds) {
 
     dirty = true;
 }
+
+} // namespace rpg

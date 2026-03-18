@@ -14,10 +14,6 @@
 
 #define SPRITEGROUP_ANIM_QUEUE_MAX 32
 
-using std::shared_ptr;
-using std::unordered_map;
-using std::vector;
-
 /**
  * @brief Collection of sprites and movement state used to draw one entity.
  *
@@ -36,7 +32,7 @@ public:
     entityid id; // the id of the entity that this spritegroup belongs to
     Rectangle dest;
     Rectangle move;
-    vector<shared_ptr<sprite>> sprites;
+    std::vector<std::shared_ptr<sprite>> sprites;
     float move_rate;
     bool visible;
 
@@ -58,7 +54,7 @@ public:
     }
 
     /** @brief Return the sprite at `index`. */
-    shared_ptr<sprite> get(int index) {
+    std::shared_ptr<sprite> get(int index) {
         return sprites.at(index);
     }
 
@@ -68,12 +64,12 @@ public:
     }
 
     /** @brief Return the sprite for the currently selected animation. */
-    shared_ptr<sprite> get_current() {
+    std::shared_ptr<sprite> get_current() {
         return sprites.at(current);
     }
 
     /** @brief Append a sprite to the group. */
-    void add(shared_ptr<sprite> s) {
+    void add(std::shared_ptr<sprite> s) {
         massert(s, "s is null");
         massert(size < capacity, "size %d is >= capacity %d", size, capacity);
 

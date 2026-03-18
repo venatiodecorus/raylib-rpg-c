@@ -8,18 +8,15 @@
 #include "libdraw.h"
 #include "liblogic.h"
 
-using std::make_shared;
-using std::shared_ptr;
-
-shared_ptr<inputstate> is = make_shared<inputstate>();
-shared_ptr<gamestate> g = gamestateinitptr();
+std::shared_ptr<inputstate> is = std::make_shared<inputstate>();
+std::shared_ptr<gamestate> g = gamestateinitptr();
 
 
 #ifndef WEB
 /** @brief Run the native desktop game bootstrap and main loop. */
 static inline void gamerun() {
-    shared_ptr<inputstate> is = make_shared<inputstate>();
-    shared_ptr<gamestate> g = gamestateinitptr();
+    std::shared_ptr<inputstate> is = std::make_shared<inputstate>();
+    std::shared_ptr<gamestate> g = gamestateinitptr();
     liblogic_init(g);
     libdraw_init(g);
     while (!libdraw_windowshouldclose(g)) {
@@ -46,8 +43,8 @@ static inline void gamerun() {
 #else
 /** @brief Run the web build bootstrap and hand control to Emscripten's main loop. */
 void gamerun() {
-    shared_ptr<inputstate> is = make_shared<inputstate>();
-    shared_ptr<gamestate> g = gamestateinitptr();
+    std::shared_ptr<inputstate> is = std::make_shared<inputstate>();
+    std::shared_ptr<gamestate> g = gamestateinitptr();
     // i think liblogic will need init before libdraw because
     // we will want to create entries in the entitymap AFTER it is init'd
     liblogic_init(g);

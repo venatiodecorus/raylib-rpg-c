@@ -44,7 +44,7 @@ These must be addressed first because everything else depends on them.
 
 ## P1 — Architecture
 
-- [ ] **Introduce namespaces**
+- [x] **Introduce namespaces**
   - Zero named namespaces exist. All symbols are in the global namespace.
   - 55 `using std::X` declarations at file scope in headers pollute every
     includer's global namespace.
