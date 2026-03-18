@@ -16,7 +16,7 @@ coupling between game logic and rendering.
 
 These must be addressed first because everything else depends on them.
 
-- [ ] **Break up the `gamestate` god object**
+- [x] **Break up the `gamestate` god object**
   - The `gamestate` class (gamestate.h + 11 _impl.h files = ~6,900 lines) owns
     dungeon generation, entity creation, combat, pathfinding, inventory, input
     handling, audio playback, UI state, camera, debug, and message history.
@@ -36,7 +36,7 @@ These must be addressed first because everything else depends on them.
   - Define a clear interface boundary: logic produces state, renderer reads it.
     No bidirectional mutation.
 
-- [ ] **Establish a proper compilation unit structure**
+- [x] **Establish a proper compilation unit structure**
   - 168 headers vs 2 .cpp files means any header change rebuilds everything.
   - Move implementation out of headers into .cpp files.
   - Target: each subsystem has its own .cpp, headers contain only declarations.
