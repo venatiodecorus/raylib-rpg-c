@@ -46,6 +46,63 @@
 
 - [ ] Automatic generation of texture_ids by filename similar to how sound effects works
 
+## Placeholder Assets (magenta squares — need real tilemap/sprite mappings)
+
+### Tiles (163 textures)
+- [ ] Map all TX_TILES_* entries to dungeon/plains tilemap sub-regions
+- [ ] TX_TILES_STONE_* (13 variants) — dungeon stone floor tiles
+- [ ] TX_TILES_GRASS_* (20 variants) — outdoor grass tiles
+- [ ] TX_TILES_DIRT_* (9 variants) — dirt tiles
+- [ ] TX_TILES_STONE_DIRT_* (54 variants) — stone-to-dirt transition tiles
+- [ ] TX_TILES_STONE_GRASS_* (14 variants) — stone-to-grass transition tiles
+- [ ] TX_TILES_DIRT_GRASS_* (15 variants) — dirt-to-grass transition tiles
+- [ ] TX_TILES_WATER_* (2 variants, animated) — water tiles
+- [ ] TX_TILES_WALL_STONE_* (2 variants) — wall tiles
+- [ ] TX_TILES_UPSTAIRS_00, TX_TILES_DOWNSTAIRS_00 — staircase tiles
+- [ ] TX_TILES_STONE_TRAP_ON_00, TX_TILES_STONE_TRAP_OFF_00 — trap tiles
+- [ ] TX_TILES_TOWN_* (all town tile variants)
+
+### Doors (4 textures)
+- [ ] TX_DOOR_WOODEN_OPEN_00/01, TX_DOOR_WOODEN_CLOSED_00/01
+
+### Props (17 textures)
+- [ ] TX_PROP_* — tables, signs, chairs, banners, barrels, torch, statue, candle, jar, plate, boxes
+
+### Items & Equipment
+- [ ] TX_ITEM_* (11 textures) — arrow, torch, key, sack, potions
+- [ ] TX_WEAPON_* (10 textures) — short sword, bow, long sword, etc.
+- [ ] TX_SHIELD_* (3 textures) — buckler, kite shield, tower shield
+- [ ] TX_CHEST_* (2 textures) — open/closed chest
+- [ ] TX_BOX_WOODEN (1 texture)
+
+### GUI Elements
+- [ ] TX_GUI_* (6 textures) — heart icon, selectors, inventory slot
+
+### Switches & Interactive
+- [ ] TX_SWITCHES_* (11 textures) — wall switches, pressure plates, levers
+- [ ] TX_GEMS_* (4 textures, animated)
+- [ ] TX_TILE_ETCHINGS_* (1 texture)
+- [ ] TX_RING_* (3 textures, animated)
+
+### Character Animations (missing from asset packs)
+- [ ] TX_CHAR_*_GUARD / TX_CHAR_*_GUARD_SHADOW — guard stance for all races
+- [ ] TX_CHAR_*_GUARD_SUCCESS / TX_CHAR_*_GUARD_SUCCESS_SHADOW — guard success for all races
+- [ ] TX_CHAR_*_SHOT / TX_CHAR_*_SHOT_SHADOW — ranged shot for all races
+- [ ] TX_CHAR_*_MINING / TX_CHAR_MINING_SHADOW — mining animation for all races
+- [ ] TX_CHAR_*_ATTACK_THRUST / TX_CHAR_*_ATTACK_THRUST_SHADOW — thrust attack for all races
+
+### Monsters
+- [ ] TX_MONSTER_RAT_* (10 textures) — no rat sprites in current asset packs
+
+### Action Overlays
+- [ ] TX_ACTIONS_* (17 textures) — weapon slash/shot/guard overlays
+
+### Miscellaneous
+- [ ] TX_AMULETS_* (1 texture)
+- [ ] TX_ARMOR_FEET_* (1 texture), TX_ARMOR_BODY_* (2 textures)
+- [ ] TX_FOOD_* (3 textures)
+- [ ] TX_RUNES_* (8 textures)
+
 --------------------------------------------------------------------------------
 
 - [x] create infrastructure for A/B testing of a specific game logic
