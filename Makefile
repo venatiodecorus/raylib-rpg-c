@@ -1,5 +1,83 @@
-.PHONY: all game clean tests index.html
 
-all game clean tests index.html:
-	$(MAKE) -C src $@ 
+CXX = clang++
 
+WFLAGS = -Wall -Werror -Wno-unused-but-set-variable -std=c++17
+
+SRCDIR = src
+
+MAIN_C = $(SRCDIR)/main.cpp
+LIBDRAW_C = $(SRCDIR)/libdraw.cpp
+GAME_SOURCES = $(MAIN_C) $(LIBDRAW_C)
+
+LINK_MATH = -lm
+
+# Platform detection
+UNAME_S := $(shell uname -s)
+
+# Use pkg-config for raylib include/link flags
+RAYLIB_CFLAGS := $(shell pkg-config --cflags raylib)
+RAYLIB_LDFLAGS := $(shell pkg-config --libs raylib)
+
+ifeq ($(UNAME_S),Darwin)
+    # macOS needs these frameworks for raylib
+    RAYLIB_LIBS = $(RAYLIB_LDFLAGS) -framework IOKit -framework Cocoa -framework OpenGL
+else
+    # Linux
+    RAYLIB_LIBS = $(RAYLIB_LDFLAGS) -lGL -lm -lpthread -ldl -lrt -lX11
+endif
+
+CFLAGS ?= # Allow override
+
+# Web build setup
+WEB_CC = emcc
+WEB_SOURCES = $(MAIN_C)
+WEB_INCLUDES = -I$(SRCDIR) -I /usr/local/include
+WEB_LINKS = -L$(SRCDIR) -l:libraylib.web.a
+EMCC_OPTIONS = -s USE_GLFW=3 -s EXPORTED_RUNTIME_METHODS=ccall -s ALLOW_MEMORY_GROWTH
+SHELL_FILE = --shell-file $(SRCDIR)/minshell.html
+PRELOAD_FILES = --preload-file $(SRCDIR)/fonts --preload-file $(SRCDIR)/img --preload-file $(SRCDIR)/audio/music --preload-file $(SRCDIR)/music.txt --preload-file $(SRCDIR)/audio/sfx --preload-file $(SRCDIR)/sfx.txt --preload-file $(SRCDIR)/shaders
+WEB_OPTIONS = -DPLATFORM_WEB -DWEB -DSPAWN_MONSTERS -DNPCS_ALL_AT_ONCE -DSTART_MESSAGES
+
+
+# Phony targets
+.PHONY: all clean docs docs-clean game tests tests_heavy
+
+# Targets
+all: game tests
+
+# Desktop build
+game: $(SRCDIR)/main.o $(SRCDIR)/libdraw.o
+	$(CXX) $(WFLAGS) $(CXXFLAGS) $(CFLAGS) $^ $(RAYLIB_LIBS) -o $@
+
+$(SRCDIR)/main.o: $(SRCDIR)/main.cpp
+	$(CXX) $(WFLAGS) $(CXXFLAGS) $(CFLAGS) $(RAYLIB_CFLAGS) -I$(SRCDIR) -c $< -o $@
+
+$(SRCDIR)/libdraw.o: $(SRCDIR)/libdraw.cpp
+	$(CXX) $(WFLAGS) $(CXXFLAGS) $(CFLAGS) $(RAYLIB_CFLAGS) -I$(SRCDIR) -c $< -o $@
+
+# Web build
+index.html: $(GAME_SOURCES)
+	$(WEB_CC) -o $@ $(GAME_SOURCES) $(WEB_INCLUDES) $(WEB_LINKS) $(EMCC_OPTIONS) $(SHELL_FILE) $(PRELOAD_FILES) $(WEB_OPTIONS) $(CFLAGS) $(CXXFLAGS)
+
+# Unit tests
+$(SRCDIR)/tests.cpp: $(addprefix $(SRCDIR)/,unit_test.h $(wildcard $(SRCDIR)/test_suites/test_*.h))
+	cxxtestgen --error-printer -o $@ $(addprefix $(SRCDIR)/,unit_test.h test_suites/test_gamestate_lifecycle.h test_suites/test_combat_bootstrap.h test_suites/test_dungeon_bootstrap.h test_suites/test_entity_factory.h test_suites/test_entity_placement.h test_suites/test_inventory.h test_suites/test_renderer_seams.h test_suites/test_tile_cache.h test_suites/test_component_table.h test_suites/test_utility_helpers.h test_suites/test_world_interaction.h)
+
+tests: $(SRCDIR)/tests.cpp
+	$(CXX) -o $@ $< $(RAYLIB_CFLAGS) $(RAYLIB_LIBS) -I$(SRCDIR) $(CXXFLAGS) $(CFLAGS)
+
+$(SRCDIR)/tests_heavy.cpp: $(addprefix $(SRCDIR)/,unit_test_heavy.h unit_test.h $(wildcard $(SRCDIR)/test_suites/test_*.h))
+	cxxtestgen --error-printer -o $@ $(addprefix $(SRCDIR)/,unit_test_heavy.h unit_test.h test_suites/test_gamestate_lifecycle.h test_suites/test_combat_bootstrap.h test_suites/test_dungeon_bootstrap.h test_suites/test_entity_factory.h test_suites/test_entity_placement.h test_suites/test_heavy_simulation.h test_suites/test_inventory.h test_suites/test_renderer_seams.h test_suites/test_tile_cache.h test_suites/test_component_table.h test_suites/test_utility_helpers.h test_suites/test_world_interaction.h)
+
+tests_heavy: $(SRCDIR)/tests_heavy.cpp
+	$(CXX) -o $@ $< $(RAYLIB_CFLAGS) $(RAYLIB_LIBS) -I$(SRCDIR) $(CXXFLAGS) $(CFLAGS)
+
+# Documentation
+docs:
+	doxygen $(SRCDIR)/Doxyfile
+
+docs-clean:
+	rm -rf docs/api
+
+clean:
+	rm -rfv game tests tests_heavy index.html index.js index.wasm index.data $(SRCDIR)/*.o $(SRCDIR)/*.gch $(SRCDIR)/tests.cpp $(SRCDIR)/tests_heavy.cpp

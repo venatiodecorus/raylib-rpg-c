@@ -1,3 +1,4 @@
+.DS_Store
 ccreenshots
 screenshots/*
 src/screenshots
@@ -51,6 +52,9 @@ src/graphs/*
 */*/*/*.png
 */*/*/*/*.png
 src/minifantasy
+
+# Allow gfx/ asset PNGs to be tracked
+!gfx/**/*.png
 .aider*
 test
 old_stats
