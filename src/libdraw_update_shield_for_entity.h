@@ -20,12 +20,17 @@ static inline void update_shield_for_entity(gamestate& g, entityid id, spritegro
         merror2("shield_id invalid");
         return;
     }
-    shield_sg = libdraw_ctx.spritegroups[shield_id];
+    auto it = libdraw_ctx.spritegroups.find(shield_id);
+    if (it == libdraw_ctx.spritegroups.end()) {
+        merror2("shield spritegroup missing");
+        return;
+    }
+    shield_sg = it->second.get();
     if (!shield_sg) {
         merror2("shield_sg null");
         return;
     }
-    ctx = sg->sprites2->at(sg->current)->get_currentcontext();
+    ctx = sg->sprites.at(sg->current)->get_currentcontext();
     minfo("ctx: %d", ctx);
     shield_sg->setcontexts(ctx); // what direction is shield-bearer facing?
     shield_sg->set_current(SG_ANIM_BUCKLER_SUCCESS_FRONT); //

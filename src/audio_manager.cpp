@@ -6,6 +6,10 @@
 #include "audio_defs.h"
 #include <algorithm>
 
+AudioManager::~AudioManager() {
+    shutdown();
+}
+
 void AudioManager::adjust_master(int dir) {
     master_volume = std::clamp(master_volume + VOLUME_STEP * dir, 0.0f, 1.0f);
     apply_settings();
@@ -63,8 +67,10 @@ void AudioManager::flush(bool test_mode) {
 }
 
 void AudioManager::load_sfx_assets() {
-    for (Sound sound : sfx) {
-        UnloadSound(sound);
+    if (audio_device_initialized && IsAudioDeviceReady()) {
+        for (Sound sound : sfx) {
+            UnloadSound(sound);
+        }
     }
 
     sfx.clear();
@@ -102,6 +108,7 @@ void AudioManager::load_random_music(std::mt19937& rng) {
 }
 
 void AudioManager::init(std::mt19937& rng, bool test_mode) {
+    shutdown();
     pending_sfx.clear();
 
 #ifndef MASTER_VOLUME
@@ -166,14 +173,17 @@ void AudioManager::update_music(std::mt19937& rng, bool test_mode) {
 void AudioManager::shutdown() {
     pending_sfx.clear();
 
-    if (audio_device_initialized && IsAudioDeviceReady()) {
-        if (music_loaded) {
-            StopMusicStream(music);
-            UnloadMusicStream(music);
-            music = {};
-            music_loaded = false;
-        }
+    const bool audio_ready = audio_device_initialized && IsAudioDeviceReady();
 
+    if (music_loaded && audio_ready) {
+        StopMusicStream(music);
+        UnloadMusicStream(music);
+    }
+
+    music = {};
+    music_loaded = false;
+
+    if (audio_ready) {
         for (Sound sound : sfx) {
             UnloadSound(sound);
         }

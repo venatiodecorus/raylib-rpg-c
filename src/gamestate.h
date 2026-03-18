@@ -271,9 +271,6 @@ public:
         reset_default_keybindings();
         messages = MessageLog();
         ct.clear();
-        for (size_t i = 0; i < d.floors.size(); i++) {
-            d.floors[i]->df_free();
-        }
         d.floors.clear();
         d.is_initialized = false;
     }

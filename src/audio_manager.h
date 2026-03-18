@@ -15,6 +15,8 @@
  */
 class AudioManager {
 public:
+    ~AudioManager();
+
     float master_volume  = DEFAULT_MASTER_VOLUME;
     float music_volume   = DEFAULT_MUSIC_VOLUME;
     float sfx_volume     = DEFAULT_MASTER_VOLUME;

@@ -18,9 +18,11 @@ static inline void update_weapon_for_entity(gamestate& g, entityid id, spritegro
     int ctx = -1;
     weaponid = g.ct.get<equipped_weapon>(id).value_or(ENTITYID_INVALID);
     if (weaponid == ENTITYID_INVALID) return;
-    w_sg = libdraw_ctx.spritegroups[weaponid];
+    auto it = libdraw_ctx.spritegroups.find(weaponid);
+    if (it == libdraw_ctx.spritegroups.end()) return;
+    w_sg = it->second.get();
     if (!w_sg) return;
-    ctx = sg->sprites2->at(sg->current)->get_currentcontext();
+    ctx = sg->sprites.at(sg->current)->get_currentcontext();
     w_sg->setcontexts(ctx);
     // this really should be either SLASH_F or SLASH_B
     // eventually we will select this based on other factors as well

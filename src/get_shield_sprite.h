@@ -22,7 +22,7 @@ static inline shared_ptr<sprite> get_shield_front_sprite(gamestate& g, entityid 
     if (it == libdraw_ctx.spritegroups.end()) {
         return nullptr;
     }
-    spritegroup* w_sg = it->second;
+    spritegroup* w_sg = it->second.get();
     if (!w_sg) {
         return nullptr;
     }
@@ -46,7 +46,7 @@ static inline shared_ptr<sprite> get_shield_back_sprite(gamestate& g, entityid i
     if (it == libdraw_ctx.spritegroups.end()) {
         return retval;
     }
-    spritegroup* w_sg = it->second;
+    spritegroup* w_sg = it->second.get();
     if (!w_sg) {
         return retval;
     }

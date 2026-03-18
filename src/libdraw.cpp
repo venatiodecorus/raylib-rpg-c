@@ -61,13 +61,14 @@
 #include <array>
 #include <cstdio>
 #include <cstring>
+#include <memory>
 
 libdraw_context_t libdraw_ctx;
 
 bool create_spritegroup(gamestate& g, entityid id, int* keys, int num_keys, int offset_x, int offset_y) {
     minfo("BEGIN create_spritegroup");
     massert(libdraw_ctx.txinfo, "txinfo is null");
-    spritegroup* group = new spritegroup(SPRITEGROUP_DEFAULT_SIZE);
+    auto group = std::make_unique<spritegroup>(SPRITEGROUP_DEFAULT_SIZE);
 
     massert(group, "spritegroup is NULL");
     auto maybe_loc = g.ct.get<location>(id);
@@ -124,7 +125,7 @@ bool create_spritegroup(gamestate& g, entityid id, int* keys, int num_keys, int 
         group->dest = Rectangle{x, y, w, h};
         group->off_x = offset_x;
         group->off_y = offset_y;
-        libdraw_ctx.spritegroups[id] = group;
+        libdraw_ctx.spritegroups[id] = std::move(group);
 
         msuccess("END create spritegroup");
         return true;
@@ -148,7 +149,7 @@ bool create_spritegroup(gamestate& g, entityid id, int* keys, int num_keys, int 
     group->dest = Rectangle{x, y, w, h};
     group->off_x = offset_x;
     group->off_y = offset_y;
-    libdraw_ctx.spritegroups[id] = group;
+    libdraw_ctx.spritegroups[id] = std::move(group);
     msuccess("END create spritegroup");
     return true;
 }
@@ -189,7 +190,8 @@ vector<string> build_item_detail_lines(gamestate& g, entityid selection_id) {
 }
 
 void draw_item_detail_panel(gamestate& g, const Rectangle& right_box, entityid selection_id) {
-    spritegroup* sg = libdraw_ctx.spritegroups[selection_id];
+    auto it = libdraw_ctx.spritegroups.find(selection_id);
+    spritegroup* sg = it != libdraw_ctx.spritegroups.end() ? it->second.get() : nullptr;
     if (!sg) {
         return;
     }
@@ -222,7 +224,8 @@ void draw_inventory_grid(gamestate& g, shared_ptr<vector<entityid>> inventory, c
             Rectangle grid_box2 = {x + 2, y + 2, w - 4, h - 4};
             DrawRectangleLinesEx(grid_box, 1, Color{0x66, 0x66, 0x66, 255});
             if (it != inventory->end()) {
-                spritegroup* sg = libdraw_ctx.spritegroups[*it];
+                auto sg_it = libdraw_ctx.spritegroups.find(*it);
+                spritegroup* sg = sg_it != libdraw_ctx.spritegroups.end() ? sg_it->second.get() : nullptr;
                 if (sg) {
                     auto sprite = sg->get_current();
                     DrawTexturePro(*(sprite->get_texture()), Rectangle{10, 10, 12, 12}, grid_box2, Vector2{0, 0}, 0.0f, WHITE);
@@ -427,7 +430,8 @@ void draw_mini_inventory_menu(gamestate& g, shared_ptr<vector<entityid>> invento
     const entityid selection_id = inventory->at(selected_index);
     const Rectangle preview = {panel.x + padding, list_box.y + list_box.height + 10.0f, panel.width - padding * 2.0f, preview_h};
     DrawRectangleLinesEx(preview, 1, g.ui.window_box_fgcolor);
-    spritegroup* sg = libdraw_ctx.spritegroups[selection_id];
+    auto it = libdraw_ctx.spritegroups.find(selection_id);
+    spritegroup* sg = it != libdraw_ctx.spritegroups.end() ? it->second.get() : nullptr;
     const float preview_sprite_size = 72.0f;
     if (sg) {
         auto sprite = sg->get_current();
@@ -1177,8 +1181,9 @@ void draw_shield_sprite_front(gamestate& g, entityid id, spritegroup* sg) {
 
 void draw_sprite_and_shadow(gamestate& g, entityid id) {
     massert(id != ENTITYID_INVALID, "id is invalid");
-    massert(libdraw_ctx.spritegroups.find(id) != libdraw_ctx.spritegroups.end(), "NO SPRITE GROUP FOR ID %d", id);
-    spritegroup* sg = libdraw_ctx.spritegroups[id];
+    auto it = libdraw_ctx.spritegroups.find(id);
+    massert(it != libdraw_ctx.spritegroups.end(), "NO SPRITE GROUP FOR ID %d", id);
+    spritegroup* sg = it->second.get();
     massert(sg, "sg is NULL");
     draw_shield_sprite_back(g, id, sg);
     draw_weapon_sprite_back(g, id, sg);
@@ -1950,7 +1955,7 @@ void libdraw_set_sg_is_attacking(gamestate& g, entityid id, spritegroup* const s
 
 void libdraw_update_sprite_context_ptr(gamestate& g, spritegroup* group, direction_t dir) {
     massert(group != NULL, "group is NULL");
-    int old_ctx = group->sprites2->at(group->current)->get_currentcontext();
+    int old_ctx = group->sprites.at(group->current)->get_currentcontext();
     int ctx = old_ctx;
     ctx = dir == DIR_NONE                                      ? old_ctx
           : dir == DIR_DOWN_RIGHT                              ? SPRITEGROUP_CONTEXT_R_D
@@ -2064,8 +2069,9 @@ void libdraw_update_sprite_ptr(gamestate& g, entityid id, spritegroup* sg) {
 
 void libdraw_update_sprite_pre(gamestate& g, entityid id) {
     massert(id != ENTITYID_INVALID, "entityid is invalid");
-    if (libdraw_ctx.spritegroups.find(id) != libdraw_ctx.spritegroups.end()) {
-        libdraw_update_sprite_ptr(g, id, libdraw_ctx.spritegroups[id]);
+    auto it = libdraw_ctx.spritegroups.find(id);
+    if (it != libdraw_ctx.spritegroups.end()) {
+        libdraw_update_sprite_ptr(g, id, it->second.get());
     }
 }
 
@@ -2109,12 +2115,13 @@ void libdraw_update_sprites_post(gamestate& g) {
             continue;
         }
 
-        spritegroup* sg = libdraw_ctx.spritegroups[id];
+        auto it = libdraw_ctx.spritegroups.find(id);
+        spritegroup* sg = it != libdraw_ctx.spritegroups.end() ? it->second.get() : nullptr;
         if (!sg) {
             continue;
         }
 
-        auto s = sg->sprites2->at(sg->current);
+        auto s = sg->sprites.at(sg->current);
         if (!s) {
             continue;
         }
@@ -2134,7 +2141,7 @@ void libdraw_update_sprites_post(gamestate& g) {
                 if (sg->current == 0) {
                     break;
                 }
-                auto s2 = sg->sprites2->at(sg->current + 1);
+                auto s2 = sg->sprites.at(sg->current + 1);
                 if (!s2) {
                     break;
                 }
@@ -2150,7 +2157,7 @@ void libdraw_update_sprites_post(gamestate& g) {
                     break;
                 }
                 minfo("shield appears to be equipped...");
-                auto s2 = sg->sprites2->at(sg->current + 1);
+                auto s2 = sg->sprites.at(sg->current + 1);
                 if (!s2) {
                     break;
                 }
@@ -2312,6 +2319,7 @@ bool libdraw_windowshouldclose(gamestate& g) {
 }
 
 void libdraw_close_partial() {
+    libdraw_ctx.spritegroups.clear();
     libdraw_unload_textures(libdraw_ctx.txinfo);
     unload_shaders();
     UnloadRenderTexture(libdraw_ctx.title_target_texture);

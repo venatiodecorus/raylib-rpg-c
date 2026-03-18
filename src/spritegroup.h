@@ -36,7 +36,7 @@ public:
     entityid id; // the id of the entity that this spritegroup belongs to
     Rectangle dest;
     Rectangle move;
-    vector<shared_ptr<sprite>>* sprites2;
+    vector<shared_ptr<sprite>> sprites;
     float move_rate;
     bool visible;
 
@@ -51,35 +51,25 @@ public:
         default_anim = 0;
         alpha = 255;
         id = 0;
-        //sprites2 = new vector<shared_ptr<sprite>>(cap);
-        sprites2 = new vector<shared_ptr<sprite>>();
+        sprites.reserve(cap);
         dest = move = Rectangle{0, 0, 0, 0};
         move_rate = 1.0;
         visible = true;
     }
 
-    /** @brief Destroy the owned sprite list container. */
-    ~spritegroup() {
-        if (sprites2) {
-            sprites2->clear();
-            delete sprites2;
-            sprites2 = NULL;
-        }
-    }
-
     /** @brief Return the sprite at `index`. */
     shared_ptr<sprite> get(int index) {
-        return sprites2->at(index);
+        return sprites.at(index);
     }
 
     /** @brief Return the number of sprites currently stored in the group. */
     size_t count() {
-        return sprites2->size();
+        return sprites.size();
     }
 
     /** @brief Return the sprite for the currently selected animation. */
     shared_ptr<sprite> get_current() {
-        return sprites2->at(current);
+        return sprites.at(current);
     }
 
     /** @brief Append a sprite to the group. */
@@ -90,14 +80,14 @@ public:
         //if (!s || size >= capacity) {
         //    return;
         //}
-        sprites2->push_back(s);
+        sprites.push_back(s);
         size++;
     }
 
     /** @brief Apply the same context row to every sprite in the group. */
     void setcontexts(int context) {
         for (int i = 0; i < size; i++) {
-            auto s = sprites2->at(i);
+            auto s = sprites.at(i);
             if (!s || s->get_numcontexts() <= 0 || context < 0 || context >= s->get_numcontexts()) {
                 continue;
             }
@@ -140,7 +130,7 @@ public:
         current = index;
         // lets update the sprite's current frame and numloops to 0
         // since we prob want to start an animation at the beginning if we are changing current
-        sprites2->at(current)->zero_currentframe_numloops();
+        sprites.at(current)->zero_currentframe_numloops();
         return true;
     }
 

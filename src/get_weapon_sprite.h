@@ -22,7 +22,7 @@ static inline shared_ptr<sprite> get_weapon_front_sprite(gamestate& g, entityid 
     auto it = libdraw_ctx.spritegroups.find(weapon);
     if (it == libdraw_ctx.spritegroups.end())
         return retval;
-    spritegroup* w_sg = it->second;
+    spritegroup* w_sg = it->second.get();
     if (!w_sg)
         return retval;
     if (sg->current == SG_ANIM_NPC_ATTACK)
@@ -44,7 +44,7 @@ static inline shared_ptr<sprite> get_weapon_back_sprite(gamestate& g, entityid i
     if (weapon == ENTITYID_INVALID) return retval;
     auto it = libdraw_ctx.spritegroups.find(weapon);
     if (it == libdraw_ctx.spritegroups.end()) return retval;
-    spritegroup* w_sg = it->second;
+    spritegroup* w_sg = it->second.get();
     if (!w_sg) return retval;
     //if (sg->current == SG_ANIM_NPC_ATTACK) retval = spritegroup_get(w_sg, SG_ANIM_LONGSWORD_SLASH_B);
     if (sg->current == SG_ANIM_NPC_ATTACK) retval = w_sg->get(SG_ANIM_LONGSWORD_SLASH_B);

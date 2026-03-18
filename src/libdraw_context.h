@@ -8,9 +8,11 @@
 #include "libgame_defines.h"
 #include "spritegroup.h"
 #include "textureinfo.h"
+#include <memory>
 #include <raylib.h>
 #include <unordered_map>
 
+using std::unique_ptr;
 using std::unordered_map;
 
 /**
@@ -21,7 +23,7 @@ using std::unordered_map;
  */
 struct libdraw_context_t {
     /// @brief Active spritegroup instances keyed by owning entity id.
-    unordered_map<entityid, spritegroup*> spritegroups;
+    unordered_map<entityid, unique_ptr<spritegroup>> spritegroups;
     /// @brief Texture metadata table indexed by generated texture id.
     textureinfo txinfo[GAMESTATE_SIZEOFTEXINFOARRAY];
     /// @brief Loaded shaders keyed by project-specific shader identifiers.
