@@ -39,7 +39,6 @@
 #include "audio_manager.h"
 #include "message_log.h"
 #include "damage_popups.h"
-#include "sfx.h"
 #include "stat_bonus.h"
 #include "texture_ids.h"
 #include "world_object_definitions.h"
@@ -331,7 +330,7 @@ public:
     void attach_static_world_definition(entityid id, const StaticWorldDefinition& definition) {
         const entt::entity registry_entity = ensure_registry_entity(id);
         registry.emplace_or_replace<DefinitionRef>(registry_entity, DefinitionRef{definition.id});
-        registry.emplace_or_replace<StaticVisual>(registry_entity, StaticVisual{definition.sprite_keys, definition.sprite_key_count});
+        registry.emplace_or_replace<StaticVisual>(registry_entity, StaticVisual{definition.sprites, definition.sprite_count});
         registry.emplace_or_replace<InteractableText>(registry_entity, InteractableText{definition.name, definition.description});
         registry.emplace_or_replace<SolidTag>(registry_entity, SolidTag{definition.solid});
         registry.emplace_or_replace<PushableTag>(registry_entity, PushableTag{definition.pushable});

@@ -1,21 +1,14 @@
 #include "create_sg_byid.h"
 
+#include "actor_definitions.h"
 #include "ecs_actor_components.h"
 #include "ecs_item_components.h"
 #include "ecs_world_object_components.h"
 #include "entitytype.h"
 #include "item.h"
+#include "item_definitions.h"
 #include "libdraw_create_spritegroup.h"
 #include "world_object_definitions.h"
-#include "tx_keys_boxes.h"
-#include "tx_keys_chests.h"
-#include "tx_keys_doors.h"
-#include "tx_keys_monsters.h"
-#include "tx_keys_npcs.h"
-#include "tx_keys_potions.h"
-#include "tx_keys_props.h"
-#include "tx_keys_shields.h"
-#include "tx_keys_weapons.h"
 
 namespace {
 bool create_actor_sg_from_registry(gamestate& g, rpg::Renderer& renderer, entityid id) {
@@ -25,11 +18,11 @@ bool create_actor_sg_from_registry(gamestate& g, rpg::Renderer& renderer, entity
     }
 
     const ActorVisual& visual = g.registry.get<ActorVisual>(registry_entity);
-    if (visual.keys == nullptr || visual.key_count <= 0) {
+    if (visual.sprites == nullptr || visual.sprite_count <= 0) {
         return false;
     }
 
-    create_sg(g, renderer, id, const_cast<int*>(visual.keys), visual.key_count);
+    create_sg(g, renderer, id, visual.sprites, visual.sprite_count);
     return true;
 }
 
@@ -40,11 +33,11 @@ bool create_item_sg_from_registry(gamestate& g, rpg::Renderer& renderer, entityi
     }
 
     const ItemVisual& visual = g.registry.get<ItemVisual>(registry_entity);
-    if (visual.keys == nullptr || visual.key_count <= 0) {
+    if (visual.sprites == nullptr || visual.sprite_count <= 0) {
         return false;
     }
 
-    create_sg(g, renderer, id, const_cast<int*>(visual.keys), visual.key_count);
+    create_sg(g, renderer, id, visual.sprites, visual.sprite_count);
     return true;
 }
 
@@ -55,11 +48,11 @@ bool create_static_world_sg_from_registry(gamestate& g, rpg::Renderer& renderer,
     }
 
     const StaticVisual& visual = g.registry.get<StaticVisual>(registry_entity);
-    if (visual.keys == nullptr || visual.key_count <= 0) {
+    if (visual.sprites == nullptr || visual.sprite_count <= 0) {
         return false;
     }
 
-    create_sg(g, renderer, id, const_cast<int*>(visual.keys), visual.key_count);
+    create_sg(g, renderer, id, visual.sprites, visual.sprite_count);
     return true;
 }
 }
@@ -71,32 +64,12 @@ void create_npc_sg_byid(gamestate& g, rpg::Renderer& renderer, entityid id) {
         return;
     }
 
+    // Fallback: look up actor definition by race
     const race_t r = g.ct.get<race>(id).value_or(RACE_NONE);
     massert(r != RACE_NONE, "race is none for id %d", id);
-
-    int* keys = NULL;
-    int key_count = 0;
-
-    switch (r) {
-    case RACE_HUMAN: keys = TX_HUMAN_KEYS; key_count = TX_HUMAN_COUNT; break;
-    case RACE_ORC: keys = TX_ORC_KEYS; key_count = TX_ORC_COUNT; break;
-    case RACE_ELF: keys = TX_ELF_KEYS; key_count = TX_ELF_COUNT; break;
-    case RACE_DWARF: keys = TX_DWARF_KEYS; key_count = TX_DWARF_COUNT; break;
-    case RACE_HALFLING: keys = TX_HALFLING_KEYS; key_count = TX_HALFLING_COUNT; break;
-    case RACE_GOBLIN: keys = TX_GOBLIN_KEYS; key_count = TX_GOBLIN_COUNT; break;
-    case RACE_WOLF: keys = TX_WOLF_KEYS; key_count = TX_WOLF_COUNT; break;
-    case RACE_BAT: keys = TX_BAT_KEYS; key_count = TX_BAT_COUNT; break;
-    case RACE_WARG: keys = TX_WARG_KEYS; key_count = TX_WARG_COUNT; break;
-    case RACE_GREEN_SLIME: keys = TX_GREEN_SLIME_KEYS; key_count = TX_GREEN_SLIME_COUNT; break;
-    case RACE_SKELETON: keys = TX_SKELETON_KEYS; key_count = TX_SKELETON_COUNT; break;
-    case RACE_RAT: keys = TX_RAT_KEYS; key_count = TX_RAT_COUNT; break;
-    case RACE_ZOMBIE: keys = TX_ZOMBIE_KEYS; key_count = TX_ZOMBIE_COUNT; break;
-    default: break;
-    }
-
-    massert(keys != NULL, "keys is null");
-    massert(key_count > 0, "key_count is not > 0");
-    create_sg(g, renderer, id, keys, key_count);
+    const ActorDefinition* def = get_actor_definition(r);
+    massert(def != nullptr, "no actor definition for race %d", r);
+    create_sg(g, renderer, id, def->sprites, def->sprite_count);
 }
 
 void create_door_sg_byid(gamestate& g, rpg::Renderer& renderer, entityid id) {
@@ -105,7 +78,8 @@ void create_door_sg_byid(gamestate& g, rpg::Renderer& renderer, entityid id) {
     if (create_static_world_sg_from_registry(g, renderer, id)) {
         return;
     }
-    create_sg(g, renderer, id, TX_WOODEN_DOOR_KEYS, TX_WOODEN_DOOR_COUNT);
+    const StaticWorldDefinition& def = get_static_world_definition(ENTITY_DOOR);
+    create_sg(g, renderer, id, def.sprites, def.sprite_count);
 }
 
 void create_box_sg_byid(gamestate& g, rpg::Renderer& renderer, entityid id) {
@@ -113,7 +87,8 @@ void create_box_sg_byid(gamestate& g, rpg::Renderer& renderer, entityid id) {
     if (create_static_world_sg_from_registry(g, renderer, id)) {
         return;
     }
-    create_sg(g, renderer, id, TX_WOODEN_BOX_KEYS, TX_WOODEN_BOX_COUNT);
+    const StaticWorldDefinition& def = get_static_world_definition(ENTITY_BOX);
+    create_sg(g, renderer, id, def.sprites, def.sprite_count);
 }
 
 void create_chest_sg_byid(gamestate& g, rpg::Renderer& renderer, entityid id) {
@@ -121,7 +96,8 @@ void create_chest_sg_byid(gamestate& g, rpg::Renderer& renderer, entityid id) {
     if (create_static_world_sg_from_registry(g, renderer, id)) {
         return;
     }
-    create_sg(g, renderer, id, TX_TREASURE_CHEST_KEYS, TX_TREASURE_CHEST_COUNT);
+    const StaticWorldDefinition& def = get_static_world_definition(ENTITY_CHEST);
+    create_sg(g, renderer, id, def.sprites, def.sprite_count);
 }
 
 void create_potion_sg_byid(gamestate& g, rpg::Renderer& renderer, entityid id) {
@@ -129,14 +105,10 @@ void create_potion_sg_byid(gamestate& g, rpg::Renderer& renderer, entityid id) {
     if (create_item_sg_from_registry(g, renderer, id)) {
         return;
     }
-    switch (g.ct.get<potiontype>(id).value_or(POTION_NONE)) {
-    case POTION_HP_SMALL: create_sg(g, renderer, id, TX_POTION_HP_SMALL_KEYS, TX_POTION_HP_SMALL_COUNT); break;
-    case POTION_HP_MEDIUM: create_sg(g, renderer, id, TX_POTION_HP_MEDIUM_KEYS, TX_POTION_HP_MEDIUM_COUNT); break;
-    case POTION_HP_LARGE: create_sg(g, renderer, id, TX_POTION_HP_LARGE_KEYS, TX_POTION_HP_LARGE_COUNT); break;
-    case POTION_MP_SMALL: create_sg(g, renderer, id, TX_POTION_MP_SMALL_KEYS, TX_POTION_MP_SMALL_COUNT); break;
-    case POTION_MP_MEDIUM: create_sg(g, renderer, id, TX_POTION_MP_MEDIUM_KEYS, TX_POTION_MP_MEDIUM_COUNT); break;
-    case POTION_MP_LARGE: create_sg(g, renderer, id, TX_POTION_MP_LARGE_KEYS, TX_POTION_MP_LARGE_COUNT); break;
-    default: break;
+    const potiontype_t pt = g.ct.get<potiontype>(id).value_or(POTION_NONE);
+    const ItemDefinition* def = find_potion_definition(pt);
+    if (def) {
+        create_sg(g, renderer, id, def->sprites, def->sprite_count);
     }
 }
 
@@ -145,11 +117,10 @@ void create_weapon_sg_byid(gamestate& g, rpg::Renderer& renderer, entityid id) {
     if (create_item_sg_from_registry(g, renderer, id)) {
         return;
     }
-    switch (g.ct.get<weapontype>(id).value_or(WEAPON_NONE)) {
-    case WEAPON_DAGGER: create_sg(g, renderer, id, TX_DAGGER_KEYS, TX_DAGGER_COUNT); break;
-    case WEAPON_SHORT_SWORD: create_sg(g, renderer, id, TX_SHORT_SWORD_KEYS, TX_SHORT_SWORD_COUNT); break;
-    case WEAPON_AXE: create_sg(g, renderer, id, TX_AXE_KEYS, TX_AXE_COUNT); break;
-    default: break;
+    const weapontype_t wt = g.ct.get<weapontype>(id).value_or(WEAPON_NONE);
+    const ItemDefinition* def = find_weapon_definition(wt);
+    if (def) {
+        create_sg(g, renderer, id, def->sprites, def->sprite_count);
     }
 }
 
@@ -158,11 +129,10 @@ void create_shield_sg_byid(gamestate& g, rpg::Renderer& renderer, entityid id) {
     if (create_item_sg_from_registry(g, renderer, id)) {
         return;
     }
-    switch (g.ct.get<shieldtype>(id).value_or(SHIELD_NONE)) {
-    case SHIELD_BUCKLER: create_sg(g, renderer, id, TX_BUCKLER_KEYS, TX_BUCKLER_COUNT); break;
-    case SHIELD_KITE: create_sg(g, renderer, id, TX_KITE_SHIELD_KEYS, TX_KITE_SHIELD_COUNT); break;
-    case SHIELD_TOWER: create_sg(g, renderer, id, TX_TOWER_SHIELD_KEYS, TX_TOWER_SHIELD_COUNT); break;
-    default: break;
+    const shieldtype_t st = g.ct.get<shieldtype>(id).value_or(SHIELD_NONE);
+    const ItemDefinition* def = find_shield_definition(st);
+    if (def) {
+        create_sg(g, renderer, id, def->sprites, def->sprite_count);
     }
 }
 
@@ -182,26 +152,10 @@ void create_prop_sg_byid(gamestate& g, rpg::Renderer& renderer, entityid id) {
         return;
     }
 
-    switch (g.ct.get<proptype>(id).value_or(PROP_NONE)) {
-    case PROP_DUNGEON_BANNER_00: create_sg(g, renderer, id, TX_PROP_DUNGEON_BANNER_00_KEYS, TX_PROP_DUNGEON_BANNER_00_COUNT); break;
-    case PROP_DUNGEON_BANNER_01: create_sg(g, renderer, id, TX_PROP_DUNGEON_BANNER_01_KEYS, TX_PROP_DUNGEON_BANNER_01_COUNT); break;
-    case PROP_DUNGEON_BANNER_02: create_sg(g, renderer, id, TX_PROP_DUNGEON_BANNER_02_KEYS, TX_PROP_DUNGEON_BANNER_02_COUNT); break;
-    case PROP_DUNGEON_WOODEN_TABLE_00: create_sg(g, renderer, id, TX_PROP_DUNGEON_WOODEN_TABLE_00_KEYS, TX_PROP_DUNGEON_WOODEN_TABLE_00_COUNT); break;
-    case PROP_DUNGEON_WOODEN_TABLE_01: create_sg(g, renderer, id, TX_PROP_DUNGEON_WOODEN_TABLE_01_KEYS, TX_PROP_DUNGEON_WOODEN_TABLE_01_COUNT); break;
-    case PROP_DUNGEON_WOODEN_SIGN: create_sg(g, renderer, id, TX_PROP_DUNGEON_WOODEN_SIGN_KEYS, TX_PROP_DUNGEON_WOODEN_SIGN_COUNT); break;
-    case PROP_DUNGEON_WOODEN_CHAIR_00: create_sg(g, renderer, id, TX_PROP_DUNGEON_WOODEN_CHAIR_00_KEYS, TX_PROP_DUNGEON_WOODEN_CHAIR_00_COUNT); break;
-    case PROP_DUNGEON_STATUE_00: create_sg(g, renderer, id, TX_PROP_DUNGEON_STATUE_00_KEYS, TX_PROP_DUNGEON_STATUE_00_COUNT); break;
-    case PROP_DUNGEON_TORCH_00: create_sg(g, renderer, id, TX_PROP_DUNGEON_TORCH_00_KEYS, TX_PROP_DUNGEON_TORCH_00_COUNT); break;
-    case PROP_DUNGEON_CANDLE_00: create_sg(g, renderer, id, TX_PROP_DUNGEON_CANDLE_00_KEYS, TX_PROP_DUNGEON_CANDLE_00_COUNT); break;
-    case PROP_DUNGEON_JAR_00: create_sg(g, renderer, id, TX_PROP_DUNGEON_JAR_00_KEYS, TX_PROP_DUNGEON_JAR_00_COUNT); break;
-    case PROP_DUNGEON_PLATE_00: create_sg(g, renderer, id, TX_PROP_DUNGEON_PLATE_00_KEYS, TX_PROP_DUNGEON_PLATE_00_COUNT); break;
-    case PROP_DUNGEON_WOODEN_BARREL_OPEN_TOP_EMPTY:
-        create_sg(g, renderer, id, TX_PROP_DUNGEON_WOODEN_BARREL_OPEN_TOP_EMPTY_KEYS, TX_PROP_DUNGEON_WOODEN_BARREL_OPEN_TOP_EMPTY_COUNT);
-        break;
-    case PROP_DUNGEON_WOODEN_BARREL_OPEN_TOP_WATER:
-        create_sg(g, renderer, id, TX_PROP_DUNGEON_WOODEN_BARREL_OPEN_TOP_WATER_KEYS, TX_PROP_DUNGEON_WOODEN_BARREL_OPEN_TOP_WATER_COUNT);
-        break;
-    default: break;
+    const proptype_t pt = g.ct.get<proptype>(id).value_or(PROP_NONE);
+    const StaticWorldDefinition& def = get_prop_definition(pt);
+    if (def.sprites && def.sprite_count > 0) {
+        create_sg(g, renderer, id, def.sprites, def.sprite_count);
     }
 }
 

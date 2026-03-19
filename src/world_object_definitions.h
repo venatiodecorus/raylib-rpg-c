@@ -2,6 +2,7 @@
 
 #include "entitytype.h"
 #include "proptype.h"
+#include "sprite_def.h"
 
 struct StaticWorldDefinition {
     const char* id;
@@ -14,8 +15,8 @@ struct StaticWorldDefinition {
     bool pullable;
     bool openable;
     bool has_inventory;
-    const int* sprite_keys;
-    int sprite_key_count;
+    const rpg::SpriteDef* sprites;
+    int sprite_count;
 };
 
 const StaticWorldDefinition& get_static_world_definition(entitytype_t legacy_type, proptype_t prop_type = PROP_NONE);

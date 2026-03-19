@@ -57,48 +57,11 @@ void draw_character_creation_screen(gamestate& g, rpg::Renderer& renderer) {
         text_y += line_step;
     }
 
-    switch (g.chara_creation.race) {
-    case RACE_HUMAN:
-        DrawTexturePro(renderer.txinfo[TX_CHAR_HUMAN_IDLE].texture, src, dst2, zero_vec, 0.0f, WHITE);
-        break;
-    case RACE_ORC:
-        DrawTexturePro(renderer.txinfo[TX_CHAR_ORC_IDLE].texture, src, dst2, zero_vec, 0.0f, WHITE);
-        break;
-    case RACE_ELF:
-        DrawTexturePro(renderer.txinfo[TX_CHAR_ELF_IDLE].texture, src, dst2, zero_vec, 0.0f, WHITE);
-        break;
-    case RACE_DWARF:
-        DrawTexturePro(renderer.txinfo[TX_CHAR_DWARF_IDLE].texture, src, dst2, zero_vec, 0.0f, WHITE);
-        break;
-    case RACE_HALFLING:
-        DrawTexturePro(renderer.txinfo[TX_CHAR_HALFLING_IDLE].texture, src, dst2, zero_vec, 0.0f, WHITE);
-        break;
-    case RACE_GOBLIN:
-        DrawTexturePro(renderer.txinfo[TX_CHAR_GOBLIN_IDLE].texture, src, dst2, zero_vec, 0.0f, WHITE);
-        break;
-    case RACE_GREEN_SLIME:
-        DrawTexturePro(renderer.txinfo[TX_MONSTER_GREEN_SLIME_IDLE].texture, src, dst2, zero_vec, 0.0f, WHITE);
-        break;
-    case RACE_BAT:
-        DrawTexturePro(renderer.txinfo[TX_MONSTER_BAT_IDLE].texture, src, dst2, zero_vec, 0.0f, WHITE);
-        break;
-    case RACE_WOLF:
-        DrawTexturePro(renderer.txinfo[TX_MONSTER_WOLF_IDLE].texture, src, dst2, zero_vec, 0.0f, WHITE);
-        break;
-    case RACE_WARG:
-        DrawTexturePro(renderer.txinfo[TX_MONSTER_WARG_IDLE].texture, src, dst2, zero_vec, 0.0f, WHITE);
-        break;
-    case RACE_ZOMBIE:
-        DrawTexturePro(renderer.txinfo[TX_MONSTER_ZOMBIE_IDLE].texture, src, dst2, zero_vec, 0.0f, WHITE);
-        break;
-    case RACE_SKELETON:
-        DrawTexturePro(renderer.txinfo[TX_MONSTER_SKELETON_IDLE].texture, src, dst2, zero_vec, 0.0f, WHITE);
-        break;
-    case RACE_RAT:
-        DrawTexturePro(renderer.txinfo[TX_MONSTER_RAT_IDLE].texture, src, dst2, zero_vec, 0.0f, WHITE);
-        break;
-    default:
-        break;
+    // Draw the race idle preview from actor definitions
+    const ActorDefinition* def = get_actor_definition(g.chara_creation.race);
+    if (def && def->sprites && def->sprite_count > 0) {
+        Texture2D idle_tex = renderer.load_sprite_texture(def->sprites[0]);
+        DrawTexturePro(idle_tex, src, dst2, zero_vec, 0.0f, WHITE);
     }
 
     text_y = instructions_start_y;

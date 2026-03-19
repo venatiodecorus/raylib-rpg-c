@@ -12,7 +12,7 @@ void mirror_item_common(gamestate& g, entityid id, const ItemDefinition* definit
         return;
     }
 
-    g.registry.emplace_or_replace<ItemVisual>(registry_entity, ItemVisual{definition->sprite_keys, definition->sprite_key_count});
+    g.registry.emplace_or_replace<ItemVisual>(registry_entity, ItemVisual{definition->sprites, definition->sprite_count});
     g.registry.emplace_or_replace<ItemText>(registry_entity, ItemText{definition->name, definition->description});
 }
 
@@ -375,7 +375,7 @@ entityid gamestate::create_npc_with(race_t rt, with_fun npcInitFunction) {
     if (def) {
         const entt::entity registry_entity = ensure_registry_entity(id);
         registry.emplace_or_replace<ActorKind>(registry_entity, ActorKind{rt});
-        registry.emplace_or_replace<ActorVisual>(registry_entity, ActorVisual{def->sprite_keys, def->sprite_key_count});
+        registry.emplace_or_replace<ActorVisual>(registry_entity, ActorVisual{def->sprites, def->sprite_count});
         registry.emplace_or_replace<ActorText>(registry_entity, ActorText{def->default_name, def->default_description});
     }
     

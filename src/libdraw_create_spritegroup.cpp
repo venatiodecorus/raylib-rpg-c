@@ -5,9 +5,8 @@
 
 #include <memory>
 
-bool create_spritegroup(gamestate& g, rpg::Renderer& renderer, entityid id, int* keys, int num_keys, int offset_x, int offset_y) {
+bool create_spritegroup(gamestate& g, rpg::Renderer& renderer, entityid id, const rpg::SpriteDef* sprites, int num_sprites, int offset_x, int offset_y) {
     minfo("BEGIN create_spritegroup");
-    massert(renderer.txinfo, "txinfo is null");
     auto group = std::make_unique<spritegroup>(SPRITEGROUP_DEFAULT_SIZE);
 
     massert(group, "spritegroup is NULL");
@@ -24,13 +23,17 @@ bool create_spritegroup(gamestate& g, rpg::Renderer& renderer, entityid id, int*
         massert(loc.y >= 0 && loc.y < df->get_height(), "location y out of bounds: %d", loc.y);
 
         minfo2("creating spritegroups...");
-        minfo2("num_keys: %d", num_keys);
+        minfo2("num_sprites: %d", num_sprites);
         int count = 0;
-        for (int i = 0; i < num_keys; i++) {
-            const int k = keys[i];
-            minfo("k: %d", k);
-            const Texture2D* tex = &renderer.txinfo[k].texture;
-            auto s = make_shared<sprite>(tex, renderer.txinfo[k].contexts, renderer.txinfo[k].num_frames);
+        for (int i = 0; i < num_sprites; i++) {
+            const rpg::SpriteDef& def = sprites[i];
+            renderer.load_sprite_texture(def);
+            std::string cache_key =
+                def.src_type == rpg::TXSRC_FILE ? def.path :
+                def.src_type == rpg::TXSRC_PLACEHOLDER ?
+                    ("__placeholder_" + std::to_string(def.src_w > 0 ? def.src_w : 32) + "x" + std::to_string(def.src_h > 0 ? def.src_h : 32)) :
+                    (def.path + "@" + std::to_string(def.src_x) + "," + std::to_string(def.src_y) + "," + std::to_string(def.src_w) + "," + std::to_string(def.src_h));
+            auto s = make_shared<sprite>(&renderer.texture_cache.at(cache_key), def.contexts, def.frames);
             massert(s, "s is NULL for some reason!");
             group->add(s);
             count++;
@@ -72,10 +75,15 @@ bool create_spritegroup(gamestate& g, rpg::Renderer& renderer, entityid id, int*
     }
 
     minfo("it does NOT have a location");
-    for (int i = 0; i < num_keys; i++) {
-        int k = keys[i];
-        const Texture2D* tex = &renderer.txinfo[k].texture;
-        auto s = make_shared<sprite>(tex, renderer.txinfo[k].contexts, renderer.txinfo[k].num_frames);
+    for (int i = 0; i < num_sprites; i++) {
+        const rpg::SpriteDef& def = sprites[i];
+        renderer.load_sprite_texture(def);
+        std::string cache_key2 =
+            def.src_type == rpg::TXSRC_FILE ? def.path :
+            def.src_type == rpg::TXSRC_PLACEHOLDER ?
+                ("__placeholder_" + std::to_string(def.src_w > 0 ? def.src_w : 32) + "x" + std::to_string(def.src_h > 0 ? def.src_h : 32)) :
+                (def.path + "@" + std::to_string(def.src_x) + "," + std::to_string(def.src_y) + "," + std::to_string(def.src_w) + "," + std::to_string(def.src_h));
+        auto s = make_shared<sprite>(&renderer.texture_cache.at(cache_key2), def.contexts, def.frames);
         group->add(s);
     }
     group->id = id;
@@ -94,6 +102,6 @@ bool create_spritegroup(gamestate& g, rpg::Renderer& renderer, entityid id, int*
     return true;
 }
 
-bool create_sg(gamestate& g, rpg::Renderer& renderer, entityid id, int* keys, int num_keys) {
-    return create_spritegroup(g, renderer, id, keys, num_keys, -12, -12);
+bool create_sg(gamestate& g, rpg::Renderer& renderer, entityid id, const rpg::SpriteDef* sprites, int num_sprites) {
+    return create_spritegroup(g, renderer, id, sprites, num_sprites, -12, -12);
 }

@@ -3,7 +3,6 @@
  */
 
 #include "audio_manager.h"
-#include "audio_defs.h"
 #include <algorithm>
 
 namespace rpg {
@@ -41,14 +40,14 @@ void AudioManager::apply_settings(bool test_mode) {
     if (music_loaded) {
         SetMusicVolume(music, music_volume);
     }
-    for (size_t i = 0; i < sfx.size(); i++) {
-        SetSoundVolume(sfx[i], sfx_volume);
+    for (auto& [path, sound] : sfx) {
+        SetSoundVolume(sound, sfx_volume);
     }
 }
 
-void AudioManager::queue(int sfx_id) {
-    if (sfx_id >= 0) {
-        pending_sfx.push_back(sfx_id);
+void AudioManager::queue(std::string_view sfx_path) {
+    if (!sfx_path.empty()) {
+        pending_sfx.emplace_back(sfx_path);
     }
 }
 
@@ -58,11 +57,13 @@ void AudioManager::flush(bool test_mode) {
         return;
     }
 
-    for (const int sfx_id : pending_sfx) {
-        if (sfx_id < 0 || sfx_id >= static_cast<int>(sfx.size())) {
-            continue;
+    for (const auto& path : pending_sfx) {
+        if (sfx.find(path) == sfx.end()) {
+            Sound sound = LoadSound(path.c_str());
+            SetSoundVolume(sound, sfx_volume);
+            sfx[path] = sound;
         }
-        PlaySound(sfx[sfx_id]);
+        PlaySound(sfx[path]);
     }
 
     pending_sfx.clear();
@@ -70,23 +71,12 @@ void AudioManager::flush(bool test_mode) {
 
 void AudioManager::load_sfx_assets() {
     if (audio_device_initialized && IsAudioDeviceReady()) {
-        for (Sound sound : sfx) {
+        for (auto& [path, sound] : sfx) {
             UnloadSound(sound);
         }
     }
 
     sfx.clear();
-    sfx.reserve(SFX_DEF_COUNT);
-
-    if (!audio_device_initialized || !IsAudioDeviceReady()) {
-        return;
-    }
-
-    for (int i = 0; i < SFX_DEF_COUNT; i++) {
-        Sound sound = LoadSound(SFX_PATHS[i]);
-        SetSoundVolume(sound, sfx_volume);
-        sfx.push_back(sound);
-    }
 }
 
 void AudioManager::load_random_music(std::mt19937& rng) {
@@ -100,6 +90,12 @@ void AudioManager::load_random_music(std::mt19937& rng) {
         music = {};
         music_loaded = false;
     }
+
+    static const char* MUSIC_PATHS[] = {
+        "sfx/Minifantasy_Dungeon_Music/Music/Goblins_Dance_(Battle).wav",
+        "sfx/Minifantasy_Dungeon_Music/Music/Goblins_Den_(Regular).wav",
+    };
+    static const int MUSIC_DEF_COUNT = 2;
 
     std::uniform_int_distribution<int> gen(0, MUSIC_DEF_COUNT - 1);
     const int index = gen(rng);
@@ -186,7 +182,7 @@ void AudioManager::shutdown() {
     music_loaded = false;
 
     if (audio_ready) {
-        for (Sound sound : sfx) {
+        for (auto& [path, sound] : sfx) {
             UnloadSound(sound);
         }
 

@@ -1,10 +1,77 @@
 #include "world_object_definitions.h"
-
 #include "massert.h"
-#include "tx_keys_boxes.h"
-#include "tx_keys_chests.h"
-#include "tx_keys_doors.h"
-#include "tx_keys_props.h"
+
+const rpg::SpriteDef tx_wooden_door_keys_sprites[] = {
+    {rpg::TXSRC_PLACEHOLDER, "", 1, 1, 0, 0, 32, 32}, // TX_DOOR_WOODEN_CLOSED_00
+    {rpg::TXSRC_PLACEHOLDER, "", 1, 1, 0, 0, 32, 32}, // TX_DOOR_WOODEN_OPEN_00
+};
+
+const rpg::SpriteDef tx_treasure_chest_keys_sprites[] = {
+    {rpg::TXSRC_PLACEHOLDER, "", 1, 1, 0, 0, 32, 32}, // TX_CHEST_CLOSED_00
+    {rpg::TXSRC_PLACEHOLDER, "", 1, 1, 0, 0, 32, 32}, // TX_CHEST_OPEN_00
+};
+
+const rpg::SpriteDef tx_wooden_box_keys_sprites[] = {
+    {rpg::TXSRC_PLACEHOLDER, "", 1, 1, 0, 0, 32, 32}, // TX_BOX_WOODEN
+};
+
+const rpg::SpriteDef tx_prop_dungeon_banner_00_keys_sprites[] = {
+    {rpg::TXSRC_PLACEHOLDER, "", 1, 1, 0, 0, 32, 32}, // TX_PROP_BANNER_00
+};
+
+const rpg::SpriteDef tx_prop_dungeon_banner_01_keys_sprites[] = {
+    {rpg::TXSRC_PLACEHOLDER, "", 1, 1, 0, 0, 32, 32}, // TX_PROP_BANNER_01
+};
+
+const rpg::SpriteDef tx_prop_dungeon_banner_02_keys_sprites[] = {
+    {rpg::TXSRC_PLACEHOLDER, "", 1, 1, 0, 0, 32, 32}, // TX_PROP_BANNER_02
+};
+
+const rpg::SpriteDef tx_prop_dungeon_statue_00_keys_sprites[] = {
+    {rpg::TXSRC_PLACEHOLDER, "", 1, 1, 0, 0, 32, 32}, // TX_PROP_STATUE_00
+};
+
+const rpg::SpriteDef tx_prop_dungeon_torch_00_keys_sprites[] = {
+    {rpg::TXSRC_PLACEHOLDER, "", 1, 1, 0, 0, 32, 32}, // TX_PROP_TORCH_00
+};
+
+const rpg::SpriteDef tx_prop_dungeon_candle_00_keys_sprites[] = {
+    {rpg::TXSRC_PLACEHOLDER, "", 1, 1, 0, 0, 32, 32}, // TX_PROP_CANDLE_00
+};
+
+const rpg::SpriteDef tx_prop_dungeon_jar_00_keys_sprites[] = {
+    {rpg::TXSRC_PLACEHOLDER, "", 1, 1, 0, 0, 32, 32}, // TX_PROP_JAR_00
+};
+
+const rpg::SpriteDef tx_prop_dungeon_plate_00_keys_sprites[] = {
+    {rpg::TXSRC_PLACEHOLDER, "", 1, 1, 0, 0, 32, 32}, // TX_PROP_PLATE_00
+};
+
+const rpg::SpriteDef tx_prop_dungeon_wooden_barrel_open_top_empty_keys_sprites[] = {
+    {rpg::TXSRC_PLACEHOLDER, "", 1, 1, 0, 0, 32, 32}, // TX_PROP_WOODEN_BARREL_OPEN_TOP_EMPTY
+};
+
+const rpg::SpriteDef tx_prop_dungeon_wooden_barrel_open_top_water_keys_sprites[] = {
+    {rpg::TXSRC_PLACEHOLDER, "", 1, 1, 0, 0, 32, 32}, // TX_PROP_WOODEN_BARREL_OPEN_TOP_WATER
+};
+
+const rpg::SpriteDef tx_prop_dungeon_wooden_chair_00_keys_sprites[] = {
+    {rpg::TXSRC_PLACEHOLDER, "", 1, 1, 0, 0, 32, 32}, // TX_PROP_WOODEN_CHAIR_00
+};
+
+const rpg::SpriteDef tx_prop_dungeon_wooden_table_00_keys_sprites[] = {
+    {rpg::TXSRC_PLACEHOLDER, "", 1, 1, 0, 0, 32, 32}, // TX_PROP_WOODEN_TABLE_00
+};
+
+const rpg::SpriteDef tx_prop_dungeon_wooden_table_01_keys_sprites[] = {
+    {rpg::TXSRC_PLACEHOLDER, "", 1, 1, 0, 0, 32, 32}, // TX_PROP_WOODEN_TABLE_01
+};
+
+const rpg::SpriteDef tx_prop_dungeon_wooden_sign_keys_sprites[] = {
+    {rpg::TXSRC_PLACEHOLDER, "", 1, 1, 0, 0, 32, 32}, // TX_PROP_WOODEN_SIGN
+};
+
+
 
 namespace {
 const StaticWorldDefinition kPropDefinitions[] = {
@@ -33,8 +100,8 @@ const StaticWorldDefinition kPropDefinitions[] = {
         false,
         false,
         false,
-        TX_PROP_DUNGEON_BANNER_00_KEYS,
-        TX_PROP_DUNGEON_BANNER_00_COUNT,
+        tx_prop_dungeon_banner_00_keys_sprites,
+        1,
     },
     {
         "prop.dungeon.banner_01",
@@ -47,8 +114,8 @@ const StaticWorldDefinition kPropDefinitions[] = {
         false,
         false,
         false,
-        TX_PROP_DUNGEON_BANNER_01_KEYS,
-        TX_PROP_DUNGEON_BANNER_01_COUNT,
+        tx_prop_dungeon_banner_01_keys_sprites,
+        1,
     },
     {
         "prop.dungeon.banner_02",
@@ -61,8 +128,8 @@ const StaticWorldDefinition kPropDefinitions[] = {
         false,
         false,
         false,
-        TX_PROP_DUNGEON_BANNER_02_KEYS,
-        TX_PROP_DUNGEON_BANNER_02_COUNT,
+        tx_prop_dungeon_banner_02_keys_sprites,
+        1,
     },
     {
         "prop.dungeon.statue_00",
@@ -75,8 +142,8 @@ const StaticWorldDefinition kPropDefinitions[] = {
         false,
         false,
         false,
-        TX_PROP_DUNGEON_STATUE_00_KEYS,
-        TX_PROP_DUNGEON_STATUE_00_COUNT,
+        tx_prop_dungeon_statue_00_keys_sprites,
+        1,
     },
     {
         "prop.dungeon.torch_00",
@@ -89,8 +156,8 @@ const StaticWorldDefinition kPropDefinitions[] = {
         false,
         false,
         false,
-        TX_PROP_DUNGEON_TORCH_00_KEYS,
-        TX_PROP_DUNGEON_TORCH_00_COUNT,
+        tx_prop_dungeon_torch_00_keys_sprites,
+        1,
     },
     {
         "prop.dungeon.candle_00",
@@ -103,8 +170,8 @@ const StaticWorldDefinition kPropDefinitions[] = {
         true,
         false,
         false,
-        TX_PROP_DUNGEON_CANDLE_00_KEYS,
-        TX_PROP_DUNGEON_CANDLE_00_COUNT,
+        tx_prop_dungeon_candle_00_keys_sprites,
+        1,
     },
     {
         "prop.dungeon.jar_00",
@@ -117,8 +184,8 @@ const StaticWorldDefinition kPropDefinitions[] = {
         false,
         false,
         false,
-        TX_PROP_DUNGEON_JAR_00_KEYS,
-        TX_PROP_DUNGEON_JAR_00_COUNT,
+        tx_prop_dungeon_jar_00_keys_sprites,
+        1,
     },
     {
         "prop.dungeon.plate_00",
@@ -131,8 +198,8 @@ const StaticWorldDefinition kPropDefinitions[] = {
         false,
         false,
         false,
-        TX_PROP_DUNGEON_PLATE_00_KEYS,
-        TX_PROP_DUNGEON_PLATE_00_COUNT,
+        tx_prop_dungeon_plate_00_keys_sprites,
+        1,
     },
     {
         "prop.dungeon.wooden_barrel_open_top_empty",
@@ -145,8 +212,8 @@ const StaticWorldDefinition kPropDefinitions[] = {
         false,
         false,
         false,
-        TX_PROP_DUNGEON_WOODEN_BARREL_OPEN_TOP_EMPTY_KEYS,
-        TX_PROP_DUNGEON_WOODEN_BARREL_OPEN_TOP_EMPTY_COUNT,
+        tx_prop_dungeon_wooden_barrel_open_top_empty_keys_sprites,
+        1,
     },
     {
         "prop.dungeon.wooden_barrel_open_top_water",
@@ -159,8 +226,8 @@ const StaticWorldDefinition kPropDefinitions[] = {
         false,
         false,
         false,
-        TX_PROP_DUNGEON_WOODEN_BARREL_OPEN_TOP_WATER_KEYS,
-        TX_PROP_DUNGEON_WOODEN_BARREL_OPEN_TOP_WATER_COUNT,
+        tx_prop_dungeon_wooden_barrel_open_top_water_keys_sprites,
+        1,
     },
     {
         "prop.dungeon.wooden_chair_00",
@@ -173,8 +240,8 @@ const StaticWorldDefinition kPropDefinitions[] = {
         false,
         false,
         false,
-        TX_PROP_DUNGEON_WOODEN_CHAIR_00_KEYS,
-        TX_PROP_DUNGEON_WOODEN_CHAIR_00_COUNT,
+        tx_prop_dungeon_wooden_chair_00_keys_sprites,
+        1,
     },
     {
         "prop.dungeon.wooden_table_00",
@@ -187,8 +254,8 @@ const StaticWorldDefinition kPropDefinitions[] = {
         true,
         false,
         false,
-        TX_PROP_DUNGEON_WOODEN_TABLE_00_KEYS,
-        TX_PROP_DUNGEON_WOODEN_TABLE_00_COUNT,
+        tx_prop_dungeon_wooden_table_00_keys_sprites,
+        1,
     },
     {
         "prop.dungeon.wooden_table_01",
@@ -201,8 +268,8 @@ const StaticWorldDefinition kPropDefinitions[] = {
         true,
         false,
         false,
-        TX_PROP_DUNGEON_WOODEN_TABLE_01_KEYS,
-        TX_PROP_DUNGEON_WOODEN_TABLE_01_COUNT,
+        tx_prop_dungeon_wooden_table_01_keys_sprites,
+        1,
     },
     {
         "prop.dungeon.wooden_sign",
@@ -215,8 +282,8 @@ const StaticWorldDefinition kPropDefinitions[] = {
         false,
         false,
         false,
-        TX_PROP_DUNGEON_WOODEN_SIGN_KEYS,
-        TX_PROP_DUNGEON_WOODEN_SIGN_COUNT,
+        tx_prop_dungeon_wooden_sign_keys_sprites,
+        1,
     },
 };
 
@@ -231,8 +298,8 @@ const StaticWorldDefinition kWoodenDoorDefinition = {
     false,
     true,
     false,
-    TX_WOODEN_DOOR_KEYS,
-    TX_WOODEN_DOOR_COUNT,
+    tx_wooden_door_keys_sprites,
+    2,
 };
 
 const StaticWorldDefinition kTreasureChestDefinition = {
@@ -246,8 +313,8 @@ const StaticWorldDefinition kTreasureChestDefinition = {
     true,
     true,
     true,
-    TX_TREASURE_CHEST_KEYS,
-    TX_TREASURE_CHEST_COUNT,
+    tx_treasure_chest_keys_sprites,
+    2,
 };
 
 const StaticWorldDefinition kWoodenBoxDefinition = {
@@ -261,8 +328,8 @@ const StaticWorldDefinition kWoodenBoxDefinition = {
     true,
     false,
     false,
-    TX_WOODEN_BOX_KEYS,
-    TX_WOODEN_BOX_COUNT,
+    tx_wooden_box_keys_sprites,
+    1,
 };
 }
 

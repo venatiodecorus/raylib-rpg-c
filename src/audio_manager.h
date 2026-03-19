@@ -7,6 +7,9 @@
 #include "libgame_defines.h"
 #include <random>
 #include <raylib.h>
+#include <string>
+#include <string_view>
+#include <unordered_map>
 #include <vector>
 
 namespace rpg {
@@ -28,8 +31,8 @@ public:
     bool music_loaded = false;
 
     Music music = {};
-    std::vector<Sound> sfx;
-    std::vector<int> pending_sfx;
+    std::unordered_map<std::string, Sound> sfx;
+    std::vector<std::string> pending_sfx;
 
     static constexpr float VOLUME_STEP = 0.1f;
 
@@ -38,7 +41,7 @@ public:
     void adjust_sfx(int dir);
     void apply_settings(bool test_mode = false);
 
-    void queue(int sfx_id);
+    void queue(std::string_view sfx_path);
     void flush(bool test_mode = false);
     void load_sfx_assets();
     void load_random_music(std::mt19937& rng);

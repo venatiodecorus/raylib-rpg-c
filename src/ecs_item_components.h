@@ -3,6 +3,7 @@
 #include "item.h"
 #include "potion.h"
 #include "shield.h"
+#include "sprite_def.h"
 #include "weapon.h"
 
 #include <string>
@@ -24,8 +25,8 @@ struct PotionKind {
 };
 
 struct ItemVisual {
-    const int* keys;
-    int key_count;
+    const rpg::SpriteDef* sprites;
+    int sprite_count;
 };
 
 struct ItemText {

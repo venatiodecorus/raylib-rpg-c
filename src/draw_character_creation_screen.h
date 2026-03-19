@@ -7,8 +7,7 @@
 #include "gamestate.h"
 #include "libdraw_context.h"
 #include "libgame_defines.h"
-#include "texture_ids.h"
-#include "textureinfo.h"
+#include "actor_definitions.h"
 #include <array>
 #include <string>
 

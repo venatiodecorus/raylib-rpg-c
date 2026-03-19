@@ -4,6 +4,7 @@
 #include "potion.h"
 #include "shield.h"
 #include "weapon.h"
+#include "sprite_def.h"
 
 struct ItemDefinition {
     const char* id;
@@ -13,8 +14,8 @@ struct ItemDefinition {
     potiontype_t potion_type;
     const char* name;
     const char* description;
-    const int* sprite_keys;
-    int sprite_key_count;
+    const rpg::SpriteDef* sprites;
+    int sprite_count;
 };
 
 const ItemDefinition* find_weapon_definition(weapontype_t type);

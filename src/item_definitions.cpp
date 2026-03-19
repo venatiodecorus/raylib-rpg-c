@@ -1,8 +1,66 @@
 #include "item_definitions.h"
 
-#include "tx_keys_potions.h"
-#include "tx_keys_shields.h"
-#include "tx_keys_weapons.h"
+const rpg::SpriteDef tx_buckler_keys_sprites[] = {
+    {rpg::TXSRC_PLACEHOLDER, "", 1, 1, 0, 0, 32, 32}, // TX_SHIELD_BUCKLER
+    {rpg::TXSRC_PLACEHOLDER, "", 4, 4, 0, 0, 128, 128}, // TX_ACTIONS_GUARD_BUCKLER_SUCCESS_FRONT
+    {rpg::TXSRC_PLACEHOLDER, "", 4, 4, 0, 0, 128, 128}, // TX_ACTIONS_GUARD_BUCKLER_SUCCESS_BACK
+};
+
+const rpg::SpriteDef tx_kite_shield_keys_sprites[] = {
+    {rpg::TXSRC_PLACEHOLDER, "", 1, 1, 0, 0, 32, 32}, // TX_SHIELD_KITE_SHIELD
+    {rpg::TXSRC_PLACEHOLDER, "", 4, 4, 0, 0, 128, 128}, // TX_ACTIONS_GUARD_KITE_SHIELD_SUCCESS_FRONT
+    {rpg::TXSRC_PLACEHOLDER, "", 4, 4, 0, 0, 128, 128}, // TX_ACTIONS_GUARD_KITE_SHIELD_SUCCESS_BACK
+};
+
+const rpg::SpriteDef tx_tower_shield_keys_sprites[] = {
+    {rpg::TXSRC_PLACEHOLDER, "", 1, 1, 0, 0, 32, 32}, // TX_SHIELD_WOODEN_TOWER_SHIELD
+    {rpg::TXSRC_PLACEHOLDER, "", 4, 4, 0, 0, 128, 128}, // TX_ACTIONS_GUARD_TOWER_SHIELD_SUCCESS_FRONT
+    {rpg::TXSRC_PLACEHOLDER, "", 4, 4, 0, 0, 128, 128}, // TX_ACTIONS_GUARD_TOWER_SHIELD_SUCCESS_BACK
+};
+
+const rpg::SpriteDef tx_potion_hp_small_keys_sprites[] = {
+    {rpg::TXSRC_PLACEHOLDER, "", 1, 1, 0, 0, 32, 32}, // TX_ITEM_POTION_HP_SMALL
+};
+
+const rpg::SpriteDef tx_potion_hp_medium_keys_sprites[] = {
+    {rpg::TXSRC_PLACEHOLDER, "", 1, 1, 0, 0, 32, 32}, // TX_ITEM_POTION_HP_MEDIUM
+};
+
+const rpg::SpriteDef tx_potion_hp_large_keys_sprites[] = {
+    {rpg::TXSRC_PLACEHOLDER, "", 1, 1, 0, 0, 32, 32}, // TX_ITEM_POTION_HP_LARGE
+};
+
+const rpg::SpriteDef tx_potion_mp_small_keys_sprites[] = {
+    {rpg::TXSRC_PLACEHOLDER, "", 1, 1, 0, 0, 32, 32}, // TX_ITEM_POTION_MP_SMALL
+};
+
+const rpg::SpriteDef tx_potion_mp_medium_keys_sprites[] = {
+    {rpg::TXSRC_PLACEHOLDER, "", 1, 1, 0, 0, 32, 32}, // TX_ITEM_POTION_MP_MEDIUM
+};
+
+const rpg::SpriteDef tx_potion_mp_large_keys_sprites[] = {
+    {rpg::TXSRC_PLACEHOLDER, "", 1, 1, 0, 0, 32, 32}, // TX_ITEM_POTION_MP_LARGE
+};
+
+const rpg::SpriteDef tx_short_sword_keys_sprites[] = {
+    {rpg::TXSRC_PLACEHOLDER, "", 1, 1, 0, 0, 32, 32}, // TX_WEAPON_SHORT_SWORD
+    {rpg::TXSRC_PLACEHOLDER, "", 4, 4, 0, 0, 128, 128}, // TX_ACTIONS_SLASH_SHORT_SWORD_F
+    {rpg::TXSRC_PLACEHOLDER, "", 4, 4, 0, 0, 128, 128}, // TX_ACTIONS_SLASH_SHORT_SWORD_B
+};
+
+const rpg::SpriteDef tx_dagger_keys_sprites[] = {
+    {rpg::TXSRC_PLACEHOLDER, "", 1, 1, 0, 0, 32, 32}, // TX_WEAPON_DAGGER
+    {rpg::TXSRC_PLACEHOLDER, "", 4, 4, 0, 0, 128, 128}, // TX_ACTIONS_SLASH_DAGGER_F
+    {rpg::TXSRC_PLACEHOLDER, "", 4, 4, 0, 0, 128, 128}, // TX_ACTIONS_SLASH_DAGGER_B
+};
+
+const rpg::SpriteDef tx_axe_keys_sprites[] = {
+    {rpg::TXSRC_PLACEHOLDER, "", 1, 1, 0, 0, 32, 32}, // TX_WEAPON_AXE
+    {rpg::TXSRC_PLACEHOLDER, "", 4, 4, 0, 0, 128, 128}, // TX_ACTIONS_SLASH_AXE_F
+    {rpg::TXSRC_PLACEHOLDER, "", 4, 4, 0, 0, 128, 128}, // TX_ACTIONS_SLASH_AXE_B
+};
+
+
 
 namespace {
 const ItemDefinition kWeaponDefinitions[] = {
@@ -14,8 +72,8 @@ const ItemDefinition kWeaponDefinitions[] = {
         POTION_NONE,
         "dagger",
         "Stabby stabby.",
-        TX_DAGGER_KEYS,
-        TX_DAGGER_COUNT,
+        tx_dagger_keys_sprites,
+        3,
     },
     {
         "weapon.short_sword",
@@ -25,8 +83,8 @@ const ItemDefinition kWeaponDefinitions[] = {
         POTION_NONE,
         "short sword",
         "your basic soldier's short sword",
-        TX_SHORT_SWORD_KEYS,
-        TX_SHORT_SWORD_COUNT,
+        tx_short_sword_keys_sprites,
+        3,
     },
     {
         "weapon.axe",
@@ -36,8 +94,8 @@ const ItemDefinition kWeaponDefinitions[] = {
         POTION_NONE,
         "axe",
         "Choppy choppy",
-        TX_AXE_KEYS,
-        TX_AXE_COUNT,
+        tx_axe_keys_sprites,
+        3,
     },
 };
 
@@ -50,8 +108,8 @@ const ItemDefinition kShieldDefinitions[] = {
         POTION_NONE,
         "buckler",
         "A light shield built for quick parries and close defense.",
-        TX_BUCKLER_KEYS,
-        TX_BUCKLER_COUNT,
+        tx_buckler_keys_sprites,
+        3,
     },
     {
         "shield.kite",
@@ -61,8 +119,8 @@ const ItemDefinition kShieldDefinitions[] = {
         POTION_NONE,
         "kite shield",
         "Standard knight's shield",
-        TX_KITE_SHIELD_KEYS,
-        TX_KITE_SHIELD_COUNT,
+        tx_kite_shield_keys_sprites,
+        3,
     },
     {
         "shield.tower",
@@ -72,8 +130,8 @@ const ItemDefinition kShieldDefinitions[] = {
         POTION_NONE,
         "tower shield",
         "A tall shield meant to soak up punishment behind a wall of wood.",
-        TX_TOWER_SHIELD_KEYS,
-        TX_TOWER_SHIELD_COUNT,
+        tx_tower_shield_keys_sprites,
+        3,
     },
 };
 
@@ -86,8 +144,8 @@ const ItemDefinition kPotionDefinitions[] = {
         POTION_HP_SMALL,
         "small healing potion",
         "a small healing potion",
-        TX_POTION_HP_SMALL_KEYS,
-        TX_POTION_HP_SMALL_COUNT,
+        tx_potion_hp_small_keys_sprites,
+        1,
     },
     {
         "potion.hp.medium",
@@ -97,8 +155,8 @@ const ItemDefinition kPotionDefinitions[] = {
         POTION_HP_MEDIUM,
         "medium healing potion",
         "a medium healing potion",
-        TX_POTION_HP_MEDIUM_KEYS,
-        TX_POTION_HP_MEDIUM_COUNT,
+        tx_potion_hp_medium_keys_sprites,
+        1,
     },
     {
         "potion.hp.large",
@@ -108,8 +166,8 @@ const ItemDefinition kPotionDefinitions[] = {
         POTION_HP_LARGE,
         "large healing potion",
         "a large healing potion",
-        TX_POTION_HP_LARGE_KEYS,
-        TX_POTION_HP_LARGE_COUNT,
+        tx_potion_hp_large_keys_sprites,
+        1,
     },
     {
         "potion.mp.small",
@@ -119,8 +177,8 @@ const ItemDefinition kPotionDefinitions[] = {
         POTION_MP_SMALL,
         "small mana potion",
         "a small mana potion",
-        TX_POTION_MP_SMALL_KEYS,
-        TX_POTION_MP_SMALL_COUNT,
+        tx_potion_mp_small_keys_sprites,
+        1,
     },
     {
         "potion.mp.medium",
@@ -130,8 +188,8 @@ const ItemDefinition kPotionDefinitions[] = {
         POTION_MP_MEDIUM,
         "medium mana potion",
         "a medium mana potion",
-        TX_POTION_MP_MEDIUM_KEYS,
-        TX_POTION_MP_MEDIUM_COUNT,
+        tx_potion_mp_medium_keys_sprites,
+        1,
     },
     {
         "potion.mp.large",
@@ -141,8 +199,8 @@ const ItemDefinition kPotionDefinitions[] = {
         POTION_MP_LARGE,
         "large mana potion",
         "a large mana potion",
-        TX_POTION_MP_LARGE_KEYS,
-        TX_POTION_MP_LARGE_COUNT,
+        tx_potion_mp_large_keys_sprites,
+        1,
     },
 };
 }

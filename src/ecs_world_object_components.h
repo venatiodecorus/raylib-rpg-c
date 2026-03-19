@@ -2,6 +2,7 @@
 
 #include "entitytype.h"
 #include "proptype.h"
+#include "sprite_def.h"
 #include "vec3.h"
 
 #include <string>
@@ -11,8 +12,8 @@ struct DefinitionRef {
 };
 
 struct StaticVisual {
-    const int* keys;
-    int key_count;
+    const rpg::SpriteDef* sprites;
+    int sprite_count;
 };
 
 struct InteractableText {

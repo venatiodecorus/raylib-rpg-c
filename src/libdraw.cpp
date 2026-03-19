@@ -53,6 +53,70 @@
 
 rpg::Renderer renderer;
 
+Texture2D rpg::Renderer::load_sprite_texture(const rpg::SpriteDef& def) {
+    std::string cache_key;
+    switch (def.src_type) {
+    case rpg::TXSRC_FILE:
+        cache_key = def.path;
+        break;
+    case rpg::TXSRC_PLACEHOLDER:
+        cache_key = "__placeholder_" + std::to_string(def.src_w > 0 ? def.src_w : 32)
+                    + "x" + std::to_string(def.src_h > 0 ? def.src_h : 32);
+        break;
+    case rpg::TXSRC_TILEMAP:
+        cache_key = def.path + "@" + std::to_string(def.src_x) + ","
+                    + std::to_string(def.src_y) + ","
+                    + std::to_string(def.src_w) + ","
+                    + std::to_string(def.src_h);
+        break;
+    }
+
+    auto it = texture_cache.find(cache_key);
+    if (it != texture_cache.end()) {
+        return it->second;
+    }
+
+    Image image = {};
+    switch (def.src_type) {
+    case rpg::TXSRC_FILE: {
+        image = LoadImage(def.path.c_str());
+        massert(image.data != NULL, "Failed to load sprite image: %s", def.path.c_str());
+        break;
+    }
+    case rpg::TXSRC_PLACEHOLDER: {
+        int w = (def.src_w > 0) ? def.src_w : 32;
+        int h = (def.src_h > 0) ? def.src_h : 32;
+        image = GenImageColor(w, h, MAGENTA);
+        break;
+    }
+    case rpg::TXSRC_TILEMAP: {
+        Image tilemap = LoadImage(def.path.c_str());
+        massert(tilemap.data != NULL, "Failed to load tilemap: %s", def.path.c_str());
+        Rectangle src_rect = {
+            static_cast<float>(def.src_x),
+            static_cast<float>(def.src_y),
+            static_cast<float>(def.src_w),
+            static_cast<float>(def.src_h)
+        };
+        image = ImageFromImage(tilemap, src_rect);
+        UnloadImage(tilemap);
+        break;
+    }
+    }
+
+    Texture2D tex = LoadTextureFromImage(image);
+    UnloadImage(image);
+    texture_cache[cache_key] = tex;
+    return tex;
+}
+
+void rpg::Renderer::unload_texture_cache() {
+    for (auto& pair : texture_cache) {
+        UnloadTexture(pair.second);
+    }
+    texture_cache.clear();
+}
+
 
 
 void draw_keyboard_profile_prompt(gamestate& g) {
@@ -229,6 +293,7 @@ bool libdraw_windowshouldclose(gamestate& g) {
 void libdraw_close_partial(rpg::Renderer& renderer) {
     renderer.spritegroups.clear();
     libdraw_unload_textures(renderer.txinfo);
+    renderer.unload_texture_cache();
     unload_shaders(renderer);
     UnloadRenderTexture(renderer.title_target_texture);
     UnloadRenderTexture(renderer.char_creation_target_texture);

@@ -6,10 +6,12 @@
 
 #include "entityid.h"
 #include "libgame_defines.h"
+#include "sprite_def.h"
 #include "spritegroup.h"
 #include "textureinfo.h"
 #include <memory>
 #include <raylib.h>
+#include <string>
 #include <unordered_map>
 
 namespace rpg {
@@ -24,8 +26,10 @@ class Renderer {
 public:
     /// @brief Active spritegroup instances keyed by owning entity id.
     std::unordered_map<entityid, std::unique_ptr<spritegroup>> spritegroups;
-    /// @brief Texture metadata table indexed by generated texture id.
+    /// @brief Texture metadata table indexed by generated texture id (legacy).
     textureinfo txinfo[GAMESTATE_SIZEOFTEXINFOARRAY];
+    /// @brief On-demand texture cache keyed by cache key string.
+    std::unordered_map<std::string, Texture2D> texture_cache;
     /// @brief Loaded shaders keyed by project-specific shader identifiers.
     std::unordered_map<int, Shader> shaders;
     /// @brief Off-screen target used to compose the title screen.
@@ -46,6 +50,12 @@ public:
     Rectangle win_dest = {0, 0, DEFAULT_WIN_WIDTH, DEFAULT_WIN_HEIGHT};
     /// @brief Global animation speed divisor used by sprite update code.
     int anim_speed = DEFAULT_ANIM_SPEED;
+
+    /** @brief Load (or retrieve from cache) a Texture2D for a SpriteDef. */
+    Texture2D load_sprite_texture(const rpg::SpriteDef& def);
+
+    /** @brief Unload all textures held in texture_cache. */
+    void unload_texture_cache();
 };
 
 } // namespace rpg

@@ -6,8 +6,8 @@
 
 #include "gamestate.h"
 #include "libdraw_context.h"
-#include "texture_ids.h"
-#include "textureinfo.h"
+#include "actor_definitions.h"
+#include "item_definitions.h"
 #include <raylib.h>
 
 /** @brief Draw the title screen and optionally its menu selection list. */

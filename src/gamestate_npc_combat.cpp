@@ -77,7 +77,7 @@ void gamestate::handle_weapon_durability_loss(entityid atk_id, entityid tgt_id) 
     ct.set<destroyed>(equipped_wpn, true);
     bool event_heard = check_hearing(hero_id, ct.get<location>(tgt_id).value_or((vec3){-1, -1, -1}));
     if (event_heard) {
-        audio.queue(SFX_05_ALCHEMY_GLASS_BREAK);
+        audio.queue("sfx/Minifantasy_Dungeon_SFX/26_sword_hit_1.wav");
     }
     add_combat_break_message(equipped_wpn);
 }
@@ -98,7 +98,7 @@ void gamestate::handle_shield_durability_loss(entityid defender, entityid attack
     ct.set<destroyed>(shield, true);
     bool event_heard = check_hearing(hero_id, ct.get<location>(defender).value_or((vec3){-1, -1, -1}));
     if (event_heard) {
-        audio.queue(SFX_05_ALCHEMY_GLASS_BREAK);
+        audio.queue("sfx/Minifantasy_Dungeon_SFX/26_sword_hit_1.wav");
     }
     add_combat_break_message(shield);
 }
@@ -141,7 +141,7 @@ void gamestate::provoke_npc(entityid npc_id, entityid source_id) {
 void gamestate::handle_shield_block_sfx(entityid target_id) {
     bool event_heard = check_hearing(hero_id, ct.get<location>(target_id).value_or((vec3){-1, -1, -1}));
     if (event_heard) {
-        audio.queue(SFX_HIT_METAL_ON_METAL);
+        audio.queue("sfx/Minifantasy_Dungeon_SFX/26_sword_hit_3.wav");
     }
 }
 
@@ -317,20 +317,20 @@ void gamestate::handle_attack_sfx(entityid attacker, attack_result_t result) {
     if (!check_hearing(hero_id, loc)) {
         return;
     }
-    int index = SFX_SLASH_ATTACK_SWORD_1;
+    const char* index = "sfx/Minifantasy_Dungeon_SFX/07_human_atk_sword_1.wav";
     if (result == ATTACK_RESULT_BLOCK) {
-        index = SFX_HIT_METAL_ON_METAL;
+        index = "sfx/Minifantasy_Dungeon_SFX/26_sword_hit_3.wav";
     }
     else if (result == ATTACK_RESULT_HIT) {
-        index = SFX_HIT_METAL_ON_FLESH;
+        index = "sfx/Minifantasy_Dungeon_SFX/26_sword_hit_1.wav";
     }
     else if (result == ATTACK_RESULT_MISS) {
         entityid weapon_id = ct.get<equipped_weapon>(attacker).value_or(ENTITYID_INVALID);
         weapontype_t wpn_type = ct.get<weapontype>(weapon_id).value_or(WEAPON_NONE);
-        index = wpn_type == WEAPON_SHORT_SWORD ? SFX_SLASH_ATTACK_SWORD_1
-                : wpn_type == WEAPON_AXE       ? SFX_SLASH_ATTACK_HEAVY_1
-                : wpn_type == WEAPON_DAGGER    ? SFX_SLASH_ATTACK_LIGHT_1
-                                               : SFX_SLASH_ATTACK_SWORD_1;
+        index = wpn_type == WEAPON_SHORT_SWORD ? "sfx/Minifantasy_Dungeon_SFX/07_human_atk_sword_1.wav"
+                : wpn_type == WEAPON_AXE       ? "sfx/Minifantasy_Dungeon_SFX/07_human_atk_sword_1.wav"
+                : wpn_type == WEAPON_DAGGER    ? "sfx/Minifantasy_Dungeon_SFX/07_human_atk_sword_1.wav"
+                                               : "sfx/Minifantasy_Dungeon_SFX/07_human_atk_sword_1.wav";
     }
     audio.queue(index);
     msuccess("attack sfx played");

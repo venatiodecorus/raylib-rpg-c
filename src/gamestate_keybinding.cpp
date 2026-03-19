@@ -175,7 +175,7 @@ void gamestate::handle_input_keyboard_profile_prompt(inputstate& is) {
         frame_dirty = true;
     }
     else if (inputstate_is_pressed(is, KEY_ENTER)) {
-        audio.queue(SFX_CONFIRM_01);
+        audio.queue("sfx/Minifantasy_Dungeon_SFX/02_chest_close_1.wav");
         apply_keyboard_profile_selection();
     }
 }

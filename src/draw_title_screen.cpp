@@ -72,12 +72,19 @@ void draw_title_screen(gamestate& g, rpg::Renderer& renderer, bool show_menu) {
 
     const float mx = frame.x;
     const float my = frame.y + sw / 2;
-    const Texture t1 = renderer.txinfo[TX_ACTIONS_SLASH_SHORT_SWORD_B].texture;
-    const Texture t2 = renderer.txinfo[TX_CHAR_HUMAN_ATTACK_SLASH].texture;
-    const Texture t3 = renderer.txinfo[TX_ACTIONS_SLASH_SHORT_SWORD_F].texture;
-    const Texture t4 = renderer.txinfo[TX_ACTIONS_SLASH_AXE_B].texture;
-    const Texture t5 = renderer.txinfo[TX_CHAR_ORC_ATTACK].texture;
-    const Texture t6 = renderer.txinfo[TX_ACTIONS_SLASH_AXE_F].texture;
+    // Inline SpriteDefs for title screen decoration textures
+    static const rpg::SpriteDef sd_slash_ss_b  = {rpg::TXSRC_PLACEHOLDER, "", 4, 4, 0, 0, 128, 128};
+    static const rpg::SpriteDef sd_human_atk   = {rpg::TXSRC_FILE, "gfx/Minifantasy_Creatures_v3.3_Free_Version/Minifantasy_Creatures_Assets/Base_Humanoids/Human/Base_Human/HumanAttack.png", 4, 4, 0, 0, 0, 0};
+    static const rpg::SpriteDef sd_slash_ss_f  = {rpg::TXSRC_PLACEHOLDER, "", 4, 4, 0, 0, 128, 128};
+    static const rpg::SpriteDef sd_slash_axe_b = {rpg::TXSRC_PLACEHOLDER, "", 4, 4, 0, 0, 128, 128};
+    static const rpg::SpriteDef sd_orc_atk     = {rpg::TXSRC_FILE, "gfx/Minifantasy_Creatures_v3.3_Free_Version/Minifantasy_Creatures_Assets/Base_Humanoids/Orc/Base_Orc/OrcBaseAttack.png", 4, 4, 0, 0, 0, 0};
+    static const rpg::SpriteDef sd_slash_axe_f = {rpg::TXSRC_PLACEHOLDER, "", 4, 4, 0, 0, 128, 128};
+    const Texture t1 = renderer.load_sprite_texture(sd_slash_ss_b);
+    const Texture t2 = renderer.load_sprite_texture(sd_human_atk);
+    const Texture t3 = renderer.load_sprite_texture(sd_slash_ss_f);
+    const Texture t4 = renderer.load_sprite_texture(sd_slash_axe_b);
+    const Texture t5 = renderer.load_sprite_texture(sd_orc_atk);
+    const Texture t6 = renderer.load_sprite_texture(sd_slash_axe_f);
     constexpr Rectangle src = {rx, ry, 32, 32};
     const Rectangle dst = {mx, my, sw, sw};
     const float mx2 = frame.x + frame.width - sw;

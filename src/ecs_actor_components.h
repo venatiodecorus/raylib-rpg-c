@@ -1,6 +1,7 @@
 #pragma once
 
 #include "race.h"
+#include "sprite_def.h"
 #include <string>
 
 struct ActorKind {
@@ -8,8 +9,8 @@ struct ActorKind {
 };
 
 struct ActorVisual {
-    const int* keys;
-    int key_count;
+    const rpg::SpriteDef* sprites;
+    int sprite_count;
 };
 
 struct ActorText {

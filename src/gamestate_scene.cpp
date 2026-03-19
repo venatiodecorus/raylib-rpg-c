@@ -16,7 +16,7 @@ void gamestate::handle_input_title_scene(inputstate& is) {
     if (inputstate_is_pressed(is, KEY_ENTER) || inputstate_is_pressed(is, KEY_SPACE)) {
         current_scene = SCENE_MAIN_MENU;
         frame_dirty = true;
-        audio.queue(SFX_CONFIRM_01);
+        audio.queue("sfx/Minifantasy_Dungeon_SFX/02_chest_close_1.wav");
     }
 }
 
@@ -26,25 +26,25 @@ void gamestate::handle_input_main_menu_scene(inputstate& is) {
             current_scene = SCENE_CHARACTER_CREATION;
             frame_dirty = true;
         }
-        audio.queue(SFX_CONFIRM_01);
+        audio.queue("sfx/Minifantasy_Dungeon_SFX/02_chest_close_1.wav");
     }
     else if (inputstate_is_pressed(is, KEY_DOWN)) {
         ui.title_screen_selection++;
         if (ui.title_screen_selection >= ui.max_title_screen_selections) {
             ui.title_screen_selection = 0;
         }
-        audio.queue(SFX_CONFIRM_01);
+        audio.queue("sfx/Minifantasy_Dungeon_SFX/02_chest_close_1.wav");
     }
     else if (inputstate_is_pressed(is, KEY_UP)) {
         ui.title_screen_selection--;
         if (ui.title_screen_selection < 0) {
             ui.title_screen_selection = ui.max_title_screen_selections - 1;
         }
-        audio.queue(SFX_CONFIRM_01);
+        audio.queue("sfx/Minifantasy_Dungeon_SFX/02_chest_close_1.wav");
     }
     else if (inputstate_is_pressed(is, KEY_ESCAPE)) {
         do_quit = true;
-        audio.queue(SFX_CONFIRM_01);
+        audio.queue("sfx/Minifantasy_Dungeon_SFX/02_chest_close_1.wav");
     }
     frame_dirty = true;
 }
@@ -102,7 +102,7 @@ void gamestate::handle_input_character_creation_scene(inputstate& is) {
     }
     bool changed = handle_character_creation_text_input(is);
     if (inputstate_is_pressed(is, KEY_ENTER)) {
-        audio.queue(SFX_CONFIRM_01);
+        audio.queue("sfx/Minifantasy_Dungeon_SFX/02_chest_close_1.wav");
         int myhd = chara_creation.hitdie;
         int maxhp_roll = -1;
         while (maxhp_roll < 1) {
@@ -122,7 +122,7 @@ void gamestate::handle_input_character_creation_scene(inputstate& is) {
         changed = true;
     }
     else if (inputstate_is_pressed(is, KEY_SPACE)) {
-        audio.queue(SFX_CONFIRM_01);
+        audio.queue("sfx/Minifantasy_Dungeon_SFX/02_chest_close_1.wav");
         chara_creation.strength = do_roll_best_of_3((vec3){3, 6, 0});
         chara_creation.dexterity = do_roll_best_of_3((vec3){3, 6, 0});
         chara_creation.intelligence = do_roll_best_of_3((vec3){3, 6, 0});
@@ -132,7 +132,7 @@ void gamestate::handle_input_character_creation_scene(inputstate& is) {
         changed = true;
     }
     else if (inputstate_is_pressed(is, KEY_LEFT)) {
-        audio.queue(SFX_CONFIRM_01);
+        audio.queue("sfx/Minifantasy_Dungeon_SFX/02_chest_close_1.wav");
         int race = chara_creation.race;
         if (chara_creation.race > 1) {
             race--;
@@ -145,7 +145,7 @@ void gamestate::handle_input_character_creation_scene(inputstate& is) {
         changed = true;
     }
     else if (inputstate_is_pressed(is, KEY_RIGHT)) {
-        audio.queue(SFX_CONFIRM_01);
+        audio.queue("sfx/Minifantasy_Dungeon_SFX/02_chest_close_1.wav");
         int race = chara_creation.race;
         if (race < RACE_COUNT - 1) {
             race++;
@@ -158,12 +158,12 @@ void gamestate::handle_input_character_creation_scene(inputstate& is) {
         changed = true;
     }
     else if (inputstate_is_pressed(is, KEY_UP)) {
-        audio.queue(SFX_CONFIRM_01);
+        audio.queue("sfx/Minifantasy_Dungeon_SFX/02_chest_close_1.wav");
         chara_creation.alignment = alignment_prev(chara_creation.alignment);
         changed = true;
     }
     else if (inputstate_is_pressed(is, KEY_DOWN)) {
-        audio.queue(SFX_CONFIRM_01);
+        audio.queue("sfx/Minifantasy_Dungeon_SFX/02_chest_close_1.wav");
         chara_creation.alignment = alignment_next(chara_creation.alignment);
         changed = true;
     }
