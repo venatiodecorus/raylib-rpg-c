@@ -2,9 +2,7 @@
 
 #include <vector>
 
-#ifndef LAST_FRAME_TIMES_MAX
-#define LAST_FRAME_TIMES_MAX 1000
-#endif
+constexpr int LAST_FRAME_TIMES_MAX = 1000;
 
 namespace rpg {
 

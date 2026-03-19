@@ -3,9 +3,7 @@
 #include <ctime>
 #include <string>
 
-#ifndef GAMESTATE_SIZEOFTIMEBUF
-#define GAMESTATE_SIZEOFTIMEBUF 64
-#endif
+constexpr int GAMESTATE_SIZEOFTIMEBUF = 64;
 
 namespace rpg {
 

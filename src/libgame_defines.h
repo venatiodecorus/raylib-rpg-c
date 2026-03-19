@@ -4,76 +4,56 @@
 
 #pragma once
 
-#ifndef GAME_INFO_DEFINES
-#define GAME_INFO_DEFINES
-#define GAME_VERSION "v0.0.6.26"
-#define GAME_VERSION_DATE "March 17, 2026"
-#define WINDOW_TITLE "@evildojo666 presents: project.rpg"
-#endif
+// Game info
+constexpr const char* GAME_VERSION      = "v0.0.6.26";
+constexpr const char* GAME_VERSION_DATE = "March 17, 2026";
+constexpr const char* WINDOW_TITLE      = "@evildojo666 presents: project.rpg";
 
-#ifndef WINDOW_DEFINES
-#define WINDOW_DEFINES
-#define DEFAULT_WIN_WIDTH 1920
-#define DEFAULT_WIN_HEIGHT 1080
-#define DEFAULT_TARGET_WIDTH 1920
-#define DEFAULT_TARGET_HEIGHT 1080
-#endif
+// Window
+constexpr int DEFAULT_WIN_WIDTH      = 1920;
+constexpr int DEFAULT_WIN_HEIGHT     = 1080;
+constexpr int DEFAULT_TARGET_WIDTH   = 1920;
+constexpr int DEFAULT_TARGET_HEIGHT  = 1080;
 
 // Alternative window sizes if needed (commented out)
-// #define DEFAULT_WIN_WIDTH 360
-// #define DEFAULT_WIN_HEIGHT 640
-// #define DEFAULT_TARGET_WIDTH 360
-// #define DEFAULT_TARGET_HEIGHT 640
+// constexpr int DEFAULT_WIN_WIDTH      = 360;
+// constexpr int DEFAULT_WIN_HEIGHT     = 640;
+// constexpr int DEFAULT_TARGET_WIDTH   = 360;
+// constexpr int DEFAULT_TARGET_HEIGHT  = 640;
 
-#ifndef AUDIO_DEFINES
-#define AUDIO_DEFINES
-#define DEFAULT_MASTER_VOLUME 1.0f
-#define DEFAULT_MUSIC_VOLUME 0.5f
-#endif
+// Audio
+constexpr float DEFAULT_MASTER_VOLUME = 1.0f;
+constexpr float DEFAULT_MUSIC_VOLUME  = 0.5f;
 
-#ifndef UI_DEFINES
-#define UI_DEFINES
-#define DEFAULT_MSG_HISTORY_FONT_SIZE 20
-#define DEFAULT_MSG_WINDOW_FONT_SIZE 20
-#define DEFAULT_LOOK_PANEL_FONT_SIZE 20
-#define DEFAULT_HUD_FONT_SIZE 20
-#define DEFAULT_HUD_BUFFER_LINE_SIZE 1024
-#define DEFAULT_HUD_LINE_COUNT 4
-#endif
+// UI
+constexpr int DEFAULT_MSG_HISTORY_FONT_SIZE = 20;
+constexpr int DEFAULT_MSG_WINDOW_FONT_SIZE  = 20;
+constexpr int DEFAULT_LOOK_PANEL_FONT_SIZE  = 20;
+constexpr int DEFAULT_HUD_FONT_SIZE         = 20;
+constexpr int DEFAULT_HUD_BUFFER_LINE_SIZE  = 1024;
+constexpr int DEFAULT_HUD_LINE_COUNT        = 4;
 
-#ifndef GRAPHICS_DEFINES
-#define GRAPHICS_DEFINES
-#define DEFAULT_TILE_SIZE_SCALED 32
-#define DEFAULT_TILE_SIZE_FLOAT 32.0f
-#define DEFAULT_OFFSET -12
-#define DEFAULT_TARGET_FPS 60
-#define DEFAULT_LOCK 30
-#define DEFAULT_TILE_SIZE 8
-#define DEFAULT_ZOOM_INCR 1.0f
-#define DEFAULT_ZOOM_LEVEL 4.0f
-#define FRAMEINTERVAL 10
-#endif
+// Graphics
+constexpr int   DEFAULT_TILE_SIZE_SCALED = 32;
+constexpr float DEFAULT_TILE_SIZE_FLOAT  = 32.0f;
+constexpr int   DEFAULT_OFFSET           = -12;
+constexpr int   DEFAULT_TARGET_FPS       = 60;
+constexpr int   DEFAULT_LOCK             = 30;
+constexpr int   DEFAULT_TILE_SIZE        = 8;
+constexpr float DEFAULT_ZOOM_INCR        = 1.0f;
+constexpr float DEFAULT_ZOOM_LEVEL       = 4.0f;
+constexpr int   FRAMEINTERVAL            = 10;
 
-#ifndef GAMEPLAY_DEFINES
-#define GAMEPLAY_DEFINES
-#define DEFAULT_DUNGEONFLOOR_WIDTH 8
-#define DEFAULT_DUNGEONFLOOR_HEIGHT 8
-#define DEFAULT_ANIM_SPEED 10
-#define DEFAULT_CAMERA_ZOOM 10.0f
-#endif
+// Gameplay
+constexpr int   DEFAULT_DUNGEONFLOOR_WIDTH  = 8;
+constexpr int   DEFAULT_DUNGEONFLOOR_HEIGHT = 8;
+constexpr int   DEFAULT_ANIM_SPEED          = 10;
+constexpr float DEFAULT_CAMERA_ZOOM         = 10.0f;
 
-#ifndef MEMORY_DEFINES
-#define MEMORY_DEFINES
-#define DEFAULT_SPRITEGROUPS_SIZE 128
-#define SPRITEGROUP_DEFAULT_SIZE 32
-#define GAMESTATE_SIZEOFTEXINFOARRAY 2048
-#endif
+// Memory
+constexpr int DEFAULT_SPRITEGROUPS_SIZE      = 128;
+constexpr int SPRITEGROUP_DEFAULT_SIZE       = 32;
+constexpr int GAMESTATE_SIZEOFTEXINFOARRAY   = 2048;
 
-#ifndef SCENE_DEFINES
-#define SCENE_DEFINES
-#define COMPANYSCENE 0
-#define TITLESCENE 1
-#define GAMEPLAYSCENE 2
-#endif
-
-#define DEFAULT_PAD 20
+// UI padding
+constexpr int DEFAULT_PAD = 20;

@@ -54,19 +54,19 @@
 #include <unordered_map>
 #include <vector>
 
-#define GAMESTATE_SIZEOFTIMEBUF 64
-#define GAMESTATE_SIZEOFDEBUGPANELBUF 1024
-#define MAX_MESSAGES 64
-#define MAX_MSG_LENGTH 256
-#define LIST_INIT_CAPACITY 16
-#define DEFAULT_MAX_HISTORY_SIZE 1024
-#define GAMESTATE_DEBUGPANEL_DEFAULT_X 0
-#define GAMESTATE_DEBUGPANEL_DEFAULT_Y 0
-#define GAMESTATE_DEBUGPANEL_DEFAULT_WIDTH 200
-#define GAMESTATE_DEBUGPANEL_DEFAULT_HEIGHT 200
-#define GAMESTATE_DEBUGPANEL_DEFAULT_FONT_SIZE 20
-#define GAMESTATE_INIT_ENTITYIDS_MAX 3000000
-#define LAST_FRAME_TIMES_MAX 1000
+// GAMESTATE_SIZEOFTIMEBUF defined in runtime_session_state.h
+// LAST_FRAME_TIMES_MAX defined in frame_timing_state.h
+constexpr int GAMESTATE_SIZEOFDEBUGPANELBUF         = 1024;
+constexpr int MAX_MESSAGES                          = 64;
+constexpr int MAX_MSG_LENGTH                        = 256;
+constexpr int LIST_INIT_CAPACITY                    = 16;
+constexpr int DEFAULT_MAX_HISTORY_SIZE              = 1024;
+constexpr int GAMESTATE_DEBUGPANEL_DEFAULT_X        = 0;
+constexpr int GAMESTATE_DEBUGPANEL_DEFAULT_Y        = 0;
+constexpr int GAMESTATE_DEBUGPANEL_DEFAULT_WIDTH    = 200;
+constexpr int GAMESTATE_DEBUGPANEL_DEFAULT_HEIGHT   = 200;
+constexpr int GAMESTATE_DEBUGPANEL_DEFAULT_FONT_SIZE = 20;
+constexpr int GAMESTATE_INIT_ENTITYIDS_MAX          = 3000000;
 
 typedef ComponentTable CT;
 

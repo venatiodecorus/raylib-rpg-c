@@ -86,7 +86,7 @@ These must be addressed first because everything else depends on them.
 
 ## P2 — Code Quality
 
-- [ ] **Replace `#define` constants with `constexpr` / `enum class`**
+- [x] **Replace `#define` constants with `constexpr` / `enum class`**
   - `libgame_defines.h`: ~60 `#define` numeric constants should be `constexpr`.
   - `sfx.h`: 62 SFX IDs + 100 legacy aliases — should be an `enum class`.
   - `gamestate.h`: `GAMESTATE_SIZEOFTIMEBUF`, `MAX_MESSAGES`, etc.
