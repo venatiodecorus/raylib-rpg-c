@@ -9,13 +9,13 @@
 #include "spritegroup.h"
 
 /** @brief Update the camera target to follow the hero when lock-on is enabled. */
-static inline bool camera_lock_on(gamestate& g) {
+static inline bool camera_lock_on(gamestate& g, rpg::Renderer& renderer) {
     if (!g.cam_lockon) {
         return false;
     }
 
-    auto it = libdraw_ctx.spritegroups.find(g.hero_id);
-    if (it == libdraw_ctx.spritegroups.end()) {
+    auto it = renderer.spritegroups.find(g.hero_id);
+    if (it == renderer.spritegroups.end()) {
         return false;
     }
 

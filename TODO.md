@@ -71,7 +71,7 @@ These must be addressed first because everything else depends on them.
   - `libdraw_context.h:42`: raw pointer map should use `unique_ptr`.
   - Replace all raw `new`/`delete` with `unique_ptr` or direct member storage.
 
-- [ ] **Eliminate global mutable state**
+- [x] **Eliminate global mutable state**
   - Three process-lifetime globals: `inputstate is` (main.cpp:14),
     `gamestate g` (main.cpp:17), `libdraw_context_t libdraw_ctx`
     (libdraw.cpp:68).

@@ -2,7 +2,7 @@
 
 #include "draw_chest_menu.h"
 
-void draw_inventory_menu(gamestate& g) {
+void draw_inventory_menu(gamestate& g, rpg::Renderer& renderer) {
     if (!g.ui.display_inventory_menu) {
         return;
     }
@@ -40,12 +40,12 @@ void draw_inventory_menu(gamestate& g) {
     }
 
     auto inventory = maybe_inventory.value();
-    draw_inventory_grid(g, inventory, left_box, true);
+    draw_inventory_grid(g, renderer, inventory, left_box, true);
 
     if (!inventory->empty()) {
         size_t index = static_cast<size_t>(g.ui.inventory_cursor.y) * 7 + static_cast<size_t>(g.ui.inventory_cursor.x);
         if (index < inventory->size()) {
-            draw_item_detail_panel(g, right_box, inventory->at(index));
+            draw_item_detail_panel(g, renderer, right_box, inventory->at(index));
         }
     }
 }

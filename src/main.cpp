@@ -10,11 +10,11 @@
 #include <emscripten/emscripten.h>
 #endif
 
-/// @brief Global input snapshot updated once per outer frame.
-inputstate is;
-
-/// @brief Global gameplay state shared across the single-translation-unit runtime.
-gamestate g;
+struct AppContext {
+    gamestate g;
+    inputstate is;
+    rpg::Renderer renderer;
+};
 
 /**
  * @brief Advance one outer frame of the application loop.
@@ -22,19 +22,20 @@ gamestate g;
  * Pulls fresh input, advances gameplay simulation, renders the current frame,
  * and performs an in-process gameplay restart when requested.
  */
-static inline void gameloop() {
-    inputstate_update(is);
-    g.tick(is);
-    drawframe(g);
-    g.advance_animation_phase();
-    g.audio.flush(g.test);
-    g.audio.update_music(g.random.mt, g.test);
-    g.finalize_render_feedback();
-    if (g.do_restart) {
+static void gameloop(void* arg) {
+    AppContext* ctx = static_cast<AppContext*>(arg);
+    inputstate_update(ctx->is);
+    ctx->g.tick(ctx->is);
+    drawframe(ctx->g, ctx->renderer);
+    ctx->g.advance_animation_phase();
+    ctx->g.audio.flush(ctx->g.test);
+    ctx->g.audio.update_music(ctx->g.random.mt, ctx->g.test);
+    ctx->g.finalize_render_feedback();
+    if (ctx->g.do_restart) {
         msuccess("Restarting game...");
-        g.audio.shutdown();
-        g.restart_game();
-        g.audio.init(g.random.mt, g.test);
+        ctx->g.audio.shutdown();
+        ctx->g.restart_game();
+        ctx->g.audio.init(ctx->g.random.mt, ctx->g.test);
     }
 }
 
@@ -47,18 +48,20 @@ static inline void gameloop() {
  * @return Process exit code.
  */
 int main() {
-    g.logic_init();
-    libdraw_init(g);
-    g.audio.init(g.random.mt, g.test);
+    AppContext* ctx = new AppContext();
+    ctx->g.logic_init();
+    libdraw_init(ctx->g, ctx->renderer);
+    ctx->g.audio.init(ctx->g.random.mt, ctx->g.test);
 #ifndef WEB
-    while (!libdraw_windowshouldclose(g)) {
-        gameloop();
+    while (!libdraw_windowshouldclose(ctx->g)) {
+        gameloop(ctx);
     }
 #else
-    emscripten_set_main_loop(gameloop, 0, 1);
+    emscripten_set_main_loop_arg(gameloop, ctx, 0, 1);
 #endif
-    g.audio.shutdown();
-    libdraw_close();
-    g.logic_close();
+    ctx->g.audio.shutdown();
+    libdraw_close(ctx->renderer);
+    ctx->g.logic_close();
+    delete ctx;
     return 0;
 }

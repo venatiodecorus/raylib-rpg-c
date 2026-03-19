@@ -1,8 +1,8 @@
 #include "draw_chest_menu.h"
 
-void draw_item_detail_panel(gamestate& g, const Rectangle& right_box, entityid selection_id) {
-    auto it = libdraw_ctx.spritegroups.find(selection_id);
-    spritegroup* sg = it != libdraw_ctx.spritegroups.end() ? it->second.get() : nullptr;
+void draw_item_detail_panel(gamestate& g, rpg::Renderer& renderer, const Rectangle& right_box, entityid selection_id) {
+    auto it = renderer.spritegroups.find(selection_id);
+    spritegroup* sg = it != renderer.spritegroups.end() ? it->second.get() : nullptr;
     if (!sg) {
         return;
     }
@@ -21,7 +21,7 @@ void draw_item_detail_panel(gamestate& g, const Rectangle& right_box, entityid s
     }
 }
 
-void draw_inventory_grid(gamestate& g, shared_ptr<vector<entityid>> inventory, const Rectangle& left_box, bool show_equipped_labels) {
+void draw_inventory_grid(gamestate& g, rpg::Renderer& renderer, shared_ptr<vector<entityid>> inventory, const Rectangle& left_box, bool show_equipped_labels) {
     float x = left_box.x + 2;
     float y = left_box.y + 2;
     const int cols = 7;
@@ -35,8 +35,8 @@ void draw_inventory_grid(gamestate& g, shared_ptr<vector<entityid>> inventory, c
             Rectangle grid_box2 = {x + 2, y + 2, w - 4, h - 4};
             DrawRectangleLinesEx(grid_box, 1, Color{0x66, 0x66, 0x66, 255});
             if (it != inventory->end()) {
-                auto sg_it = libdraw_ctx.spritegroups.find(*it);
-                spritegroup* sg = sg_it != libdraw_ctx.spritegroups.end() ? sg_it->second.get() : nullptr;
+                auto sg_it = renderer.spritegroups.find(*it);
+                spritegroup* sg = sg_it != renderer.spritegroups.end() ? sg_it->second.get() : nullptr;
                 if (sg) {
                     auto sprite = sg->get_current();
                     DrawTexturePro(*(sprite->get_texture()), Rectangle{10, 10, 12, 12}, grid_box2, Vector2{0, 0}, 0.0f, WHITE);
@@ -66,7 +66,7 @@ void draw_inventory_grid(gamestate& g, shared_ptr<vector<entityid>> inventory, c
     }
 }
 
-void draw_chest_menu(gamestate& g) {
+void draw_chest_menu(gamestate& g, rpg::Renderer& renderer) {
     if (!g.ui.display_chest_menu || g.active_chest_id == ENTITYID_INVALID) {
         return;
     }
@@ -104,12 +104,12 @@ void draw_chest_menu(gamestate& g) {
     DrawRectangleRec(right_box, g.ui.window_box_bgcolor);
     DrawRectangleLinesEx(right_box, 2, g.ui.window_box_fgcolor);
 
-    draw_inventory_grid(g, inventory, left_box, g.ui.chest_deposit_mode);
+    draw_inventory_grid(g, renderer, inventory, left_box, g.ui.chest_deposit_mode);
 
     if (!inventory->empty()) {
         size_t index = static_cast<size_t>(g.ui.inventory_cursor.y) * 7 + static_cast<size_t>(g.ui.inventory_cursor.x);
         if (index < inventory->size()) {
-            draw_item_detail_panel(g, right_box, inventory->at(index));
+            draw_item_detail_panel(g, renderer, right_box, inventory->at(index));
         }
     }
 }

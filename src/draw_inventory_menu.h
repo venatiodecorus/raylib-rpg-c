@@ -10,4 +10,4 @@
 #include "spritegroup.h"
 
 /** @brief Draw the full inventory grid and selected-item detail panel. */
-void draw_inventory_menu(gamestate& g);
+void draw_inventory_menu(gamestate& g, rpg::Renderer& renderer);

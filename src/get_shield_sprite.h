@@ -11,15 +11,15 @@
 #include "spritegroup_anim.h"
 
 /** @brief Return the equipped shield's front-layer sprite for the entity's current animation. */
-static inline shared_ptr<sprite> get_shield_front_sprite(gamestate& g, entityid id, spritegroup* sg) {
+static inline shared_ptr<sprite> get_shield_front_sprite(gamestate& g, rpg::Renderer& renderer, entityid id, spritegroup* sg) {
     massert(id != ENTITYID_INVALID, "id is -1");
     massert(sg, "spritegroup is NULL");
     const entityid shield = g.ct.get<equipped_shield>(id).value_or(ENTITYID_INVALID);
     if (shield == ENTITYID_INVALID) {
         return nullptr;
     }
-    auto it = libdraw_ctx.spritegroups.find(shield);
-    if (it == libdraw_ctx.spritegroups.end()) {
+    auto it = renderer.spritegroups.find(shield);
+    if (it == renderer.spritegroups.end()) {
         return nullptr;
     }
     spritegroup* w_sg = it->second.get();
@@ -33,7 +33,7 @@ static inline shared_ptr<sprite> get_shield_front_sprite(gamestate& g, entityid 
 }
 
 /** @brief Return the equipped shield's back-layer sprite for the entity's current animation. */
-static inline shared_ptr<sprite> get_shield_back_sprite(gamestate& g, entityid id, spritegroup* sg) {
+static inline shared_ptr<sprite> get_shield_back_sprite(gamestate& g, rpg::Renderer& renderer, entityid id, spritegroup* sg) {
     //massert(g, "gamestate is NULL");
     massert(id != ENTITYID_INVALID, "id is -1");
     massert(sg, "spritegroup is NULL");
@@ -42,8 +42,8 @@ static inline shared_ptr<sprite> get_shield_back_sprite(gamestate& g, entityid i
     if (shield == ENTITYID_INVALID) {
         return retval;
     }
-    auto it = libdraw_ctx.spritegroups.find(shield);
-    if (it == libdraw_ctx.spritegroups.end()) {
+    auto it = renderer.spritegroups.find(shield);
+    if (it == renderer.spritegroups.end()) {
         return retval;
     }
     spritegroup* w_sg = it->second.get();

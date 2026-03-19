@@ -4,7 +4,7 @@
 #include "race.h"
 #include <raylib.h>
 
-void draw_character_creation_screen(gamestate& g) {
+void draw_character_creation_screen(gamestate& g, rpg::Renderer& renderer) {
     minfo3("draw character creation scene");
 
     const char* title_text = "Character Creation";
@@ -59,43 +59,43 @@ void draw_character_creation_screen(gamestate& g) {
 
     switch (g.chara_creation.race) {
     case RACE_HUMAN:
-        DrawTexturePro(libdraw_ctx.txinfo[TX_CHAR_HUMAN_IDLE].texture, src, dst2, zero_vec, 0.0f, WHITE);
+        DrawTexturePro(renderer.txinfo[TX_CHAR_HUMAN_IDLE].texture, src, dst2, zero_vec, 0.0f, WHITE);
         break;
     case RACE_ORC:
-        DrawTexturePro(libdraw_ctx.txinfo[TX_CHAR_ORC_IDLE].texture, src, dst2, zero_vec, 0.0f, WHITE);
+        DrawTexturePro(renderer.txinfo[TX_CHAR_ORC_IDLE].texture, src, dst2, zero_vec, 0.0f, WHITE);
         break;
     case RACE_ELF:
-        DrawTexturePro(libdraw_ctx.txinfo[TX_CHAR_ELF_IDLE].texture, src, dst2, zero_vec, 0.0f, WHITE);
+        DrawTexturePro(renderer.txinfo[TX_CHAR_ELF_IDLE].texture, src, dst2, zero_vec, 0.0f, WHITE);
         break;
     case RACE_DWARF:
-        DrawTexturePro(libdraw_ctx.txinfo[TX_CHAR_DWARF_IDLE].texture, src, dst2, zero_vec, 0.0f, WHITE);
+        DrawTexturePro(renderer.txinfo[TX_CHAR_DWARF_IDLE].texture, src, dst2, zero_vec, 0.0f, WHITE);
         break;
     case RACE_HALFLING:
-        DrawTexturePro(libdraw_ctx.txinfo[TX_CHAR_HALFLING_IDLE].texture, src, dst2, zero_vec, 0.0f, WHITE);
+        DrawTexturePro(renderer.txinfo[TX_CHAR_HALFLING_IDLE].texture, src, dst2, zero_vec, 0.0f, WHITE);
         break;
     case RACE_GOBLIN:
-        DrawTexturePro(libdraw_ctx.txinfo[TX_CHAR_GOBLIN_IDLE].texture, src, dst2, zero_vec, 0.0f, WHITE);
+        DrawTexturePro(renderer.txinfo[TX_CHAR_GOBLIN_IDLE].texture, src, dst2, zero_vec, 0.0f, WHITE);
         break;
     case RACE_GREEN_SLIME:
-        DrawTexturePro(libdraw_ctx.txinfo[TX_MONSTER_GREEN_SLIME_IDLE].texture, src, dst2, zero_vec, 0.0f, WHITE);
+        DrawTexturePro(renderer.txinfo[TX_MONSTER_GREEN_SLIME_IDLE].texture, src, dst2, zero_vec, 0.0f, WHITE);
         break;
     case RACE_BAT:
-        DrawTexturePro(libdraw_ctx.txinfo[TX_MONSTER_BAT_IDLE].texture, src, dst2, zero_vec, 0.0f, WHITE);
+        DrawTexturePro(renderer.txinfo[TX_MONSTER_BAT_IDLE].texture, src, dst2, zero_vec, 0.0f, WHITE);
         break;
     case RACE_WOLF:
-        DrawTexturePro(libdraw_ctx.txinfo[TX_MONSTER_WOLF_IDLE].texture, src, dst2, zero_vec, 0.0f, WHITE);
+        DrawTexturePro(renderer.txinfo[TX_MONSTER_WOLF_IDLE].texture, src, dst2, zero_vec, 0.0f, WHITE);
         break;
     case RACE_WARG:
-        DrawTexturePro(libdraw_ctx.txinfo[TX_MONSTER_WARG_IDLE].texture, src, dst2, zero_vec, 0.0f, WHITE);
+        DrawTexturePro(renderer.txinfo[TX_MONSTER_WARG_IDLE].texture, src, dst2, zero_vec, 0.0f, WHITE);
         break;
     case RACE_ZOMBIE:
-        DrawTexturePro(libdraw_ctx.txinfo[TX_MONSTER_ZOMBIE_IDLE].texture, src, dst2, zero_vec, 0.0f, WHITE);
+        DrawTexturePro(renderer.txinfo[TX_MONSTER_ZOMBIE_IDLE].texture, src, dst2, zero_vec, 0.0f, WHITE);
         break;
     case RACE_SKELETON:
-        DrawTexturePro(libdraw_ctx.txinfo[TX_MONSTER_SKELETON_IDLE].texture, src, dst2, zero_vec, 0.0f, WHITE);
+        DrawTexturePro(renderer.txinfo[TX_MONSTER_SKELETON_IDLE].texture, src, dst2, zero_vec, 0.0f, WHITE);
         break;
     case RACE_RAT:
-        DrawTexturePro(libdraw_ctx.txinfo[TX_MONSTER_RAT_IDLE].texture, src, dst2, zero_vec, 0.0f, WHITE);
+        DrawTexturePro(renderer.txinfo[TX_MONSTER_RAT_IDLE].texture, src, dst2, zero_vec, 0.0f, WHITE);
         break;
     default:
         break;

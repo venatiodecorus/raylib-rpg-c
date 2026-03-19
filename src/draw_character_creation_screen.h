@@ -13,4 +13,4 @@
 #include <string>
 
 /** @brief Draw the character-creation UI, stats, instructions, and race preview. */
-void draw_character_creation_screen(gamestate& g);
+void draw_character_creation_screen(gamestate& g, rpg::Renderer& renderer);

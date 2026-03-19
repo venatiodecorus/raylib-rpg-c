@@ -51,7 +51,7 @@
 #include <cstring>
 #include <memory>
 
-libdraw_context_t libdraw_ctx;
+rpg::Renderer renderer;
 
 
 
@@ -82,133 +82,133 @@ void draw_keyboard_profile_prompt(gamestate& g) {
     DrawText("Arrows to choose, Enter to confirm", box_x + 16, box_y + box_h - 20, 10, g.ui.window_box_fgcolor);
 }
 
-void libdraw_render_current_scene_to_scene_texture(gamestate& g) {
+void libdraw_render_current_scene_to_scene_texture(gamestate& g, rpg::Renderer& renderer) {
     switch (g.current_scene) {
     case SCENE_TITLE:
-        draw_title_screen_to_texture(g, false);
+        draw_title_screen_to_texture(g, renderer, false);
         break;
     case SCENE_MAIN_MENU:
-        draw_title_screen_to_texture(g, true);
+        draw_title_screen_to_texture(g, renderer, true);
         break;
     case SCENE_CHARACTER_CREATION:
         minfo3("draw character creation scene to texture");
-        draw_char_creation_to_texture(g);
+        draw_char_creation_to_texture(g, renderer);
         break;
     case SCENE_GAMEPLAY: {
         const int vision_dist = g.ct.get<vision_distance>(g.hero_id).value_or(0);
         const int light_rad = g.ct.get<light_radius>(g.hero_id).value_or(0);
-        libdraw_drawframe_2d_to_texture(g, vision_dist, light_rad);
+        libdraw_drawframe_2d_to_texture(g, renderer, vision_dist, light_rad);
     } break;
     default:
         break;
     }
 }
 
-void libdraw_draw_current_scene_from_scene_texture(gamestate& g) {
+void libdraw_draw_current_scene_from_scene_texture(gamestate& g, rpg::Renderer& renderer) {
     switch (g.current_scene) {
     case SCENE_TITLE:
     case SCENE_MAIN_MENU:
-        draw_title_screen_from_texture(g);
+        draw_title_screen_from_texture(g, renderer);
         break;
     case SCENE_CHARACTER_CREATION:
-        draw_char_creation_from_texture(g);
+        draw_char_creation_from_texture(g, renderer);
         break;
     case SCENE_GAMEPLAY:
-        libdraw_drawframe_2d_from_texture(g);
+        libdraw_drawframe_2d_from_texture(g, renderer);
         break;
     default:
         break;
     }
 }
 
-void libdraw_refresh_dirty_scene(gamestate& g) {
+void libdraw_refresh_dirty_scene(gamestate& g, rpg::Renderer& renderer) {
     if (!g.frame_dirty) {
         return;
     }
 
     minfo3("frame is dirty");
-    libdraw_render_current_scene_to_scene_texture(g);
+    libdraw_render_current_scene_to_scene_texture(g, renderer);
     g.frame_dirty = false;
     g.frame_updates++;
     msuccess3("frame is no longer dirty");
 }
 
-void libdraw_compose_scene_to_window_target(gamestate& g) {
-    BeginTextureMode(libdraw_ctx.target);
+void libdraw_compose_scene_to_window_target(gamestate& g, rpg::Renderer& renderer) {
+    BeginTextureMode(renderer.target);
     ClearBackground(BLUE);
-    libdraw_draw_current_scene_from_scene_texture(g);
+    libdraw_draw_current_scene_from_scene_texture(g, renderer);
     EndTextureMode();
 }
 
-void libdraw_present_window_target(gamestate& g) {
+void libdraw_present_window_target(gamestate& g, rpg::Renderer& renderer) {
     (void)g;
-    libdraw_ctx.win_dest.width = GetScreenWidth();
-    libdraw_ctx.win_dest.height = GetScreenHeight();
-    DrawTexturePro(libdraw_ctx.target.texture, libdraw_ctx.target_src, libdraw_ctx.win_dest, Vector2{0, 0}, 0.0f, WHITE);
+    renderer.win_dest.width = GetScreenWidth();
+    renderer.win_dest.height = GetScreenHeight();
+    DrawTexturePro(renderer.target.texture, renderer.target_src, renderer.win_dest, Vector2{0, 0}, 0.0f, WHITE);
     DrawFPS(10, 10);
 }
 
-void drawframe(gamestate& g) {
+void drawframe(gamestate& g, rpg::Renderer& renderer) {
     minfo3("drawframe");
     const double start_time = libdraw_frame_begin_time();
-    libdraw_update_sprites_pre(g);
+    libdraw_update_sprites_pre(g, renderer);
 
     BeginDrawing();
     ClearBackground(RED);
-    libdraw_refresh_dirty_scene(g);
-    libdraw_compose_scene_to_window_target(g);
-    libdraw_present_window_target(g);
+    libdraw_refresh_dirty_scene(g, renderer);
+    libdraw_compose_scene_to_window_target(g, renderer);
+    libdraw_present_window_target(g, renderer);
     EndDrawing();
     libdraw_finish_frame_stats(g, start_time);
 
-    libdraw_update_sprites_post(g);
+    libdraw_update_sprites_post(g, renderer);
     msuccess3("drawframe");
 }
 
-void libdraw_init_render_targets(gamestate& g) {
+void libdraw_init_render_targets(gamestate& g, rpg::Renderer& renderer) {
     g.windowwidth = DEFAULT_WIN_WIDTH;
     g.windowheight = DEFAULT_WIN_HEIGHT;
     g.targetwidth = DEFAULT_TARGET_WIDTH;
     g.targetheight = DEFAULT_TARGET_HEIGHT;
 
     const TextureFilter filter = TEXTURE_FILTER_POINT;
-    libdraw_ctx.target = LoadRenderTexture(DEFAULT_TARGET_WIDTH, DEFAULT_TARGET_HEIGHT);
-    libdraw_ctx.title_target_texture = LoadRenderTexture(DEFAULT_TARGET_WIDTH, DEFAULT_TARGET_HEIGHT);
-    libdraw_ctx.char_creation_target_texture = LoadRenderTexture(DEFAULT_TARGET_WIDTH, DEFAULT_TARGET_HEIGHT);
-    libdraw_ctx.main_game_target_texture = LoadRenderTexture(DEFAULT_TARGET_WIDTH, DEFAULT_TARGET_HEIGHT);
-    libdraw_ctx.hud_target_texture = LoadRenderTexture(DEFAULT_TARGET_WIDTH, DEFAULT_TARGET_HEIGHT);
+    renderer.target = LoadRenderTexture(DEFAULT_TARGET_WIDTH, DEFAULT_TARGET_HEIGHT);
+    renderer.title_target_texture = LoadRenderTexture(DEFAULT_TARGET_WIDTH, DEFAULT_TARGET_HEIGHT);
+    renderer.char_creation_target_texture = LoadRenderTexture(DEFAULT_TARGET_WIDTH, DEFAULT_TARGET_HEIGHT);
+    renderer.main_game_target_texture = LoadRenderTexture(DEFAULT_TARGET_WIDTH, DEFAULT_TARGET_HEIGHT);
+    renderer.hud_target_texture = LoadRenderTexture(DEFAULT_TARGET_WIDTH, DEFAULT_TARGET_HEIGHT);
 
-    SetTextureFilter(libdraw_ctx.target.texture, filter);
-    SetTextureFilter(libdraw_ctx.title_target_texture.texture, filter);
-    SetTextureFilter(libdraw_ctx.char_creation_target_texture.texture, filter);
-    SetTextureFilter(libdraw_ctx.main_game_target_texture.texture, filter);
-    SetTextureFilter(libdraw_ctx.hud_target_texture.texture, filter);
+    SetTextureFilter(renderer.target.texture, filter);
+    SetTextureFilter(renderer.title_target_texture.texture, filter);
+    SetTextureFilter(renderer.char_creation_target_texture.texture, filter);
+    SetTextureFilter(renderer.main_game_target_texture.texture, filter);
+    SetTextureFilter(renderer.hud_target_texture.texture, filter);
 
-    libdraw_ctx.target_src = Rectangle{0, 0, DEFAULT_TARGET_WIDTH * 1.0f, -DEFAULT_TARGET_HEIGHT * 1.0f};
-    libdraw_ctx.target_dest = Rectangle{0, 0, DEFAULT_TARGET_WIDTH * 1.0f, DEFAULT_TARGET_HEIGHT * 1.0f};
+    renderer.target_src = Rectangle{0, 0, DEFAULT_TARGET_WIDTH * 1.0f, -DEFAULT_TARGET_HEIGHT * 1.0f};
+    renderer.target_dest = Rectangle{0, 0, DEFAULT_TARGET_WIDTH * 1.0f, DEFAULT_TARGET_HEIGHT * 1.0f};
 }
 
-void libdraw_init_resources(gamestate& g) {
-    load_textures(libdraw_ctx.txinfo);
-    load_shaders();
+void libdraw_init_resources(gamestate& g, rpg::Renderer& renderer) {
+    load_textures(renderer.txinfo);
+    load_shaders(renderer);
 
     const float x = DEFAULT_TARGET_WIDTH / 4.0f;
     const float y = DEFAULT_TARGET_HEIGHT / 4.0f;
     g.cam2d.offset = Vector2{x, y};
 
-    draw_title_screen_to_texture(g, false);
-    draw_char_creation_to_texture(g);
+    draw_title_screen_to_texture(g, renderer, false);
+    draw_char_creation_to_texture(g, renderer);
 
 }
 
-void libdraw_init_rest(gamestate& g) {
+void libdraw_init_rest(gamestate& g, rpg::Renderer& renderer) {
     SetExitKey(KEY_ESCAPE);
     SetTargetFPS(60);
-    libdraw_init_render_targets(g);
-    libdraw_init_resources(g);
+    libdraw_init_render_targets(g, renderer);
+    libdraw_init_resources(g, renderer);
 }
 
-void libdraw_init(gamestate& g) {
+void libdraw_init(gamestate& g, rpg::Renderer& renderer) {
     const int w = DEFAULT_WIN_WIDTH;
     const int h = DEFAULT_WIN_HEIGHT;
     const char* title = WINDOW_TITLE;
@@ -219,25 +219,25 @@ void libdraw_init(gamestate& g) {
     g.windowwidth = w;
     g.windowheight = h;
     SetWindowMinSize(320, 240);
-    libdraw_init_rest(g);
+    libdraw_init_rest(g, renderer);
 }
 
 bool libdraw_windowshouldclose(gamestate& g) {
     return g.do_quit;
 }
 
-void libdraw_close_partial() {
-    libdraw_ctx.spritegroups.clear();
-    libdraw_unload_textures(libdraw_ctx.txinfo);
-    unload_shaders();
-    UnloadRenderTexture(libdraw_ctx.title_target_texture);
-    UnloadRenderTexture(libdraw_ctx.char_creation_target_texture);
-    UnloadRenderTexture(libdraw_ctx.main_game_target_texture);
-    UnloadRenderTexture(libdraw_ctx.hud_target_texture);
-    UnloadRenderTexture(libdraw_ctx.target);
+void libdraw_close_partial(rpg::Renderer& renderer) {
+    renderer.spritegroups.clear();
+    libdraw_unload_textures(renderer.txinfo);
+    unload_shaders(renderer);
+    UnloadRenderTexture(renderer.title_target_texture);
+    UnloadRenderTexture(renderer.char_creation_target_texture);
+    UnloadRenderTexture(renderer.main_game_target_texture);
+    UnloadRenderTexture(renderer.hud_target_texture);
+    UnloadRenderTexture(renderer.target);
 }
 
-void libdraw_close() {
-    libdraw_close_partial();
+void libdraw_close(rpg::Renderer& renderer) {
+    libdraw_close_partial(renderer);
     CloseWindow();
 }

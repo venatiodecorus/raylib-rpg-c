@@ -10,7 +10,7 @@
 #include "spritegroup_anim.h"
 
 /** @brief Update an equipped weapon spritegroup to match the owner's current context. */
-static inline void update_weapon_for_entity(gamestate& g, entityid id, spritegroup* sg) {
+static inline void update_weapon_for_entity(gamestate& g, rpg::Renderer& renderer, entityid id, spritegroup* sg) {
     massert(id != ENTITYID_INVALID, "entity id is -1");
     massert(sg, "spritegroup is NULL");
     spritegroup* w_sg = nullptr;
@@ -18,8 +18,8 @@ static inline void update_weapon_for_entity(gamestate& g, entityid id, spritegro
     int ctx = -1;
     weaponid = g.ct.get<equipped_weapon>(id).value_or(ENTITYID_INVALID);
     if (weaponid == ENTITYID_INVALID) return;
-    auto it = libdraw_ctx.spritegroups.find(weaponid);
-    if (it == libdraw_ctx.spritegroups.end()) return;
+    auto it = renderer.spritegroups.find(weaponid);
+    if (it == renderer.spritegroups.end()) return;
     w_sg = it->second.get();
     if (!w_sg) return;
     ctx = sg->sprites.at(sg->current)->get_currentcontext();

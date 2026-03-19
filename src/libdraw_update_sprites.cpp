@@ -68,7 +68,7 @@ void libdraw_update_sprite_position(gamestate& g, entityid id, spritegroup* sg) 
     }
 }
 
-void libdraw_update_sprite_ptr(gamestate& g, entityid id, spritegroup* sg) {
+void libdraw_update_sprite_ptr(gamestate& g, rpg::Renderer& renderer, entityid id, spritegroup* sg) {
     minfo3("Begin update sprite ptr: %d", id);
     massert(id != ENTITYID_INVALID, "entityid is invalid");
     massert(sg, "spritegroup is NULL");
@@ -86,20 +86,20 @@ void libdraw_update_sprite_ptr(gamestate& g, entityid id, spritegroup* sg) {
     libdraw_update_sprite_position(g, id, sg);
 
     if (g.ct.get<block_success>(id).value_or(false)) {
-        libdraw_set_sg_block_success(g, id, sg);
+        libdraw_set_sg_block_success(g, renderer, id, sg);
     }
 
     if (g.ct.get<attacking>(id).value_or(false)) {
-        libdraw_set_sg_is_attacking(g, id, sg);
+        libdraw_set_sg_is_attacking(g, renderer, id, sg);
     }
 
     const entitytype_t type = g.ct.get<entitytype>(id).value_or(ENTITY_NONE);
 
     if (g.ct.get<dead>(id).value_or(false)) {
-        libdraw_set_sg_is_dead(g, id, sg);
+        libdraw_set_sg_is_dead(g, renderer, id, sg);
     }
     else if (g.ct.get<damaged>(id).value_or(false)) {
-        libdraw_set_sg_is_damaged(g, id, sg);
+        libdraw_set_sg_is_damaged(g, renderer, id, sg);
     }
 
     if (type == ENTITY_DOOR || type == ENTITY_CHEST) {
@@ -121,43 +121,43 @@ void libdraw_update_sprite_ptr(gamestate& g, entityid id, spritegroup* sg) {
     sg->snap_dest(loc.x, loc.y);
 }
 
-void libdraw_update_sprite_pre(gamestate& g, entityid id) {
+void libdraw_update_sprite_pre(gamestate& g, rpg::Renderer& renderer, entityid id) {
     massert(id != ENTITYID_INVALID, "entityid is invalid");
-    auto it = libdraw_ctx.spritegroups.find(id);
-    if (it != libdraw_ctx.spritegroups.end()) {
-        libdraw_update_sprite_ptr(g, id, it->second.get());
+    auto it = renderer.spritegroups.find(id);
+    if (it != renderer.spritegroups.end()) {
+        libdraw_update_sprite_ptr(g, renderer, id, it->second.get());
     }
 }
 
-void libdraw_handle_dirty_entities(gamestate& g) {
+void libdraw_handle_dirty_entities(gamestate& g, rpg::Renderer& renderer) {
     if (!g.dirty_entities) {
         return;
     }
     for (entityid i = g.new_entityid_begin; i < g.new_entityid_end; i++) {
-        create_sg_byid(g, i);
-        libdraw_update_sprite_pre(g, i);
+        create_sg_byid(g, renderer, i);
+        libdraw_update_sprite_pre(g, renderer, i);
     }
     g.frame_dirty = true;
 }
 
-void libdraw_update_sprites_pre(gamestate& g) {
+void libdraw_update_sprites_pre(gamestate& g, rpg::Renderer& renderer) {
     minfo2("BEGIN update sprites pre");
     if (g.current_scene == SCENE_GAMEPLAY) {
-        libdraw_handle_dirty_entities(g);
+        libdraw_handle_dirty_entities(g, renderer);
         for (entityid id = 0; id < g.next_entityid; id++) {
-            libdraw_update_sprite_pre(g, id);
+            libdraw_update_sprite_pre(g, renderer, id);
         }
     }
     msuccess2("END update sprites pre");
 }
 
-void libdraw_update_sprites_post(gamestate& g) {
+void libdraw_update_sprites_post(gamestate& g, rpg::Renderer& renderer) {
     if (g.current_scene != SCENE_GAMEPLAY) {
         g.frame_dirty = false;
         return;
     }
 
-    if (g.framecount % libdraw_ctx.anim_speed != 0) {
+    if (g.framecount % renderer.anim_speed != 0) {
         return;
     }
 
@@ -169,8 +169,8 @@ void libdraw_update_sprites_post(gamestate& g) {
             continue;
         }
 
-        auto it = libdraw_ctx.spritegroups.find(id);
-        spritegroup* sg = it != libdraw_ctx.spritegroups.end() ? it->second.get() : nullptr;
+        auto it = renderer.spritegroups.find(id);
+        spritegroup* sg = it != renderer.spritegroups.end() ? it->second.get() : nullptr;
         if (!sg) {
             continue;
         }

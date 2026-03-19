@@ -18,7 +18,7 @@
 #include "tx_keys_weapons.h"
 
 namespace {
-bool create_actor_sg_from_registry(gamestate& g, entityid id) {
+bool create_actor_sg_from_registry(gamestate& g, rpg::Renderer& renderer, entityid id) {
     const entt::entity registry_entity = g.lookup_registry_entity(id);
     if (registry_entity == entt::null || !g.registry.all_of<ActorVisual>(registry_entity)) {
         return false;
@@ -29,11 +29,11 @@ bool create_actor_sg_from_registry(gamestate& g, entityid id) {
         return false;
     }
 
-    create_sg(g, id, const_cast<int*>(visual.keys), visual.key_count);
+    create_sg(g, renderer, id, const_cast<int*>(visual.keys), visual.key_count);
     return true;
 }
 
-bool create_item_sg_from_registry(gamestate& g, entityid id) {
+bool create_item_sg_from_registry(gamestate& g, rpg::Renderer& renderer, entityid id) {
     const entt::entity registry_entity = g.lookup_registry_entity(id);
     if (registry_entity == entt::null || !g.registry.all_of<ItemVisual>(registry_entity)) {
         return false;
@@ -44,11 +44,11 @@ bool create_item_sg_from_registry(gamestate& g, entityid id) {
         return false;
     }
 
-    create_sg(g, id, const_cast<int*>(visual.keys), visual.key_count);
+    create_sg(g, renderer, id, const_cast<int*>(visual.keys), visual.key_count);
     return true;
 }
 
-bool create_static_world_sg_from_registry(gamestate& g, entityid id) {
+bool create_static_world_sg_from_registry(gamestate& g, rpg::Renderer& renderer, entityid id) {
     const entt::entity registry_entity = g.lookup_registry_entity(id);
     if (registry_entity == entt::null || !g.registry.all_of<StaticVisual>(registry_entity)) {
         return false;
@@ -59,15 +59,15 @@ bool create_static_world_sg_from_registry(gamestate& g, entityid id) {
         return false;
     }
 
-    create_sg(g, id, const_cast<int*>(visual.keys), visual.key_count);
+    create_sg(g, renderer, id, const_cast<int*>(visual.keys), visual.key_count);
     return true;
 }
 }
 
-void create_npc_sg_byid(gamestate& g, entityid id) {
+void create_npc_sg_byid(gamestate& g, rpg::Renderer& renderer, entityid id) {
     massert(id != ENTITYID_INVALID, "entityid is invalid");
 
-    if (create_actor_sg_from_registry(g, id)) {
+    if (create_actor_sg_from_registry(g, renderer, id)) {
         return;
     }
 
@@ -96,125 +96,125 @@ void create_npc_sg_byid(gamestate& g, entityid id) {
 
     massert(keys != NULL, "keys is null");
     massert(key_count > 0, "key_count is not > 0");
-    create_sg(g, id, keys, key_count);
+    create_sg(g, renderer, id, keys, key_count);
 }
 
-void create_door_sg_byid(gamestate& g, entityid id) {
+void create_door_sg_byid(gamestate& g, rpg::Renderer& renderer, entityid id) {
     massert(id != ENTITYID_INVALID, "entityid is invalid");
     minfo("create_door_sg_byid: %d", id);
-    if (create_static_world_sg_from_registry(g, id)) {
+    if (create_static_world_sg_from_registry(g, renderer, id)) {
         return;
     }
-    create_sg(g, id, TX_WOODEN_DOOR_KEYS, TX_WOODEN_DOOR_COUNT);
+    create_sg(g, renderer, id, TX_WOODEN_DOOR_KEYS, TX_WOODEN_DOOR_COUNT);
 }
 
-void create_box_sg_byid(gamestate& g, entityid id) {
+void create_box_sg_byid(gamestate& g, rpg::Renderer& renderer, entityid id) {
     massert(id != ENTITYID_INVALID, "entityid is invalid");
-    if (create_static_world_sg_from_registry(g, id)) {
+    if (create_static_world_sg_from_registry(g, renderer, id)) {
         return;
     }
-    create_sg(g, id, TX_WOODEN_BOX_KEYS, TX_WOODEN_BOX_COUNT);
+    create_sg(g, renderer, id, TX_WOODEN_BOX_KEYS, TX_WOODEN_BOX_COUNT);
 }
 
-void create_chest_sg_byid(gamestate& g, entityid id) {
+void create_chest_sg_byid(gamestate& g, rpg::Renderer& renderer, entityid id) {
     massert(id != ENTITYID_INVALID, "entityid is invalid");
-    if (create_static_world_sg_from_registry(g, id)) {
+    if (create_static_world_sg_from_registry(g, renderer, id)) {
         return;
     }
-    create_sg(g, id, TX_TREASURE_CHEST_KEYS, TX_TREASURE_CHEST_COUNT);
+    create_sg(g, renderer, id, TX_TREASURE_CHEST_KEYS, TX_TREASURE_CHEST_COUNT);
 }
 
-void create_potion_sg_byid(gamestate& g, entityid id) {
+void create_potion_sg_byid(gamestate& g, rpg::Renderer& renderer, entityid id) {
     massert(id != ENTITYID_INVALID, "entityid is invalid");
-    if (create_item_sg_from_registry(g, id)) {
+    if (create_item_sg_from_registry(g, renderer, id)) {
         return;
     }
     switch (g.ct.get<potiontype>(id).value_or(POTION_NONE)) {
-    case POTION_HP_SMALL: create_sg(g, id, TX_POTION_HP_SMALL_KEYS, TX_POTION_HP_SMALL_COUNT); break;
-    case POTION_HP_MEDIUM: create_sg(g, id, TX_POTION_HP_MEDIUM_KEYS, TX_POTION_HP_MEDIUM_COUNT); break;
-    case POTION_HP_LARGE: create_sg(g, id, TX_POTION_HP_LARGE_KEYS, TX_POTION_HP_LARGE_COUNT); break;
-    case POTION_MP_SMALL: create_sg(g, id, TX_POTION_MP_SMALL_KEYS, TX_POTION_MP_SMALL_COUNT); break;
-    case POTION_MP_MEDIUM: create_sg(g, id, TX_POTION_MP_MEDIUM_KEYS, TX_POTION_MP_MEDIUM_COUNT); break;
-    case POTION_MP_LARGE: create_sg(g, id, TX_POTION_MP_LARGE_KEYS, TX_POTION_MP_LARGE_COUNT); break;
+    case POTION_HP_SMALL: create_sg(g, renderer, id, TX_POTION_HP_SMALL_KEYS, TX_POTION_HP_SMALL_COUNT); break;
+    case POTION_HP_MEDIUM: create_sg(g, renderer, id, TX_POTION_HP_MEDIUM_KEYS, TX_POTION_HP_MEDIUM_COUNT); break;
+    case POTION_HP_LARGE: create_sg(g, renderer, id, TX_POTION_HP_LARGE_KEYS, TX_POTION_HP_LARGE_COUNT); break;
+    case POTION_MP_SMALL: create_sg(g, renderer, id, TX_POTION_MP_SMALL_KEYS, TX_POTION_MP_SMALL_COUNT); break;
+    case POTION_MP_MEDIUM: create_sg(g, renderer, id, TX_POTION_MP_MEDIUM_KEYS, TX_POTION_MP_MEDIUM_COUNT); break;
+    case POTION_MP_LARGE: create_sg(g, renderer, id, TX_POTION_MP_LARGE_KEYS, TX_POTION_MP_LARGE_COUNT); break;
     default: break;
     }
 }
 
-void create_weapon_sg_byid(gamestate& g, entityid id) {
+void create_weapon_sg_byid(gamestate& g, rpg::Renderer& renderer, entityid id) {
     massert(id != ENTITYID_INVALID, "entityid is invalid");
-    if (create_item_sg_from_registry(g, id)) {
+    if (create_item_sg_from_registry(g, renderer, id)) {
         return;
     }
     switch (g.ct.get<weapontype>(id).value_or(WEAPON_NONE)) {
-    case WEAPON_DAGGER: create_sg(g, id, TX_DAGGER_KEYS, TX_DAGGER_COUNT); break;
-    case WEAPON_SHORT_SWORD: create_sg(g, id, TX_SHORT_SWORD_KEYS, TX_SHORT_SWORD_COUNT); break;
-    case WEAPON_AXE: create_sg(g, id, TX_AXE_KEYS, TX_AXE_COUNT); break;
+    case WEAPON_DAGGER: create_sg(g, renderer, id, TX_DAGGER_KEYS, TX_DAGGER_COUNT); break;
+    case WEAPON_SHORT_SWORD: create_sg(g, renderer, id, TX_SHORT_SWORD_KEYS, TX_SHORT_SWORD_COUNT); break;
+    case WEAPON_AXE: create_sg(g, renderer, id, TX_AXE_KEYS, TX_AXE_COUNT); break;
     default: break;
     }
 }
 
-void create_shield_sg_byid(gamestate& g, entityid id) {
+void create_shield_sg_byid(gamestate& g, rpg::Renderer& renderer, entityid id) {
     massert(id != ENTITYID_INVALID, "entityid is invalid");
-    if (create_item_sg_from_registry(g, id)) {
+    if (create_item_sg_from_registry(g, renderer, id)) {
         return;
     }
     switch (g.ct.get<shieldtype>(id).value_or(SHIELD_NONE)) {
-    case SHIELD_BUCKLER: create_sg(g, id, TX_BUCKLER_KEYS, TX_BUCKLER_COUNT); break;
-    case SHIELD_KITE: create_sg(g, id, TX_KITE_SHIELD_KEYS, TX_KITE_SHIELD_COUNT); break;
-    case SHIELD_TOWER: create_sg(g, id, TX_TOWER_SHIELD_KEYS, TX_TOWER_SHIELD_COUNT); break;
+    case SHIELD_BUCKLER: create_sg(g, renderer, id, TX_BUCKLER_KEYS, TX_BUCKLER_COUNT); break;
+    case SHIELD_KITE: create_sg(g, renderer, id, TX_KITE_SHIELD_KEYS, TX_KITE_SHIELD_COUNT); break;
+    case SHIELD_TOWER: create_sg(g, renderer, id, TX_TOWER_SHIELD_KEYS, TX_TOWER_SHIELD_COUNT); break;
     default: break;
     }
 }
 
-void create_item_sg_byid(gamestate& g, entityid id) {
+void create_item_sg_byid(gamestate& g, rpg::Renderer& renderer, entityid id) {
     massert(id != ENTITYID_INVALID, "entityid is invalid");
     switch (g.ct.get<itemtype>(id).value_or(ITEM_NONE)) {
-    case ITEM_POTION: create_potion_sg_byid(g, id); break;
-    case ITEM_WEAPON: create_weapon_sg_byid(g, id); break;
-    case ITEM_SHIELD: create_shield_sg_byid(g, id); break;
+    case ITEM_POTION: create_potion_sg_byid(g, renderer, id); break;
+    case ITEM_WEAPON: create_weapon_sg_byid(g, renderer, id); break;
+    case ITEM_SHIELD: create_shield_sg_byid(g, renderer, id); break;
     default: break;
     }
 }
 
-void create_prop_sg_byid(gamestate& g, entityid id) {
+void create_prop_sg_byid(gamestate& g, rpg::Renderer& renderer, entityid id) {
     massert(id != ENTITYID_INVALID, "entityid is invalid");
-    if (create_static_world_sg_from_registry(g, id)) {
+    if (create_static_world_sg_from_registry(g, renderer, id)) {
         return;
     }
 
     switch (g.ct.get<proptype>(id).value_or(PROP_NONE)) {
-    case PROP_DUNGEON_BANNER_00: create_sg(g, id, TX_PROP_DUNGEON_BANNER_00_KEYS, TX_PROP_DUNGEON_BANNER_00_COUNT); break;
-    case PROP_DUNGEON_BANNER_01: create_sg(g, id, TX_PROP_DUNGEON_BANNER_01_KEYS, TX_PROP_DUNGEON_BANNER_01_COUNT); break;
-    case PROP_DUNGEON_BANNER_02: create_sg(g, id, TX_PROP_DUNGEON_BANNER_02_KEYS, TX_PROP_DUNGEON_BANNER_02_COUNT); break;
-    case PROP_DUNGEON_WOODEN_TABLE_00: create_sg(g, id, TX_PROP_DUNGEON_WOODEN_TABLE_00_KEYS, TX_PROP_DUNGEON_WOODEN_TABLE_00_COUNT); break;
-    case PROP_DUNGEON_WOODEN_TABLE_01: create_sg(g, id, TX_PROP_DUNGEON_WOODEN_TABLE_01_KEYS, TX_PROP_DUNGEON_WOODEN_TABLE_01_COUNT); break;
-    case PROP_DUNGEON_WOODEN_SIGN: create_sg(g, id, TX_PROP_DUNGEON_WOODEN_SIGN_KEYS, TX_PROP_DUNGEON_WOODEN_SIGN_COUNT); break;
-    case PROP_DUNGEON_WOODEN_CHAIR_00: create_sg(g, id, TX_PROP_DUNGEON_WOODEN_CHAIR_00_KEYS, TX_PROP_DUNGEON_WOODEN_CHAIR_00_COUNT); break;
-    case PROP_DUNGEON_STATUE_00: create_sg(g, id, TX_PROP_DUNGEON_STATUE_00_KEYS, TX_PROP_DUNGEON_STATUE_00_COUNT); break;
-    case PROP_DUNGEON_TORCH_00: create_sg(g, id, TX_PROP_DUNGEON_TORCH_00_KEYS, TX_PROP_DUNGEON_TORCH_00_COUNT); break;
-    case PROP_DUNGEON_CANDLE_00: create_sg(g, id, TX_PROP_DUNGEON_CANDLE_00_KEYS, TX_PROP_DUNGEON_CANDLE_00_COUNT); break;
-    case PROP_DUNGEON_JAR_00: create_sg(g, id, TX_PROP_DUNGEON_JAR_00_KEYS, TX_PROP_DUNGEON_JAR_00_COUNT); break;
-    case PROP_DUNGEON_PLATE_00: create_sg(g, id, TX_PROP_DUNGEON_PLATE_00_KEYS, TX_PROP_DUNGEON_PLATE_00_COUNT); break;
+    case PROP_DUNGEON_BANNER_00: create_sg(g, renderer, id, TX_PROP_DUNGEON_BANNER_00_KEYS, TX_PROP_DUNGEON_BANNER_00_COUNT); break;
+    case PROP_DUNGEON_BANNER_01: create_sg(g, renderer, id, TX_PROP_DUNGEON_BANNER_01_KEYS, TX_PROP_DUNGEON_BANNER_01_COUNT); break;
+    case PROP_DUNGEON_BANNER_02: create_sg(g, renderer, id, TX_PROP_DUNGEON_BANNER_02_KEYS, TX_PROP_DUNGEON_BANNER_02_COUNT); break;
+    case PROP_DUNGEON_WOODEN_TABLE_00: create_sg(g, renderer, id, TX_PROP_DUNGEON_WOODEN_TABLE_00_KEYS, TX_PROP_DUNGEON_WOODEN_TABLE_00_COUNT); break;
+    case PROP_DUNGEON_WOODEN_TABLE_01: create_sg(g, renderer, id, TX_PROP_DUNGEON_WOODEN_TABLE_01_KEYS, TX_PROP_DUNGEON_WOODEN_TABLE_01_COUNT); break;
+    case PROP_DUNGEON_WOODEN_SIGN: create_sg(g, renderer, id, TX_PROP_DUNGEON_WOODEN_SIGN_KEYS, TX_PROP_DUNGEON_WOODEN_SIGN_COUNT); break;
+    case PROP_DUNGEON_WOODEN_CHAIR_00: create_sg(g, renderer, id, TX_PROP_DUNGEON_WOODEN_CHAIR_00_KEYS, TX_PROP_DUNGEON_WOODEN_CHAIR_00_COUNT); break;
+    case PROP_DUNGEON_STATUE_00: create_sg(g, renderer, id, TX_PROP_DUNGEON_STATUE_00_KEYS, TX_PROP_DUNGEON_STATUE_00_COUNT); break;
+    case PROP_DUNGEON_TORCH_00: create_sg(g, renderer, id, TX_PROP_DUNGEON_TORCH_00_KEYS, TX_PROP_DUNGEON_TORCH_00_COUNT); break;
+    case PROP_DUNGEON_CANDLE_00: create_sg(g, renderer, id, TX_PROP_DUNGEON_CANDLE_00_KEYS, TX_PROP_DUNGEON_CANDLE_00_COUNT); break;
+    case PROP_DUNGEON_JAR_00: create_sg(g, renderer, id, TX_PROP_DUNGEON_JAR_00_KEYS, TX_PROP_DUNGEON_JAR_00_COUNT); break;
+    case PROP_DUNGEON_PLATE_00: create_sg(g, renderer, id, TX_PROP_DUNGEON_PLATE_00_KEYS, TX_PROP_DUNGEON_PLATE_00_COUNT); break;
     case PROP_DUNGEON_WOODEN_BARREL_OPEN_TOP_EMPTY:
-        create_sg(g, id, TX_PROP_DUNGEON_WOODEN_BARREL_OPEN_TOP_EMPTY_KEYS, TX_PROP_DUNGEON_WOODEN_BARREL_OPEN_TOP_EMPTY_COUNT);
+        create_sg(g, renderer, id, TX_PROP_DUNGEON_WOODEN_BARREL_OPEN_TOP_EMPTY_KEYS, TX_PROP_DUNGEON_WOODEN_BARREL_OPEN_TOP_EMPTY_COUNT);
         break;
     case PROP_DUNGEON_WOODEN_BARREL_OPEN_TOP_WATER:
-        create_sg(g, id, TX_PROP_DUNGEON_WOODEN_BARREL_OPEN_TOP_WATER_KEYS, TX_PROP_DUNGEON_WOODEN_BARREL_OPEN_TOP_WATER_COUNT);
+        create_sg(g, renderer, id, TX_PROP_DUNGEON_WOODEN_BARREL_OPEN_TOP_WATER_KEYS, TX_PROP_DUNGEON_WOODEN_BARREL_OPEN_TOP_WATER_COUNT);
         break;
     default: break;
     }
 }
 
-void create_sg_byid(gamestate& g, entityid id) {
+void create_sg_byid(gamestate& g, rpg::Renderer& renderer, entityid id) {
     massert(id != ENTITYID_INVALID, "entityid is invalid");
     switch (g.ct.get<entitytype>(id).value_or(ENTITY_NONE)) {
     case ENTITY_PLAYER:
-    case ENTITY_NPC: create_npc_sg_byid(g, id); break;
-    case ENTITY_DOOR: create_door_sg_byid(g, id); break;
-    case ENTITY_BOX: create_box_sg_byid(g, id); break;
-    case ENTITY_CHEST: create_chest_sg_byid(g, id); break;
-    case ENTITY_ITEM: create_item_sg_byid(g, id); break;
-    case ENTITY_PROP: create_prop_sg_byid(g, id); break;
+    case ENTITY_NPC: create_npc_sg_byid(g, renderer, id); break;
+    case ENTITY_DOOR: create_door_sg_byid(g, renderer, id); break;
+    case ENTITY_BOX: create_box_sg_byid(g, renderer, id); break;
+    case ENTITY_CHEST: create_chest_sg_byid(g, renderer, id); break;
+    case ENTITY_ITEM: create_item_sg_byid(g, renderer, id); break;
+    case ENTITY_PROP: create_prop_sg_byid(g, renderer, id); break;
     default: break;
     }
 }

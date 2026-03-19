@@ -4,7 +4,7 @@
 #include "libdraw_update_weapon_for_entity.h"
 #include "spritegroup_anim.h"
 
-void libdraw_set_sg_block_success(gamestate& g, entityid id, spritegroup* const sg) {
+void libdraw_set_sg_block_success(gamestate& g, rpg::Renderer& renderer, entityid id, spritegroup* const sg) {
     minfo("set sg block success");
     massert(id != ENTITYID_INVALID, "entity id is -1");
     massert(sg, "spritegroup is NULL");
@@ -21,10 +21,10 @@ void libdraw_set_sg_block_success(gamestate& g, entityid id, spritegroup* const 
         minfo("setting SG_ANIM_NPC_GUARD_SUCCESS");
         sg->set_current(SG_ANIM_NPC_GUARD_SUCCESS);
     }
-    update_shield_for_entity(g, id, sg);
+    update_shield_for_entity(g, renderer, id, sg);
 }
 
-void libdraw_set_sg_is_damaged(gamestate& g, entityid id, spritegroup* const sg) {
+void libdraw_set_sg_is_damaged(gamestate& g, rpg::Renderer& renderer, entityid id, spritegroup* const sg) {
     massert(id != ENTITYID_INVALID, "entity id is -1");
     massert(sg, "spritegroup is NULL");
     const race_t r = g.ct.get<race>(id).value_or(RACE_NONE);
@@ -32,7 +32,7 @@ void libdraw_set_sg_is_damaged(gamestate& g, entityid id, spritegroup* const sg)
     sg->set_current(anim_index);
 }
 
-void libdraw_set_sg_is_dead(gamestate& g, entityid id, spritegroup* const sg) {
+void libdraw_set_sg_is_dead(gamestate& g, rpg::Renderer& renderer, entityid id, spritegroup* const sg) {
     massert(id != ENTITYID_INVALID, "entity id is -1");
     massert(sg, "spritegroup is NULL");
 
@@ -64,7 +64,7 @@ void libdraw_set_sg_is_dead(gamestate& g, entityid id, spritegroup* const sg) {
     sg->set_stop_on_last_frame(true);
 }
 
-void libdraw_set_sg_is_attacking(gamestate& g, entityid id, spritegroup* const sg) {
+void libdraw_set_sg_is_attacking(gamestate& g, rpg::Renderer& renderer, entityid id, spritegroup* const sg) {
     massert(id != ENTITYID_INVALID, "entityid is invalid");
     massert(sg, "spritegroup is NULL");
     const race_t r = g.ct.get<race>(id).value_or(RACE_NONE);
@@ -76,5 +76,5 @@ void libdraw_set_sg_is_attacking(gamestate& g, entityid id, spritegroup* const s
         : r == RACE_ZOMBIE    ? SG_ANIM_ZOMBIE_ATTACK
         : r == RACE_BAT       ? SG_ANIM_BAT_ATTACK
                               : SG_ANIM_NPC_ATTACK);
-    update_weapon_for_entity(g, id, sg);
+    update_weapon_for_entity(g, renderer, id, sg);
 }

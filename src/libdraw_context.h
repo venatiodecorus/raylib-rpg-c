@@ -12,13 +12,16 @@
 #include <raylib.h>
 #include <unordered_map>
 
+namespace rpg {
+
 /**
  * @brief Process-lifetime renderer state shared across the libdraw subsystem.
  *
- * This groups the renderer's mutable global state into one object so libdraw
+ * This groups the renderer's mutable state into one object so libdraw
  * callers depend on a single shared context instead of many unrelated globals.
  */
-struct libdraw_context_t {
+class Renderer {
+public:
     /// @brief Active spritegroup instances keyed by owning entity id.
     std::unordered_map<entityid, std::unique_ptr<spritegroup>> spritegroups;
     /// @brief Texture metadata table indexed by generated texture id.
@@ -45,9 +48,4 @@ struct libdraw_context_t {
     int anim_speed = DEFAULT_ANIM_SPEED;
 };
 
-/// @brief Shared libdraw renderer context instance.
-#ifdef CXXTEST_RUNNING
-inline libdraw_context_t libdraw_ctx;
-#else
-extern libdraw_context_t libdraw_ctx;
-#endif
+} // namespace rpg

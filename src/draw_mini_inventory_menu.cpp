@@ -14,7 +14,7 @@ Rectangle mini_inventory_panel_for_hero(gamestate& g, float width, float height)
     return Rectangle{x, y, width, height};
 }
 
-void draw_mini_inventory_menu(gamestate& g, shared_ptr<vector<entityid>> inventory, const char* title, const char* hint, bool show_equipped) {
+void draw_mini_inventory_menu(gamestate& g, rpg::Renderer& renderer, shared_ptr<vector<entityid>> inventory, const char* title, const char* hint, bool show_equipped) {
     const float width = 260.0f;
     const float row_h = 18.0f;
     const float preview_h = 118.0f;
@@ -79,8 +79,8 @@ void draw_mini_inventory_menu(gamestate& g, shared_ptr<vector<entityid>> invento
     const entityid selection_id = inventory->at(selected_index);
     const Rectangle preview = {panel.x + padding, list_box.y + list_box.height + 10.0f, panel.width - padding * 2.0f, preview_h};
     DrawRectangleLinesEx(preview, 1, g.ui.window_box_fgcolor);
-    auto it = libdraw_ctx.spritegroups.find(selection_id);
-    spritegroup* sg = it != libdraw_ctx.spritegroups.end() ? it->second.get() : nullptr;
+    auto it = renderer.spritegroups.find(selection_id);
+    spritegroup* sg = it != renderer.spritegroups.end() ? it->second.get() : nullptr;
     const float preview_sprite_size = 72.0f;
     if (sg) {
         auto sprite = sg->get_current();

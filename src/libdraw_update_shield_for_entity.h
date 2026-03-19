@@ -9,7 +9,7 @@
 #include "spritegroup_anim.h"
 
 /** @brief Update an equipped shield spritegroup to match the owner's current context. */
-static inline void update_shield_for_entity(gamestate& g, entityid id, spritegroup* sg) {
+static inline void update_shield_for_entity(gamestate& g, rpg::Renderer& renderer, entityid id, spritegroup* sg) {
     minfo("update shield for entity %d", id);
     massert(id != ENTITYID_INVALID, "entity id is -1");
     massert(sg, "spritegroup is NULL");
@@ -20,8 +20,8 @@ static inline void update_shield_for_entity(gamestate& g, entityid id, spritegro
         merror2("shield_id invalid");
         return;
     }
-    auto it = libdraw_ctx.spritegroups.find(shield_id);
-    if (it == libdraw_ctx.spritegroups.end()) {
+    auto it = renderer.spritegroups.find(shield_id);
+    if (it == renderer.spritegroups.end()) {
         merror2("shield spritegroup missing");
         return;
     }

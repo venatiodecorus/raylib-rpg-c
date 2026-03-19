@@ -24,18 +24,18 @@
 #include "libdraw_from_texture.h"
 #include "libdraw_to_texture.h"
 
-void draw_hud_to_texture(gamestate& g) {
-    BeginTextureMode(libdraw_ctx.hud_target_texture);
+void draw_hud_to_texture(gamestate& g, rpg::Renderer& renderer) {
+    BeginTextureMode(renderer.hud_target_texture);
     draw_hud(g);
     EndTextureMode();
 }
 
-void libdraw_drawframe_2d(gamestate& g, int vision_dist, int light_rad) {
-    camera_lock_on(g);
+void libdraw_drawframe_2d(gamestate& g, rpg::Renderer& renderer, int vision_dist, int light_rad) {
+    camera_lock_on(g, renderer);
 
     BeginMode2D(g.cam2d);
     ClearBackground(BLACK);
-    draw_dungeon_floor(g, vision_dist, light_rad);
+    draw_dungeon_floor(g, renderer, vision_dist, light_rad);
     draw_damage_numbers(g);
     EndMode2D();
 
@@ -51,11 +51,11 @@ void libdraw_drawframe_2d(gamestate& g, int vision_dist, int light_rad) {
             auto maybe_inventory = g.ct.get<inventory>(g.hero_id);
             auto items = maybe_inventory.value_or(nullptr);
             if (items) {
-                draw_mini_inventory_menu(g, items, "Inventory", "E equip  Enter use  Q drop  Esc close", true);
+                draw_mini_inventory_menu(g, renderer, items, "Inventory", "E equip  Enter use  Q drop  Esc close", true);
             }
         }
         else {
-            draw_inventory_menu(g);
+            draw_inventory_menu(g, renderer);
         }
     }
 
@@ -66,7 +66,7 @@ void libdraw_drawframe_2d(gamestate& g, int vision_dist, int light_rad) {
             auto items = maybe_inventory.value_or(nullptr);
             if (items) {
                 draw_mini_inventory_menu(
-                    g,
+                    g, renderer,
                     items,
                     g.ui.chest_deposit_mode ? "Chest Deposit" : "Chest",
                     g.ui.chest_deposit_mode ? "Tab chest  Enter deposit  D close" : "Tab hero  Enter take  D close",
@@ -74,7 +74,7 @@ void libdraw_drawframe_2d(gamestate& g, int vision_dist, int light_rad) {
             }
         }
         else {
-            draw_chest_menu(g);
+            draw_chest_menu(g, renderer);
         }
     }
 
@@ -103,18 +103,18 @@ void libdraw_drawframe_2d(gamestate& g, int vision_dist, int light_rad) {
 #endif
 }
 
-void libdraw_drawframe_2d_to_texture(gamestate& g, int vision_dist, int light_rad) {
-    BeginTextureMode(libdraw_ctx.main_game_target_texture);
-    libdraw_drawframe_2d(g, vision_dist, light_rad);
+void libdraw_drawframe_2d_to_texture(gamestate& g, rpg::Renderer& renderer, int vision_dist, int light_rad) {
+    BeginTextureMode(renderer.main_game_target_texture);
+    libdraw_drawframe_2d(g, renderer, vision_dist, light_rad);
     EndTextureMode();
 }
 
-void draw_hud_from_texture(gamestate& g) {
+void draw_hud_from_texture(gamestate& g, rpg::Renderer& renderer) {
     (void)g;
-    DrawTexturePro(libdraw_ctx.hud_target_texture.texture, libdraw_ctx.target_src, libdraw_ctx.target_dest, Vector2{0, 0}, 0.0f, WHITE);
+    DrawTexturePro(renderer.hud_target_texture.texture, renderer.target_src, renderer.target_dest, Vector2{0, 0}, 0.0f, WHITE);
 }
 
-void libdraw_drawframe_2d_from_texture(gamestate& g) {
+void libdraw_drawframe_2d_from_texture(gamestate& g, rpg::Renderer& renderer) {
     (void)g;
-    DrawTexturePro(libdraw_ctx.main_game_target_texture.texture, libdraw_ctx.target_src, libdraw_ctx.target_dest, Vector2{0, 0}, 0.0f, WHITE);
+    DrawTexturePro(renderer.main_game_target_texture.texture, renderer.target_src, renderer.target_dest, Vector2{0, 0}, 0.0f, WHITE);
 }

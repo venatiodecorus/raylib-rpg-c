@@ -21,28 +21,28 @@ void draw_entity_sprite(gamestate& g, spritegroup* sg) {
 #endif
 }
 
-void draw_weapon_sprite_back(gamestate& g, entityid id, spritegroup* sg) {
+void draw_weapon_sprite_back(gamestate& g, rpg::Renderer& renderer, entityid id, spritegroup* sg) {
     massert(id != ENTITYID_INVALID, "id is invalid");
     massert(sg, "spritegroup is NULL");
-    auto weapon_back_s = get_weapon_back_sprite(g, id, sg);
+    auto weapon_back_s = get_weapon_back_sprite(g, renderer, id, sg);
     if (weapon_back_s) {
         DrawTexturePro(*weapon_back_s->get_texture(), weapon_back_s->get_src(), sg->dest, Vector2{0, 0}, 0, WHITE);
     }
 }
 
-void draw_weapon_sprite_front(gamestate& g, entityid id, spritegroup* sg) {
+void draw_weapon_sprite_front(gamestate& g, rpg::Renderer& renderer, entityid id, spritegroup* sg) {
     massert(id != ENTITYID_INVALID, "id is invalid");
     massert(sg, "spritegroup is NULL");
-    auto weapon_front_s = get_weapon_front_sprite(g, id, sg);
+    auto weapon_front_s = get_weapon_front_sprite(g, renderer, id, sg);
     if (weapon_front_s) {
         DrawTexturePro(*weapon_front_s->get_texture(), weapon_front_s->get_src(), sg->dest, Vector2{0, 0}, 0, WHITE);
     }
 }
 
-void draw_shield_sprite_back(gamestate& g, entityid id, spritegroup* sg) {
+void draw_shield_sprite_back(gamestate& g, rpg::Renderer& renderer, entityid id, spritegroup* sg) {
     massert(id != ENTITYID_INVALID, "id is invalid");
     massert(sg, "spritegroup is NULL");
-    auto shield_back_s = get_shield_back_sprite(g, id, sg);
+    auto shield_back_s = get_shield_back_sprite(g, renderer, id, sg);
     if (shield_back_s) {
         DrawTexturePro(*shield_back_s->get_texture(), shield_back_s->get_src(), sg->dest, Vector2{0, 0}, 0, WHITE);
     }
@@ -51,10 +51,10 @@ void draw_shield_sprite_back(gamestate& g, entityid id, spritegroup* sg) {
     }
 }
 
-void draw_shield_sprite_front(gamestate& g, entityid id, spritegroup* sg) {
+void draw_shield_sprite_front(gamestate& g, rpg::Renderer& renderer, entityid id, spritegroup* sg) {
     massert(id != ENTITYID_INVALID, "id is invalid");
     massert(sg, "spritegroup is NULL");
-    auto shield_front_s = get_shield_front_sprite(g, id, sg);
+    auto shield_front_s = get_shield_front_sprite(g, renderer, id, sg);
     if (shield_front_s) {
         DrawTexturePro(*shield_front_s->get_texture(), shield_front_s->get_src(), sg->dest, Vector2{0, 0}, 0, WHITE);
     }
@@ -63,15 +63,15 @@ void draw_shield_sprite_front(gamestate& g, entityid id, spritegroup* sg) {
     }
 }
 
-void draw_sprite_and_shadow(gamestate& g, entityid id) {
+void draw_sprite_and_shadow(gamestate& g, rpg::Renderer& renderer, entityid id) {
     massert(id != ENTITYID_INVALID, "id is invalid");
-    auto it = libdraw_ctx.spritegroups.find(id);
-    massert(it != libdraw_ctx.spritegroups.end(), "NO SPRITE GROUP FOR ID %d", id);
+    auto it = renderer.spritegroups.find(id);
+    massert(it != renderer.spritegroups.end(), "NO SPRITE GROUP FOR ID %d", id);
     spritegroup* sg = it->second.get();
     massert(sg, "sg is NULL");
-    draw_shield_sprite_back(g, id, sg);
-    draw_weapon_sprite_back(g, id, sg);
+    draw_shield_sprite_back(g, renderer, id, sg);
+    draw_weapon_sprite_back(g, renderer, id, sg);
     draw_entity_sprite(g, sg);
-    draw_shield_sprite_front(g, id, sg);
-    draw_weapon_sprite_front(g, id, sg);
+    draw_shield_sprite_front(g, renderer, id, sg);
+    draw_weapon_sprite_front(g, renderer, id, sg);
 }

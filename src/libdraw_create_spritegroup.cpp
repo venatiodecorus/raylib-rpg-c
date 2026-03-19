@@ -5,9 +5,9 @@
 
 #include <memory>
 
-bool create_spritegroup(gamestate& g, entityid id, int* keys, int num_keys, int offset_x, int offset_y) {
+bool create_spritegroup(gamestate& g, rpg::Renderer& renderer, entityid id, int* keys, int num_keys, int offset_x, int offset_y) {
     minfo("BEGIN create_spritegroup");
-    massert(libdraw_ctx.txinfo, "txinfo is null");
+    massert(renderer.txinfo, "txinfo is null");
     auto group = std::make_unique<spritegroup>(SPRITEGROUP_DEFAULT_SIZE);
 
     massert(group, "spritegroup is NULL");
@@ -29,8 +29,8 @@ bool create_spritegroup(gamestate& g, entityid id, int* keys, int num_keys, int 
         for (int i = 0; i < num_keys; i++) {
             const int k = keys[i];
             minfo("k: %d", k);
-            const Texture2D* tex = &libdraw_ctx.txinfo[k].texture;
-            auto s = make_shared<sprite>(tex, libdraw_ctx.txinfo[k].contexts, libdraw_ctx.txinfo[k].num_frames);
+            const Texture2D* tex = &renderer.txinfo[k].texture;
+            auto s = make_shared<sprite>(tex, renderer.txinfo[k].contexts, renderer.txinfo[k].num_frames);
             massert(s, "s is NULL for some reason!");
             group->add(s);
             count++;
@@ -65,7 +65,7 @@ bool create_spritegroup(gamestate& g, entityid id, int* keys, int num_keys, int 
         group->dest = Rectangle{x, y, w, h};
         group->off_x = offset_x;
         group->off_y = offset_y;
-        libdraw_ctx.spritegroups[id] = std::move(group);
+        renderer.spritegroups[id] = std::move(group);
 
         msuccess("END create spritegroup");
         return true;
@@ -74,8 +74,8 @@ bool create_spritegroup(gamestate& g, entityid id, int* keys, int num_keys, int 
     minfo("it does NOT have a location");
     for (int i = 0; i < num_keys; i++) {
         int k = keys[i];
-        const Texture2D* tex = &libdraw_ctx.txinfo[k].texture;
-        auto s = make_shared<sprite>(tex, libdraw_ctx.txinfo[k].contexts, libdraw_ctx.txinfo[k].num_frames);
+        const Texture2D* tex = &renderer.txinfo[k].texture;
+        auto s = make_shared<sprite>(tex, renderer.txinfo[k].contexts, renderer.txinfo[k].num_frames);
         group->add(s);
     }
     group->id = id;
@@ -89,11 +89,11 @@ bool create_spritegroup(gamestate& g, entityid id, int* keys, int num_keys, int 
     group->dest = Rectangle{x, y, w, h};
     group->off_x = offset_x;
     group->off_y = offset_y;
-    libdraw_ctx.spritegroups[id] = std::move(group);
+    renderer.spritegroups[id] = std::move(group);
     msuccess("END create spritegroup");
     return true;
 }
 
-bool create_sg(gamestate& g, entityid id, int* keys, int num_keys) {
-    return create_spritegroup(g, id, keys, num_keys, -12, -12);
+bool create_sg(gamestate& g, rpg::Renderer& renderer, entityid id, int* keys, int num_keys) {
+    return create_spritegroup(g, renderer, id, keys, num_keys, -12, -12);
 }

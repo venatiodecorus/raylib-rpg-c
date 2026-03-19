@@ -11,4 +11,4 @@
 #include <raylib.h>
 
 /** @brief Draw the title screen and optionally its menu selection list. */
-void draw_title_screen(gamestate& g, bool show_menu);
+void draw_title_screen(gamestate& g, rpg::Renderer& renderer, bool show_menu);

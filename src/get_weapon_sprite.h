@@ -11,7 +11,7 @@
 #include "spritegroup_anim.h"
 
 /** @brief Return the equipped weapon's front-layer sprite for the entity's current animation. */
-static inline shared_ptr<sprite> get_weapon_front_sprite(gamestate& g, entityid id, spritegroup* sg) {
+static inline shared_ptr<sprite> get_weapon_front_sprite(gamestate& g, rpg::Renderer& renderer, entityid id, spritegroup* sg) {
     //massert(g, "gamestate is NULL");
     massert(id != ENTITYID_INVALID, "id is -1");
     massert(sg, "spritegroup is NULL");
@@ -19,8 +19,8 @@ static inline shared_ptr<sprite> get_weapon_front_sprite(gamestate& g, entityid 
     entityid weapon = g.ct.get<equipped_weapon>(id).value_or(ENTITYID_INVALID);
     if (weapon == ENTITYID_INVALID)
         return retval;
-    auto it = libdraw_ctx.spritegroups.find(weapon);
-    if (it == libdraw_ctx.spritegroups.end())
+    auto it = renderer.spritegroups.find(weapon);
+    if (it == renderer.spritegroups.end())
         return retval;
     spritegroup* w_sg = it->second.get();
     if (!w_sg)
@@ -35,15 +35,15 @@ static inline shared_ptr<sprite> get_weapon_front_sprite(gamestate& g, entityid 
 }
 
 /** @brief Return the equipped weapon's back-layer sprite for the entity's current animation. */
-static inline shared_ptr<sprite> get_weapon_back_sprite(gamestate& g, entityid id, spritegroup* sg) {
+static inline shared_ptr<sprite> get_weapon_back_sprite(gamestate& g, rpg::Renderer& renderer, entityid id, spritegroup* sg) {
     //massert(g, "gamestate is NULL");
     massert(id != ENTITYID_INVALID, "id is -1");
     massert(sg, "spritegroup is NULL");
     shared_ptr<sprite> retval = nullptr;
     entityid weapon = g.ct.get<equipped_weapon>(id).value_or(ENTITYID_INVALID);
     if (weapon == ENTITYID_INVALID) return retval;
-    auto it = libdraw_ctx.spritegroups.find(weapon);
-    if (it == libdraw_ctx.spritegroups.end()) return retval;
+    auto it = renderer.spritegroups.find(weapon);
+    if (it == renderer.spritegroups.end()) return retval;
     spritegroup* w_sg = it->second.get();
     if (!w_sg) return retval;
     //if (sg->current == SG_ANIM_NPC_ATTACK) retval = spritegroup_get(w_sg, SG_ANIM_LONGSWORD_SLASH_B);

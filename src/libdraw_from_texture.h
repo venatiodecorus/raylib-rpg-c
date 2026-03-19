@@ -7,13 +7,13 @@
 #include "gamestate.h"
 
 /** @brief Draw the cached title-screen texture into the current render target. */
-void draw_title_screen_from_texture(gamestate& g);
+void draw_title_screen_from_texture(gamestate& g, rpg::Renderer& renderer);
 
 /** @brief Draw the cached HUD texture into the current render target. */
-void draw_hud_from_texture(gamestate& g);
+void draw_hud_from_texture(gamestate& g, rpg::Renderer& renderer);
 
 /** @brief Draw the cached character-creation texture into the current render target. */
-void draw_char_creation_from_texture(gamestate& g);
+void draw_char_creation_from_texture(gamestate& g, rpg::Renderer& renderer);
 
 /** @brief Draw the cached gameplay-world texture into the current render target. */
-void libdraw_drawframe_2d_from_texture(gamestate& g);
+void libdraw_drawframe_2d_from_texture(gamestate& g, rpg::Renderer& renderer);

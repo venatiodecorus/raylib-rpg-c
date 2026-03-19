@@ -7,7 +7,7 @@
 #include "gamestate.h"
 
 /** @brief Run pre-draw sprite and dirty-entity updates for the current frame. */
-void libdraw_update_sprites_pre(gamestate& g);
+void libdraw_update_sprites_pre(gamestate& g, rpg::Renderer& renderer);
 
 /** @brief Run post-draw animation advancement only. */
-void libdraw_update_sprites_post(gamestate& g);
+void libdraw_update_sprites_post(gamestate& g, rpg::Renderer& renderer);
