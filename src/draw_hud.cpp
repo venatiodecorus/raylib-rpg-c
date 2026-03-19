@@ -25,7 +25,7 @@ void draw_hud(gamestate& g) {
     const int cha = g.ct.get<charisma>(g.hero_id).value_or(-1);
     const string n = g.ct.get<name>(g.hero_id).value_or("no-name");
     const vec3 loc = g.ct.get<location>(g.hero_id).value_or(vec3{-1, -1, -1});
-    const alignment_t hero_alignment = g.ct.get<alignment>(g.hero_id).value_or(ALIGNMENT_NONE);
+    const alignment_t hero_alignment = g.ct.get<alignment>(g.hero_id).value_or(alignment_t::NONE);
     const std::array<std::string, line_count> lines = {
         n,
         TextFormat("Lvl %d HP %d/%d  Atk: %d  AC: %d", mylevel, myhp, mymaxhp, attack_bonus, ac),

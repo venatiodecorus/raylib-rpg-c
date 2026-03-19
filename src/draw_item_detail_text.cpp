@@ -2,11 +2,11 @@
 
 vector<string> build_item_detail_lines(gamestate& g, entityid selection_id) {
     vector<string> lines;
-    const itemtype_t item_type = g.ct.get<itemtype>(selection_id).value_or(ITEM_NONE);
+    const itemtype_t item_type = g.ct.get<itemtype>(selection_id).value_or(itemtype_t::NONE);
 
     lines.push_back(g.ct.get<name>(selection_id).value_or("no-name"));
 
-    if (item_type == ITEM_WEAPON) {
+    if (item_type == itemtype_t::WEAPON) {
         const vec3 dmg = g.ct.get<damage>(selection_id).value_or(vec3{-1, -1, -1});
         lines.push_back(TextFormat("Damage: %d-%d", dmg.x, dmg.y));
 
@@ -14,7 +14,7 @@ vector<string> build_item_detail_lines(gamestate& g, entityid selection_id) {
         const int max_dura = g.ct.get<max_durability>(selection_id).value_or(-1);
         lines.push_back(TextFormat("Durability: %d/%d", dura, max_dura));
     }
-    else if (item_type == ITEM_SHIELD) {
+    else if (item_type == itemtype_t::SHIELD) {
         const int block = g.ct.get<block_chance>(selection_id).value_or(-1);
         lines.push_back(TextFormat("Block chance: %d", block));
 
@@ -22,7 +22,7 @@ vector<string> build_item_detail_lines(gamestate& g, entityid selection_id) {
         const int max_dura = g.ct.get<max_durability>(selection_id).value_or(-1);
         lines.push_back(TextFormat("Durability: %d/%d", dura, max_dura));
     }
-    else if (item_type == ITEM_POTION) {
+    else if (item_type == itemtype_t::POTION) {
         const vec3 heal = g.ct.get<healing>(selection_id).value_or(vec3{-1, -1, -1});
         lines.push_back(TextFormat("Heal amount: %d-%d", heal.x, heal.y));
     }

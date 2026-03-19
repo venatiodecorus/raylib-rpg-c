@@ -9,13 +9,13 @@
 #include <vector>
 
 /// @brief High-level option sections that can be opened from the options menu.
-typedef enum {
-    OPTION_NONE,
-    OPTION_SOUND,
-    OPTION_WINDOW_BOXES,
-    OPTION_CONTROLS,
-    OPTION_INVENTORY_MENU,
-} option_type;
+enum class option_type {
+    NONE,
+    SOUND,
+    WINDOW_BOXES,
+    CONTROLS,
+    INVENTORY_MENU,
+};
 
 /**
  * @brief Lightweight selection model for the gameplay options menu.
@@ -32,10 +32,10 @@ public:
     /** @brief Construct the options menu with its default option ordering. */
     option_menu() {
         selection = 0;
-        options.push_back(OPTION_SOUND);
-        options.push_back(OPTION_WINDOW_BOXES);
-        options.push_back(OPTION_CONTROLS);
-        options.push_back(OPTION_INVENTORY_MENU);
+        options.push_back(option_type::SOUND);
+        options.push_back(option_type::WINDOW_BOXES);
+        options.push_back(option_type::CONTROLS);
+        options.push_back(option_type::INVENTORY_MENU);
     }
 
 
@@ -76,11 +76,11 @@ public:
     /** @brief Return a display string for the provided option type. */
     std::string get_option_str(option_type t) {
         switch (t) {
-        case OPTION_NONE: return "none";
-        case OPTION_CONTROLS: return "controls";
-        case OPTION_SOUND: return "sound";
-        case OPTION_WINDOW_BOXES: return "window boxes";
-        case OPTION_INVENTORY_MENU: return "inventory menu";
+        case option_type::NONE: return "none";
+        case option_type::CONTROLS: return "controls";
+        case option_type::SOUND: return "sound";
+        case option_type::WINDOW_BOXES: return "window boxes";
+        case option_type::INVENTORY_MENU: return "inventory menu";
         default: break;
         }
         return "unknown option";

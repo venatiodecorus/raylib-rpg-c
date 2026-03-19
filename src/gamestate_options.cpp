@@ -12,14 +12,14 @@ void gamestate::open_sound_menu() {
     ui.display_option_menu = false;
     ui.display_sound_menu = true;
     ui.sound_menu_selection = 0;
-    controlmode = CONTROLMODE_SOUND_MENU;
+    controlmode = controlmode_t::SOUND_MENU;
     frame_dirty = true;
 }
 
 void gamestate::close_sound_menu() {
     ui.display_sound_menu = false;
     ui.display_option_menu = true;
-    controlmode = CONTROLMODE_OPTION_MENU;
+    controlmode = controlmode_t::OPTION_MENU;
     frame_dirty = true;
 }
 
@@ -27,14 +27,14 @@ void gamestate::open_window_color_menu() {
     ui.display_option_menu = false;
     ui.display_window_color_menu = true;
     ui.window_color_menu_selection = 0;
-    controlmode = CONTROLMODE_WINDOW_COLOR_MENU;
+    controlmode = controlmode_t::WINDOW_COLOR_MENU;
     frame_dirty = true;
 }
 
 void gamestate::close_window_color_menu() {
     ui.display_window_color_menu = false;
     ui.display_option_menu = true;
-    controlmode = CONTROLMODE_OPTION_MENU;
+    controlmode = controlmode_t::OPTION_MENU;
     frame_dirty = true;
 }
 

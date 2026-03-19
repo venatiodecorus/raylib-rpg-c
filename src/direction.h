@@ -7,49 +7,49 @@
 #include "vec3.h"
 
 /// @brief Cardinal and diagonal movement/facing directions used by gameplay logic.
-typedef enum direction_t {
-    DIR_NONE,
-    DIR_UP,
-    DIR_DOWN,
-    DIR_LEFT,
-    DIR_RIGHT,
-    DIR_UP_LEFT,
-    DIR_UP_RIGHT,
-    DIR_DOWN_LEFT,
-    DIR_DOWN_RIGHT,
-    DIR_UNKNOWN,
-    DIR_COUNT
-} direction_t;
+enum class direction_t {
+    NONE,
+    UP,
+    DOWN,
+    LEFT,
+    RIGHT,
+    UP_LEFT,
+    UP_RIGHT,
+    DOWN_LEFT,
+    DOWN_RIGHT,
+    UNKNOWN,
+    COUNT
+};
 
-/** @brief Return the opposite of the provided direction, or `DIR_UNKNOWN`. */
+/** @brief Return the opposite of the provided direction, or `direction_t::UNKNOWN`. */
 constexpr static inline direction_t get_opposite_dir(direction_t dir) {
     switch (dir) {
-    case DIR_UP: return DIR_DOWN;
-    case DIR_DOWN: return DIR_UP;
-    case DIR_LEFT: return DIR_RIGHT;
-    case DIR_RIGHT: return DIR_LEFT;
-    case DIR_UP_LEFT: return DIR_DOWN_RIGHT;
-    case DIR_UP_RIGHT: return DIR_DOWN_LEFT;
-    case DIR_DOWN_LEFT: return DIR_UP_RIGHT;
-    case DIR_DOWN_RIGHT: return DIR_UP_LEFT;
+    case direction_t::UP: return direction_t::DOWN;
+    case direction_t::DOWN: return direction_t::UP;
+    case direction_t::LEFT: return direction_t::RIGHT;
+    case direction_t::RIGHT: return direction_t::LEFT;
+    case direction_t::UP_LEFT: return direction_t::DOWN_RIGHT;
+    case direction_t::UP_RIGHT: return direction_t::DOWN_LEFT;
+    case direction_t::DOWN_LEFT: return direction_t::UP_RIGHT;
+    case direction_t::DOWN_RIGHT: return direction_t::UP_LEFT;
     default: break;
     }
-    return DIR_UNKNOWN;
+    return direction_t::UNKNOWN;
 }
 
 /** @brief Return the x-axis delta associated with a direction. */
 constexpr static inline int get_x_from_dir(direction_t dir) {
     switch (dir) {
-    case DIR_UP_LEFT:
-    case DIR_DOWN_LEFT:
-    case DIR_LEFT: return -1;
-    case DIR_UP_RIGHT:
-    case DIR_DOWN_RIGHT:
-    case DIR_RIGHT: return 1;
-    case DIR_UP:
-    case DIR_DOWN:
-    case DIR_NONE:
-    case DIR_UNKNOWN:
+    case direction_t::UP_LEFT:
+    case direction_t::DOWN_LEFT:
+    case direction_t::LEFT: return -1;
+    case direction_t::UP_RIGHT:
+    case direction_t::DOWN_RIGHT:
+    case direction_t::RIGHT: return 1;
+    case direction_t::UP:
+    case direction_t::DOWN:
+    case direction_t::NONE:
+    case direction_t::UNKNOWN:
     default: return 0;
     }
 }
@@ -57,16 +57,16 @@ constexpr static inline int get_x_from_dir(direction_t dir) {
 /** @brief Return the y-axis delta associated with a direction. */
 constexpr static inline int get_y_from_dir(direction_t dir) {
     switch (dir) {
-    case DIR_UP:
-    case DIR_UP_LEFT:
-    case DIR_UP_RIGHT: return -1;
-    case DIR_DOWN:
-    case DIR_DOWN_LEFT:
-    case DIR_DOWN_RIGHT: return 1;
-    case DIR_LEFT:
-    case DIR_RIGHT:
-    case DIR_NONE:
-    case DIR_UNKNOWN:
+    case direction_t::UP:
+    case direction_t::UP_LEFT:
+    case direction_t::UP_RIGHT: return -1;
+    case direction_t::DOWN:
+    case direction_t::DOWN_LEFT:
+    case direction_t::DOWN_RIGHT: return 1;
+    case direction_t::LEFT:
+    case direction_t::RIGHT:
+    case direction_t::NONE:
+    case direction_t::UNKNOWN:
     default: return 0;
     }
 }
@@ -75,16 +75,16 @@ constexpr static inline int get_y_from_dir(direction_t dir) {
 constexpr static inline vec3 get_loc_from_dir(direction_t dir) {
     vec3 loc = {0, 0, 0};
     switch (dir) {
-    case DIR_UP: loc = (vec3){0, -1, 0}; break;
-    case DIR_DOWN: loc = (vec3){0, 1, 0}; break;
-    case DIR_LEFT: loc = (vec3){-1, 0, 0}; break;
-    case DIR_RIGHT: loc = (vec3){1, 0, 0}; break;
-    case DIR_UP_LEFT: loc = (vec3){-1, -1, 0}; break;
-    case DIR_UP_RIGHT: loc = (vec3){1, -1, 0}; break;
-    case DIR_DOWN_LEFT: loc = (vec3){-1, 1, 0}; break;
-    case DIR_DOWN_RIGHT: loc = (vec3){1, 1, 0}; break;
-    case DIR_NONE:
-    case DIR_UNKNOWN:
+    case direction_t::UP: loc = (vec3){0, -1, 0}; break;
+    case direction_t::DOWN: loc = (vec3){0, 1, 0}; break;
+    case direction_t::LEFT: loc = (vec3){-1, 0, 0}; break;
+    case direction_t::RIGHT: loc = (vec3){1, 0, 0}; break;
+    case direction_t::UP_LEFT: loc = (vec3){-1, -1, 0}; break;
+    case direction_t::UP_RIGHT: loc = (vec3){1, -1, 0}; break;
+    case direction_t::DOWN_LEFT: loc = (vec3){-1, 1, 0}; break;
+    case direction_t::DOWN_RIGHT: loc = (vec3){1, 1, 0}; break;
+    case direction_t::NONE:
+    case direction_t::UNKNOWN:
     default: loc = (vec3){-1, -1, -1}; break;
     }
     return loc;
@@ -93,25 +93,25 @@ constexpr static inline vec3 get_loc_from_dir(direction_t dir) {
 /** @brief Convert an `(x, y)` delta pair into a direction enum. */
 constexpr static inline const direction_t get_dir_from_xy(int x, int y) {
     if (x == 0 && y == 0)
-        return DIR_NONE;
+        return direction_t::NONE;
     if (x == 0 && y == -1)
-        return DIR_UP;
+        return direction_t::UP;
     if (x == 0 && y == 1)
-        return DIR_DOWN;
+        return direction_t::DOWN;
     if (x == -1 && y == 0)
-        return DIR_LEFT;
+        return direction_t::LEFT;
     if (x == 1 && y == 0)
-        return DIR_RIGHT;
+        return direction_t::RIGHT;
     // also handle diagonals
     if (x == -1 && y == -1)
-        return DIR_UP_LEFT;
+        return direction_t::UP_LEFT;
     if (x == 1 && y == -1)
-        return DIR_UP_RIGHT;
+        return direction_t::UP_RIGHT;
     if (x == -1 && y == 1)
-        return DIR_DOWN_LEFT;
+        return direction_t::DOWN_LEFT;
     if (x == 1 && y == 1)
-        return DIR_DOWN_RIGHT;
-    return DIR_UNKNOWN;
+        return direction_t::DOWN_RIGHT;
+    return direction_t::UNKNOWN;
 }
 
 /** @brief Convert a `vec3` tile delta into a direction enum using its x/y axes. */
@@ -122,14 +122,14 @@ constexpr static inline direction_t get_dir_from_loc(vec3 loc) {
 /** @brief Return a lowercase string label for a direction enum. */
 constexpr static inline const char* get_dir_as_string(direction_t dir) {
     switch (dir) {
-    case DIR_UP: return "up";
-    case DIR_DOWN: return "down";
-    case DIR_LEFT: return "left";
-    case DIR_RIGHT: return "right";
-    case DIR_UP_LEFT: return "up_left";
-    case DIR_UP_RIGHT: return "up_right";
-    case DIR_DOWN_LEFT: return "down_left";
-    case DIR_DOWN_RIGHT: return "down_right";
+    case direction_t::UP: return "up";
+    case direction_t::DOWN: return "down";
+    case direction_t::LEFT: return "left";
+    case direction_t::RIGHT: return "right";
+    case direction_t::UP_LEFT: return "up_left";
+    case direction_t::UP_RIGHT: return "up_right";
+    case direction_t::DOWN_LEFT: return "down_left";
+    case direction_t::DOWN_RIGHT: return "down_right";
     default: return "unknown";
     }
 }

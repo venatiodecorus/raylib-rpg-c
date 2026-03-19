@@ -13,53 +13,53 @@ using std::string;
 using std::unordered_map;
 
 /// @brief Supported player and NPC races used by factories and gameplay logic.
-typedef enum
+enum class race_t
 {
-    RACE_NONE = 0,
-    RACE_HALFLING,
-    RACE_GOBLIN,
-    RACE_HUMAN,
-    RACE_ELF,
-    RACE_DWARF,
-    RACE_ORC,
-    RACE_GREEN_SLIME,
-    RACE_BAT,
-    RACE_WOLF,
-    RACE_WARG,
-    RACE_ZOMBIE,
-    RACE_SKELETON,
-    RACE_RAT,
-    RACE_COUNT
-} race_t;
+    NONE = 0,
+    HALFLING,
+    GOBLIN,
+    HUMAN,
+    ELF,
+    DWARF,
+    ORC,
+    GREEN_SLIME,
+    BAT,
+    WOLF,
+    WARG,
+    ZOMBIE,
+    SKELETON,
+    RAT,
+    COUNT
+};
 
 /// @brief Mapping from race enum values to lowercase display/debug names.
-const unordered_map<race_t, string> rn = {{RACE_NONE, "race_none"},
-                                          {RACE_COUNT, "race_count"},
-                                          {RACE_HUMAN, "human"},
-                                          {RACE_HALFLING, "halfling"},
-                                          {RACE_GOBLIN, "goblin"},
-                                          {RACE_ELF, "elf"},
-                                          {RACE_DWARF, "dwarf"},
-                                          {RACE_ORC, "orc"},
-                                          {RACE_GREEN_SLIME, "green slime"},
-                                          {RACE_BAT, "bat"},
-                                          {RACE_WOLF, "wolf"},
-                                          {RACE_WARG, "warg"},
-                                          {RACE_ZOMBIE, "zombie"},
-                                          {RACE_SKELETON, "skeleton"},
-                                          {RACE_RAT, "rat"}};
+const unordered_map<race_t, string> rn = {{race_t::NONE, "race_none"},
+                                          {race_t::COUNT, "race_count"},
+                                          {race_t::HUMAN, "human"},
+                                          {race_t::HALFLING, "halfling"},
+                                          {race_t::GOBLIN, "goblin"},
+                                          {race_t::ELF, "elf"},
+                                          {race_t::DWARF, "dwarf"},
+                                          {race_t::ORC, "orc"},
+                                          {race_t::GREEN_SLIME, "green slime"},
+                                          {race_t::BAT, "bat"},
+                                          {race_t::WOLF, "wolf"},
+                                          {race_t::WARG, "warg"},
+                                          {race_t::ZOMBIE, "zombie"},
+                                          {race_t::SKELETON, "skeleton"},
+                                          {race_t::RAT, "rat"}};
 
 /** @brief Convert a race enum into its configured string label. */
 const static inline string race2str(const race_t r) {
-    massert(r >= RACE_NONE && r < RACE_COUNT, "Invalid race name");
-    massert(rn.find(r) != rn.end(), "race doesn't exist in map!: %d", r);
+    massert(r >= race_t::NONE && r < race_t::COUNT, "Invalid race name");
+    massert(rn.find(r) != rn.end(), "race doesn't exist in map!: %d", static_cast<int>(r));
     return rn.at(r);
 }
 
-/** @brief Convert a configured race string into a race enum, or `RACE_NONE`. */
+/** @brief Convert a configured race string into a race enum, or `race_t::NONE`. */
 const static inline race_t str2race(const string str) {
     for (auto i : rn)
         if (str == i.second)
             return i.first;
-    return RACE_NONE;
+    return race_t::NONE;
 }

@@ -13,49 +13,49 @@
  *
  * Combat follow-up ordering intentionally relies on FIFO append semantics in
  * `process_gameplay_events()`. The current contract is:
- * - attack miss: `EVENT_ATTACK_INTENT` emits the miss message inline and does
+ * - attack miss: `event_type_t::ATTACK_INTENT` emits the miss message inline and does
  *   not enqueue damage/block/death/durability follow-ups
- * - attack block: `EVENT_ATTACK_INTENT` may enqueue `EVENT_PROVOKE_NPC`, then
- *   `EVENT_ATTACK_BLOCK`; block resolution then appends
- *   `EVENT_ATTACK_SHIELD_DURABILITY`
- * - attack hit: `EVENT_ATTACK_INTENT` may enqueue `EVENT_PROVOKE_NPC`, then
- *   `EVENT_ATTACK_DAMAGE`; damage resolution then appends
- *   `EVENT_ATTACK_WEAPON_DURABILITY` and, on lethal damage,
- *   `EVENT_ATTACK_DEATH`; death resolution then appends either
- *   `EVENT_ATTACK_AWARD_XP` plus `EVENT_ATTACK_DROP_INVENTORY` for NPC targets
- *   or `EVENT_ATTACK_PLAYER_DEATH` for the hero
+ * - attack block: `event_type_t::ATTACK_INTENT` may enqueue `event_type_t::PROVOKE_NPC`, then
+ *   `event_type_t::ATTACK_BLOCK`; block resolution then appends
+ *   `event_type_t::ATTACK_SHIELD_DURABILITY`
+ * - attack hit: `event_type_t::ATTACK_INTENT` may enqueue `event_type_t::PROVOKE_NPC`, then
+ *   `event_type_t::ATTACK_DAMAGE`; damage resolution then appends
+ *   `event_type_t::ATTACK_WEAPON_DURABILITY` and, on lethal damage,
+ *   `event_type_t::ATTACK_DEATH`; death resolution then appends either
+ *   `event_type_t::ATTACK_AWARD_XP` plus `event_type_t::ATTACK_DROP_INVENTORY` for NPC targets
+ *   or `event_type_t::ATTACK_PLAYER_DEATH` for the hero
  *
  * Future queue changes should preserve that observable order unless the tests
  * and gameplay contract are updated deliberately.
  */
-typedef enum {
-    EVENT_NONE = 0,
-    EVENT_MOVE_INTENT,
-    EVENT_PUSH_INTENT,
-    EVENT_ATTACK_INTENT,
-    EVENT_PROVOKE_NPC,
-    EVENT_ATTACK_BLOCK,
-    EVENT_ATTACK_DAMAGE,
-    EVENT_ATTACK_DEATH,
-    EVENT_ATTACK_AWARD_XP,
-    EVENT_ATTACK_DROP_INVENTORY,
-    EVENT_ATTACK_PLAYER_DEATH,
-    EVENT_ATTACK_WEAPON_DURABILITY,
-    EVENT_ATTACK_SHIELD_DURABILITY,
-    EVENT_PULL_INTENT,
-    EVENT_OPEN_DOOR_INTENT,
-    EVENT_OPEN_CHEST_INTENT,
-    EVENT_INTERACT_INTENT,
-    EVENT_PICKUP_INTENT,
-    EVENT_USE_ITEM_INTENT,
-    EVENT_EQUIP_ITEM_INTENT,
-    EVENT_DROP_ITEM_INTENT,
-    EVENT_CHEST_TRANSFER_INTENT,
-    EVENT_TRAVERSE_STAIRS_INTENT,
-    EVENT_REFRESH_PRESSURE_PLATES,
-    EVENT_PRESSURE_PLATE_SET_DOOR,
-    EVENT_COUNT
-} event_type_t;
+enum class event_type_t {
+    NONE = 0,
+    MOVE_INTENT,
+    PUSH_INTENT,
+    ATTACK_INTENT,
+    PROVOKE_NPC,
+    ATTACK_BLOCK,
+    ATTACK_DAMAGE,
+    ATTACK_DEATH,
+    ATTACK_AWARD_XP,
+    ATTACK_DROP_INVENTORY,
+    ATTACK_PLAYER_DEATH,
+    ATTACK_WEAPON_DURABILITY,
+    ATTACK_SHIELD_DURABILITY,
+    PULL_INTENT,
+    OPEN_DOOR_INTENT,
+    OPEN_CHEST_INTENT,
+    INTERACT_INTENT,
+    PICKUP_INTENT,
+    USE_ITEM_INTENT,
+    EQUIP_ITEM_INTENT,
+    DROP_ITEM_INTENT,
+    CHEST_TRANSFER_INTENT,
+    TRAVERSE_STAIRS_INTENT,
+    REFRESH_PRESSURE_PLATES,
+    PRESSURE_PLATE_SET_DOOR,
+    COUNT
+};
 
 /**
  * @brief Queue payload for one gameplay event.
@@ -64,7 +64,7 @@ typedef enum {
  * sentinel defaults until more event domains move over.
  */
 struct gameplay_event_t {
-    event_type_t type = EVENT_NONE;
+    event_type_t type = event_type_t::NONE;
     entityid actor_id = ENTITYID_INVALID;
     entityid target_id = ENTITYID_INVALID;
     entityid item_id = ENTITYID_INVALID;
@@ -73,14 +73,14 @@ struct gameplay_event_t {
     int floor = -1;
     int amount = 0;
     bool state = false;
-    attack_result_t attack_result = ATTACK_RESULT_NONE;
+    attack_result_t attack_result = attack_result_t::NONE;
 };
 
 /// @brief Resolution summary for a processed gameplay event.
 struct gameplay_event_result_t {
-    event_type_t type = EVENT_NONE;
+    event_type_t type = event_type_t::NONE;
     entityid actor_id = ENTITYID_INVALID;
     bool handled = false;
     bool succeeded = false;
-    attack_result_t attack_result = ATTACK_RESULT_NONE;
+    attack_result_t attack_result = attack_result_t::NONE;
 };

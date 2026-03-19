@@ -58,7 +58,7 @@ bool gamestate::visibility_path_blocked(vec3 a, vec3 b) {
 }
 
 bool gamestate::update_player_tiles_explored() {
-    if (current_scene != SCENE_GAMEPLAY) {
+    if (current_scene != scene_t::GAMEPLAY) {
         return false;
     }
     if (hero_id == ENTITYID_INVALID) {
@@ -122,8 +122,8 @@ void gamestate::update_npcs_state() {
     auto view = registry.view<ActorKind, LegacyEntityId>();
     for (auto entity : view) {
         entityid id = view.get<LegacyEntityId>(entity).id;
-        auto type = ct.get<entitytype>(id).value_or(ENTITY_NONE);
-        if (type == ENTITY_NPC) {
+        auto type = ct.get<entitytype>(id).value_or(entitytype_t::NONE);
+        if (type == entitytype_t::NPC) {
             ct.set<damaged>(id, false);
             update_npc_behavior(id);
         }
@@ -131,18 +131,18 @@ void gamestate::update_npcs_state() {
 }
 
 void gamestate::update_npc_behavior(entityid id) {
-    if (ct.get<entitytype>(id).value_or(ENTITY_NONE) != ENTITY_NPC) {
+    if (ct.get<entitytype>(id).value_or(entitytype_t::NONE) != entitytype_t::NPC) {
         return;
     }
     if (ct.get<dead>(id).value_or(true)) {
-        ct.set<entity_default_action>(id, ENTITY_DEFAULT_ACTION_NONE);
+        ct.set<entity_default_action>(id, entity_default_action_t::NONE);
         ct.set<target_id>(id, ENTITYID_INVALID);
         return;
     }
 
     const bool is_aggressive = ct.get<aggro>(id).value_or(false);
     if (hero_id == ENTITYID_INVALID || !is_aggressive || !ct.has<location>(hero_id)) {
-        ct.set<entity_default_action>(id, ENTITY_DEFAULT_ACTION_RANDOM_MOVE);
+        ct.set<entity_default_action>(id, entity_default_action_t::RANDOM_MOVE);
         ct.set<target_id>(id, ENTITYID_INVALID);
         return;
     }
@@ -150,18 +150,18 @@ void gamestate::update_npc_behavior(entityid id) {
     const vec3 npc_loc = ct.get<location>(id).value_or(vec3{-1, -1, -1});
     const vec3 hero_loc = ct.get<location>(hero_id).value_or(vec3{-1, -1, -1});
     if (vec3_invalid(npc_loc) || vec3_invalid(hero_loc) || npc_loc.z != hero_loc.z) {
-        ct.set<entity_default_action>(id, ENTITY_DEFAULT_ACTION_RANDOM_MOVE);
+        ct.set<entity_default_action>(id, entity_default_action_t::RANDOM_MOVE);
         ct.set<target_id>(id, ENTITYID_INVALID);
         return;
     }
 
     ct.set<target_id>(id, hero_id);
     if (is_entity_adjacent(id, hero_id)) {
-        ct.set<entity_default_action>(id, ENTITY_DEFAULT_ACTION_ATTACK_TARGET_IF_ADJACENT);
+        ct.set<entity_default_action>(id, entity_default_action_t::ATTACK_TARGET_IF_ADJACENT);
         return;
     }
 
-    ct.set<entity_default_action>(id, ENTITY_DEFAULT_ACTION_MOVE_TO_TARGET_AND_ATTACK_TARGET_IF_ADJACENT);
+    ct.set<entity_default_action>(id, entity_default_action_t::MOVE_TO_TARGET_AND_ATTACK_TARGET_IF_ADJACENT);
 }
 
 void gamestate::logic_init() {
@@ -170,10 +170,10 @@ void gamestate::logic_init() {
     SetRandomSeed(time(NULL));
     constexpr float parts = 1.0;
     massert(!d.is_initialized, "dungeon is already initialized");
-    create_and_add_df_1(BIOME_STONE, 8, 8, 4, parts);
-    create_and_add_df_1(BIOME_STONE, 24, 24, 4, parts);
-    create_and_add_df_1(BIOME_STONE, 16, 16, 4, parts);
-    create_and_add_df_0(BIOME_STONE, 16, 16, 4, parts);
+    create_and_add_df_1(biome_t::STONE, 8, 8, 4, parts);
+    create_and_add_df_1(biome_t::STONE, 24, 24, 4, parts);
+    create_and_add_df_1(biome_t::STONE, 16, 16, 4, parts);
+    create_and_add_df_0(biome_t::STONE, 16, 16, 4, parts);
     const bool stairs_assigned = assign_random_stairs();
     massert(stairs_assigned, "failed to assign dungeon stairs");
     if (!stairs_assigned) {
@@ -217,14 +217,14 @@ void gamestate::logic_init() {
         };
         uniform_int_distribution<int> weapon_dist(0, static_cast<int>(weapon_inits.size()) - 1);
         const entityid weapon_id = create_weapon_with(weapon_inits[weapon_dist(random.mt)]);
-        const entityid potion_id = create_potion_with(potion_init(POTION_HP_SMALL));
+        const entityid potion_id = create_potion_with(potion_init(potiontype_t::HP_SMALL));
         add_to_inventory(id, weapon_id);
         add_to_inventory(id, potion_id);
         ct.set<equipped_weapon>(id, weapon_id);
         ct.set<aggro>(id, true);
     };
 
-    const race_t friendly_race = static_cast<race_t>(GetRandomValue(RACE_NONE + 1, RACE_COUNT - 1));
+    const race_t friendly_race = static_cast<race_t>(GetRandomValue(static_cast<int>(race_t::NONE) + 1, static_cast<int>(race_t::COUNT) - 1));
     const vec3 friendly_loc = d.get_floor(0)->get_random_loc();
     create_npc_at_with(friendly_race, friendly_loc, [](CT& ct, const entityid id) {
         ct.set<aggro>(id, false);
@@ -233,7 +233,7 @@ void gamestate::logic_init() {
     auto floor_one = d.get_floor(1);
     for (int i = 0; i < 9; i++) {
         const vec3 slime_loc = floor_one->get_random_loc();
-        create_npc_at_with(RACE_GREEN_SLIME, slime_loc, green_slime_init);
+        create_npc_at_with(race_t::GREEN_SLIME, slime_loc, green_slime_init);
     }
 
     const vec3 floor_two_orc_loc = vec3_valid(floor_four_tutorial_orc_spawn) ? floor_four_tutorial_orc_spawn : d.get_floor(2)->get_random_loc();
@@ -260,42 +260,42 @@ void gamestate::restart_game() {
     logic_init();
     do_restart = false;
     restart_count = previous_restart_count + 1;
-    current_scene = SCENE_TITLE;
+    current_scene = scene_t::TITLE;
     frame_dirty = true;
 }
 
 void gamestate::advance_animation_phase() {
     minfo2(
         "handle test flag: %s",
-        flag == GAMESTATE_FLAG_PLAYER_ANIM    ? "player anim"
-        : flag == GAMESTATE_FLAG_PLAYER_INPUT ? "player input"
-        : flag == GAMESTATE_FLAG_NPC_TURN     ? "npc turn"
-        : flag == GAMESTATE_FLAG_NPC_ANIM     ? "npc anim"
+        flag == gamestate_flag_t::PLAYER_ANIM    ? "player anim"
+        : flag == gamestate_flag_t::PLAYER_INPUT ? "player input"
+        : flag == gamestate_flag_t::NPC_TURN     ? "npc turn"
+        : flag == gamestate_flag_t::NPC_ANIM     ? "npc anim"
                                               : "Unknown");
-    if (flag == GAMESTATE_FLAG_PLAYER_ANIM) {
+    if (flag == gamestate_flag_t::PLAYER_ANIM) {
 #ifndef NPCS_ALL_AT_ONCE
         entity_turn++;
         if (entity_turn >= next_entityid) {
             entity_turn = 1;
         }
 #endif
-        flag = GAMESTATE_FLAG_NPC_TURN;
+        flag = gamestate_flag_t::NPC_TURN;
     }
-    else if (flag == GAMESTATE_FLAG_NPC_ANIM) {
+    else if (flag == gamestate_flag_t::NPC_ANIM) {
 #ifndef NPCS_ALL_AT_ONCE
         entity_turn++;
         if (entity_turn >= next_entityid) {
             entity_turn = 1;
         }
         if (entity_turn == hero_id) {
-            flag = GAMESTATE_FLAG_PLAYER_INPUT;
+            flag = gamestate_flag_t::PLAYER_INPUT;
             turn_count++;
         }
         else {
-            flag = GAMESTATE_FLAG_NPC_TURN;
+            flag = gamestate_flag_t::NPC_TURN;
         }
 #else
-        flag = GAMESTATE_FLAG_PLAYER_INPUT;
+        flag = gamestate_flag_t::PLAYER_INPUT;
         turn_count++;
 #endif
     }

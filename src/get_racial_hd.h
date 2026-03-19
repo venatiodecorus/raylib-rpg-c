@@ -9,9 +9,9 @@
 /** @brief Return the default hit-die size for a race. */
 static inline const int get_racial_hd(race_t rt) {
     switch (rt) {
-    case RACE_HUMAN: return 8;
-    case RACE_ELF: return 6;
-    case RACE_DWARF: return 10;
+    case race_t::HUMAN: return 8;
+    case race_t::ELF: return 6;
+    case race_t::DWARF: return 10;
     default: break;
     }
     return 8;

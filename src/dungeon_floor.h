@@ -94,7 +94,7 @@ public:
             return false;
         }
         upstairs_loc = loc;
-        tile.set_type(TILE_UPSTAIRS);
+        tile.set_type(tiletype_t::UPSTAIRS);
         tile.set_can_have_door(false);
         return true;
     }
@@ -114,7 +114,7 @@ public:
             return false;
         }
         downstairs_loc = loc;
-        tile.set_type(TILE_DOWNSTAIRS);
+        tile.set_type(tiletype_t::DOWNSTAIRS);
         tile.set_can_have_door(false);
         return true;
     }
@@ -228,10 +228,10 @@ public:
             auto t5 = tile_at((vec3){loc.x + 1, loc.y - 1, loc.z});
             auto t6 = tile_at((vec3){loc.x + 1, loc.y, loc.z});
             auto t7 = tile_at((vec3){loc.x + 1, loc.y + 1, loc.z});
-            auto top_row_none = t0.get_type() == TILE_NONE && t3.get_type() == TILE_NONE && t5.get_type() == TILE_NONE;
-            auto bottom_row_none = t2.get_type() == TILE_NONE && t4.get_type() == TILE_NONE && t7.get_type() == TILE_NONE;
-            auto left_not_none = t1.get_type() != TILE_NONE;
-            auto right_not_none = t6.get_type() != TILE_NONE;
+            auto top_row_none = t0.get_type() == tiletype_t::NONE && t3.get_type() == tiletype_t::NONE && t5.get_type() == tiletype_t::NONE;
+            auto bottom_row_none = t2.get_type() == tiletype_t::NONE && t4.get_type() == tiletype_t::NONE && t7.get_type() == tiletype_t::NONE;
+            auto left_not_none = t1.get_type() != tiletype_t::NONE;
+            auto right_not_none = t6.get_type() != tiletype_t::NONE;
             auto case1 = top_row_none && bottom_row_none && left_not_none && right_not_none;
             if (case1) {
                 return true;
@@ -246,7 +246,7 @@ public:
     }
 
     tiletype_t random_tiletype(tiletype_t a, tiletype_t b) {
-        return (tiletype_t)GetRandomValue(a, b);
+        return static_cast<tiletype_t>(GetRandomValue(static_cast<int>(a), static_cast<int>(b)));
     }
 
     void set_area(tiletype_t a, tiletype_t b, Rectangle r) {
@@ -296,7 +296,7 @@ public:
 
     /** @brief Paint a floor-material area and return the painted rectangle. */
     Rectangle df_paint_floor_area(Rectangle r) {
-        return df_paint_area(TILE_FLOOR_STONE_00, TILE_FLOOR_STONE_11, r);
+        return df_paint_area(tiletype_t::FLOOR_STONE_00, tiletype_t::FLOOR_STONE_11, r);
     }
 
     /**
@@ -308,19 +308,19 @@ public:
         int x = static_cast<int>(origin.x);
         int y = static_cast<int>(origin.y);
         switch (dir) {
-        case DIR_LEFT:
+        case direction_t::LEFT:
             x = static_cast<int>(origin.x) - gap - area_width;
             y = static_cast<int>(origin.y) + (static_cast<int>(origin.height) - area_height) / 2;
             break;
-        case DIR_RIGHT:
+        case direction_t::RIGHT:
             x = static_cast<int>(origin.x + origin.width) + gap;
             y = static_cast<int>(origin.y) + (static_cast<int>(origin.height) - area_height) / 2;
             break;
-        case DIR_UP:
+        case direction_t::UP:
             x = static_cast<int>(origin.x) + (static_cast<int>(origin.width) - area_width) / 2;
             y = static_cast<int>(origin.y) - gap - area_height;
             break;
-        case DIR_DOWN:
+        case direction_t::DOWN:
             x = static_cast<int>(origin.x) + (static_cast<int>(origin.width) - area_width) / 2;
             y = static_cast<int>(origin.y + origin.height) + gap;
             break;
@@ -421,7 +421,7 @@ public:
                 if (!tile_is_good_for_upgrade(loc)) {
                     continue;
                 }
-                df_set_tile(TILE_FLOOR_STONE_10, x, y);
+                df_set_tile(tiletype_t::FLOOR_STONE_10, x, y);
             }
         }
     }
@@ -479,7 +479,7 @@ public:
         massert(height > 0, "height must be greater than zero");
         grid.assign(static_cast<size_t>(width) * static_cast<size_t>(height), tile_t{});
         for (tile_t& tile : grid) {
-            tile.set_type(TILE_NONE);
+            tile.set_type(tiletype_t::NONE);
         }
         msuccess2("Created dungeon floor %d with dimensions %dx%d", floor, width, height);
     }
@@ -653,8 +653,8 @@ public:
             for (int y = 0; y < height; y++) {
                 const vec3 loc = {x, y, floor};
                 tile_t& tile = tile_at(loc);
-                const bool type_invalid = tile.get_type() == TILE_NONE || tile.get_type() == TILE_STONE_WALL_00 || tile.get_type() == TILE_STONE_WALL_01 ||
-                                          tile.get_type() == TILE_UPSTAIRS || tile.get_type() == TILE_DOWNSTAIRS;
+                const bool type_invalid = tile.get_type() == tiletype_t::NONE || tile.get_type() == tiletype_t::STONE_WALL_00 || tile.get_type() == tiletype_t::STONE_WALL_01 ||
+                                          tile.get_type() == tiletype_t::UPSTAIRS || tile.get_type() == tiletype_t::DOWNSTAIRS;
                 if (type_invalid) {
                     continue;
                 }
@@ -706,7 +706,7 @@ public:
         : floor(0)
         , width(width)
         , height(height)
-        , biome(BIOME_NONE)
+        , biome(biome_t::NONE)
         , full_light(false) {
         massert(width > 0, "width must be greater than zero");
         massert(height > 0, "height must be greater than zero");

@@ -230,7 +230,7 @@ void gamestate::update_pressure_plates_for_floor(int z) {
         }
 
         const bool active = tile_has_pressure_plate_occupant(plate.loc);
-        if (plate.linked_door_id == ENTITYID_INVALID || ct.get<entitytype>(plate.linked_door_id).value_or(ENTITY_NONE) != ENTITY_DOOR) {
+        if (plate.linked_door_id == ENTITYID_INVALID || ct.get<entitytype>(plate.linked_door_id).value_or(entitytype_t::NONE) != entitytype_t::DOOR) {
             plate.linked_door_id = ENTITYID_INVALID;
             plate.active = false;
             continue;
@@ -265,7 +265,7 @@ void gamestate::update_pressure_plates_for_floor(int z) {
 }
 
 void gamestate::resolve_pressure_plate_set_door_event(entityid door_id, bool should_open) {
-    if (door_id == ENTITYID_INVALID || ct.get<entitytype>(door_id).value_or(ENTITY_NONE) != ENTITY_DOOR) {
+    if (door_id == ENTITYID_INVALID || ct.get<entitytype>(door_id).value_or(entitytype_t::NONE) != entitytype_t::DOOR) {
         return;
     }
 
@@ -289,7 +289,7 @@ void gamestate::clear_gameplay_events() {
 }
 
 bool gamestate::queue_gameplay_event(const gameplay_event_t& event) {
-    if (event.type == EVENT_NONE) {
+    if (event.type == event_type_t::NONE) {
         return false;
     }
     gameplay_events.push_back(event);
@@ -298,7 +298,7 @@ bool gamestate::queue_gameplay_event(const gameplay_event_t& event) {
 
 bool gamestate::queue_move_event(entityid id, vec3 v) {
     gameplay_event_t event;
-    event.type = EVENT_MOVE_INTENT;
+    event.type = event_type_t::MOVE_INTENT;
     event.actor_id = id;
     event.delta = v;
     return queue_gameplay_event(event);
@@ -306,7 +306,7 @@ bool gamestate::queue_move_event(entityid id, vec3 v) {
 
 bool gamestate::queue_push_event(entityid id, vec3 v) {
     gameplay_event_t event;
-    event.type = EVENT_PUSH_INTENT;
+    event.type = event_type_t::PUSH_INTENT;
     event.actor_id = id;
     event.delta = v;
     return queue_gameplay_event(event);
@@ -314,7 +314,7 @@ bool gamestate::queue_push_event(entityid id, vec3 v) {
 
 bool gamestate::queue_attack_event(entityid id, vec3 loc) {
     gameplay_event_t event;
-    event.type = EVENT_ATTACK_INTENT;
+    event.type = event_type_t::ATTACK_INTENT;
     event.actor_id = id;
     event.target_loc = loc;
     return queue_gameplay_event(event);
@@ -322,7 +322,7 @@ bool gamestate::queue_attack_event(entityid id, vec3 loc) {
 
 bool gamestate::queue_provoke_npc_event(entityid npc_id, entityid source_id) {
     gameplay_event_t event;
-    event.type = EVENT_PROVOKE_NPC;
+    event.type = event_type_t::PROVOKE_NPC;
     event.actor_id = npc_id;
     event.target_id = source_id;
     return queue_gameplay_event(event);
@@ -330,26 +330,26 @@ bool gamestate::queue_provoke_npc_event(entityid npc_id, entityid source_id) {
 
 bool gamestate::queue_attack_block_event(entityid attacker_id, entityid target_id) {
     gameplay_event_t event;
-    event.type = EVENT_ATTACK_BLOCK;
+    event.type = event_type_t::ATTACK_BLOCK;
     event.actor_id = attacker_id;
     event.target_id = target_id;
-    event.attack_result = ATTACK_RESULT_BLOCK;
+    event.attack_result = attack_result_t::BLOCK;
     return queue_gameplay_event(event);
 }
 
 bool gamestate::queue_attack_damage_event(entityid attacker_id, entityid target_id, int damage) {
     gameplay_event_t event;
-    event.type = EVENT_ATTACK_DAMAGE;
+    event.type = event_type_t::ATTACK_DAMAGE;
     event.actor_id = attacker_id;
     event.target_id = target_id;
     event.amount = damage;
-    event.attack_result = ATTACK_RESULT_HIT;
+    event.attack_result = attack_result_t::HIT;
     return queue_gameplay_event(event);
 }
 
 bool gamestate::queue_attack_death_event(entityid attacker_id, entityid target_id) {
     gameplay_event_t event;
-    event.type = EVENT_ATTACK_DEATH;
+    event.type = event_type_t::ATTACK_DEATH;
     event.actor_id = attacker_id;
     event.target_id = target_id;
     return queue_gameplay_event(event);
@@ -357,7 +357,7 @@ bool gamestate::queue_attack_death_event(entityid attacker_id, entityid target_i
 
 bool gamestate::queue_attack_award_xp_event(entityid attacker_id, entityid target_id) {
     gameplay_event_t event;
-    event.type = EVENT_ATTACK_AWARD_XP;
+    event.type = event_type_t::ATTACK_AWARD_XP;
     event.actor_id = attacker_id;
     event.target_id = target_id;
     return queue_gameplay_event(event);
@@ -365,21 +365,21 @@ bool gamestate::queue_attack_award_xp_event(entityid attacker_id, entityid targe
 
 bool gamestate::queue_attack_drop_inventory_event(entityid target_id) {
     gameplay_event_t event;
-    event.type = EVENT_ATTACK_DROP_INVENTORY;
+    event.type = event_type_t::ATTACK_DROP_INVENTORY;
     event.actor_id = target_id;
     return queue_gameplay_event(event);
 }
 
 bool gamestate::queue_attack_player_death_event(entityid target_id) {
     gameplay_event_t event;
-    event.type = EVENT_ATTACK_PLAYER_DEATH;
+    event.type = event_type_t::ATTACK_PLAYER_DEATH;
     event.actor_id = target_id;
     return queue_gameplay_event(event);
 }
 
 bool gamestate::queue_attack_weapon_durability_event(entityid attacker_id, entityid target_id) {
     gameplay_event_t event;
-    event.type = EVENT_ATTACK_WEAPON_DURABILITY;
+    event.type = event_type_t::ATTACK_WEAPON_DURABILITY;
     event.actor_id = attacker_id;
     event.target_id = target_id;
     return queue_gameplay_event(event);
@@ -387,7 +387,7 @@ bool gamestate::queue_attack_weapon_durability_event(entityid attacker_id, entit
 
 bool gamestate::queue_attack_shield_durability_event(entityid defender_id, entityid attacker_id) {
     gameplay_event_t event;
-    event.type = EVENT_ATTACK_SHIELD_DURABILITY;
+    event.type = event_type_t::ATTACK_SHIELD_DURABILITY;
     event.actor_id = defender_id;
     event.target_id = attacker_id;
     return queue_gameplay_event(event);
@@ -395,14 +395,14 @@ bool gamestate::queue_attack_shield_durability_event(entityid defender_id, entit
 
 bool gamestate::queue_pull_event(entityid id) {
     gameplay_event_t event;
-    event.type = EVENT_PULL_INTENT;
+    event.type = event_type_t::PULL_INTENT;
     event.actor_id = id;
     return queue_gameplay_event(event);
 }
 
 bool gamestate::queue_open_door_event(entityid id, vec3 loc) {
     gameplay_event_t event;
-    event.type = EVENT_OPEN_DOOR_INTENT;
+    event.type = event_type_t::OPEN_DOOR_INTENT;
     event.actor_id = id;
     event.target_loc = loc;
     return queue_gameplay_event(event);
@@ -410,7 +410,7 @@ bool gamestate::queue_open_door_event(entityid id, vec3 loc) {
 
 bool gamestate::queue_open_chest_event(entityid id, vec3 loc) {
     gameplay_event_t event;
-    event.type = EVENT_OPEN_CHEST_INTENT;
+    event.type = event_type_t::OPEN_CHEST_INTENT;
     event.actor_id = id;
     event.target_loc = loc;
     return queue_gameplay_event(event);
@@ -418,7 +418,7 @@ bool gamestate::queue_open_chest_event(entityid id, vec3 loc) {
 
 bool gamestate::queue_interact_event(entityid id, vec3 loc) {
     gameplay_event_t event;
-    event.type = EVENT_INTERACT_INTENT;
+    event.type = event_type_t::INTERACT_INTENT;
     event.actor_id = id;
     event.target_loc = loc;
     return queue_gameplay_event(event);
@@ -426,14 +426,14 @@ bool gamestate::queue_interact_event(entityid id, vec3 loc) {
 
 bool gamestate::queue_pickup_event(entityid id) {
     gameplay_event_t event;
-    event.type = EVENT_PICKUP_INTENT;
+    event.type = event_type_t::PICKUP_INTENT;
     event.actor_id = id;
     return queue_gameplay_event(event);
 }
 
 bool gamestate::queue_use_item_event(entityid id, entityid item_id) {
     gameplay_event_t event;
-    event.type = EVENT_USE_ITEM_INTENT;
+    event.type = event_type_t::USE_ITEM_INTENT;
     event.actor_id = id;
     event.target_id = item_id;
     return queue_gameplay_event(event);
@@ -441,7 +441,7 @@ bool gamestate::queue_use_item_event(entityid id, entityid item_id) {
 
 bool gamestate::queue_equip_item_event(entityid id, entityid item_id) {
     gameplay_event_t event;
-    event.type = EVENT_EQUIP_ITEM_INTENT;
+    event.type = event_type_t::EQUIP_ITEM_INTENT;
     event.actor_id = id;
     event.target_id = item_id;
     return queue_gameplay_event(event);
@@ -449,7 +449,7 @@ bool gamestate::queue_equip_item_event(entityid id, entityid item_id) {
 
 bool gamestate::queue_drop_item_event(entityid id, entityid item_id) {
     gameplay_event_t event;
-    event.type = EVENT_DROP_ITEM_INTENT;
+    event.type = event_type_t::DROP_ITEM_INTENT;
     event.actor_id = id;
     event.item_id = item_id;
     return queue_gameplay_event(event);
@@ -457,7 +457,7 @@ bool gamestate::queue_drop_item_event(entityid id, entityid item_id) {
 
 bool gamestate::queue_chest_transfer_event(entityid from_id, entityid to_id, entityid item_id) {
     gameplay_event_t event;
-    event.type = EVENT_CHEST_TRANSFER_INTENT;
+    event.type = event_type_t::CHEST_TRANSFER_INTENT;
     event.actor_id = from_id;
     event.target_id = to_id;
     event.item_id = item_id;
@@ -466,21 +466,21 @@ bool gamestate::queue_chest_transfer_event(entityid from_id, entityid to_id, ent
 
 bool gamestate::queue_traverse_stairs_event(entityid id) {
     gameplay_event_t event;
-    event.type = EVENT_TRAVERSE_STAIRS_INTENT;
+    event.type = event_type_t::TRAVERSE_STAIRS_INTENT;
     event.actor_id = id;
     return queue_gameplay_event(event);
 }
 
 bool gamestate::queue_pressure_plate_refresh_event(int z) {
     gameplay_event_t event;
-    event.type = EVENT_REFRESH_PRESSURE_PLATES;
+    event.type = event_type_t::REFRESH_PRESSURE_PLATES;
     event.floor = z;
     return queue_gameplay_event(event);
 }
 
 bool gamestate::queue_pressure_plate_set_door_event(entityid door_id, bool should_open) {
     gameplay_event_t event;
-    event.type = EVENT_PRESSURE_PLATE_SET_DOOR;
+    event.type = event_type_t::PRESSURE_PLATE_SET_DOOR;
     event.actor_id = door_id;
     event.state = should_open;
     return queue_gameplay_event(event);
@@ -491,7 +491,7 @@ gameplay_event_result_t gamestate::process_gameplay_event(const gameplay_event_t
     result.type = event.type;
     result.actor_id = event.actor_id;
     switch (event.type) {
-    case EVENT_MOVE_INTENT: {
+    case event_type_t::MOVE_INTENT: {
         result.handled = true;
         result.succeeded = try_entity_move(event.actor_id, event.delta);
         if (result.succeeded) {
@@ -502,7 +502,7 @@ gameplay_event_result_t gamestate::process_gameplay_event(const gameplay_event_t
         }
         return result;
     }
-    case EVENT_PUSH_INTENT: {
+    case event_type_t::PUSH_INTENT: {
         result.handled = true;
         result.succeeded = try_entity_push(event.actor_id, event.delta);
         if (result.succeeded) {
@@ -513,64 +513,64 @@ gameplay_event_result_t gamestate::process_gameplay_event(const gameplay_event_t
         }
         return result;
     }
-    case EVENT_ATTACK_INTENT:
+    case event_type_t::ATTACK_INTENT:
         result.handled = true;
         result.attack_result = resolve_attack_intent(event.actor_id, event.target_loc);
         handle_attack_sfx(event.actor_id, result.attack_result);
         if (!test) {
-            set_gamestate_flag_for_attack_animation(ct.get<entitytype>(event.actor_id).value_or(ENTITY_NONE));
+            set_gamestate_flag_for_attack_animation(ct.get<entitytype>(event.actor_id).value_or(entitytype_t::NONE));
         }
-        result.succeeded = result.attack_result != ATTACK_RESULT_NONE;
+        result.succeeded = result.attack_result != attack_result_t::NONE;
         return result;
-    case EVENT_PROVOKE_NPC:
+    case event_type_t::PROVOKE_NPC:
         result.handled = true;
         resolve_provoke_npc_event(event.actor_id, event.target_id);
         result.succeeded = true;
         return result;
-    case EVENT_ATTACK_BLOCK:
+    case event_type_t::ATTACK_BLOCK:
         result.handled = true;
         resolve_attack_block_event(event.actor_id, event.target_id);
-        result.attack_result = ATTACK_RESULT_BLOCK;
+        result.attack_result = attack_result_t::BLOCK;
         result.succeeded = true;
         return result;
-    case EVENT_ATTACK_DAMAGE:
+    case event_type_t::ATTACK_DAMAGE:
         result.handled = true;
         resolve_attack_damage_event(event.actor_id, event.target_id, event.amount);
-        result.attack_result = ATTACK_RESULT_HIT;
+        result.attack_result = attack_result_t::HIT;
         result.succeeded = true;
         return result;
-    case EVENT_ATTACK_DEATH:
+    case event_type_t::ATTACK_DEATH:
         result.handled = true;
         resolve_attack_death_event(event.actor_id, event.target_id);
-        result.attack_result = ATTACK_RESULT_HIT;
+        result.attack_result = attack_result_t::HIT;
         result.succeeded = true;
         return result;
-    case EVENT_ATTACK_AWARD_XP:
+    case event_type_t::ATTACK_AWARD_XP:
         result.handled = true;
         resolve_attack_award_xp_event(event.actor_id, event.target_id);
         result.succeeded = true;
         return result;
-    case EVENT_ATTACK_DROP_INVENTORY:
+    case event_type_t::ATTACK_DROP_INVENTORY:
         result.handled = true;
         resolve_attack_drop_inventory_event(event.actor_id);
         result.succeeded = true;
         return result;
-    case EVENT_ATTACK_PLAYER_DEATH:
+    case event_type_t::ATTACK_PLAYER_DEATH:
         result.handled = true;
         resolve_attack_player_death_event(event.actor_id);
         result.succeeded = true;
         return result;
-    case EVENT_ATTACK_WEAPON_DURABILITY:
+    case event_type_t::ATTACK_WEAPON_DURABILITY:
         result.handled = true;
         resolve_attack_weapon_durability_event(event.actor_id, event.target_id);
         result.succeeded = true;
         return result;
-    case EVENT_ATTACK_SHIELD_DURABILITY:
+    case event_type_t::ATTACK_SHIELD_DURABILITY:
         result.handled = true;
         resolve_attack_shield_durability_event(event.actor_id, event.target_id);
         result.succeeded = true;
         return result;
-    case EVENT_PULL_INTENT: {
+    case event_type_t::PULL_INTENT: {
         result.handled = true;
         result.succeeded = try_entity_pull(event.actor_id);
         if (result.succeeded) {
@@ -581,55 +581,55 @@ gameplay_event_result_t gamestate::process_gameplay_event(const gameplay_event_t
         }
         return result;
     }
-    case EVENT_OPEN_DOOR_INTENT:
+    case event_type_t::OPEN_DOOR_INTENT:
         result.handled = true;
         result.succeeded = try_entity_open_door(event.actor_id, event.target_loc);
         return result;
-    case EVENT_OPEN_CHEST_INTENT:
+    case event_type_t::OPEN_CHEST_INTENT:
         result.handled = true;
         result.succeeded = try_entity_open_chest(event.actor_id, event.target_loc);
         return result;
-    case EVENT_INTERACT_INTENT:
+    case event_type_t::INTERACT_INTENT:
         result.handled = true;
         result.succeeded = try_entity_interact(event.actor_id, event.target_loc);
         return result;
-    case EVENT_PICKUP_INTENT:
+    case event_type_t::PICKUP_INTENT:
         result.handled = true;
         result.succeeded = try_entity_pickup(event.actor_id);
         return result;
-    case EVENT_USE_ITEM_INTENT:
+    case event_type_t::USE_ITEM_INTENT:
         result.handled = true;
         result.succeeded = false;
-        if (ct.get<entitytype>(event.target_id).value_or(ENTITY_NONE) == ENTITY_ITEM &&
-            ct.get<itemtype>(event.target_id).value_or(ITEM_NONE) == ITEM_POTION &&
+        if (ct.get<entitytype>(event.target_id).value_or(entitytype_t::NONE) == entitytype_t::ITEM &&
+            ct.get<itemtype>(event.target_id).value_or(itemtype_t::NONE) == itemtype_t::POTION &&
             use_potion(event.actor_id, event.target_id)) {
             if (event.actor_id == hero_id) {
-                flag = GAMESTATE_FLAG_PLAYER_ANIM;
-                controlmode = CONTROLMODE_PLAYER;
+                flag = gamestate_flag_t::PLAYER_ANIM;
+                controlmode = controlmode_t::PLAYER;
                 ui.display_inventory_menu = false;
             }
             result.succeeded = true;
         }
         return result;
-    case EVENT_EQUIP_ITEM_INTENT:
+    case event_type_t::EQUIP_ITEM_INTENT:
         result.handled = true;
         result.succeeded = false;
-        if (event.actor_id == hero_id && ct.get<entitytype>(event.target_id).value_or(ENTITY_NONE) == ENTITY_ITEM) {
-            const itemtype_t item_type = ct.get<itemtype>(event.target_id).value_or(ITEM_NONE);
-            if (item_type == ITEM_WEAPON || item_type == ITEM_SHIELD) {
+        if (event.actor_id == hero_id && ct.get<entitytype>(event.target_id).value_or(entitytype_t::NONE) == entitytype_t::ITEM) {
+            const itemtype_t item_type = ct.get<itemtype>(event.target_id).value_or(itemtype_t::NONE);
+            if (item_type == itemtype_t::WEAPON || item_type == itemtype_t::SHIELD) {
                 handle_hero_inventory_equip_item(event.target_id);
                 result.succeeded = true;
             }
         }
         return result;
-    case EVENT_DROP_ITEM_INTENT:
+    case event_type_t::DROP_ITEM_INTENT:
         result.handled = true;
         result.succeeded = false;
-        if (event.actor_id == hero_id && ct.get<entitytype>(event.item_id).value_or(ENTITY_NONE) == ENTITY_ITEM) {
+        if (event.actor_id == hero_id && ct.get<entitytype>(event.item_id).value_or(entitytype_t::NONE) == entitytype_t::ITEM) {
             result.succeeded = drop_inventory_item(event.actor_id, event.item_id);
         }
         return result;
-    case EVENT_CHEST_TRANSFER_INTENT:
+    case event_type_t::CHEST_TRANSFER_INTENT:
         result.handled = true;
         result.succeeded = transfer_inventory_item(event.actor_id, event.target_id, event.item_id);
         if (result.succeeded) {
@@ -639,24 +639,24 @@ gameplay_event_result_t gamestate::process_gameplay_event(const gameplay_event_t
             clamp_inventory_selection(updated_inventory->size());
         }
         return result;
-    case EVENT_TRAVERSE_STAIRS_INTENT:
+    case event_type_t::TRAVERSE_STAIRS_INTENT:
         result.handled = true;
         result.succeeded = try_entity_stairs(event.actor_id);
         return result;
-    case EVENT_REFRESH_PRESSURE_PLATES:
+    case event_type_t::REFRESH_PRESSURE_PLATES:
         result.handled = true;
         if (event.floor >= 0 && static_cast<size_t>(event.floor) < d.floors.size()) {
             update_pressure_plates_for_floor(event.floor);
             result.succeeded = true;
         }
         return result;
-    case EVENT_PRESSURE_PLATE_SET_DOOR:
+    case event_type_t::PRESSURE_PLATE_SET_DOOR:
         result.handled = true;
         resolve_pressure_plate_set_door_event(event.actor_id, event.state);
         result.succeeded = true;
         return result;
-    case EVENT_NONE:
-    case EVENT_COUNT:
+    case event_type_t::NONE:
+    case event_type_t::COUNT:
     default:
         return result;
     }
@@ -675,7 +675,7 @@ gameplay_event_result_t gamestate::process_gameplay_events() {
     // in the same turn slice, in append order.
     for (size_t i = 0; i < gameplay_events.size(); i++) {
         const gameplay_event_result_t result = process_gameplay_event(gameplay_events[i]);
-        if (first_result.type == EVENT_NONE && result.type != EVENT_NONE) {
+        if (first_result.type == event_type_t::NONE && result.type != event_type_t::NONE) {
             first_result = result;
         }
     }
@@ -703,7 +703,7 @@ bool gamestate::run_push_action(entityid id, vec3 v) {
 attack_result_t gamestate::run_attack_action(entityid id, vec3 loc) {
     clear_gameplay_events();
     if (!queue_attack_event(id, loc)) {
-        return ATTACK_RESULT_NONE;
+        return attack_result_t::NONE;
     }
     return process_gameplay_events().attack_result;
 }
@@ -848,8 +848,8 @@ bool gamestate::try_entity_move(entityid id, vec3 v) {
         return false;
     }
 
-    auto type = ct.get<entitytype>(id).value_or(ENTITY_NONE);
-    bool is_dead_npc = type == ENTITY_NPC && ct.get<dead>(id).value_or(false);
+    auto type = ct.get<entitytype>(id).value_or(entitytype_t::NONE);
+    bool is_dead_npc = type == entitytype_t::NPC && ct.get<dead>(id).value_or(false);
     if (is_dead_npc) {
         tile_t& dst_tile = df->tile_at(aloc);
         dst_tile.add_dead_npc(id);
@@ -876,97 +876,97 @@ bool gamestate::try_entity_move(entityid id, vec3 v) {
 }
 
 bool gamestate::handle_move_up(inputstate& is, bool is_dead) {
-    if (is_action_pressed(is, INPUT_ACTION_MOVE_UP)) {
+    if (is_action_pressed(is, gameplay_input_action_t::MOVE_UP)) {
         if (is_dead) {
             return messages.add("You cannot move while dead");
         }
         run_move_action(hero_id, (vec3){0, -1, 0});
-        flag = GAMESTATE_FLAG_PLAYER_ANIM;
+        flag = gamestate_flag_t::PLAYER_ANIM;
         return true;
     }
     return false;
 }
 
 bool gamestate::handle_move_down(inputstate& is, bool is_dead) {
-    if (is_action_pressed(is, INPUT_ACTION_MOVE_DOWN)) {
+    if (is_action_pressed(is, gameplay_input_action_t::MOVE_DOWN)) {
         if (is_dead) {
             return messages.add("You cannot move while dead");
         }
         run_move_action(hero_id, (vec3){0, 1, 0});
-        flag = GAMESTATE_FLAG_PLAYER_ANIM;
+        flag = gamestate_flag_t::PLAYER_ANIM;
         return true;
     }
     return false;
 }
 
 bool gamestate::handle_move_left(inputstate& is, bool is_dead) {
-    if (is_action_pressed(is, INPUT_ACTION_MOVE_LEFT)) {
+    if (is_action_pressed(is, gameplay_input_action_t::MOVE_LEFT)) {
         if (is_dead) {
             return messages.add("You cannot move while dead");
         }
         run_move_action(hero_id, (vec3){-1, 0, 0});
-        flag = GAMESTATE_FLAG_PLAYER_ANIM;
+        flag = gamestate_flag_t::PLAYER_ANIM;
         return true;
     }
     return false;
 }
 
 bool gamestate::handle_move_right(inputstate& is, bool is_dead) {
-    if (is_action_pressed(is, INPUT_ACTION_MOVE_RIGHT)) {
+    if (is_action_pressed(is, gameplay_input_action_t::MOVE_RIGHT)) {
         if (is_dead) {
             return messages.add("You cannot move while dead");
         }
         run_move_action(hero_id, (vec3){1, 0, 0});
-        flag = GAMESTATE_FLAG_PLAYER_ANIM;
+        flag = gamestate_flag_t::PLAYER_ANIM;
         return true;
     }
     return false;
 }
 
 bool gamestate::handle_move_up_left(inputstate& is, bool is_dead) {
-    if (is_action_pressed(is, INPUT_ACTION_MOVE_UP_LEFT)) {
+    if (is_action_pressed(is, gameplay_input_action_t::MOVE_UP_LEFT)) {
         if (is_dead) {
             return messages.add("You cannot move while dead");
         }
         run_move_action(hero_id, (vec3){-1, -1, 0});
-        flag = GAMESTATE_FLAG_PLAYER_ANIM;
+        flag = gamestate_flag_t::PLAYER_ANIM;
         return true;
     }
     return false;
 }
 
 bool gamestate::handle_move_up_right(inputstate& is, bool is_dead) {
-    if (is_action_pressed(is, INPUT_ACTION_MOVE_UP_RIGHT)) {
+    if (is_action_pressed(is, gameplay_input_action_t::MOVE_UP_RIGHT)) {
         if (is_dead) {
             messages.add("You cannot move while dead");
             return true;
         }
         run_move_action(hero_id, (vec3){1, -1, 0});
-        flag = GAMESTATE_FLAG_PLAYER_ANIM;
+        flag = gamestate_flag_t::PLAYER_ANIM;
         return true;
     }
     return false;
 }
 
 bool gamestate::handle_move_down_left(inputstate& is, bool is_dead) {
-    if (is_action_pressed(is, INPUT_ACTION_MOVE_DOWN_LEFT)) {
+    if (is_action_pressed(is, gameplay_input_action_t::MOVE_DOWN_LEFT)) {
         if (is_dead) {
             return messages.add("You cannot move while dead");
         }
         run_move_action(hero_id, (vec3){-1, 1, 0});
-        flag = GAMESTATE_FLAG_PLAYER_ANIM;
+        flag = gamestate_flag_t::PLAYER_ANIM;
         return true;
     }
     return false;
 }
 
 bool gamestate::handle_move_down_right(inputstate& is, bool is_dead) {
-    if (is_action_pressed(is, INPUT_ACTION_MOVE_DOWN_RIGHT)) {
+    if (is_action_pressed(is, gameplay_input_action_t::MOVE_DOWN_RIGHT)) {
         if (is_dead) {
             return messages.add("You cannot move while dead");
         }
         run_move_action(hero_id, (vec3){1, 1, 0});
-        flag = GAMESTATE_FLAG_PLAYER_ANIM;
+        flag = gamestate_flag_t::PLAYER_ANIM;
         return true;
     }
     return false;
@@ -977,31 +977,31 @@ vec3 gamestate::get_loc_facing_player() {
     if (maybe_loc.has_value()) {
         vec3 loc = ct.get<location>(hero_id).value();
         direction_t dir = ct.get<direction>(hero_id).value();
-        if (dir == DIR_UP) {
+        if (dir == direction_t::UP) {
             loc.y -= 1;
         }
-        else if (dir == DIR_DOWN) {
+        else if (dir == direction_t::DOWN) {
             loc.y += 1;
         }
-        else if (dir == DIR_LEFT) {
+        else if (dir == direction_t::LEFT) {
             loc.x -= 1;
         }
-        else if (dir == DIR_RIGHT) {
+        else if (dir == direction_t::RIGHT) {
             loc.x += 1;
         }
-        else if (dir == DIR_UP_LEFT) {
+        else if (dir == direction_t::UP_LEFT) {
             loc.x -= 1;
             loc.y -= 1;
         }
-        else if (dir == DIR_UP_RIGHT) {
+        else if (dir == direction_t::UP_RIGHT) {
             loc.x += 1;
             loc.y -= 1;
         }
-        else if (dir == DIR_DOWN_LEFT) {
+        else if (dir == direction_t::DOWN_LEFT) {
             loc.x -= 1;
             loc.y += 1;
         }
-        else if (dir == DIR_DOWN_RIGHT) {
+        else if (dir == direction_t::DOWN_RIGHT) {
             loc.x += 1;
             loc.y += 1;
         }
@@ -1021,8 +1021,8 @@ bool gamestate::try_entity_pull(entityid id) {
     vec3 loc = ct.get<location>(id).value_or(vec3{-1, -1, -1});
     massert(!vec3_invalid(loc), "loc is invalid");
     auto df = d.get_floor(loc.z);
-    direction_t facing_d = ct.get<direction>(id).value_or(DIR_NONE);
-    massert(facing_d != DIR_NONE, "direction d is none");
+    direction_t facing_d = ct.get<direction>(id).value_or(direction_t::NONE);
+    massert(facing_d != direction_t::NONE, "direction d is none");
     direction_t d = get_opposite_dir(facing_d);
     vec3 v = get_loc_from_dir(d);
     vec3 aloc = {loc.x + v.x, loc.y + v.y, loc.z};
@@ -1087,8 +1087,8 @@ bool gamestate::try_entity_pull(entityid id) {
         return false;
     }
 
-    auto type = ct.get<entitytype>(id).value_or(ENTITY_NONE);
-    bool is_dead_npc = type == ENTITY_NPC && ct.get<dead>(id).value_or(false);
+    auto type = ct.get<entitytype>(id).value_or(entitytype_t::NONE);
+    bool is_dead_npc = type == entitytype_t::NPC && ct.get<dead>(id).value_or(false);
     if (is_dead_npc) {
         tile_t& dst_tile = df->tile_at(aloc);
         dst_tile.add_dead_npc(id);
@@ -1141,22 +1141,22 @@ bool gamestate::try_entity_pickup(entityid id) {
     else if (item_id == ENTITYID_INVALID) {
         mwarning("No item cached");
     }
-    entitytype_t t = ct.get<entitytype>(id).value_or(ENTITY_NONE);
-    if (t == ENTITY_PLAYER) {
-        flag = GAMESTATE_FLAG_PLAYER_ANIM;
+    entitytype_t t = ct.get<entitytype>(id).value_or(entitytype_t::NONE);
+    if (t == entitytype_t::PLAYER) {
+        flag = gamestate_flag_t::PLAYER_ANIM;
     }
     return item_picked_up;
 }
 
 bool gamestate::handle_pickup_item(inputstate& is, bool is_dead) {
-    if (!is_action_pressed(is, INPUT_ACTION_PICKUP)) {
+    if (!is_action_pressed(is, gameplay_input_action_t::PICKUP)) {
         return false;
     }
     if (is_dead) {
         return messages.add("You cannot pick up items while dead");
     }
     run_pickup_action(hero_id);
-    flag = GAMESTATE_FLAG_PLAYER_ANIM;
+    flag = gamestate_flag_t::PLAYER_ANIM;
     return true;
 }
 
@@ -1167,7 +1167,7 @@ bool gamestate::try_entity_stairs(entityid id) {
     int current_floor = d.current_floor;
     shared_ptr<dungeon_floor> df = d.floors[current_floor];
     tile_t& t = df->tile_at(loc);
-    if (t.get_type() == TILE_UPSTAIRS) {
+    if (t.get_type() == tiletype_t::UPSTAIRS) {
         if (current_floor == 0) {
             messages.add("You are already on the top floor!");
         }
@@ -1177,7 +1177,7 @@ bool gamestate::try_entity_stairs(entityid id) {
             int new_floor = d.current_floor;
             shared_ptr<dungeon_floor> df2 = d.floors[new_floor];
             vec3 uloc = df2->get_downstairs_loc();
-            df2->df_add_at(hero_id, ENTITY_PLAYER, uloc);
+            df2->df_add_at(hero_id, entitytype_t::PLAYER, uloc);
             ct.set<location>(hero_id, uloc);
             if (processing_actions) {
                 queue_pressure_plate_refresh_event(current_floor);
@@ -1186,19 +1186,19 @@ bool gamestate::try_entity_stairs(entityid id) {
             else {
                 refresh_pressure_plates();
             }
-            flag = GAMESTATE_FLAG_PLAYER_ANIM;
+            flag = gamestate_flag_t::PLAYER_ANIM;
             audio.queue("sfx/Minifantasy_Dungeon_SFX/16_human_walk_stone_1.wav");
             return true;
         }
     }
-    else if (t.get_type() == TILE_DOWNSTAIRS) {
+    else if (t.get_type() == tiletype_t::DOWNSTAIRS) {
         if ((size_t)current_floor < d.floors.size() - 1) {
             df->df_remove_at(hero_id, loc);
             d.current_floor++;
             int new_floor = d.current_floor;
             shared_ptr<dungeon_floor> df2 = d.floors[new_floor];
             vec3 uloc = df2->get_upstairs_loc();
-            df2->df_add_at(hero_id, ENTITY_PLAYER, uloc);
+            df2->df_add_at(hero_id, entitytype_t::PLAYER, uloc);
             ct.set<location>(hero_id, uloc);
             if (processing_actions) {
                 queue_pressure_plate_refresh_event(current_floor);
@@ -1207,7 +1207,7 @@ bool gamestate::try_entity_stairs(entityid id) {
             else {
                 refresh_pressure_plates();
             }
-            flag = GAMESTATE_FLAG_PLAYER_ANIM;
+            flag = gamestate_flag_t::PLAYER_ANIM;
             audio.queue("sfx/Minifantasy_Dungeon_SFX/16_human_walk_stone_1.wav");
             return true;
         }
@@ -1219,7 +1219,7 @@ bool gamestate::try_entity_stairs(entityid id) {
 }
 
 bool gamestate::handle_traverse_stairs(inputstate& is, bool is_dead) {
-    if (is_action_pressed(is, INPUT_ACTION_STAIRS)) {
+    if (is_action_pressed(is, gameplay_input_action_t::STAIRS)) {
         if (is_dead) {
             return messages.add("You cannot traverse stairs while dead");
         }
@@ -1314,7 +1314,7 @@ bool gamestate::try_entity_interact(entityid id, vec3 loc) {
 }
 
 bool gamestate::handle_interact(inputstate& is, bool is_dead) {
-    if (!is_action_pressed(is, INPUT_ACTION_INTERACT)) {
+    if (!is_action_pressed(is, gameplay_input_action_t::INTERACT)) {
         return false;
     }
     if (is_dead) {
@@ -1324,12 +1324,12 @@ bool gamestate::handle_interact(inputstate& is, bool is_dead) {
     if (!run_interact_action(hero_id, loc)) {
         return messages.add("There is nothing to interact with");
     }
-    flag = GAMESTATE_FLAG_PLAYER_ANIM;
+    flag = gamestate_flag_t::PLAYER_ANIM;
     return true;
 }
 
 bool gamestate::handle_open_door(inputstate& is, bool is_dead) {
-    if (is_action_pressed(is, INPUT_ACTION_OPEN)) {
+    if (is_action_pressed(is, gameplay_input_action_t::OPEN)) {
         if (is_dead) {
             return messages.add("You cannot open doors while dead");
         }
@@ -1337,7 +1337,7 @@ bool gamestate::handle_open_door(inputstate& is, bool is_dead) {
         if (!run_open_chest_action(hero_id, loc)) {
             run_open_door_action(hero_id, loc);
         }
-        flag = GAMESTATE_FLAG_PLAYER_ANIM;
+        flag = gamestate_flag_t::PLAYER_ANIM;
         return true;
     }
     return false;

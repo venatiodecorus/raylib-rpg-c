@@ -5,13 +5,13 @@
 #pragma once
 
 /// @brief Coarse state-machine phases for player input, animation, and NPC turns.
-typedef enum
+enum class gamestate_flag_t
 {
-    GAMESTATE_FLAG_NONE = 0,
-    GAMESTATE_FLAG_PLAYER_INPUT = 1,
-    GAMESTATE_FLAG_PLAYER_ANIM = 2,
-    GAMESTATE_FLAG_NPC_TURN = 3,
-    GAMESTATE_FLAG_NPC_ANIM = 4,
-    GAMESTATE_FLAG_NPC_BATCH = 5,
-    GAMESTATE_FLAG_COUNT = 6
-} gamestate_flag_t;
+    NONE = 0,
+    PLAYER_INPUT = 1,
+    PLAYER_ANIM = 2,
+    NPC_TURN = 3,
+    NPC_ANIM = 4,
+    NPC_BATCH = 5,
+    COUNT = 6
+};

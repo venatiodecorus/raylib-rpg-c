@@ -7,8 +7,8 @@
 class InventoryTestSuite : public CxxTest::TestSuite {
 private:
     vec3 add_initialized_floor(gamestate& g, int width = 8, int height = 8) {
-        auto df = g.d.create_floor(BIOME_STONE, width, height);
-        df->df_set_all_tiles(TILE_FLOOR_STONE_00);
+        auto df = g.d.create_floor(biome_t::STONE, width, height);
+        df->df_set_all_tiles(tiletype_t::FLOOR_STONE_00);
         g.d.add_floor(df);
         g.d.is_initialized = true;
         return vec3{1, 1, 0};
@@ -33,7 +33,7 @@ public:
         const entityid hero = create_hero(g, loc);
 
         const entityid dagger = g.create_weapon_at_with(g.ct, loc, g.dagger_init());
-        const entityid potion = g.create_potion_at_with(loc, g.potion_init(POTION_HP_SMALL));
+        const entityid potion = g.create_potion_at_with(loc, g.potion_init(potiontype_t::HP_SMALL));
 
         TS_ASSERT_DIFFERS(dagger, ENTITYID_INVALID);
         TS_ASSERT_DIFFERS(potion, ENTITYID_INVALID);
@@ -57,7 +57,7 @@ public:
         const entityid hero = create_hero(g, loc);
 
         const entityid dagger = g.create_weapon_at_with(g.ct, loc, g.dagger_init());
-        const entityid potion = g.create_potion_at_with(loc, g.potion_init(POTION_HP_SMALL));
+        const entityid potion = g.create_potion_at_with(loc, g.potion_init(potiontype_t::HP_SMALL));
 
         TS_ASSERT_DIFFERS(dagger, ENTITYID_INVALID);
         TS_ASSERT_DIFFERS(potion, ENTITYID_INVALID);
@@ -118,8 +118,8 @@ public:
         g.handle_hero_inventory_equip_weapon(dagger);
 
         TS_ASSERT_EQUALS(g.ct.get<equipped_weapon>(hero).value_or(ENTITYID_INVALID), dagger);
-        TS_ASSERT_EQUALS(g.flag, GAMESTATE_FLAG_PLAYER_ANIM);
-        TS_ASSERT_EQUALS(g.controlmode, CONTROLMODE_PLAYER);
+        TS_ASSERT_EQUALS(g.flag, gamestate_flag_t::PLAYER_ANIM);
+        TS_ASSERT_EQUALS(g.controlmode, controlmode_t::PLAYER);
         TS_ASSERT(!g.ui.display_inventory_menu);
 
         g.ui.display_inventory_menu = true;
@@ -137,20 +137,20 @@ public:
         TS_ASSERT(g.add_to_inventory(hero, dagger));
         g.hero_id = hero;
         g.ui.display_inventory_menu = true;
-        g.controlmode = CONTROLMODE_INVENTORY;
+        g.controlmode = controlmode_t::INVENTORY;
 
         TS_ASSERT(g.run_equip_item_action(hero, dagger));
         TS_ASSERT_EQUALS(g.ct.get<equipped_weapon>(hero).value_or(ENTITYID_INVALID), dagger);
-        TS_ASSERT_EQUALS(g.flag, GAMESTATE_FLAG_PLAYER_ANIM);
-        TS_ASSERT_EQUALS(g.controlmode, CONTROLMODE_PLAYER);
+        TS_ASSERT_EQUALS(g.flag, gamestate_flag_t::PLAYER_ANIM);
+        TS_ASSERT_EQUALS(g.controlmode, controlmode_t::PLAYER);
         TS_ASSERT(!g.ui.display_inventory_menu);
         TS_ASSERT(g.queue_state.gameplay_events.empty());
 
         g.ui.display_inventory_menu = true;
-        g.controlmode = CONTROLMODE_INVENTORY;
+        g.controlmode = controlmode_t::INVENTORY;
         TS_ASSERT(g.run_equip_item_action(hero, dagger));
         TS_ASSERT_EQUALS(g.ct.get<equipped_weapon>(hero).value_or(ENTITYID_INVALID), ENTITYID_INVALID);
-        TS_ASSERT_EQUALS(g.controlmode, CONTROLMODE_PLAYER);
+        TS_ASSERT_EQUALS(g.controlmode, controlmode_t::PLAYER);
         TS_ASSERT(!g.ui.display_inventory_menu);
         TS_ASSERT(g.queue_state.gameplay_events.empty());
     }
@@ -166,8 +166,8 @@ public:
         g.handle_hero_inventory_equip_shield(shield);
 
         TS_ASSERT_EQUALS(g.ct.get<equipped_shield>(hero).value_or(ENTITYID_INVALID), shield);
-        TS_ASSERT_EQUALS(g.flag, GAMESTATE_FLAG_PLAYER_ANIM);
-        TS_ASSERT_EQUALS(g.controlmode, CONTROLMODE_PLAYER);
+        TS_ASSERT_EQUALS(g.flag, gamestate_flag_t::PLAYER_ANIM);
+        TS_ASSERT_EQUALS(g.controlmode, controlmode_t::PLAYER);
         TS_ASSERT(!g.ui.display_inventory_menu);
 
         g.ui.display_inventory_menu = true;
@@ -185,20 +185,20 @@ public:
         TS_ASSERT(g.add_to_inventory(hero, shield));
         g.hero_id = hero;
         g.ui.display_inventory_menu = true;
-        g.controlmode = CONTROLMODE_INVENTORY;
+        g.controlmode = controlmode_t::INVENTORY;
 
         TS_ASSERT(g.run_equip_item_action(hero, shield));
         TS_ASSERT_EQUALS(g.ct.get<equipped_shield>(hero).value_or(ENTITYID_INVALID), shield);
-        TS_ASSERT_EQUALS(g.flag, GAMESTATE_FLAG_PLAYER_ANIM);
-        TS_ASSERT_EQUALS(g.controlmode, CONTROLMODE_PLAYER);
+        TS_ASSERT_EQUALS(g.flag, gamestate_flag_t::PLAYER_ANIM);
+        TS_ASSERT_EQUALS(g.controlmode, controlmode_t::PLAYER);
         TS_ASSERT(!g.ui.display_inventory_menu);
         TS_ASSERT(g.queue_state.gameplay_events.empty());
 
         g.ui.display_inventory_menu = true;
-        g.controlmode = CONTROLMODE_INVENTORY;
+        g.controlmode = controlmode_t::INVENTORY;
         TS_ASSERT(g.run_equip_item_action(hero, shield));
         TS_ASSERT_EQUALS(g.ct.get<equipped_shield>(hero).value_or(ENTITYID_INVALID), ENTITYID_INVALID);
-        TS_ASSERT_EQUALS(g.controlmode, CONTROLMODE_PLAYER);
+        TS_ASSERT_EQUALS(g.controlmode, controlmode_t::PLAYER);
         TS_ASSERT(!g.ui.display_inventory_menu);
         TS_ASSERT(g.queue_state.gameplay_events.empty());
     }
@@ -207,18 +207,18 @@ public:
         gamestate g;
         const vec3 loc = add_initialized_floor(g);
         const entityid hero = create_hero(g, loc);
-        const entityid potion = g.create_potion_at_with(loc, g.potion_init(POTION_HP_SMALL));
+        const entityid potion = g.create_potion_at_with(loc, g.potion_init(potiontype_t::HP_SMALL));
 
         TS_ASSERT(g.add_to_inventory(hero, potion));
         g.hero_id = hero;
         g.ui.display_inventory_menu = true;
-        g.controlmode = CONTROLMODE_INVENTORY;
+        g.controlmode = controlmode_t::INVENTORY;
 
         TS_ASSERT(!g.run_equip_item_action(hero, potion));
         TS_ASSERT_EQUALS(g.ct.get<equipped_weapon>(hero).value_or(ENTITYID_INVALID), ENTITYID_INVALID);
         TS_ASSERT_EQUALS(g.ct.get<equipped_shield>(hero).value_or(ENTITYID_INVALID), ENTITYID_INVALID);
         TS_ASSERT(g.ui.display_inventory_menu);
-        TS_ASSERT_EQUALS(g.controlmode, CONTROLMODE_INVENTORY);
+        TS_ASSERT_EQUALS(g.controlmode, controlmode_t::INVENTORY);
         TS_ASSERT(g.queue_state.gameplay_events.empty());
     }
 
@@ -249,7 +249,7 @@ public:
         TS_ASSERT(g.add_to_inventory(hero, dagger));
         g.hero_id = hero;
         g.ui.display_inventory_menu = true;
-        g.controlmode = CONTROLMODE_INVENTORY;
+        g.controlmode = controlmode_t::INVENTORY;
 
         TS_ASSERT(g.run_drop_item_action(hero, dagger));
 
@@ -257,7 +257,7 @@ public:
         TS_ASSERT(vec3_equal(g.ct.get<location>(dagger).value_or(vec3{-1, -1, -1}), loc));
         TS_ASSERT_EQUALS(g.d.get_floor(0)->tile_at(loc).get_cached_item(), dagger);
         TS_ASSERT(g.ui.display_inventory_menu);
-        TS_ASSERT_EQUALS(g.controlmode, CONTROLMODE_INVENTORY);
+        TS_ASSERT_EQUALS(g.controlmode, controlmode_t::INVENTORY);
         TS_ASSERT(g.queue_state.gameplay_events.empty());
     }
 
@@ -292,7 +292,7 @@ public:
         gamestate g;
         const vec3 loc = add_initialized_floor(g);
         const entityid hero = create_hero(g, loc);
-        const entityid potion = g.create_potion_at_with(loc, g.potion_init(POTION_HP_SMALL));
+        const entityid potion = g.create_potion_at_with(loc, g.potion_init(potiontype_t::HP_SMALL));
 
         TS_ASSERT(g.add_to_inventory(hero, potion));
         g.ct.set<hp>(hero, vec2{2, 10});
@@ -312,19 +312,19 @@ public:
         gamestate g;
         const vec3 loc = add_initialized_floor(g);
         const entityid hero = create_hero(g, loc);
-        const entityid potion = g.create_potion_at_with(loc, g.potion_init(POTION_HP_SMALL));
+        const entityid potion = g.create_potion_at_with(loc, g.potion_init(potiontype_t::HP_SMALL));
 
         TS_ASSERT(g.add_to_inventory(hero, potion));
         g.ct.set<hp>(hero, vec2{3, 10});
         g.hero_id = hero;
         g.ui.display_inventory_menu = true;
-        g.controlmode = CONTROLMODE_INVENTORY;
+        g.controlmode = controlmode_t::INVENTORY;
 
         TS_ASSERT(g.run_use_item_action(hero, potion));
         TS_ASSERT(!g.is_in_inventory(hero, potion));
         TS_ASSERT(g.ct.get<hp>(hero).value_or(vec2{0, 0}).x > 3);
-        TS_ASSERT_EQUALS(g.flag, GAMESTATE_FLAG_PLAYER_ANIM);
-        TS_ASSERT_EQUALS(g.controlmode, CONTROLMODE_PLAYER);
+        TS_ASSERT_EQUALS(g.flag, gamestate_flag_t::PLAYER_ANIM);
+        TS_ASSERT_EQUALS(g.controlmode, controlmode_t::PLAYER);
         TS_ASSERT(!g.ui.display_inventory_menu);
         TS_ASSERT(g.queue_state.gameplay_events.empty());
     }
@@ -338,12 +338,12 @@ public:
         TS_ASSERT(g.add_to_inventory(hero, dagger));
         g.hero_id = hero;
         g.ui.display_inventory_menu = true;
-        g.controlmode = CONTROLMODE_INVENTORY;
+        g.controlmode = controlmode_t::INVENTORY;
 
         TS_ASSERT(!g.run_use_item_action(hero, dagger));
         TS_ASSERT(g.is_in_inventory(hero, dagger));
         TS_ASSERT(g.ui.display_inventory_menu);
-        TS_ASSERT_EQUALS(g.controlmode, CONTROLMODE_INVENTORY);
+        TS_ASSERT_EQUALS(g.controlmode, controlmode_t::INVENTORY);
         TS_ASSERT(g.queue_state.gameplay_events.empty());
     }
 
@@ -376,7 +376,7 @@ public:
 
         g.close_chest_menu();
         TS_ASSERT(!g.ui.display_chest_menu);
-        TS_ASSERT_EQUALS(g.controlmode, CONTROLMODE_PLAYER);
+        TS_ASSERT_EQUALS(g.controlmode, controlmode_t::PLAYER);
     }
 
     void testRunChestTransferActionWithdrawsItemThroughQueue() {
@@ -390,7 +390,7 @@ public:
         TS_ASSERT(g.add_to_inventory(chest, dagger));
         g.ui.active_chest_id = chest;
         g.ui.display_chest_menu = true;
-        g.controlmode = CONTROLMODE_CHEST;
+        g.controlmode = controlmode_t::CHEST;
 
         TS_ASSERT(g.run_chest_transfer_action(chest, hero, dagger));
         TS_ASSERT(g.is_in_inventory(hero, dagger));
@@ -410,7 +410,7 @@ public:
         g.hero_id = hero;
         g.ui.active_chest_id = chest;
         g.ui.display_chest_menu = true;
-        g.controlmode = CONTROLMODE_CHEST;
+        g.controlmode = controlmode_t::CHEST;
         g.ui.chest_deposit_mode = true;
 
         TS_ASSERT(g.run_chest_transfer_action(hero, chest, dagger));
@@ -451,13 +451,13 @@ public:
         press_key(is, KEY_D);
         g.handle_input_chest(is);
         TS_ASSERT(!g.ui.display_chest_menu);
-        TS_ASSERT_EQUALS(g.controlmode, CONTROLMODE_PLAYER);
+        TS_ASSERT_EQUALS(g.controlmode, controlmode_t::PLAYER);
 
         TS_ASSERT(g.open_chest_menu(chest));
         press_key(is, KEY_O);
         g.handle_input_chest(is);
         TS_ASSERT(g.ui.display_chest_menu);
-        TS_ASSERT_EQUALS(g.controlmode, CONTROLMODE_CHEST);
+        TS_ASSERT_EQUALS(g.controlmode, controlmode_t::CHEST);
     }
 
     void testMiniInventorySelectionScrollsPastVisibleWindow() {
@@ -476,7 +476,7 @@ public:
         }
 
         g.ui.display_inventory_menu = true;
-        g.controlmode = CONTROLMODE_INVENTORY;
+        g.controlmode = controlmode_t::INVENTORY;
         inputstate is = {};
         for (int i = 0; i < 4; i++) {
             press_key(is, KEY_DOWN);

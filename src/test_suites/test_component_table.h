@@ -15,7 +15,7 @@ public:
         ComponentTable table;
         table.set<name>(1, "hero");
         table.set<hp>(1, vec2{12, 14});
-        table.set<entitytype>(1, ENTITY_PLAYER);
+        table.set<entitytype>(1, entitytype_t::PLAYER);
         table.set<location>(1, vec3{3, 4, 0});
 
         TS_ASSERT(table.has<name>(1));
@@ -26,7 +26,7 @@ public:
         const vec2 hp_value = table.get<hp>(1).value_or(vec2{-1, -1});
         TS_ASSERT_EQUALS(hp_value.x, 12);
         TS_ASSERT_EQUALS(hp_value.y, 14);
-        TS_ASSERT_EQUALS(table.get<entitytype>(1).value_or(ENTITY_NONE), ENTITY_PLAYER);
+        TS_ASSERT_EQUALS(table.get<entitytype>(1).value_or(entitytype_t::NONE), entitytype_t::PLAYER);
 
         const vec3 loc = table.get<location>(1).value_or(vec3{-1, -1, -1});
         TS_ASSERT_EQUALS(loc.x, 3);

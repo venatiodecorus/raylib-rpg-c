@@ -8,7 +8,7 @@ void draw_option_menu(gamestate& g) {
     for (size_t i = 0; i < g.ui.options_menu.get_option_count(); i++) {
         const option_type option = g.ui.options_menu.get_option(i);
         const string option_label =
-            option == OPTION_INVENTORY_MENU
+            option == option_type::INVENTORY_MENU
                 ? TextFormat("inventory menu: %s", g.ui.prefer_mini_inventory_menu ? "mini" : "full")
                 : g.ui.options_menu.get_option_str(option);
         const char* spaced_str = TextFormat("  %s", option_label.c_str());
@@ -27,7 +27,7 @@ void draw_option_menu(gamestate& g) {
         const int y0 = y + pa + fsize * i;
         const option_type otype = g.ui.options_menu.get_option(i);
         const string ostr =
-            otype == OPTION_INVENTORY_MENU
+            otype == option_type::INVENTORY_MENU
                 ? TextFormat("inventory menu: %s", g.ui.prefer_mini_inventory_menu ? "mini" : "full")
                 : g.ui.options_menu.get_option_str(otype);
         const char* cstr = ostr.c_str();

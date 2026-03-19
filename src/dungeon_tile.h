@@ -225,34 +225,34 @@ public:
      * @return The entity id on success, or `INVALID` when the cache cannot accept it.
      */
     inline entityid tile_add(entityid id, entitytype_t type) {
-        if (type == ENTITY_PLAYER) {
+        if (type == entitytype_t::PLAYER) {
             cached_player_present = true;
             cached_live_npc = id;
         }
-        else if (type == ENTITY_NPC) {
+        else if (type == entitytype_t::NPC) {
             cached_live_npc = id;
             // Dead NPCs are now handled through dead_npc_cache
         }
-        else if (type == ENTITY_ITEM) {
+        else if (type == entitytype_t::ITEM) {
             if (!items.add_id(id)) {
                 merror("tile_add: item cache is full");
                 return INVALID;
             }
         }
-        else if (type == ENTITY_PROP) {
+        else if (type == entitytype_t::PROP) {
             cached_prop = id;
         }
-        else if (type == ENTITY_BOX) {
+        else if (type == entitytype_t::BOX) {
             cached_box = id;
         }
-        else if (type == ENTITY_CHEST) {
+        else if (type == entitytype_t::CHEST) {
             if (cached_chest != INVALID) {
                 merror("tile_add: chest cache already occupied");
                 return INVALID;
             }
             cached_chest = id;
         }
-        else if (type == ENTITY_DOOR) {
+        else if (type == entitytype_t::DOOR) {
             if (cached_door != INVALID) {
                 merror("tile_add: door cache already occupied");
                 return INVALID;
@@ -304,7 +304,7 @@ public:
     }
 
     inline void tile_create(tiletype_t type) {
-        massert(type >= TILE_NONE && type < TILE_COUNT, "tile_create: type is out-of-bounds");
+        massert(type >= tiletype_t::NONE && type < tiletype_t::COUNT, "tile_create: type is out-of-bounds");
         tile_init(type);
     }
 
@@ -317,7 +317,7 @@ public:
 
     tile_t() {
         minfo2("BEGIN tile_t()");
-        tile_init(TILE_NONE);
+        tile_init(tiletype_t::NONE);
         minfo2("END tile_t()");
     }
 

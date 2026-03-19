@@ -9,9 +9,9 @@
 /** @brief Return the racial modifier for a race/stat-index pair. */
 static inline int get_racial_modifiers(race_t r, int stat) {
     switch (r) {
-    case RACE_HUMAN:
+    case race_t::HUMAN:
         if (stat >= 0 && stat < 6) return 0;
-    case RACE_ELF:
+    case race_t::ELF:
         switch (stat) {
         case 0: return 0;
         case 1: return 2;
@@ -21,7 +21,7 @@ static inline int get_racial_modifiers(race_t r, int stat) {
         case 5: return 0;
         default: return 0;
         }
-    case RACE_DWARF:
+    case race_t::DWARF:
         switch (stat) {
         case 0: return 0;
         case 1: return 0;
@@ -31,7 +31,7 @@ static inline int get_racial_modifiers(race_t r, int stat) {
         case 5: return -2;
         default: return 0;
         }
-    case RACE_GREEN_SLIME:
+    case race_t::GREEN_SLIME:
         switch (stat) {
         case 0: return -2;
         case 1: return -2;

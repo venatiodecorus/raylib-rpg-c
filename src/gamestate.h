@@ -221,10 +221,10 @@ public:
         presentation.cam2d.zoom = DEFAULT_ZOOM_LEVEL;
         presentation.cam2d.rotation = 0.0;
         presentation.fadealpha = 0.0;
-        controlmode = CONTROLMODE_PLAYER;
-        controlmode_before_confirm = CONTROLMODE_PLAYER;
+        controlmode = controlmode_t::PLAYER;
+        controlmode_before_confirm = controlmode_t::PLAYER;
         // current displayed dungeon floor
-        flag = GAMESTATE_FLAG_PLAYER_INPUT;
+        flag = gamestate_flag_t::PLAYER_INPUT;
         presentation.font_size = GAMESTATE_DEBUGPANEL_DEFAULT_FONT_SIZE;
         presentation.pad = 20;
         presentation.line_spacing = 1.0f;
@@ -252,16 +252,16 @@ public:
         chara_creation.wisdom = 10;
         chara_creation.constitution = 10;
         chara_creation.charisma = 10;
-        chara_creation.race = RACE_HUMAN;
-        chara_creation.alignment = ALIGNMENT_NEUTRAL_NEUTRAL;
-        chara_creation.hitdie = get_racial_hd(RACE_HUMAN);
-        current_scene = SCENE_TITLE;
+        chara_creation.race = race_t::HUMAN;
+        chara_creation.alignment = alignment_t::NEUTRAL_NEUTRAL;
+        chara_creation.hitdie = get_racial_hd(race_t::HUMAN);
+        current_scene = scene_t::TITLE;
         audio.reset_defaults();
         ui.window_box_bgcolor = rpg::DEFAULT_WINDOW_BOX_BGCOLOR;
         ui.window_box_fgcolor = rpg::DEFAULT_WINDOW_BOX_FGCOLOR;
         ui.message_history_bgcolor = rpg::DEFAULT_WINDOW_BOX_BGCOLOR;
         presentation.last_click_screen_pos = Vector2{-1, -1};
-        ui.confirm_action = rpg::CONFIRM_ACTION_NONE;
+        ui.confirm_action = rpg::confirm_action_t::NONE;
         ui.confirm_prompt_message.clear();
         ui.active_interaction_entity_id = ENTITYID_INVALID;
         ui.interaction_title.clear();
@@ -273,7 +273,7 @@ public:
         ui.prefer_mini_inventory_menu = false;
         keybind.controls_menu_waiting_for_key = false;
         ui.controls_menu_selection = 0;
-        keybind.controls_menu_pending_action = INPUT_ACTION_MOVE_UP;
+        keybind.controls_menu_pending_action = gameplay_input_action_t::MOVE_UP;
         reset_default_keybindings();
         messages = rpg::MessageLog();
         ct.clear();
@@ -337,7 +337,7 @@ public:
         registry.emplace_or_replace<PullableTag>(registry_entity, PullableTag{definition.pullable});
         registry.emplace_or_replace<LegacyEntityType>(registry_entity, LegacyEntityType{definition.legacy_type});
 
-        if (definition.legacy_type == ENTITY_PROP) {
+        if (definition.legacy_type == entitytype_t::PROP) {
             registry.emplace_or_replace<PropKind>(registry_entity, PropKind{definition.type});
         }
         else if (registry.any_of<PropKind>(registry_entity)) {
@@ -1123,14 +1123,14 @@ public:
     void set_gamestate_flag_for_attack_animation(entitytype_t type);
 
     bool handle_attack(inputstate& is, bool is_dead) {
-        if (is_action_pressed(is, INPUT_ACTION_ATTACK)) {
+        if (is_action_pressed(is, gameplay_input_action_t::ATTACK)) {
             if (is_dead) {
                 return messages.add("You cannot attack while dead");
             }
             if (ct.has<location>(hero_id) && ct.has<direction>(hero_id)) {
                 vec3 loc = get_loc_facing_player();
                 run_attack_action(hero_id, loc);
-                flag = GAMESTATE_FLAG_PLAYER_ANIM;
+                flag = gamestate_flag_t::PLAYER_ANIM;
                 return true;
             }
         }
@@ -1231,12 +1231,12 @@ public:
         int df_w = df->get_width();
         int df_h = df->get_height();
         // Determine control mode and flag strings
-        const char* control_mode = controlmode == CONTROLMODE_CAMERA ? "Camera" : controlmode == CONTROLMODE_PLAYER ? "Player" : "Unknown";
+        const char* control_mode = controlmode == controlmode_t::CAMERA ? "Camera" : controlmode == controlmode_t::PLAYER ? "Player" : "Unknown";
         const int full_light = df->get_full_light();
         // zero out the buffer
         //memset(debugpanel.buffer, 0, sizeof(debugpanel.buffer));
 
-        direction_t player_dir = ct.get<direction>(hero_id).value_or(DIR_NONE);
+        direction_t player_dir = ct.get<direction>(hero_id).value_or(direction_t::NONE);
 
         bzero(presentation.debugpanel.buffer, sizeof(presentation.debugpanel.buffer));
         // Format the string in one pass
@@ -1290,11 +1290,11 @@ public:
             0,
             next_entityid,
             hero_id,
-            flag == GAMESTATE_FLAG_NONE           ? "None"
-            : flag == GAMESTATE_FLAG_PLAYER_INPUT ? "Player Input"
-            : flag == GAMESTATE_FLAG_PLAYER_ANIM  ? "Player anim"
-            : flag == GAMESTATE_FLAG_NPC_TURN     ? "NPC Turn"
-            : flag == GAMESTATE_FLAG_NPC_ANIM     ? "NPC anim"
+            flag == gamestate_flag_t::NONE           ? "None"
+            : flag == gamestate_flag_t::PLAYER_INPUT ? "Player Input"
+            : flag == gamestate_flag_t::PLAYER_ANIM  ? "Player anim"
+            : flag == gamestate_flag_t::NPC_TURN     ? "NPC Turn"
+            : flag == gamestate_flag_t::NPC_ANIM     ? "NPC anim"
                                                   : "Unknown",
             entity_turn,
             loc.x,
@@ -1384,7 +1384,7 @@ public:
     bool& keyboard_profile_confirmed = keybind.keyboard_profile_confirmed;
     bool& controls_menu_waiting_for_key = keybind.controls_menu_waiting_for_key;
     gameplay_input_action_t& controls_menu_pending_action = keybind.controls_menu_pending_action;
-    std::array<std::array<gameplay_keybinding_t, INPUT_ACTION_COUNT>, KEYBOARD_PROFILE_COUNT>& keybindings = keybind.keybindings;
+    std::array<std::array<gameplay_keybinding_t, static_cast<size_t>(gameplay_input_action_t::COUNT)>, static_cast<size_t>(keyboard_profile_t::COUNT)>& keybindings = keybind.keybindings;
 
     bool& processing_actions = queue_state.processing_actions;
     vector<gameplay_event_t>& gameplay_events = queue_state.gameplay_events;

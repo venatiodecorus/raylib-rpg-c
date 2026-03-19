@@ -10,7 +10,7 @@ private:
     size_t count_entities_of_type(gamestate& g, entitytype_t type) {
         size_t count = 0;
         for (entityid id = 1; id < g.next_entityid; id++) {
-            if (g.ct.get<entitytype>(id).value_or(ENTITY_NONE) == type) {
+            if (g.ct.get<entitytype>(id).value_or(entitytype_t::NONE) == type) {
                 count++;
             }
         }
@@ -20,7 +20,7 @@ private:
     size_t count_live_npcs_on_floor(gamestate& g, int floor) {
         size_t count = 0;
         for (entityid id = 1; id < g.next_entityid; id++) {
-            if (g.ct.get<entitytype>(id).value_or(ENTITY_NONE) != ENTITY_NPC) {
+            if (g.ct.get<entitytype>(id).value_or(entitytype_t::NONE) != entitytype_t::NPC) {
                 continue;
             }
             if (g.ct.get<dead>(id).value_or(true)) {
@@ -37,13 +37,13 @@ private:
     size_t count_live_npcs_of_race_on_floor(gamestate& g, race_t race_value, int floor) {
         size_t count = 0;
         for (entityid id = 1; id < g.next_entityid; id++) {
-            if (g.ct.get<entitytype>(id).value_or(ENTITY_NONE) != ENTITY_NPC) {
+            if (g.ct.get<entitytype>(id).value_or(entitytype_t::NONE) != entitytype_t::NPC) {
                 continue;
             }
             if (g.ct.get<dead>(id).value_or(true)) {
                 continue;
             }
-            if (g.ct.get<race>(id).value_or(RACE_NONE) != race_value) {
+            if (g.ct.get<race>(id).value_or(race_t::NONE) != race_value) {
                 continue;
             }
             const vec3 loc = g.ct.get<location>(id).value_or(vec3{-1, -1, -1});
@@ -56,7 +56,7 @@ private:
 
     entityid find_live_npc_on_floor(gamestate& g, int floor) {
         for (entityid id = 1; id < g.next_entityid; id++) {
-            if (g.ct.get<entitytype>(id).value_or(ENTITY_NONE) != ENTITY_NPC) {
+            if (g.ct.get<entitytype>(id).value_or(entitytype_t::NONE) != entitytype_t::NPC) {
                 continue;
             }
             if (g.ct.get<dead>(id).value_or(true)) {
@@ -71,8 +71,8 @@ private:
     }
 
     void add_floor(gamestate& g, int width = 8, int height = 8) {
-        auto df = g.d.create_floor(BIOME_STONE, width, height);
-        df->df_set_all_tiles(TILE_FLOOR_STONE_00);
+        auto df = g.d.create_floor(biome_t::STONE, width, height);
+        df->df_set_all_tiles(tiletype_t::FLOOR_STONE_00);
         g.d.add_floor(df);
         g.d.is_initialized = true;
     }
@@ -88,8 +88,8 @@ public:
             const entityid id = g.create_orc_at_with(loc, [](CT&, const entityid) {});
             TS_ASSERT_DIFFERS(id, ENTITYID_INVALID);
             ids.insert(id);
-            TS_ASSERT_EQUALS(g.ct.get<entitytype>(id).value_or(ENTITY_NONE), ENTITY_NPC);
-            TS_ASSERT_EQUALS(g.ct.get<race>(id).value_or(RACE_NONE), RACE_ORC);
+            TS_ASSERT_EQUALS(g.ct.get<entitytype>(id).value_or(entitytype_t::NONE), entitytype_t::NPC);
+            TS_ASSERT_EQUALS(g.ct.get<race>(id).value_or(race_t::NONE), race_t::ORC);
             TS_ASSERT(!g.ct.get<dead>(id).value_or(true));
         }
 
@@ -154,9 +154,9 @@ public:
         TS_ASSERT_EQUALS(g.d.get_floor(3)->get_height(), 16);
         TS_ASSERT(vec3_valid(g.d.get_floor(0)->get_upstairs_loc()));
         TS_ASSERT(vec3_valid(g.d.get_floor(0)->get_downstairs_loc()));
-        TS_ASSERT(count_entities_of_type(g, ENTITY_DOOR) >= 1U);
-        TS_ASSERT(count_entities_of_type(g, ENTITY_BOX) >= 4U);
-        TS_ASSERT(count_entities_of_type(g, ENTITY_ITEM) >= 2U);
+        TS_ASSERT(count_entities_of_type(g, entitytype_t::DOOR) >= 1U);
+        TS_ASSERT(count_entities_of_type(g, entitytype_t::BOX) >= 4U);
+        TS_ASSERT(count_entities_of_type(g, entitytype_t::ITEM) >= 2U);
         TS_ASSERT(count_live_npcs_on_floor(g, 0) >= 1U);
         TS_ASSERT(count_live_npcs_on_floor(g, 1) >= 9U);
         TS_ASSERT(count_live_npcs_on_floor(g, 2) >= 1U);
@@ -178,21 +178,21 @@ public:
         TS_ASSERT_DIFFERS(floor_one_npc, ENTITYID_INVALID);
         TS_ASSERT_DIFFERS(floor_two_npc, ENTITYID_INVALID);
         TS_ASSERT(!g.ct.get<aggro>(floor_zero_npc).value_or(true));
-        TS_ASSERT_EQUALS(g.ct.get<race>(floor_one_npc).value_or(RACE_NONE), RACE_GREEN_SLIME);
+        TS_ASSERT_EQUALS(g.ct.get<race>(floor_one_npc).value_or(race_t::NONE), race_t::GREEN_SLIME);
         TS_ASSERT(!g.ct.get<aggro>(floor_one_npc).value_or(true));
-        TS_ASSERT_EQUALS(count_live_npcs_of_race_on_floor(g, RACE_GREEN_SLIME, 1), 9U);
-        TS_ASSERT_EQUALS(g.ct.get<race>(floor_two_npc).value_or(RACE_NONE), RACE_ORC);
+        TS_ASSERT_EQUALS(count_live_npcs_of_race_on_floor(g, race_t::GREEN_SLIME, 1), 9U);
+        TS_ASSERT_EQUALS(g.ct.get<race>(floor_two_npc).value_or(race_t::NONE), race_t::ORC);
         TS_ASSERT(g.ct.get<aggro>(floor_two_npc).value_or(false));
         const auto npc_inventory = g.ct.get<inventory>(floor_two_npc).value_or(nullptr);
         TS_ASSERT(npc_inventory);
         TS_ASSERT_EQUALS(npc_inventory->size(), 2U);
         const entityid equipped_weapon_id = g.ct.get<equipped_weapon>(floor_two_npc).value_or(ENTITYID_INVALID);
         TS_ASSERT_DIFFERS(equipped_weapon_id, ENTITYID_INVALID);
-        TS_ASSERT_EQUALS(g.ct.get<itemtype>(equipped_weapon_id).value_or(ITEM_NONE), ITEM_WEAPON);
+        TS_ASSERT_EQUALS(g.ct.get<itemtype>(equipped_weapon_id).value_or(itemtype_t::NONE), itemtype_t::WEAPON);
         bool found_potion = false;
         for (entityid item_id : *npc_inventory) {
-            if (g.ct.get<itemtype>(item_id).value_or(ITEM_NONE) == ITEM_POTION &&
-                g.ct.get<potiontype>(item_id).value_or(POTION_NONE) == POTION_HP_SMALL) {
+            if (g.ct.get<itemtype>(item_id).value_or(itemtype_t::NONE) == itemtype_t::POTION &&
+                g.ct.get<potiontype>(item_id).value_or(potiontype_t::NONE) == potiontype_t::HP_SMALL) {
                 found_potion = true;
             }
         }
@@ -204,7 +204,7 @@ public:
         add_floor(g, 8, 8);
         add_floor(g, 8, 8);
 
-        const entityid friendly = g.create_npc_at_with(RACE_DWARF, vec3{1, 1, 0}, [](CT&, const entityid) {});
+        const entityid friendly = g.create_npc_at_with(race_t::DWARF, vec3{1, 1, 0}, [](CT&, const entityid) {});
         const entityid hostile = g.create_orc_at_with(vec3{2, 2, 1}, [](CT&, const entityid) {});
 
         TS_ASSERT_DIFFERS(friendly, ENTITYID_INVALID);
@@ -212,8 +212,8 @@ public:
 
         g.update_npcs_state();
 
-        TS_ASSERT_EQUALS(g.ct.get<entity_default_action>(friendly).value_or(ENTITY_DEFAULT_ACTION_NONE), ENTITY_DEFAULT_ACTION_RANDOM_MOVE);
-        TS_ASSERT_EQUALS(g.ct.get<entity_default_action>(hostile).value_or(ENTITY_DEFAULT_ACTION_NONE), ENTITY_DEFAULT_ACTION_RANDOM_MOVE);
+        TS_ASSERT_EQUALS(g.ct.get<entity_default_action>(friendly).value_or(entity_default_action_t::NONE), entity_default_action_t::RANDOM_MOVE);
+        TS_ASSERT_EQUALS(g.ct.get<entity_default_action>(hostile).value_or(entity_default_action_t::NONE), entity_default_action_t::RANDOM_MOVE);
         TS_ASSERT_EQUALS(g.ct.get<target_id>(hostile).value_or(ENTITYID_INVALID), ENTITYID_INVALID);
 
         g.d.current_floor = 1;
@@ -221,21 +221,21 @@ public:
         g.update_npcs_state();
 
         TS_ASSERT_EQUALS(g.ct.get<target_id>(hostile).value_or(ENTITYID_INVALID), g.hero_id);
-        TS_ASSERT_EQUALS(g.ct.get<entity_default_action>(hostile).value_or(ENTITY_DEFAULT_ACTION_NONE),
-                         ENTITY_DEFAULT_ACTION_MOVE_TO_TARGET_AND_ATTACK_TARGET_IF_ADJACENT);
+        TS_ASSERT_EQUALS(g.ct.get<entity_default_action>(hostile).value_or(entity_default_action_t::NONE),
+                         entity_default_action_t::MOVE_TO_TARGET_AND_ATTACK_TARGET_IF_ADJACENT);
 
         g.hero_id = g.create_player_at_with(vec3{3, 2, 1}, "hero_adjacent", g.player_init(10));
         g.update_npcs_state();
 
-        TS_ASSERT_EQUALS(g.ct.get<entity_default_action>(hostile).value_or(ENTITY_DEFAULT_ACTION_NONE),
-                         ENTITY_DEFAULT_ACTION_ATTACK_TARGET_IF_ADJACENT);
+        TS_ASSERT_EQUALS(g.ct.get<entity_default_action>(hostile).value_or(entity_default_action_t::NONE),
+                         entity_default_action_t::ATTACK_TARGET_IF_ADJACENT);
     }
 
     void testProvokeNpcTurnsFriendlyNpcHostile() {
         gamestate g;
         add_floor(g, 8, 8);
 
-        const entityid friendly = g.create_npc_at_with(RACE_DWARF, vec3{2, 1, 0}, [](CT&, const entityid) {});
+        const entityid friendly = g.create_npc_at_with(race_t::DWARF, vec3{2, 1, 0}, [](CT&, const entityid) {});
         const entityid hero = g.create_player_at_with(vec3{1, 1, 0}, "hero", g.player_init(10));
 
         TS_ASSERT_DIFFERS(friendly, ENTITYID_INVALID);
@@ -246,8 +246,8 @@ public:
 
         TS_ASSERT(g.ct.get<aggro>(friendly).value_or(false));
         TS_ASSERT_EQUALS(g.ct.get<target_id>(friendly).value_or(ENTITYID_INVALID), hero);
-        TS_ASSERT_EQUALS(g.ct.get<entity_default_action>(friendly).value_or(ENTITY_DEFAULT_ACTION_NONE),
-                         ENTITY_DEFAULT_ACTION_ATTACK_TARGET_IF_ADJACENT);
+        TS_ASSERT_EQUALS(g.ct.get<entity_default_action>(friendly).value_or(entity_default_action_t::NONE),
+                         entity_default_action_t::ATTACK_TARGET_IF_ADJACENT);
     }
 
     void testAttackingFriendlyNpcSetsAggro() {
@@ -255,7 +255,7 @@ public:
         g.test = true;
         add_floor(g, 8, 8);
 
-        const entityid friendly = g.create_npc_at_with(RACE_DWARF, vec3{2, 1, 0}, [](CT&, const entityid) {});
+        const entityid friendly = g.create_npc_at_with(race_t::DWARF, vec3{2, 1, 0}, [](CT&, const entityid) {});
         const entityid hero = g.create_player_at_with(vec3{1, 1, 0}, "hero", g.player_init(10));
 
         TS_ASSERT_DIFFERS(friendly, ENTITYID_INVALID);
@@ -351,9 +351,9 @@ public:
 
         const attack_result_t result = g.run_attack_action(hero, vec3{2, 1, 0});
 
-        TS_ASSERT_DIFFERS(result, ATTACK_RESULT_NONE);
+        TS_ASSERT_DIFFERS(result, attack_result_t::NONE);
         TS_ASSERT(g.gameplay_events.empty());
-        TS_ASSERT_EQUALS(g.ct.get<direction>(hero).value_or(DIR_NONE), DIR_RIGHT);
+        TS_ASSERT_EQUALS(g.ct.get<direction>(hero).value_or(direction_t::NONE), direction_t::RIGHT);
     }
 
     void testRunAttackActionProvokesFriendlyNpcThroughQueuedFollowup() {
@@ -362,7 +362,7 @@ public:
         g.mt.seed(24680);
         add_floor(g, 8, 8);
 
-        const entityid friendly = g.create_npc_at_with(RACE_DWARF, vec3{2, 1, 0}, [](CT&, const entityid) {});
+        const entityid friendly = g.create_npc_at_with(race_t::DWARF, vec3{2, 1, 0}, [](CT&, const entityid) {});
         const entityid hero = g.create_player_at_with(vec3{1, 1, 0}, "hero", g.player_init(12));
         const entityid hero_weapon = g.create_weapon_with(g.sword_init());
         TS_ASSERT_DIFFERS(friendly, ENTITYID_INVALID);
@@ -406,7 +406,7 @@ public:
 
         const attack_result_t result = g.run_attack_action(hero, vec3{2, 1, 0});
 
-        TS_ASSERT_EQUALS(result, ATTACK_RESULT_HIT);
+        TS_ASSERT_EQUALS(result, attack_result_t::HIT);
         TS_ASSERT(g.ct.get<dead>(orc).value_or(false));
         tile_t& target_tile = g.d.get_floor(0)->tile_at(vec3{2, 1, 0});
         TS_ASSERT_EQUALS(target_tile.get_cached_live_npc(), ENTITYID_INVALID);
@@ -441,7 +441,7 @@ public:
 
         const attack_result_t result = g.run_attack_action(hero, vec3{2, 1, 0});
 
-        TS_ASSERT_EQUALS(result, ATTACK_RESULT_HIT);
+        TS_ASSERT_EQUALS(result, attack_result_t::HIT);
         TS_ASSERT(g.ct.get<dead>(orc).value_or(false));
         TS_ASSERT(!g.is_in_inventory(orc, loot));
         TS_ASSERT(vec3_equal(g.ct.get<location>(loot).value_or(vec3{-1, -1, -1}), vec3{2, 1, 0}));
@@ -480,7 +480,7 @@ public:
 
         const attack_result_t result = g.run_attack_action(hero, vec3{2, 1, 0});
 
-        TS_ASSERT_EQUALS(result, ATTACK_RESULT_BLOCK);
+        TS_ASSERT_EQUALS(result, attack_result_t::BLOCK);
         const vec2 orc_hp = g.ct.get<hp>(orc).value_or(vec2{-1, -1});
         TS_ASSERT_EQUALS(orc_hp.x, 12);
         TS_ASSERT_EQUALS(orc_hp.y, 12);
@@ -519,7 +519,7 @@ public:
         const size_t initial_history_size = g.messages.history.size();
         const attack_result_t result = g.run_attack_action(hero, vec3{2, 1, 0});
 
-        TS_ASSERT_EQUALS(result, ATTACK_RESULT_BLOCK);
+        TS_ASSERT_EQUALS(result, attack_result_t::BLOCK);
         TS_ASSERT_EQUALS(g.messages.history.size(), initial_history_size + 1);
         TS_ASSERT(g.messages.history.back().find("blocked an attack") != string::npos);
         TS_ASSERT(g.messages.history.back().find("broke") == string::npos);
@@ -554,7 +554,7 @@ public:
         const size_t initial_history_size = g.messages.history.size();
         const attack_result_t result = g.run_attack_action(hero, vec3{2, 1, 0});
 
-        TS_ASSERT_EQUALS(result, ATTACK_RESULT_HIT);
+        TS_ASSERT_EQUALS(result, attack_result_t::HIT);
         TS_ASSERT_EQUALS(g.messages.history.size(), initial_history_size + 1);
         TS_ASSERT(g.messages.history.back().find("deals") != string::npos);
         TS_ASSERT(g.messages.history.back().find("broke") == string::npos);
@@ -587,7 +587,7 @@ public:
 
         const attack_result_t result = g.run_attack_action(hero, vec3{2, 1, 0});
 
-        TS_ASSERT_EQUALS(result, ATTACK_RESULT_HIT);
+        TS_ASSERT_EQUALS(result, attack_result_t::HIT);
         TS_ASSERT_EQUALS(g.ct.get<equipped_weapon>(hero).value_or(ENTITYID_INVALID), ENTITYID_INVALID);
         TS_ASSERT(g.ct.get<destroyed>(hero_weapon).value_or(false));
         TS_ASSERT(!g.is_in_inventory(hero, hero_weapon));
@@ -626,7 +626,7 @@ public:
 
         const attack_result_t result = g.run_attack_action(hero, vec3{2, 1, 0});
 
-        TS_ASSERT_EQUALS(result, ATTACK_RESULT_BLOCK);
+        TS_ASSERT_EQUALS(result, attack_result_t::BLOCK);
         TS_ASSERT_EQUALS(g.ct.get<equipped_shield>(orc).value_or(ENTITYID_INVALID), ENTITYID_INVALID);
         TS_ASSERT(g.ct.get<destroyed>(shield).value_or(false));
         TS_ASSERT(!g.is_in_inventory(orc, shield));
@@ -667,7 +667,7 @@ public:
         const size_t initial_history_size = g.messages.history.size();
         const attack_result_t result = g.run_attack_action(hero, vec3{2, 1, 0});
 
-        TS_ASSERT_EQUALS(result, ATTACK_RESULT_MISS);
+        TS_ASSERT_EQUALS(result, attack_result_t::MISS);
         TS_ASSERT(!g.ct.get<damaged>(orc).value_or(false));
         TS_ASSERT(!g.ct.get<dead>(orc).value_or(false));
         TS_ASSERT(!g.ct.get<block_success>(orc).value_or(false));
@@ -713,7 +713,7 @@ public:
         const size_t initial_history_size = g.messages.history.size();
         const attack_result_t result = g.run_attack_action(hero, vec3{2, 1, 0});
 
-        TS_ASSERT_EQUALS(result, ATTACK_RESULT_HIT);
+        TS_ASSERT_EQUALS(result, attack_result_t::HIT);
         TS_ASSERT(g.ct.get<dead>(orc).value_or(false));
         TS_ASSERT_EQUALS(g.messages.history.size(), initial_history_size + 1);
         TS_ASSERT(g.messages.history.back().find("deals") != string::npos);
@@ -752,7 +752,7 @@ public:
         const size_t initial_history_size = g.messages.history.size();
         const attack_result_t result = g.run_attack_action(orc, vec3{1, 1, 0});
 
-        TS_ASSERT_EQUALS(result, ATTACK_RESULT_HIT);
+        TS_ASSERT_EQUALS(result, attack_result_t::HIT);
         TS_ASSERT(g.ct.get<dead>(hero).value_or(false));
         TS_ASSERT(g.ct.get<pullable>(hero).value_or(false));
         TS_ASSERT_EQUALS(hero_tile.get_cached_live_npc(), ENTITYID_INVALID);
@@ -781,7 +781,7 @@ public:
         TS_ASSERT_EQUALS(g.entity_turn, g.hero_id);
 
         g.make_all_npcs_target_player();
-        g.current_scene = SCENE_GAMEPLAY;
+        g.current_scene = scene_t::GAMEPLAY;
 
         inputstate is;
         inputstate_reset(is);

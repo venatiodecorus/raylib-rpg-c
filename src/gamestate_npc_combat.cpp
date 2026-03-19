@@ -120,7 +120,7 @@ void gamestate::provoke_npc(entityid npc_id, entityid source_id) {
     if (npc_id == ENTITYID_INVALID) {
         return;
     }
-    if (ct.get<entitytype>(npc_id).value_or(ENTITY_NONE) != ENTITY_NPC) {
+    if (ct.get<entitytype>(npc_id).value_or(entitytype_t::NONE) != entitytype_t::NPC) {
         return;
     }
     if (ct.get<dead>(npc_id).value_or(true)) {
@@ -151,7 +151,7 @@ attack_result_t gamestate::resolve_attack_intent(entityid attacker_id, vec3 targ
     massert(ct.has<location>(attacker_id), "entity %d has no location", attacker_id);
 
     // Ordering contract for queued combat:
-    // 1. `EVENT_ATTACK_INTENT` decides miss/block/hit and appends the first
+    // 1. `event_type_t::ATTACK_INTENT` decides miss/block/hit and appends the first
     //    follow-up events only; it does not apply chained side effects inline.
     // 2. For NPC targets, provoke is appended before block/damage so aggro is
     //    established ahead of later combat consequences in the same turn slice.
@@ -173,23 +173,23 @@ attack_result_t gamestate::resolve_attack_intent(entityid attacker_id, vec3 targ
 
     const entityid target_id = tile.get_cached_live_npc();
     if (target_id == INVALID) {
-        return ATTACK_RESULT_MISS;
+        return attack_result_t::MISS;
     }
 
-    const entitytype_t type = ct.get<entitytype>(target_id).value_or(ENTITY_NONE);
-    if (type != ENTITY_PLAYER && type != ENTITY_NPC) {
-        return ATTACK_RESULT_MISS;
+    const entitytype_t type = ct.get<entitytype>(target_id).value_or(entitytype_t::NONE);
+    if (type != entitytype_t::PLAYER && type != entitytype_t::NPC) {
+        return attack_result_t::MISS;
     }
     if (ct.get<dead>(target_id).value_or(true)) {
-        return ATTACK_RESULT_MISS;
+        return attack_result_t::MISS;
     }
-    if (type == ENTITY_NPC) {
+    if (type == entitytype_t::NPC) {
         queue_provoke_npc_event(target_id, attacker_id);
     }
 
     if (!compute_attack_roll(attacker_id, target_id)) {
         add_combat_miss_message(attacker_id, target_id);
-        return ATTACK_RESULT_MISS;
+        return attack_result_t::MISS;
     }
 
     const entityid shield_id = ct.get<equipped_shield>(target_id).value_or(ENTITYID_INVALID);
@@ -200,12 +200,12 @@ attack_result_t gamestate::resolve_attack_intent(entityid attacker_id, vec3 targ
         const int low_roll = MAX_BLOCK_CHANCE - chance;
         if (roll > low_roll) {
             queue_attack_block_event(attacker_id, target_id);
-            return ATTACK_RESULT_BLOCK;
+            return attack_result_t::BLOCK;
         }
     }
 
     queue_attack_damage_event(attacker_id, target_id, compute_attack_damage(attacker_id, target_id));
-    return ATTACK_RESULT_HIT;
+    return attack_result_t::HIT;
 }
 
 void gamestate::resolve_attack_block_event(entityid attacker_id, entityid target_id) {
@@ -273,12 +273,12 @@ void gamestate::resolve_attack_death_event(entityid attacker_id, entityid target
     tile.tile_remove(target_id);
     tile.add_dead_npc(target_id);
 
-    switch (ct.get<entitytype>(target_id).value_or(ENTITY_NONE)) {
-    case ENTITY_NPC:
+    switch (ct.get<entitytype>(target_id).value_or(entitytype_t::NONE)) {
+    case entitytype_t::NPC:
         queue_attack_award_xp_event(attacker_id, target_id);
         queue_attack_drop_inventory_event(target_id);
         break;
-    case ENTITY_PLAYER:
+    case entitytype_t::PLAYER:
         queue_attack_player_death_event(target_id);
         break;
     default:
@@ -318,18 +318,18 @@ void gamestate::handle_attack_sfx(entityid attacker, attack_result_t result) {
         return;
     }
     const char* index = "sfx/Minifantasy_Dungeon_SFX/07_human_atk_sword_1.wav";
-    if (result == ATTACK_RESULT_BLOCK) {
+    if (result == attack_result_t::BLOCK) {
         index = "sfx/Minifantasy_Dungeon_SFX/26_sword_hit_3.wav";
     }
-    else if (result == ATTACK_RESULT_HIT) {
+    else if (result == attack_result_t::HIT) {
         index = "sfx/Minifantasy_Dungeon_SFX/26_sword_hit_1.wav";
     }
-    else if (result == ATTACK_RESULT_MISS) {
+    else if (result == attack_result_t::MISS) {
         entityid weapon_id = ct.get<equipped_weapon>(attacker).value_or(ENTITYID_INVALID);
-        weapontype_t wpn_type = ct.get<weapontype>(weapon_id).value_or(WEAPON_NONE);
-        index = wpn_type == WEAPON_SHORT_SWORD ? "sfx/Minifantasy_Dungeon_SFX/07_human_atk_sword_1.wav"
-                : wpn_type == WEAPON_AXE       ? "sfx/Minifantasy_Dungeon_SFX/07_human_atk_sword_1.wav"
-                : wpn_type == WEAPON_DAGGER    ? "sfx/Minifantasy_Dungeon_SFX/07_human_atk_sword_1.wav"
+        weapontype_t wpn_type = ct.get<weapontype>(weapon_id).value_or(weapontype_t::NONE);
+        index = wpn_type == weapontype_t::SHORT_SWORD ? "sfx/Minifantasy_Dungeon_SFX/07_human_atk_sword_1.wav"
+                : wpn_type == weapontype_t::AXE       ? "sfx/Minifantasy_Dungeon_SFX/07_human_atk_sword_1.wav"
+                : wpn_type == weapontype_t::DAGGER    ? "sfx/Minifantasy_Dungeon_SFX/07_human_atk_sword_1.wav"
                                                : "sfx/Minifantasy_Dungeon_SFX/07_human_atk_sword_1.wav";
     }
     audio.queue(index);
@@ -337,12 +337,12 @@ void gamestate::handle_attack_sfx(entityid attacker, attack_result_t result) {
 }
 
 void gamestate::set_gamestate_flag_for_attack_animation(entitytype_t type) {
-    massert(type == ENTITY_PLAYER || type == ENTITY_NPC, "type is not player or npc!");
-    if (type == ENTITY_PLAYER) {
-        flag = GAMESTATE_FLAG_PLAYER_ANIM;
+    massert(type == entitytype_t::PLAYER || type == entitytype_t::NPC, "type is not player or npc!");
+    if (type == entitytype_t::PLAYER) {
+        flag = gamestate_flag_t::PLAYER_ANIM;
     }
-    else if (type == ENTITY_NPC) {
-        flag = GAMESTATE_FLAG_NPC_ANIM;
+    else if (type == entitytype_t::NPC) {
+        flag = gamestate_flag_t::NPC_ANIM;
     }
 }
 
@@ -490,7 +490,7 @@ bool gamestate::try_entity_move_random(entityid id) {
 bool gamestate::handle_npc(entityid id) {
     minfo2("handle npc %d", id);
     massert(id != ENTITYID_INVALID, "Entity is NULL!");
-    if (ct.get<entitytype>(id).value_or(ENTITY_NONE) != ENTITY_NPC) {
+    if (ct.get<entitytype>(id).value_or(entitytype_t::NONE) != entitytype_t::NPC) {
         return false;
     }
     auto id_name = ct.get<name>(id).value_or("no-name");
@@ -505,28 +505,28 @@ bool gamestate::handle_npc(entityid id) {
     }
 
     entityid tgt_id = ct.get<target_id>(id).value_or(hero_id);
-    entity_default_action_t d_action = ct.get<entity_default_action>(id).value_or(ENTITY_DEFAULT_ACTION_NONE);
-    if (d_action == ENTITY_DEFAULT_ACTION_NONE) {
+    entity_default_action_t d_action = ct.get<entity_default_action>(id).value_or(entity_default_action_t::NONE);
+    if (d_action == entity_default_action_t::NONE) {
         return true;
     }
-    else if (d_action == ENTITY_DEFAULT_ACTION_RANDOM_MOVE) {
+    else if (d_action == entity_default_action_t::RANDOM_MOVE) {
         if (try_entity_move_random(id)) {
             return true;
         }
     }
-    else if (d_action == ENTITY_DEFAULT_ACTION_MOVE_TO_TARGET) {
+    else if (d_action == entity_default_action_t::MOVE_TO_TARGET) {
         if (try_entity_move_to_target(id)) {
             return true;
         }
     }
-    else if (d_action == ENTITY_DEFAULT_ACTION_ATTACK_TARGET_IF_ADJACENT) {
+    else if (d_action == entity_default_action_t::ATTACK_TARGET_IF_ADJACENT) {
         if (is_entity_adjacent(id, tgt_id)) {
             vec3 loc = ct.get<location>(tgt_id).value();
             run_attack_action(id, loc);
             return true;
         }
     }
-    else if (d_action == ENTITY_DEFAULT_ACTION_RANDOM_MOVE_AND_ATTACK_TARGET_IF_ADJACENT) {
+    else if (d_action == entity_default_action_t::RANDOM_MOVE_AND_ATTACK_TARGET_IF_ADJACENT) {
         if (is_entity_adjacent(id, tgt_id)) {
             vec3 loc = ct.get<location>(tgt_id).value();
             run_attack_action(id, loc);
@@ -536,7 +536,7 @@ bool gamestate::handle_npc(entityid id) {
             return true;
         }
     }
-    else if (d_action == ENTITY_DEFAULT_ACTION_MOVE_TO_TARGET_AND_ATTACK_TARGET_IF_ADJACENT) {
+    else if (d_action == entity_default_action_t::MOVE_TO_TARGET_AND_ATTACK_TARGET_IF_ADJACENT) {
         if (is_entity_adjacent(id, tgt_id)) {
             vec3 loc = ct.get<location>(tgt_id).value();
             run_attack_action(id, loc);
@@ -553,15 +553,15 @@ bool gamestate::handle_npc(entityid id) {
 
 void gamestate::handle_npcs() {
     minfo2("handle npcs");
-    if (flag == GAMESTATE_FLAG_NPC_TURN) {
+    if (flag == gamestate_flag_t::NPC_TURN) {
 #ifndef NPCS_ALL_AT_ONCE
         if (entity_turn >= 1 && entity_turn < next_entityid) {
-            if (ct.get<entitytype>(entity_turn).value_or(ENTITY_NONE) == ENTITY_NPC) {
+            if (ct.get<entitytype>(entity_turn).value_or(entitytype_t::NONE) == entitytype_t::NPC) {
                 handle_npc(entity_turn);
-                flag = GAMESTATE_FLAG_NPC_ANIM;
+                flag = gamestate_flag_t::NPC_ANIM;
             }
             else {
-                flag = GAMESTATE_FLAG_NPC_ANIM;
+                flag = gamestate_flag_t::NPC_ANIM;
             }
         }
 #else
@@ -570,8 +570,8 @@ void gamestate::handle_npcs() {
         auto view = registry.view<ActorKind, LegacyEntityId>();
         for (auto entity : view) {
             entityid id = view.get<LegacyEntityId>(entity).id;
-            auto type = ct.get<entitytype>(id).value_or(ENTITY_NONE);
-            if (type == ENTITY_NPC) {
+            auto type = ct.get<entitytype>(id).value_or(entitytype_t::NONE);
+            if (type == entitytype_t::NPC) {
                 const bool result = handle_npc(id);
                 if (result) {
                     msuccess2("npc %d handled successfully", id);
@@ -581,7 +581,7 @@ void gamestate::handle_npcs() {
                 }
             }
         }
-        flag = GAMESTATE_FLAG_NPC_ANIM;
+        flag = gamestate_flag_t::NPC_ANIM;
 #endif
     }
 }

@@ -109,9 +109,9 @@ public:
     }
 
     void testTileInitAndCacheReset() {
-        tile_t tile(TILE_FLOOR_STONE_00);
+        tile_t tile(tiletype_t::FLOOR_STONE_00);
 
-        TS_ASSERT_EQUALS(tile.get_type(), TILE_FLOOR_STONE_00);
+        TS_ASSERT_EQUALS(tile.get_type(), tiletype_t::FLOOR_STONE_00);
         TS_ASSERT(!tile.get_visible());
         TS_ASSERT(!tile.get_explored());
         TS_ASSERT(!tile.get_cached_player_present());
@@ -133,7 +133,7 @@ public:
         tile.set_dirty_entities(false);
         tile.tile_reset_cache();
 
-        TS_ASSERT_EQUALS(tile.get_type(), TILE_FLOOR_STONE_00);
+        TS_ASSERT_EQUALS(tile.get_type(), tiletype_t::FLOOR_STONE_00);
         TS_ASSERT(tile.get_visible());
         TS_ASSERT(tile.get_explored());
         TS_ASSERT(!tile.get_cached_player_present());
@@ -148,9 +148,9 @@ public:
     }
 
     void testTileAddAndRemoveAcrossEntityKinds() {
-        tile_t tile(TILE_FLOOR_STONE_00);
+        tile_t tile(tiletype_t::FLOOR_STONE_00);
 
-        TS_ASSERT_EQUALS(tile.tile_add(1, ENTITY_PLAYER), 1);
+        TS_ASSERT_EQUALS(tile.tile_add(1, entitytype_t::PLAYER), 1);
         TS_ASSERT(tile.get_cached_player_present());
         TS_ASSERT_EQUALS(tile.get_cached_live_npc(), 1);
         TS_ASSERT_EQUALS(tile.entity_count(), 1U);
@@ -159,13 +159,13 @@ public:
         TS_ASSERT(!tile.get_cached_player_present());
         TS_ASSERT_EQUALS(tile.get_cached_live_npc(), ENTITYID_INVALID);
 
-        TS_ASSERT_EQUALS(tile.tile_add(2, ENTITY_NPC), 2);
-        TS_ASSERT_EQUALS(tile.tile_add(3, ENTITY_ITEM), 3);
-        TS_ASSERT_EQUALS(tile.tile_add(4, ENTITY_ITEM), 4);
-        TS_ASSERT_EQUALS(tile.tile_add(5, ENTITY_PROP), 5);
-        TS_ASSERT_EQUALS(tile.tile_add(6, ENTITY_BOX), 6);
-        TS_ASSERT_EQUALS(tile.tile_add(7, ENTITY_CHEST), 7);
-        TS_ASSERT_EQUALS(tile.tile_add(8, ENTITY_DOOR), 8);
+        TS_ASSERT_EQUALS(tile.tile_add(2, entitytype_t::NPC), 2);
+        TS_ASSERT_EQUALS(tile.tile_add(3, entitytype_t::ITEM), 3);
+        TS_ASSERT_EQUALS(tile.tile_add(4, entitytype_t::ITEM), 4);
+        TS_ASSERT_EQUALS(tile.tile_add(5, entitytype_t::PROP), 5);
+        TS_ASSERT_EQUALS(tile.tile_add(6, entitytype_t::BOX), 6);
+        TS_ASSERT_EQUALS(tile.tile_add(7, entitytype_t::CHEST), 7);
+        TS_ASSERT_EQUALS(tile.tile_add(8, entitytype_t::DOOR), 8);
         TS_ASSERT(tile.add_dead_npc(9));
 
         TS_ASSERT_EQUALS(tile.get_cached_live_npc(), 2);
@@ -198,37 +198,37 @@ public:
     }
 
     void testTileItemCacheLimit() {
-        tile_t tile(TILE_FLOOR_STONE_00);
+        tile_t tile(tiletype_t::FLOOR_STONE_00);
 
         for (int i = 0; i < ITEM_CACHE_SIZE; i++) {
-            TS_ASSERT_EQUALS(tile.tile_add(200 + i, ENTITY_ITEM), 200 + i);
+            TS_ASSERT_EQUALS(tile.tile_add(200 + i, entitytype_t::ITEM), 200 + i);
         }
 
         TS_ASSERT_EQUALS(tile.get_item_count(), static_cast<size_t>(ITEM_CACHE_SIZE));
-        TS_ASSERT_EQUALS(tile.tile_add(999, ENTITY_ITEM), INVALID);
+        TS_ASSERT_EQUALS(tile.tile_add(999, entitytype_t::ITEM), INVALID);
         TS_ASSERT_EQUALS(tile.get_item_count(), static_cast<size_t>(ITEM_CACHE_SIZE));
         TS_ASSERT_EQUALS(tile.get_cached_item(), 200 + ITEM_CACHE_SIZE - 1);
     }
 
     void testTileRejectsSecondDoorCacheEntry() {
-        tile_t tile(TILE_FLOOR_STONE_00);
+        tile_t tile(tiletype_t::FLOOR_STONE_00);
 
-        TS_ASSERT_EQUALS(tile.tile_add(10, ENTITY_DOOR), 10);
-        TS_ASSERT_EQUALS(tile.tile_add(11, ENTITY_DOOR), INVALID);
+        TS_ASSERT_EQUALS(tile.tile_add(10, entitytype_t::DOOR), 10);
+        TS_ASSERT_EQUALS(tile.tile_add(11, entitytype_t::DOOR), INVALID);
         TS_ASSERT_EQUALS(tile.get_cached_door(), 10);
         TS_ASSERT_EQUALS(tile.entity_count(), 1U);
     }
 
     void testTileSupportsMixedOccupancyAcrossSupportedCacheKinds() {
-        tile_t tile(TILE_FLOOR_STONE_00);
+        tile_t tile(tiletype_t::FLOOR_STONE_00);
 
-        TS_ASSERT_EQUALS(tile.tile_add(10, ENTITY_PLAYER), 10);
-        TS_ASSERT_EQUALS(tile.tile_add(20, ENTITY_ITEM), 20);
-        TS_ASSERT_EQUALS(tile.tile_add(21, ENTITY_ITEM), 21);
-        TS_ASSERT_EQUALS(tile.tile_add(30, ENTITY_PROP), 30);
-        TS_ASSERT_EQUALS(tile.tile_add(40, ENTITY_BOX), 40);
-        TS_ASSERT_EQUALS(tile.tile_add(45, ENTITY_CHEST), 45);
-        TS_ASSERT_EQUALS(tile.tile_add(50, ENTITY_DOOR), 50);
+        TS_ASSERT_EQUALS(tile.tile_add(10, entitytype_t::PLAYER), 10);
+        TS_ASSERT_EQUALS(tile.tile_add(20, entitytype_t::ITEM), 20);
+        TS_ASSERT_EQUALS(tile.tile_add(21, entitytype_t::ITEM), 21);
+        TS_ASSERT_EQUALS(tile.tile_add(30, entitytype_t::PROP), 30);
+        TS_ASSERT_EQUALS(tile.tile_add(40, entitytype_t::BOX), 40);
+        TS_ASSERT_EQUALS(tile.tile_add(45, entitytype_t::CHEST), 45);
+        TS_ASSERT_EQUALS(tile.tile_add(50, entitytype_t::DOOR), 50);
         TS_ASSERT(tile.add_dead_npc(60));
 
         TS_ASSERT(tile.get_cached_player_present());
@@ -246,15 +246,15 @@ public:
     }
 
     void testTileMixedOccupancyRemovalPreservesRemainingCaches() {
-        tile_t tile(TILE_FLOOR_STONE_00);
+        tile_t tile(tiletype_t::FLOOR_STONE_00);
 
-        TS_ASSERT_EQUALS(tile.tile_add(10, ENTITY_PLAYER), 10);
-        TS_ASSERT_EQUALS(tile.tile_add(20, ENTITY_ITEM), 20);
-        TS_ASSERT_EQUALS(tile.tile_add(21, ENTITY_ITEM), 21);
-        TS_ASSERT_EQUALS(tile.tile_add(30, ENTITY_PROP), 30);
-        TS_ASSERT_EQUALS(tile.tile_add(40, ENTITY_BOX), 40);
-        TS_ASSERT_EQUALS(tile.tile_add(45, ENTITY_CHEST), 45);
-        TS_ASSERT_EQUALS(tile.tile_add(50, ENTITY_DOOR), 50);
+        TS_ASSERT_EQUALS(tile.tile_add(10, entitytype_t::PLAYER), 10);
+        TS_ASSERT_EQUALS(tile.tile_add(20, entitytype_t::ITEM), 20);
+        TS_ASSERT_EQUALS(tile.tile_add(21, entitytype_t::ITEM), 21);
+        TS_ASSERT_EQUALS(tile.tile_add(30, entitytype_t::PROP), 30);
+        TS_ASSERT_EQUALS(tile.tile_add(40, entitytype_t::BOX), 40);
+        TS_ASSERT_EQUALS(tile.tile_add(45, entitytype_t::CHEST), 45);
+        TS_ASSERT_EQUALS(tile.tile_add(50, entitytype_t::DOOR), 50);
         TS_ASSERT(tile.add_dead_npc(60));
 
         TS_ASSERT_EQUALS(tile.tile_remove(50), 50);
@@ -277,16 +277,16 @@ public:
     }
 
     void testTileTypeHelpers() {
-        tile_t wall(TILE_STONE_WALL_00);
-        tile_t floor(TILE_FLOOR_STONE_00);
+        tile_t wall(tiletype_t::STONE_WALL_00);
+        tile_t floor(tiletype_t::FLOOR_STONE_00);
 
         TS_ASSERT(wall.tile_is_wall());
         TS_ASSERT(!floor.tile_is_wall());
-        TS_ASSERT(tile_is_walkable(TILE_FLOOR_STONE_00));
-        TS_ASSERT(!tile_is_walkable(TILE_STONE_WALL_00));
-        TS_ASSERT(tile_is_possible_upstairs(TILE_FLOOR_STONE_00));
-        TS_ASSERT(tile_is_possible_downstairs(TILE_FLOOR_STONE_00));
-        TS_ASSERT(!tile_is_possible_upstairs(TILE_DOWNSTAIRS));
-        TS_ASSERT(!tile_is_possible_downstairs(TILE_UPSTAIRS));
+        TS_ASSERT(tile_is_walkable(tiletype_t::FLOOR_STONE_00));
+        TS_ASSERT(!tile_is_walkable(tiletype_t::STONE_WALL_00));
+        TS_ASSERT(tile_is_possible_upstairs(tiletype_t::FLOOR_STONE_00));
+        TS_ASSERT(tile_is_possible_downstairs(tiletype_t::FLOOR_STONE_00));
+        TS_ASSERT(!tile_is_possible_upstairs(tiletype_t::DOWNSTAIRS));
+        TS_ASSERT(!tile_is_possible_downstairs(tiletype_t::UPSTAIRS));
     }
 };

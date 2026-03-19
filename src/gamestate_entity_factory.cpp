@@ -21,7 +21,7 @@ void mirror_weapon_item(gamestate& g, entityid id, weapontype_t type) {
     mirror_item_common(g, id, definition);
 
     const entt::entity registry_entity = g.ensure_registry_entity(id);
-    g.registry.emplace_or_replace<ItemKind>(registry_entity, ItemKind{ITEM_WEAPON});
+    g.registry.emplace_or_replace<ItemKind>(registry_entity, ItemKind{itemtype_t::WEAPON});
     g.registry.emplace_or_replace<WeaponKind>(registry_entity, WeaponKind{type});
 }
 
@@ -30,7 +30,7 @@ void mirror_shield_item(gamestate& g, entityid id, shieldtype_t type) {
     mirror_item_common(g, id, definition);
 
     const entt::entity registry_entity = g.ensure_registry_entity(id);
-    g.registry.emplace_or_replace<ItemKind>(registry_entity, ItemKind{ITEM_SHIELD});
+    g.registry.emplace_or_replace<ItemKind>(registry_entity, ItemKind{itemtype_t::SHIELD});
     g.registry.emplace_or_replace<ShieldKind>(registry_entity, ShieldKind{type});
 }
 
@@ -39,7 +39,7 @@ void mirror_potion_item(gamestate& g, entityid id, potiontype_t type) {
     mirror_item_common(g, id, definition);
 
     const entt::entity registry_entity = g.ensure_registry_entity(id);
-    g.registry.emplace_or_replace<ItemKind>(registry_entity, ItemKind{ITEM_POTION});
+    g.registry.emplace_or_replace<ItemKind>(registry_entity, ItemKind{itemtype_t::POTION});
     g.registry.emplace_or_replace<PotionKind>(registry_entity, PotionKind{type});
 }
 }
@@ -51,12 +51,12 @@ void mirror_potion_item(gamestate& g, entityid id, potiontype_t type) {
 
 entityid gamestate::create_weapon_with(with_fun weaponInitFunction) {
     entityid id = add_entity();
-    ct.set<entitytype>(id, ENTITY_ITEM);
-    ct.set<itemtype>(id, ITEM_WEAPON);
+    ct.set<entitytype>(id, entitytype_t::ITEM);
+    ct.set<itemtype>(id, itemtype_t::WEAPON);
     ct.set<spritemove>(id, Rectangle{0, 0, 0, 0});
     ct.set<update>(id, true);
     weaponInitFunction(ct, id);
-    mirror_weapon_item(*this, id, ct.get<weapontype>(id).value_or(WEAPON_NONE));
+    mirror_weapon_item(*this, id, ct.get<weapontype>(id).value_or(weapontype_t::NONE));
     return id;
 }
 
@@ -64,11 +64,11 @@ with_fun gamestate::dagger_init() {
     return [](CT& ct, const entityid id) {
         ct.set<name>(id, "dagger");
         ct.set<description>(id, "Stabby stabby.");
-        ct.set<weapontype>(id, WEAPON_DAGGER);
+        ct.set<weapontype>(id, weapontype_t::DAGGER);
         ct.set<damage>(id, (vec3){1, 4, 0});
         ct.set<durability>(id, 100);
         ct.set<max_durability>(id, 100);
-        ct.set<rarity>(id, RARITY_COMMON);
+        ct.set<rarity>(id, rarity_t::COMMON);
     };
 }
 
@@ -76,11 +76,11 @@ with_fun gamestate::axe_init() {
     return [](CT& ct, const entityid id) {
         ct.set<name>(id, "axe");
         ct.set<description>(id, "Choppy choppy");
-        ct.set<weapontype>(id, WEAPON_AXE);
+        ct.set<weapontype>(id, weapontype_t::AXE);
         ct.set<damage>(id, (vec3){1, 8, 0});
         ct.set<durability>(id, 100);
         ct.set<max_durability>(id, 100);
-        ct.set<rarity>(id, RARITY_COMMON);
+        ct.set<rarity>(id, rarity_t::COMMON);
     };
 }
 
@@ -88,11 +88,11 @@ with_fun gamestate::sword_init() {
     return [](CT& ct, const entityid id) {
         ct.set<name>(id, "short sword");
         ct.set<description>(id, "your basic soldier's short sword");
-        ct.set<weapontype>(id, WEAPON_SHORT_SWORD);
+        ct.set<weapontype>(id, weapontype_t::SHORT_SWORD);
         ct.set<damage>(id, vec3{1, 6, 0});
         ct.set<durability>(id, 100);
         ct.set<max_durability>(id, 100);
-        ct.set<rarity>(id, RARITY_COMMON);
+        ct.set<rarity>(id, rarity_t::COMMON);
     };
 }
 
@@ -100,9 +100,9 @@ with_fun gamestate::shield_init() {
     return [](CT& ct, const entityid id) {
         ct.set<name>(id, "kite shield");
         ct.set<description>(id, "Standard knight's shield");
-        ct.set<shieldtype>(id, SHIELD_KITE);
+        ct.set<shieldtype>(id, shieldtype_t::KITE);
         ct.set<block_chance>(id, 90);
-        ct.set<rarity>(id, RARITY_COMMON);
+        ct.set<rarity>(id, rarity_t::COMMON);
         ct.set<durability>(id, 100);
         ct.set<max_durability>(id, 100);
     };
@@ -111,7 +111,7 @@ with_fun gamestate::shield_init() {
 with_fun gamestate::potion_init(potiontype_t pt) {
     return [pt](CT& ct, const entityid id) {
         ct.set<potiontype>(id, pt);
-        if (pt == POTION_HP_SMALL) {
+        if (pt == potiontype_t::HP_SMALL) {
             ct.set<name>(id, "small healing potion");
             ct.set<description>(id, "a small healing potion");
             ct.set<healing>(id, (vec3){1, 6, 0});
@@ -135,31 +135,31 @@ with_fun gamestate::player_init(int maxhp_roll) {
 
 alignment_t gamestate::default_alignment_for_race(race_t rt) {
     switch (rt) {
-    case RACE_HUMAN: return ALIGNMENT_NEUTRAL_NEUTRAL;
-    case RACE_ELF: return ALIGNMENT_GOOD_CHAOTIC;
-    case RACE_DWARF: return ALIGNMENT_GOOD_LAWFUL;
-    case RACE_HALFLING: return ALIGNMENT_GOOD_NEUTRAL;
-    case RACE_GOBLIN: return ALIGNMENT_EVIL_NEUTRAL;
-    case RACE_ORC: return ALIGNMENT_EVIL_CHAOTIC;
-    case RACE_BAT: return ALIGNMENT_NEUTRAL_NEUTRAL;
-    case RACE_GREEN_SLIME: return ALIGNMENT_NEUTRAL_NEUTRAL;
-    case RACE_WOLF: return ALIGNMENT_NEUTRAL_NEUTRAL;
-    case RACE_WARG: return ALIGNMENT_EVIL_NEUTRAL;
-    case RACE_RAT: return ALIGNMENT_NEUTRAL_NEUTRAL;
-    case RACE_SKELETON: return ALIGNMENT_EVIL_LAWFUL;
-    case RACE_ZOMBIE: return ALIGNMENT_EVIL_NEUTRAL;
-    case RACE_NONE:
-    case RACE_COUNT:
+    case race_t::HUMAN: return alignment_t::NEUTRAL_NEUTRAL;
+    case race_t::ELF: return alignment_t::GOOD_CHAOTIC;
+    case race_t::DWARF: return alignment_t::GOOD_LAWFUL;
+    case race_t::HALFLING: return alignment_t::GOOD_NEUTRAL;
+    case race_t::GOBLIN: return alignment_t::EVIL_NEUTRAL;
+    case race_t::ORC: return alignment_t::EVIL_CHAOTIC;
+    case race_t::BAT: return alignment_t::NEUTRAL_NEUTRAL;
+    case race_t::GREEN_SLIME: return alignment_t::NEUTRAL_NEUTRAL;
+    case race_t::WOLF: return alignment_t::NEUTRAL_NEUTRAL;
+    case race_t::WARG: return alignment_t::EVIL_NEUTRAL;
+    case race_t::RAT: return alignment_t::NEUTRAL_NEUTRAL;
+    case race_t::SKELETON: return alignment_t::EVIL_LAWFUL;
+    case race_t::ZOMBIE: return alignment_t::EVIL_NEUTRAL;
+    case race_t::NONE:
+    case race_t::COUNT:
     default: break;
     }
-    return ALIGNMENT_NONE;
+    return alignment_t::NONE;
 }
 
 bool gamestate::alignment_is_aggressive(alignment_t alignment_value) {
     switch (alignment_value) {
-    case ALIGNMENT_EVIL_LAWFUL:
-    case ALIGNMENT_EVIL_NEUTRAL:
-    case ALIGNMENT_EVIL_CHAOTIC:
+    case alignment_t::EVIL_LAWFUL:
+    case alignment_t::EVIL_NEUTRAL:
+    case alignment_t::EVIL_CHAOTIC:
         return true;
     default:
         break;
@@ -198,7 +198,7 @@ entityid gamestate::create_weapon_at_with(ComponentTable& ct, vec3 loc, with_fun
         minfo2("failed to create weapon");
         return INVALID;
     }
-    if (df->df_add_at(id, ENTITY_ITEM, loc) == ENTITYID_INVALID) {
+    if (df->df_add_at(id, entitytype_t::ITEM, loc) == ENTITYID_INVALID) {
         minfo2("failed to add weapon to df");
         return INVALID;
     }
@@ -218,14 +218,14 @@ entityid gamestate::create_weapon_at_random_loc_with(CT& ct, with_fun weaponInit
 
 entityid gamestate::create_shield_with(ComponentTable& ct, with_fun shieldInitFunction) {
     entityid id = add_entity();
-    ct.set<entitytype>(id, ENTITY_ITEM);
-    ct.set<itemtype>(id, ITEM_SHIELD);
+    ct.set<entitytype>(id, entitytype_t::ITEM);
+    ct.set<itemtype>(id, itemtype_t::SHIELD);
     ct.set<durability>(id, 100);
     ct.set<max_durability>(id, 100);
-    ct.set<rarity>(id, RARITY_COMMON);
+    ct.set<rarity>(id, rarity_t::COMMON);
     ct.set<update>(id, false);
     shieldInitFunction(ct, id);
-    mirror_shield_item(*this, id, ct.get<shieldtype>(id).value_or(SHIELD_NONE));
+    mirror_shield_item(*this, id, ct.get<shieldtype>(id).value_or(shieldtype_t::NONE));
     return id;
 }
 
@@ -235,7 +235,7 @@ entityid gamestate::create_shield_at_with(ComponentTable& ct, vec3 loc, with_fun
     }
     entityid id = create_shield_with(ct, shieldInitFunction);
     shared_ptr<dungeon_floor> df = d.get_floor(loc.z);
-    if (!df->df_add_at(id, ENTITY_ITEM, loc)) {
+    if (!df->df_add_at(id, entitytype_t::ITEM, loc)) {
         return INVALID;
     }
     ct.set<location>(id, loc);
@@ -245,11 +245,11 @@ entityid gamestate::create_shield_at_with(ComponentTable& ct, vec3 loc, with_fun
 
 entityid gamestate::create_potion_with(with_fun potionInitFunction) {
     entityid id = add_entity();
-    ct.set<entitytype>(id, ENTITY_ITEM);
-    ct.set<itemtype>(id, ITEM_POTION);
+    ct.set<entitytype>(id, entitytype_t::ITEM);
+    ct.set<itemtype>(id, itemtype_t::POTION);
     ct.set<update>(id, true);
     potionInitFunction(ct, id);
-    mirror_potion_item(*this, id, ct.get<potiontype>(id).value_or(POTION_NONE));
+    mirror_potion_item(*this, id, ct.get<potiontype>(id).value_or(potiontype_t::NONE));
     return id;
 }
 
@@ -263,7 +263,7 @@ entityid gamestate::create_potion_at_with(vec3 loc, with_fun potionInitFunction)
     if (id == INVALID) {
         return INVALID;
     }
-    if (!df->df_add_at(id, ENTITY_ITEM, loc)) {
+    if (!df->df_add_at(id, entitytype_t::ITEM, loc)) {
         return INVALID;
     }
     ct.set<location>(id, loc);
@@ -273,15 +273,15 @@ entityid gamestate::create_potion_at_with(vec3 loc, with_fun potionInitFunction)
 }
 
 race_t gamestate::random_monster_type() {
-    vector<race_t> monster_races = {RACE_GOBLIN, RACE_ORC, RACE_BAT, RACE_WOLF, RACE_WARG, RACE_ZOMBIE, RACE_SKELETON, RACE_RAT, RACE_GREEN_SLIME};
+    vector<race_t> monster_races = {race_t::GOBLIN, race_t::ORC, race_t::BAT, race_t::WOLF, race_t::WARG, race_t::ZOMBIE, race_t::SKELETON, race_t::RAT, race_t::GREEN_SLIME};
     uniform_int_distribution<int> gen(0, monster_races.size() - 1);
     int random_index = gen(mt);
     return monster_races[random_index];
 }
 
 void gamestate::set_npc_starting_stats(entityid id) {
-    race_t rt = ct.get<race>(id).value_or(RACE_NONE);
-    if (rt == RACE_NONE) {
+    race_t rt = ct.get<race>(id).value_or(race_t::NONE);
+    if (rt == race_t::NONE) {
         return;
     }
     const ActorDefinition* def = get_actor_definition(rt);
@@ -307,19 +307,19 @@ void gamestate::set_npc_starting_stats(entityid id) {
     vec3 hitdie = {1, def ? def->default_hitdie : 8, 0};
     if (!def) {
         switch (rt) {
-        case RACE_HUMAN: hitdie.y = 8; break;
-        case RACE_ELF: hitdie.y = 6; break;
-        case RACE_DWARF: hitdie.y = 10; break;
-        case RACE_HALFLING: hitdie.y = 6; break;
-        case RACE_GOBLIN: hitdie.y = 6; break;
-        case RACE_ORC: hitdie.y = 8; break;
-        case RACE_BAT: hitdie.y = 3; break;
-        case RACE_GREEN_SLIME: hitdie.y = 4; break;
-        case RACE_WOLF: hitdie.y = 6; break;
-        case RACE_WARG: hitdie.y = 12; break;
-        case RACE_RAT: hitdie.y = 4; break;
-        case RACE_SKELETON: hitdie.y = 8; break;
-        case RACE_ZOMBIE: hitdie.y = 8; break;
+        case race_t::HUMAN: hitdie.y = 8; break;
+        case race_t::ELF: hitdie.y = 6; break;
+        case race_t::DWARF: hitdie.y = 10; break;
+        case race_t::HALFLING: hitdie.y = 6; break;
+        case race_t::GOBLIN: hitdie.y = 6; break;
+        case race_t::ORC: hitdie.y = 8; break;
+        case race_t::BAT: hitdie.y = 3; break;
+        case race_t::GREEN_SLIME: hitdie.y = 4; break;
+        case race_t::WOLF: hitdie.y = 6; break;
+        case race_t::WARG: hitdie.y = 12; break;
+        case race_t::RAT: hitdie.y = 4; break;
+        case race_t::SKELETON: hitdie.y = 8; break;
+        case race_t::ZOMBIE: hitdie.y = 8; break;
         default: break;
         }
     }
@@ -332,11 +332,11 @@ void gamestate::set_npc_starting_stats(entityid id) {
 }
 
 void gamestate::set_npc_defaults(entityid id) {
-    ct.set<entitytype>(id, ENTITY_NPC);
+    ct.set<entitytype>(id, entitytype_t::NPC);
     ct.set<spritemove>(id, Rectangle{0, 0, 0, 0});
     ct.set<dead>(id, false);
     ct.set<update>(id, true);
-    ct.set<direction>(id, DIR_DOWN_RIGHT);
+    ct.set<direction>(id, direction_t::DOWN_RIGHT);
     ct.set<attacking>(id, false);
     ct.set<blocking>(id, false);
     ct.set<block_success>(id, false);
@@ -349,7 +349,7 @@ void gamestate::set_npc_defaults(entityid id) {
     ct.set<level>(id, 1);
     ct.set<xp>(id, 0);
     ct.set<hunger_points>(id, hunger_points_t{100, 100});
-    ct.set<entity_default_action>(id, ENTITY_DEFAULT_ACTION_NONE);
+    ct.set<entity_default_action>(id, entity_default_action_t::NONE);
     ct.set<target_path>(id, make_shared<vector<vec3>>());
 }
 
@@ -407,7 +407,7 @@ entityid gamestate::create_npc_at_with(race_t rt, vec3 loc, with_fun npcInitFunc
         merror("failed to create npc");
         return INVALID;
     }
-    if (df->df_add_at(id, ENTITY_NPC, loc) == INVALID) {
+    if (df->df_add_at(id, entitytype_t::NPC, loc) == INVALID) {
         merror("failed to add npc %d to %d, %d", id, loc.x, loc.y);
         return INVALID;
     }
@@ -432,7 +432,7 @@ bool gamestate::add_to_inventory(entityid actor_id, entityid item_id) {
 }
 
 entityid gamestate::create_orc_with(with_fun monsterInitFunction) {
-    constexpr race_t r = RACE_ORC;
+    constexpr race_t r = race_t::ORC;
     entityid id = create_npc_with(r, monsterInitFunction);
     ct.set<name>(id, get_random_orc_name());
     return id;
@@ -454,7 +454,7 @@ entityid gamestate::create_orc_at_with(vec3 loc, with_fun monsterInitFunction) {
     if (id == ENTITYID_INVALID) {
         return ENTITYID_INVALID;
     }
-    if (!df->df_add_at(id, ENTITY_NPC, loc)) {
+    if (!df->df_add_at(id, entitytype_t::NPC, loc)) {
         return ENTITYID_INVALID;
     }
     ct.set<location>(id, loc);
@@ -483,7 +483,7 @@ entityid gamestate::create_player_at_with(vec3 loc, string n, with_fun playerIni
     constexpr int light_rad = 3;
     constexpr int hear_dist = 3;
     set_hero_id(id);
-    ct.set<entitytype>(id, ENTITY_PLAYER);
+    ct.set<entitytype>(id, entitytype_t::PLAYER);
 
     auto df = d.get_floor(loc.z);
     tile_t& tile = df->tile_at(loc);
@@ -501,8 +501,8 @@ entityid gamestate::create_player_at_with(vec3 loc, string n, with_fun playerIni
 
 entityid gamestate::create_box_with() {
     entityid id = add_entity();
-    const StaticWorldDefinition& definition = get_static_world_definition(ENTITY_BOX);
-    ct.set<entitytype>(id, ENTITY_BOX);
+    const StaticWorldDefinition& definition = get_static_world_definition(entitytype_t::BOX);
+    ct.set<entitytype>(id, entitytype_t::BOX);
     ct.set<spritemove>(id, (Rectangle){0, 0, 0, 0});
     ct.set<update>(id, true);
     ct.set<pushable>(id, definition.pushable);
@@ -526,7 +526,7 @@ entityid gamestate::create_box_at_with(vec3 loc) {
         return ENTITYID_INVALID;
     }
     entityid id = create_box_with();
-    if (df->df_add_at(id, ENTITY_BOX, loc) == ENTITYID_INVALID) {
+    if (df->df_add_at(id, entitytype_t::BOX, loc) == ENTITYID_INVALID) {
         merror("failed df_add_at: %d, %d, %d", id, loc.x, loc.y);
         return ENTITYID_INVALID;
     }

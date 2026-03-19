@@ -207,19 +207,19 @@ const rpg::SpriteDef tx_goblin_keys_sprites[] = {
 
 
 static const ActorDefinition actor_definitions[] = {
-    {"human", RACE_HUMAN, "Human", "A typical human.", ALIGNMENT_NEUTRAL_NEUTRAL, 8, {0, 0, 0, 0, 0, 0}, tx_human_keys_sprites, 16},
-    {"elf", RACE_ELF, "Elf", "A graceful elf.", ALIGNMENT_GOOD_CHAOTIC, 6, {0, 2, 0, 0, -2, 0}, tx_elf_keys_sprites, 16},
-    {"dwarf", RACE_DWARF, "Dwarf", "A sturdy dwarf.", ALIGNMENT_GOOD_LAWFUL, 10, {0, 0, 0, 0, 2, -2}, tx_dwarf_keys_sprites, 16},
-    {"halfling", RACE_HALFLING, "Halfling", "A small halfling.", ALIGNMENT_GOOD_NEUTRAL, 6, {0, 0, 0, 0, 0, 0}, tx_halfling_keys_sprites, 16},
-    {"goblin", RACE_GOBLIN, "Goblin", "A sneaky goblin.", ALIGNMENT_EVIL_NEUTRAL, 6, {0, 0, 0, 0, 0, 0}, tx_goblin_keys_sprites, 16},
-    {"orc", RACE_ORC, "Orc", "A fierce orc.", ALIGNMENT_EVIL_CHAOTIC, 8, {0, 0, 0, 0, 0, 0}, tx_orc_keys_sprites, 14},
-    {"bat", RACE_BAT, "Bat", "A flying bat.", ALIGNMENT_NEUTRAL_NEUTRAL, 3, {0, 0, 0, 0, 0, 0}, tx_bat_keys_sprites, 10},
-    {"green_slime", RACE_GREEN_SLIME, "Green Slime", "A gooey green slime.", ALIGNMENT_NEUTRAL_NEUTRAL, 4, {-2, -2, -2, -2, -2, -2}, tx_green_slime_keys_sprites, 8},
-    {"wolf", RACE_WOLF, "Wolf", "A wild wolf.", ALIGNMENT_NEUTRAL_NEUTRAL, 6, {0, 0, 0, 0, 0, 0}, tx_wolf_keys_sprites, 12},
-    {"warg", RACE_WARG, "Warg", "A massive warg.", ALIGNMENT_EVIL_NEUTRAL, 12, {0, 0, 0, 0, 0, 0}, tx_warg_keys_sprites, 12},
-    {"rat", RACE_RAT, "Rat", "A scurrying rat.", ALIGNMENT_NEUTRAL_NEUTRAL, 4, {0, 0, 0, 0, 0, 0}, tx_rat_keys_sprites, 10},
-    {"skeleton", RACE_SKELETON, "Skeleton", "A reanimated skeleton.", ALIGNMENT_EVIL_LAWFUL, 8, {0, 0, 0, 0, 0, 0}, tx_skeleton_keys_sprites, 10},
-    {"zombie", RACE_ZOMBIE, "Zombie", "A shambling zombie.", ALIGNMENT_EVIL_NEUTRAL, 8, {0, 0, 0, 0, 0, 0}, tx_zombie_keys_sprites, 10}
+    {"human", race_t::HUMAN, "Human", "A typical human.", alignment_t::NEUTRAL_NEUTRAL, 8, {0, 0, 0, 0, 0, 0}, tx_human_keys_sprites, 16},
+    {"elf", race_t::ELF, "Elf", "A graceful elf.", alignment_t::GOOD_CHAOTIC, 6, {0, 2, 0, 0, -2, 0}, tx_elf_keys_sprites, 16},
+    {"dwarf", race_t::DWARF, "Dwarf", "A sturdy dwarf.", alignment_t::GOOD_LAWFUL, 10, {0, 0, 0, 0, 2, -2}, tx_dwarf_keys_sprites, 16},
+    {"halfling", race_t::HALFLING, "Halfling", "A small halfling.", alignment_t::GOOD_NEUTRAL, 6, {0, 0, 0, 0, 0, 0}, tx_halfling_keys_sprites, 16},
+    {"goblin", race_t::GOBLIN, "Goblin", "A sneaky goblin.", alignment_t::EVIL_NEUTRAL, 6, {0, 0, 0, 0, 0, 0}, tx_goblin_keys_sprites, 16},
+    {"orc", race_t::ORC, "Orc", "A fierce orc.", alignment_t::EVIL_CHAOTIC, 8, {0, 0, 0, 0, 0, 0}, tx_orc_keys_sprites, 14},
+    {"bat", race_t::BAT, "Bat", "A flying bat.", alignment_t::NEUTRAL_NEUTRAL, 3, {0, 0, 0, 0, 0, 0}, tx_bat_keys_sprites, 10},
+    {"green_slime", race_t::GREEN_SLIME, "Green Slime", "A gooey green slime.", alignment_t::NEUTRAL_NEUTRAL, 4, {-2, -2, -2, -2, -2, -2}, tx_green_slime_keys_sprites, 8},
+    {"wolf", race_t::WOLF, "Wolf", "A wild wolf.", alignment_t::NEUTRAL_NEUTRAL, 6, {0, 0, 0, 0, 0, 0}, tx_wolf_keys_sprites, 12},
+    {"warg", race_t::WARG, "Warg", "A massive warg.", alignment_t::EVIL_NEUTRAL, 12, {0, 0, 0, 0, 0, 0}, tx_warg_keys_sprites, 12},
+    {"rat", race_t::RAT, "Rat", "A scurrying rat.", alignment_t::NEUTRAL_NEUTRAL, 4, {0, 0, 0, 0, 0, 0}, tx_rat_keys_sprites, 10},
+    {"skeleton", race_t::SKELETON, "Skeleton", "A reanimated skeleton.", alignment_t::EVIL_LAWFUL, 8, {0, 0, 0, 0, 0, 0}, tx_skeleton_keys_sprites, 10},
+    {"zombie", race_t::ZOMBIE, "Zombie", "A shambling zombie.", alignment_t::EVIL_NEUTRAL, 8, {0, 0, 0, 0, 0, 0}, tx_zombie_keys_sprites, 10}
 };
 
 const ActorDefinition* get_actor_definition(race_t race) {

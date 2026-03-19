@@ -16,7 +16,7 @@ void gamestate::open_confirm_prompt(rpg::confirm_action_t action, const char* fm
     ui.confirm_action = action;
     ui.display_confirm_prompt = true;
     controlmode_before_confirm = controlmode;
-    controlmode = CONTROLMODE_CONFIRM_PROMPT;
+    controlmode = controlmode_t::CONFIRM_PROMPT;
     frame_dirty = true;
 }
 
@@ -32,19 +32,19 @@ void gamestate::handle_confirm_quit() {
 void gamestate::resolve_confirm_prompt(bool confirmed) {
     const rpg::confirm_action_t action = ui.confirm_action;
     ui.display_confirm_prompt = false;
-    ui.confirm_action = rpg::CONFIRM_ACTION_NONE;
+    ui.confirm_action = rpg::confirm_action_t::NONE;
     ui.confirm_prompt_message.clear();
-    controlmode = controlmode_before_confirm == CONTROLMODE_CONFIRM_PROMPT ? CONTROLMODE_PLAYER : controlmode_before_confirm;
-    controlmode_before_confirm = CONTROLMODE_PLAYER;
+    controlmode = controlmode_before_confirm == controlmode_t::CONFIRM_PROMPT ? controlmode_t::PLAYER : controlmode_before_confirm;
+    controlmode_before_confirm = controlmode_t::PLAYER;
     frame_dirty = true;
     if (!confirmed) {
         return;
     }
     switch (action) {
-    case rpg::CONFIRM_ACTION_QUIT:
+    case rpg::confirm_action_t::QUIT:
         handle_confirm_quit();
         break;
-    case rpg::CONFIRM_ACTION_NONE:
+    case rpg::confirm_action_t::NONE:
     default:
         break;
     }
@@ -56,7 +56,7 @@ void gamestate::open_interaction_modal(entityid id, const string& title, const s
     ui.interaction_body = body;
     ui.display_interaction_modal = true;
     controlmode_before_confirm = controlmode;
-    controlmode = CONTROLMODE_INTERACTION;
+    controlmode = controlmode_t::INTERACTION;
     frame_dirty = true;
 }
 
@@ -65,13 +65,13 @@ void gamestate::close_interaction_modal() {
     ui.active_interaction_entity_id = ENTITYID_INVALID;
     ui.interaction_title.clear();
     ui.interaction_body.clear();
-    controlmode = controlmode_before_confirm == CONTROLMODE_INTERACTION ? CONTROLMODE_PLAYER : controlmode_before_confirm;
-    controlmode_before_confirm = CONTROLMODE_PLAYER;
+    controlmode = controlmode_before_confirm == controlmode_t::INTERACTION ? controlmode_t::PLAYER : controlmode_before_confirm;
+    controlmode_before_confirm = controlmode_t::PLAYER;
     frame_dirty = true;
 }
 
 void gamestate::handle_input_interaction(inputstate& is) {
-    if (controlmode != CONTROLMODE_INTERACTION || !ui.display_interaction_modal) {
+    if (controlmode != controlmode_t::INTERACTION || !ui.display_interaction_modal) {
         return;
     }
     if (inputstate_any_pressed(is)) {
@@ -88,7 +88,7 @@ int gamestate::get_level_up_xp_threshold(entityid id) {
 void gamestate::open_level_up_modal() {
     ui.display_level_up_modal = true;
     ui.level_up_selection = 0;
-    controlmode = CONTROLMODE_LEVEL_UP;
+    controlmode = controlmode_t::LEVEL_UP;
     frame_dirty = true;
 }
 
@@ -186,7 +186,7 @@ void gamestate::apply_level_up_selection() {
     apply_level_up_rewards(hero_id);
     ui.pending_level_ups = ui.pending_level_ups > 0 ? ui.pending_level_ups - 1 : 0;
     ui.display_level_up_modal = false;
-    controlmode = CONTROLMODE_PLAYER;
+    controlmode = controlmode_t::PLAYER;
     messages.add("%s increased by 1", stat_name);
     messages.add_history("%s reached level %d", ct.get<name>(hero_id).value_or("hero").c_str(), ct.get<level>(hero_id).value_or(1));
     frame_dirty = true;
@@ -197,7 +197,7 @@ void gamestate::apply_level_up_selection() {
 }
 
 void gamestate::maybe_unlock_level_up(entityid id) {
-    if (id != hero_id || ct.get<entitytype>(id).value_or(ENTITY_NONE) != ENTITY_PLAYER) {
+    if (id != hero_id || ct.get<entitytype>(id).value_or(entitytype_t::NONE) != entitytype_t::PLAYER) {
         return;
     }
 
@@ -217,7 +217,7 @@ void gamestate::maybe_unlock_level_up(entityid id) {
 }
 
 void gamestate::handle_input_level_up(inputstate& is) {
-    if (controlmode != CONTROLMODE_LEVEL_UP || !ui.display_level_up_modal) {
+    if (controlmode != controlmode_t::LEVEL_UP || !ui.display_level_up_modal) {
         return;
     }
     if (inputstate_is_pressed(is, KEY_LEFT)) {
@@ -251,8 +251,8 @@ void gamestate::handle_input_level_up(inputstate& is) {
 }
 
 void gamestate::handle_input_confirm_prompt(inputstate& is) {
-    if (controlmode != CONTROLMODE_CONFIRM_PROMPT) {
-        controlmode = CONTROLMODE_CONFIRM_PROMPT;
+    if (controlmode != controlmode_t::CONFIRM_PROMPT) {
+        controlmode = controlmode_t::CONFIRM_PROMPT;
     }
     if (inputstate_is_pressed(is, KEY_Y)) {
         audio.queue("sfx/Minifantasy_Dungeon_SFX/02_chest_close_1.wav");
@@ -284,11 +284,11 @@ void gamestate::handle_camera_move(inputstate& is) {
 }
 
 void gamestate::handle_input_inventory(inputstate& is) {
-    if (controlmode != CONTROLMODE_INVENTORY || !ui.display_inventory_menu) {
+    if (controlmode != controlmode_t::INVENTORY || !ui.display_inventory_menu) {
         return;
     }
     if (inputstate_is_pressed(is, KEY_I) || inputstate_is_pressed(is, KEY_ESCAPE)) {
-        controlmode = CONTROLMODE_PLAYER;
+        controlmode = controlmode_t::PLAYER;
         ui.display_inventory_menu = false;
         audio.queue("sfx/Minifantasy_Dungeon_SFX/02_chest_close_1.wav");
         return;
@@ -370,12 +370,12 @@ bool gamestate::handle_cycle_messages_test() {
 }
 
 void gamestate::handle_camera_zoom(inputstate& is) {
-    if (is_action_pressed(is, INPUT_ACTION_ZOOM_IN)) {
+    if (is_action_pressed(is, gameplay_input_action_t::ZOOM_IN)) {
         minfo("camera zoom in");
         cam2d.zoom += DEFAULT_ZOOM_INCR;
         frame_dirty = true;
     }
-    else if (is_action_pressed(is, INPUT_ACTION_ZOOM_OUT)) {
+    else if (is_action_pressed(is, gameplay_input_action_t::ZOOM_OUT)) {
         minfo("camera zoom out");
         cam2d.zoom -= (cam2d.zoom > 1.0) * DEFAULT_ZOOM_INCR;
         frame_dirty = true;
@@ -401,48 +401,48 @@ bool gamestate::handle_change_dir(inputstate& is) {
         return true;
     }
     bool is_dead = maybe_player_is_dead.value();
-    if (is_action_pressed(is, INPUT_ACTION_FACE_WAIT)) {
+    if (is_action_pressed(is, gameplay_input_action_t::FACE_WAIT)) {
         player_changing_dir = false;
-        flag = GAMESTATE_FLAG_PLAYER_ANIM;
+        flag = gamestate_flag_t::PLAYER_ANIM;
     }
-    else if (is_action_pressed(is, INPUT_ACTION_FACE_UP)) {
-        change_player_dir(DIR_UP);
+    else if (is_action_pressed(is, gameplay_input_action_t::FACE_UP)) {
+        change_player_dir(direction_t::UP);
     }
-    else if (is_action_pressed(is, INPUT_ACTION_FACE_DOWN)) {
-        change_player_dir(DIR_DOWN);
+    else if (is_action_pressed(is, gameplay_input_action_t::FACE_DOWN)) {
+        change_player_dir(direction_t::DOWN);
     }
-    else if (is_action_pressed(is, INPUT_ACTION_FACE_LEFT)) {
-        change_player_dir(DIR_LEFT);
+    else if (is_action_pressed(is, gameplay_input_action_t::FACE_LEFT)) {
+        change_player_dir(direction_t::LEFT);
     }
-    else if (is_action_pressed(is, INPUT_ACTION_FACE_RIGHT)) {
-        change_player_dir(DIR_RIGHT);
+    else if (is_action_pressed(is, gameplay_input_action_t::FACE_RIGHT)) {
+        change_player_dir(direction_t::RIGHT);
     }
-    else if (is_action_pressed(is, INPUT_ACTION_FACE_UP_LEFT)) {
-        change_player_dir(DIR_UP_LEFT);
+    else if (is_action_pressed(is, gameplay_input_action_t::FACE_UP_LEFT)) {
+        change_player_dir(direction_t::UP_LEFT);
     }
-    else if (is_action_pressed(is, INPUT_ACTION_FACE_UP_RIGHT)) {
-        change_player_dir(DIR_UP_RIGHT);
+    else if (is_action_pressed(is, gameplay_input_action_t::FACE_UP_RIGHT)) {
+        change_player_dir(direction_t::UP_RIGHT);
     }
-    else if (is_action_pressed(is, INPUT_ACTION_FACE_DOWN_LEFT)) {
-        change_player_dir(DIR_DOWN_LEFT);
+    else if (is_action_pressed(is, gameplay_input_action_t::FACE_DOWN_LEFT)) {
+        change_player_dir(direction_t::DOWN_LEFT);
     }
-    else if (is_action_pressed(is, INPUT_ACTION_FACE_DOWN_RIGHT)) {
-        change_player_dir(DIR_DOWN_RIGHT);
+    else if (is_action_pressed(is, gameplay_input_action_t::FACE_DOWN_RIGHT)) {
+        change_player_dir(direction_t::DOWN_RIGHT);
     }
-    else if (is_action_pressed(is, INPUT_ACTION_FACE_ATTACK)) {
+    else if (is_action_pressed(is, gameplay_input_action_t::FACE_ATTACK)) {
         if (is_dead) {
             return messages.add("You cannot attack while dead");
         }
         ct.set<attacking>(hero_id, true);
         ct.set<update>(hero_id, true);
-        flag = GAMESTATE_FLAG_PLAYER_ANIM;
+        flag = gamestate_flag_t::PLAYER_ANIM;
         player_changing_dir = false;
     }
     return true;
 }
 
 bool gamestate::handle_change_dir_intent(inputstate& is) {
-    if (is_action_pressed(is, INPUT_ACTION_DIRECTION_MODE)) {
+    if (is_action_pressed(is, gameplay_input_action_t::DIRECTION_MODE)) {
         player_changing_dir = true;
         return true;
     }
@@ -450,9 +450,9 @@ bool gamestate::handle_change_dir_intent(inputstate& is) {
 }
 
 bool gamestate::handle_display_inventory(inputstate& is) {
-    if (is_action_pressed(is, INPUT_ACTION_INVENTORY)) {
+    if (is_action_pressed(is, gameplay_input_action_t::INVENTORY)) {
         ui.display_inventory_menu = true;
-        controlmode = CONTROLMODE_INVENTORY;
+        controlmode = controlmode_t::INVENTORY;
         ui.mini_inventory_scroll_offset = 0;
         ui.inventory_cursor = Vector2{0, 0};
         frame_dirty = true;
@@ -463,7 +463,7 @@ bool gamestate::handle_display_inventory(inputstate& is) {
 }
 
 bool gamestate::handle_toggle_full_light(inputstate& is) {
-    if (!is_action_pressed(is, INPUT_ACTION_TOGGLE_FULL_LIGHT)) {
+    if (!is_action_pressed(is, gameplay_input_action_t::TOGGLE_FULL_LIGHT)) {
         return false;
     }
     shared_ptr<dungeon_floor> df = d.get_current_floor();
@@ -475,7 +475,7 @@ bool gamestate::handle_toggle_full_light(inputstate& is) {
 }
 
 bool gamestate::handle_restart(inputstate& is) {
-    if (is_action_pressed(is, INPUT_ACTION_RESTART)) {
+    if (is_action_pressed(is, gameplay_input_action_t::RESTART)) {
         do_restart = true;
         return true;
     }
@@ -483,20 +483,20 @@ bool gamestate::handle_restart(inputstate& is) {
 }
 
 void gamestate::handle_input_gameplay_controlmode_player(inputstate& is) {
-    if (flag != GAMESTATE_FLAG_PLAYER_INPUT) {
+    if (flag != gamestate_flag_t::PLAYER_INPUT) {
         return;
     }
     if (inputstate_is_pressed(is, KEY_ESCAPE)) {
-        open_confirm_prompt(rpg::CONFIRM_ACTION_QUIT, "Do You Want To Exit? Press Y or N");
+        open_confirm_prompt(rpg::confirm_action_t::QUIT, "Do You Want To Exit? Press Y or N");
         return;
     }
     handle_camera_zoom(is);
     if (handle_cycle_messages(is)) {
         return;
     }
-    if (is_action_pressed(is, INPUT_ACTION_HELP)) {
+    if (is_action_pressed(is, gameplay_input_action_t::HELP)) {
         ui.display_help_menu = true;
-        controlmode = CONTROLMODE_HELP_MENU;
+        controlmode = controlmode_t::HELP_MENU;
     }
     bool is_dead = ct.get<dead>(hero_id).value_or(true);
     if (is_dead) {
@@ -524,20 +524,20 @@ void gamestate::handle_input_gameplay_controlmode_player(inputstate& is) {
         else {
             minfo2("hero failed to move randomly");
         }
-        flag = GAMESTATE_FLAG_PLAYER_ANIM;
+        flag = gamestate_flag_t::PLAYER_ANIM;
         return;
     }
     else if (test) {
         return;
     }
-    else if (is_action_pressed(is, INPUT_ACTION_OPTIONS)) {
+    else if (is_action_pressed(is, gameplay_input_action_t::OPTIONS)) {
         ui.display_option_menu = true;
-        controlmode = CONTROLMODE_OPTION_MENU;
+        controlmode = controlmode_t::OPTION_MENU;
         return;
     }
-    else if (is_action_pressed(is, INPUT_ACTION_PULL)) {
+    else if (is_action_pressed(is, gameplay_input_action_t::PULL)) {
         run_pull_action(hero_id);
-        flag = GAMESTATE_FLAG_PLAYER_ANIM;
+        flag = gamestate_flag_t::PLAYER_ANIM;
         return;
     }
     if (handle_toggle_full_light(is) || handle_change_dir(is) || handle_change_dir_intent(is) || handle_display_inventory(is)) {
@@ -559,10 +559,10 @@ void gamestate::handle_input_gameplay_controlmode_player(inputstate& is) {
 }
 
 void gamestate::handle_input_action_menu(inputstate& is) {
-    massert(controlmode == CONTROLMODE_ACTION_MENU, "controlmode isnt in action menu: %d", controlmode);
+    massert(controlmode == controlmode_t::ACTION_MENU, "controlmode isnt in action menu: %d", controlmode);
     if (inputstate_is_pressed(is, KEY_SPACE)) {
         ui.display_action_menu = false;
-        controlmode = CONTROLMODE_PLAYER;
+        controlmode = controlmode_t::PLAYER;
         return;
     }
     else if (inputstate_is_pressed(is, KEY_DOWN)) {
@@ -574,10 +574,10 @@ void gamestate::handle_input_action_menu(inputstate& is) {
 }
 
 void gamestate::handle_input_option_menu(inputstate& is) {
-    massert(controlmode == CONTROLMODE_OPTION_MENU, "controlmode isnt in option menu: %d", controlmode);
+    massert(controlmode == controlmode_t::OPTION_MENU, "controlmode isnt in option menu: %d", controlmode);
     if (inputstate_is_pressed(is, KEY_GRAVE) || inputstate_is_pressed(is, KEY_ESCAPE)) {
         ui.display_option_menu = false;
-        controlmode = CONTROLMODE_PLAYER;
+        controlmode = controlmode_t::PLAYER;
         frame_dirty = true;
     }
     else if (inputstate_is_pressed(is, KEY_UP)) {
@@ -590,16 +590,16 @@ void gamestate::handle_input_option_menu(inputstate& is) {
     }
     else if (inputstate_is_pressed(is, KEY_ENTER)) {
         const option_type selected = ui.options_menu.get_option(ui.options_menu.get_selection());
-        if (selected == OPTION_SOUND) {
+        if (selected == option_type::SOUND) {
             open_sound_menu();
         }
-        else if (selected == OPTION_WINDOW_BOXES) {
+        else if (selected == option_type::WINDOW_BOXES) {
             open_window_color_menu();
         }
-        else if (selected == OPTION_CONTROLS) {
+        else if (selected == option_type::CONTROLS) {
             open_controls_menu();
         }
-        else if (selected == OPTION_INVENTORY_MENU) {
+        else if (selected == option_type::INVENTORY_MENU) {
             ui.prefer_mini_inventory_menu = !ui.prefer_mini_inventory_menu;
             ui.mini_inventory_scroll_offset = 0;
             ui.inventory_cursor = Vector2{0, 0};
@@ -609,7 +609,7 @@ void gamestate::handle_input_option_menu(inputstate& is) {
 }
 
 void gamestate::handle_input_sound_menu(inputstate& is) {
-    if (controlmode != CONTROLMODE_SOUND_MENU || !ui.display_sound_menu) {
+    if (controlmode != controlmode_t::SOUND_MENU || !ui.display_sound_menu) {
         return;
     }
 
@@ -657,7 +657,7 @@ void gamestate::handle_input_sound_menu(inputstate& is) {
 }
 
 void gamestate::handle_input_window_color_menu(inputstate& is) {
-    if (controlmode != CONTROLMODE_WINDOW_COLOR_MENU || !ui.display_window_color_menu) {
+    if (controlmode != controlmode_t::WINDOW_COLOR_MENU || !ui.display_window_color_menu) {
         return;
     }
 
@@ -701,78 +701,78 @@ void gamestate::handle_input_window_color_menu(inputstate& is) {
 }
 
 void gamestate::handle_input_help_menu(inputstate& is) {
-    massert(controlmode == CONTROLMODE_HELP_MENU, "controlmode isnt in help menu: %d", controlmode);
+    massert(controlmode == controlmode_t::HELP_MENU, "controlmode isnt in help menu: %d", controlmode);
     if (inputstate_any_pressed(is)) {
         ui.display_help_menu = false;
-        controlmode = CONTROLMODE_PLAYER;
+        controlmode = controlmode_t::PLAYER;
     }
 }
 
 void gamestate::handle_input_gameplay_scene(inputstate& is) {
     minfo2("handle input gameplay scene");
-    if (controlmode == CONTROLMODE_KEYBOARD_PROFILE) {
+    if (controlmode == controlmode_t::KEYBOARD_PROFILE) {
         handle_input_keyboard_profile_prompt(is);
         return;
     }
-    if (controlmode == CONTROLMODE_LEVEL_UP) {
+    if (controlmode == controlmode_t::LEVEL_UP) {
         handle_input_level_up(is);
         return;
     }
-    if (controlmode == CONTROLMODE_CONFIRM_PROMPT) {
+    if (controlmode == controlmode_t::CONFIRM_PROMPT) {
         handle_input_confirm_prompt(is);
         return;
     }
-    if (controlmode == CONTROLMODE_INTERACTION) {
+    if (controlmode == controlmode_t::INTERACTION) {
         handle_input_interaction(is);
         return;
     }
-    if (controlmode == CONTROLMODE_SOUND_MENU) {
+    if (controlmode == controlmode_t::SOUND_MENU) {
         handle_input_sound_menu(is);
         return;
     }
-    if (controlmode == CONTROLMODE_WINDOW_COLOR_MENU) {
+    if (controlmode == controlmode_t::WINDOW_COLOR_MENU) {
         handle_input_window_color_menu(is);
         return;
     }
-    if (controlmode == CONTROLMODE_CONTROLS_MENU) {
+    if (controlmode == controlmode_t::CONTROLS_MENU) {
         handle_input_controls_menu(is);
         return;
     }
-    if (is_action_pressed(is, INPUT_ACTION_CAMERA_TOGGLE)) {
-        if (controlmode == CONTROLMODE_PLAYER) {
-            controlmode = CONTROLMODE_CAMERA;
+    if (is_action_pressed(is, gameplay_input_action_t::CAMERA_TOGGLE)) {
+        if (controlmode == controlmode_t::PLAYER) {
+            controlmode = controlmode_t::CAMERA;
         }
-        else if (controlmode == CONTROLMODE_CAMERA) {
-            controlmode = CONTROLMODE_PLAYER;
+        else if (controlmode == controlmode_t::CAMERA) {
+            controlmode = controlmode_t::PLAYER;
         }
         frame_dirty = true;
     }
 
-    if (controlmode == CONTROLMODE_CAMERA) {
+    if (controlmode == controlmode_t::CAMERA) {
         handle_camera_move(is);
     }
-    else if (controlmode == CONTROLMODE_PLAYER) {
+    else if (controlmode == controlmode_t::PLAYER) {
         handle_input_gameplay_controlmode_player(is);
     }
-    else if (controlmode == CONTROLMODE_INVENTORY) {
+    else if (controlmode == controlmode_t::INVENTORY) {
         handle_input_inventory(is);
     }
-    else if (controlmode == CONTROLMODE_CHEST) {
+    else if (controlmode == controlmode_t::CHEST) {
         handle_input_chest(is);
     }
-    else if (controlmode == CONTROLMODE_ACTION_MENU) {
+    else if (controlmode == controlmode_t::ACTION_MENU) {
         handle_input_action_menu(is);
     }
-    else if (controlmode == CONTROLMODE_OPTION_MENU) {
+    else if (controlmode == controlmode_t::OPTION_MENU) {
         handle_input_option_menu(is);
     }
-    else if (controlmode == CONTROLMODE_HELP_MENU) {
+    else if (controlmode == controlmode_t::HELP_MENU) {
         handle_input_help_menu(is);
     }
-    else if (controlmode == CONTROLMODE_LEVEL_UP) {
+    else if (controlmode == controlmode_t::LEVEL_UP) {
         handle_input_level_up(is);
     }
-    else if (controlmode == CONTROLMODE_INTERACTION) {
+    else if (controlmode == controlmode_t::INTERACTION) {
         handle_input_interaction(is);
     }
 }
@@ -783,20 +783,20 @@ void gamestate::handle_input(inputstate& is) {
         debugpanelon = !debugpanelon;
         minfo2("Toggling debug panel: %s", debugpanelon ? "ON" : "OFF");
     }
-    if (ui.display_confirm_prompt || controlmode == CONTROLMODE_CONFIRM_PROMPT) {
+    if (ui.display_confirm_prompt || controlmode == controlmode_t::CONFIRM_PROMPT) {
         handle_input_confirm_prompt(is);
         return;
     }
-    if (current_scene == SCENE_TITLE) {
+    if (current_scene == scene_t::TITLE) {
         handle_input_title_scene(is);
     }
-    else if (current_scene == SCENE_MAIN_MENU) {
+    else if (current_scene == scene_t::MAIN_MENU) {
         handle_input_main_menu_scene(is);
     }
-    else if (current_scene == SCENE_CHARACTER_CREATION) {
+    else if (current_scene == scene_t::CHARACTER_CREATION) {
         handle_input_character_creation_scene(is);
     }
-    else if (current_scene == SCENE_GAMEPLAY) {
+    else if (current_scene == scene_t::GAMEPLAY) {
         handle_input_gameplay_scene(is);
     }
 }

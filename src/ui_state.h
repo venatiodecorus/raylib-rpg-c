@@ -10,10 +10,10 @@
 
 namespace rpg {
 
-typedef enum {
-    CONFIRM_ACTION_NONE = 0,
-    CONFIRM_ACTION_QUIT,
-} confirm_action_t;
+enum class confirm_action_t {
+    NONE = 0,
+    QUIT,
+};
 
 constexpr Color DEFAULT_WINDOW_BOX_BGCOLOR = Color{0, 0, 255, 128};
 constexpr Color DEFAULT_WINDOW_BOX_FGCOLOR = Color{255, 255, 255, 255};
@@ -52,7 +52,7 @@ struct UIState {
     entityid active_chest_id = ENTITYID_INVALID;
 
     // Confirm prompt
-    confirm_action_t confirm_action = CONFIRM_ACTION_NONE;
+    confirm_action_t confirm_action = confirm_action_t::NONE;
     std::string confirm_prompt_message;
 
     // Interaction modal

@@ -6,8 +6,8 @@
 class EntityFactoryTestSuite : public CxxTest::TestSuite {
 private:
     vec3 add_initialized_floor(gamestate& g, int width = 8, int height = 8) {
-        auto df = g.d.create_floor(BIOME_STONE, width, height);
-        df->df_set_all_tiles(TILE_FLOOR_STONE_00);
+        auto df = g.d.create_floor(biome_t::STONE, width, height);
+        df->df_set_all_tiles(tiletype_t::FLOOR_STONE_00);
         g.d.add_floor(df);
         g.d.is_initialized = true;
         return vec3{1, 1, 0};
@@ -15,9 +15,9 @@ private:
 
 public:
     void testAlignmentToStrReturnsExpectedNames() {
-        TS_ASSERT_EQUALS(alignment_to_str(ALIGNMENT_GOOD_LAWFUL), "lawful good");
-        TS_ASSERT_EQUALS(alignment_to_str(ALIGNMENT_NEUTRAL_NEUTRAL), "true neutral");
-        TS_ASSERT_EQUALS(alignment_to_str(ALIGNMENT_EVIL_CHAOTIC), "chaotic evil");
+        TS_ASSERT_EQUALS(alignment_to_str(alignment_t::GOOD_LAWFUL), "lawful good");
+        TS_ASSERT_EQUALS(alignment_to_str(alignment_t::NEUTRAL_NEUTRAL), "true neutral");
+        TS_ASSERT_EQUALS(alignment_to_str(alignment_t::EVIL_CHAOTIC), "chaotic evil");
     }
 
     void testCreateWeaponAtWithSetsExpectedWeaponComponents() {
@@ -27,9 +27,9 @@ public:
         const entityid id = g.create_weapon_at_with(g.ct, loc, g.dagger_init());
 
         TS_ASSERT_DIFFERS(id, ENTITYID_INVALID);
-        TS_ASSERT_EQUALS(g.ct.get<entitytype>(id).value_or(ENTITY_NONE), ENTITY_ITEM);
-        TS_ASSERT_EQUALS(g.ct.get<itemtype>(id).value_or(ITEM_NONE), ITEM_WEAPON);
-        TS_ASSERT_EQUALS(g.ct.get<weapontype>(id).value_or(WEAPON_NONE), WEAPON_DAGGER);
+        TS_ASSERT_EQUALS(g.ct.get<entitytype>(id).value_or(entitytype_t::NONE), entitytype_t::ITEM);
+        TS_ASSERT_EQUALS(g.ct.get<itemtype>(id).value_or(itemtype_t::NONE), itemtype_t::WEAPON);
+        TS_ASSERT_EQUALS(g.ct.get<weapontype>(id).value_or(weapontype_t::NONE), weapontype_t::DAGGER);
         TS_ASSERT_EQUALS(g.ct.get<name>(id).value_or(""), "dagger");
         TS_ASSERT_EQUALS(g.ct.get<description>(id).value_or(""), "Stabby stabby.");
         TS_ASSERT(g.ct.get<update>(id).value_or(false));
@@ -53,9 +53,9 @@ public:
         const entityid id = g.create_shield_at_with(g.ct, loc, g.shield_init());
 
         TS_ASSERT_DIFFERS(id, ENTITYID_INVALID);
-        TS_ASSERT_EQUALS(g.ct.get<entitytype>(id).value_or(ENTITY_NONE), ENTITY_ITEM);
-        TS_ASSERT_EQUALS(g.ct.get<itemtype>(id).value_or(ITEM_NONE), ITEM_SHIELD);
-        TS_ASSERT_EQUALS(g.ct.get<shieldtype>(id).value_or(SHIELD_NONE), SHIELD_KITE);
+        TS_ASSERT_EQUALS(g.ct.get<entitytype>(id).value_or(entitytype_t::NONE), entitytype_t::ITEM);
+        TS_ASSERT_EQUALS(g.ct.get<itemtype>(id).value_or(itemtype_t::NONE), itemtype_t::SHIELD);
+        TS_ASSERT_EQUALS(g.ct.get<shieldtype>(id).value_or(shieldtype_t::NONE), shieldtype_t::KITE);
         TS_ASSERT_EQUALS(g.ct.get<name>(id).value_or(""), "kite shield");
         TS_ASSERT_EQUALS(g.ct.get<description>(id).value_or(""), "Standard knight's shield");
         TS_ASSERT_EQUALS(g.ct.get<block_chance>(id).value_or(0), 90);
@@ -70,12 +70,12 @@ public:
         gamestate g;
         const vec3 loc = add_initialized_floor(g);
 
-        const entityid id = g.create_potion_at_with(loc, g.potion_init(POTION_HP_SMALL));
+        const entityid id = g.create_potion_at_with(loc, g.potion_init(potiontype_t::HP_SMALL));
 
         TS_ASSERT_DIFFERS(id, ENTITYID_INVALID);
-        TS_ASSERT_EQUALS(g.ct.get<entitytype>(id).value_or(ENTITY_NONE), ENTITY_ITEM);
-        TS_ASSERT_EQUALS(g.ct.get<itemtype>(id).value_or(ITEM_NONE), ITEM_POTION);
-        TS_ASSERT_EQUALS(g.ct.get<potiontype>(id).value_or(POTION_NONE), POTION_HP_SMALL);
+        TS_ASSERT_EQUALS(g.ct.get<entitytype>(id).value_or(entitytype_t::NONE), entitytype_t::ITEM);
+        TS_ASSERT_EQUALS(g.ct.get<itemtype>(id).value_or(itemtype_t::NONE), itemtype_t::POTION);
+        TS_ASSERT_EQUALS(g.ct.get<potiontype>(id).value_or(potiontype_t::NONE), potiontype_t::HP_SMALL);
         TS_ASSERT_EQUALS(g.ct.get<name>(id).value_or(""), "small healing potion");
         TS_ASSERT_EQUALS(g.ct.get<description>(id).value_or(""), "a small healing potion");
         TS_ASSERT(g.ct.get<update>(id).value_or(false));
@@ -95,11 +95,11 @@ public:
         gamestate g;
         const vec3 loc = add_initialized_floor(g);
 
-        const entityid id = g.create_prop_at_with(PROP_DUNGEON_STATUE_00, loc, dungeon_prop_init(PROP_DUNGEON_STATUE_00));
+        const entityid id = g.create_prop_at_with(proptype_t::DUNGEON_STATUE_00, loc, dungeon_prop_init(proptype_t::DUNGEON_STATUE_00));
 
         TS_ASSERT_DIFFERS(id, ENTITYID_INVALID);
-        TS_ASSERT_EQUALS(g.ct.get<entitytype>(id).value_or(ENTITY_NONE), ENTITY_PROP);
-        TS_ASSERT_EQUALS(g.ct.get<proptype>(id).value_or(PROP_NONE), PROP_DUNGEON_STATUE_00);
+        TS_ASSERT_EQUALS(g.ct.get<entitytype>(id).value_or(entitytype_t::NONE), entitytype_t::PROP);
+        TS_ASSERT_EQUALS(g.ct.get<proptype>(id).value_or(proptype_t::NONE), proptype_t::DUNGEON_STATUE_00);
         TS_ASSERT_EQUALS(g.ct.get<name>(id).value_or(""), "statue");
         TS_ASSERT_EQUALS(g.ct.get<description>(id).value_or(""), "A heavy carved statue worn smooth by years of damp air and passing hands.");
         TS_ASSERT(g.ct.get<solid>(id).value_or(false));
@@ -118,7 +118,7 @@ public:
         const entityid id = g.create_chest_at_with(loc, [](CT&, const entityid) {});
 
         TS_ASSERT_DIFFERS(id, ENTITYID_INVALID);
-        TS_ASSERT_EQUALS(g.ct.get<entitytype>(id).value_or(ENTITY_NONE), ENTITY_CHEST);
+        TS_ASSERT_EQUALS(g.ct.get<entitytype>(id).value_or(entitytype_t::NONE), entitytype_t::CHEST);
         TS_ASSERT_EQUALS(g.ct.get<name>(id).value_or(""), "treasure chest");
         TS_ASSERT_EQUALS(g.ct.get<description>(id).value_or(""), "A stout treasure chest reinforced with iron bands and built to survive rough handling.");
         TS_ASSERT(g.ct.get<pushable>(id).value_or(false));
@@ -140,9 +140,9 @@ public:
         const entityid id = g.create_orc_at_with(loc, [](CT&, const entityid) {});
 
         TS_ASSERT_DIFFERS(id, ENTITYID_INVALID);
-        TS_ASSERT_EQUALS(g.ct.get<entitytype>(id).value_or(ENTITY_NONE), ENTITY_NPC);
-        TS_ASSERT_EQUALS(g.ct.get<race>(id).value_or(RACE_NONE), RACE_ORC);
-        TS_ASSERT_EQUALS(g.ct.get<alignment>(id).value_or(ALIGNMENT_NONE), ALIGNMENT_EVIL_CHAOTIC);
+        TS_ASSERT_EQUALS(g.ct.get<entitytype>(id).value_or(entitytype_t::NONE), entitytype_t::NPC);
+        TS_ASSERT_EQUALS(g.ct.get<race>(id).value_or(race_t::NONE), race_t::ORC);
+        TS_ASSERT_EQUALS(g.ct.get<alignment>(id).value_or(alignment_t::NONE), alignment_t::EVIL_CHAOTIC);
         TS_ASSERT(g.ct.get<name>(id).has_value());
         TS_ASSERT(!g.ct.get<name>(id).value_or("").empty());
         TS_ASSERT_EQUALS(g.ct.get<dialogue_text>(id).value_or(""), "They give you a guarded look but say nothing.");
@@ -164,12 +164,12 @@ public:
         gamestate g;
         const vec3 loc = add_initialized_floor(g);
 
-        const entityid id = g.create_npc_at_with(RACE_DWARF, loc, [](CT&, const entityid) {});
+        const entityid id = g.create_npc_at_with(race_t::DWARF, loc, [](CT&, const entityid) {});
 
         TS_ASSERT_DIFFERS(id, ENTITYID_INVALID);
         TS_ASSERT_EQUALS(g.ct.get<name>(id).value_or(""), "dwarf");
         TS_ASSERT_EQUALS(g.ct.get<dialogue_text>(id).value_or(""), "They give you a guarded look but say nothing.");
-        TS_ASSERT_EQUALS(g.ct.get<alignment>(id).value_or(ALIGNMENT_NONE), ALIGNMENT_GOOD_LAWFUL);
+        TS_ASSERT_EQUALS(g.ct.get<alignment>(id).value_or(alignment_t::NONE), alignment_t::GOOD_LAWFUL);
         TS_ASSERT(!g.ct.get<aggro>(id).value_or(true));
     }
 
@@ -177,31 +177,31 @@ public:
         gamestate g;
         const vec3 loc = add_initialized_floor(g);
 
-        const entityid id = g.create_npc_at_with(RACE_GREEN_SLIME, loc, [](CT&, const entityid) {});
+        const entityid id = g.create_npc_at_with(race_t::GREEN_SLIME, loc, [](CT&, const entityid) {});
 
         TS_ASSERT_DIFFERS(id, ENTITYID_INVALID);
         TS_ASSERT_EQUALS(g.ct.get<name>(id).value_or(""), "green slime");
-        TS_ASSERT_EQUALS(g.ct.get<alignment>(id).value_or(ALIGNMENT_NONE), ALIGNMENT_NEUTRAL_NEUTRAL);
+        TS_ASSERT_EQUALS(g.ct.get<alignment>(id).value_or(alignment_t::NONE), alignment_t::NEUTRAL_NEUTRAL);
         TS_ASSERT(!g.ct.get<aggro>(id).value_or(true));
-        TS_ASSERT_EQUALS(get_racial_modifiers(RACE_GREEN_SLIME, 0), -2);
-        TS_ASSERT_EQUALS(get_racial_modifiers(RACE_GREEN_SLIME, 1), -2);
-        TS_ASSERT_EQUALS(get_racial_modifiers(RACE_GREEN_SLIME, 2), -2);
-        TS_ASSERT_EQUALS(get_racial_modifiers(RACE_GREEN_SLIME, 3), -2);
-        TS_ASSERT_EQUALS(get_racial_modifiers(RACE_GREEN_SLIME, 4), -2);
-        TS_ASSERT_EQUALS(get_racial_modifiers(RACE_GREEN_SLIME, 5), -2);
+        TS_ASSERT_EQUALS(get_racial_modifiers(race_t::GREEN_SLIME, 0), -2);
+        TS_ASSERT_EQUALS(get_racial_modifiers(race_t::GREEN_SLIME, 1), -2);
+        TS_ASSERT_EQUALS(get_racial_modifiers(race_t::GREEN_SLIME, 2), -2);
+        TS_ASSERT_EQUALS(get_racial_modifiers(race_t::GREEN_SLIME, 3), -2);
+        TS_ASSERT_EQUALS(get_racial_modifiers(race_t::GREEN_SLIME, 4), -2);
+        TS_ASSERT_EQUALS(get_racial_modifiers(race_t::GREEN_SLIME, 5), -2);
     }
 
     void testCreatePlayerAtWithUsesCharacterCreationAlignment() {
         gamestate g;
         const vec3 loc = add_initialized_floor(g);
-        g.chara_creation.race = RACE_DWARF;
-        g.chara_creation.alignment = ALIGNMENT_GOOD_LAWFUL;
+        g.chara_creation.race = race_t::DWARF;
+        g.chara_creation.alignment = alignment_t::GOOD_LAWFUL;
 
         const entityid id = g.create_player_at_with(loc, "hero", g.player_init(12));
 
         TS_ASSERT_DIFFERS(id, ENTITYID_INVALID);
-        TS_ASSERT_EQUALS(g.ct.get<entitytype>(id).value_or(ENTITY_NONE), ENTITY_PLAYER);
-        TS_ASSERT_EQUALS(g.ct.get<alignment>(id).value_or(ALIGNMENT_NONE), ALIGNMENT_GOOD_LAWFUL);
+        TS_ASSERT_EQUALS(g.ct.get<entitytype>(id).value_or(entitytype_t::NONE), entitytype_t::PLAYER);
+        TS_ASSERT_EQUALS(g.ct.get<alignment>(id).value_or(alignment_t::NONE), alignment_t::GOOD_LAWFUL);
     }
 
     void testApplyPermanentAttributeIncreaseCanBeUsedOutsideLevelUp() {

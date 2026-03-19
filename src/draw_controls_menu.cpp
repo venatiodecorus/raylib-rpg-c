@@ -8,7 +8,7 @@ void draw_controls_menu(gamestate& g) {
     constexpr int font_size = 10;
     constexpr int line_height = 12;
     constexpr int padding = 12;
-    const int visible_rows = INPUT_ACTION_COUNT + 4;
+    const int visible_rows = static_cast<int>(gameplay_input_action_t::COUNT) + 4;
     const int box_w = 500;
     const int box_h = visible_rows * line_height + padding * 2 + 24;
     const int box_x = (DEFAULT_TARGET_WIDTH - box_w) / 2;
@@ -35,7 +35,7 @@ void draw_controls_menu(gamestate& g) {
         box_x + padding, y, font_size, reset_selected ? YELLOW : g.ui.window_box_fgcolor);
     y += line_height;
 
-    for (int action = 0; action < INPUT_ACTION_COUNT; action++) {
+    for (int action = 0; action < static_cast<int>(gameplay_input_action_t::COUNT); action++) {
         const bool selected = g.ui.controls_menu_selection == static_cast<size_t>(action + 2);
         const char* action_label = gameplay_input_action_label(static_cast<gameplay_input_action_t>(action));
         const string binding = g.get_keybinding_label(g.keyboard_profile, static_cast<gameplay_input_action_t>(action));

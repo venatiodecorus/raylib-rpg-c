@@ -74,16 +74,16 @@ with_fun dungeon_prop_init(proptype_t type) {
 
 proptype_t dungeon_random_floor_prop_type(mt19937& mt) {
     static constexpr proptype_t floor_prop_types[] = {
-        PROP_DUNGEON_STATUE_00,
-        PROP_DUNGEON_TORCH_00,
-        PROP_DUNGEON_CANDLE_00,
-        PROP_DUNGEON_JAR_00,
-        PROP_DUNGEON_PLATE_00,
-        PROP_DUNGEON_WOODEN_BARREL_OPEN_TOP_EMPTY,
-        PROP_DUNGEON_WOODEN_BARREL_OPEN_TOP_WATER,
-        PROP_DUNGEON_WOODEN_CHAIR_00,
-        PROP_DUNGEON_WOODEN_TABLE_00,
-        PROP_DUNGEON_WOODEN_TABLE_01,
+        proptype_t::DUNGEON_STATUE_00,
+        proptype_t::DUNGEON_TORCH_00,
+        proptype_t::DUNGEON_CANDLE_00,
+        proptype_t::DUNGEON_JAR_00,
+        proptype_t::DUNGEON_PLATE_00,
+        proptype_t::DUNGEON_WOODEN_BARREL_OPEN_TOP_EMPTY,
+        proptype_t::DUNGEON_WOODEN_BARREL_OPEN_TOP_WATER,
+        proptype_t::DUNGEON_WOODEN_CHAIR_00,
+        proptype_t::DUNGEON_WOODEN_TABLE_00,
+        proptype_t::DUNGEON_WOODEN_TABLE_01,
     };
     uniform_int_distribution<int> dist(0, static_cast<int>(sizeof(floor_prop_types) / sizeof(floor_prop_types[0])) - 1);
     return floor_prop_types[dist(mt)];
@@ -91,7 +91,7 @@ proptype_t dungeon_random_floor_prop_type(mt19937& mt) {
 
 bool dungeon_prop_tile_is_walkable(tile_t& tile) {
     const tiletype_t type = tile.get_type();
-    return tile_is_walkable(type) && type != TILE_UPSTAIRS && type != TILE_DOWNSTAIRS;
+    return tile_is_walkable(type) && type != tiletype_t::UPSTAIRS && type != tiletype_t::DOWNSTAIRS;
 }
 
 int dungeon_count_walkable_cardinal_neighbors(shared_ptr<dungeon_floor> df, vec3 loc) {
@@ -175,7 +175,7 @@ void gamestate::create_and_add_df_1(biome_t type, int w, int h, int df_count, fl
     (void)df_count;
     auto df = d.create_floor(type, w, h);
     vector<room> rooms;
-    constexpr direction_t dirs[] = {DIR_LEFT, DIR_RIGHT, DIR_UP, DIR_DOWN};
+    constexpr direction_t dirs[] = {direction_t::LEFT, direction_t::RIGHT, direction_t::UP, direction_t::DOWN};
 
     const bool compact_map = w <= 8 && h <= 8;
     const int min_room_w = compact_map ? 2 : 3;
@@ -271,8 +271,8 @@ void gamestate::init_dungeon(biome_t type, int df_count, float parts, int width,
     minfo2("init_dungeon");
     massert(df_count > 0, "df_count is <= 0");
     massert(df_count > 0, "df_count == 0");
-    massert(type > BIOME_NONE, "biome is invalid");
-    massert(type < BIOME_COUNT, "biome is invalid 2");
+    massert(type > biome_t::NONE, "biome is invalid");
+    massert(type < biome_t::COUNT, "biome is invalid 2");
     massert(width > 0, "width must be greater than zero");
     massert(height > 0, "height must be greater than zero");
     if (d.is_initialized) {
@@ -294,8 +294,8 @@ void gamestate::init_dungeon(biome_t type, int df_count, float parts, int width,
 
 entityid gamestate::create_door_with(with_fun doorInitFunction) {
     entityid id = add_entity();
-    const StaticWorldDefinition& definition = get_static_world_definition(ENTITY_DOOR);
-    ct.set<entitytype>(id, ENTITY_DOOR);
+    const StaticWorldDefinition& definition = get_static_world_definition(entitytype_t::DOOR);
+    ct.set<entitytype>(id, entitytype_t::DOOR);
     doorInitFunction(ct, id);
     if (!ct.get<name>(id).has_value()) {
         ct.set<name>(id, definition.name);
@@ -313,7 +313,7 @@ entityid gamestate::create_door_at_with(vec3 loc, with_fun doorInitFunction) {
     if (!tile_is_walkable(tile.get_type())) {
         return INVALID;
     }
-    if (tile.get_type() == TILE_UPSTAIRS || tile.get_type() == TILE_DOWNSTAIRS) {
+    if (tile.get_type() == tiletype_t::UPSTAIRS || tile.get_type() == tiletype_t::DOWNSTAIRS) {
         return INVALID;
     }
     if (tile.entity_count() > 0) {
@@ -323,7 +323,7 @@ entityid gamestate::create_door_at_with(vec3 loc, with_fun doorInitFunction) {
     if (id == INVALID) {
         return INVALID;
     }
-    if (!df->df_add_at(id, ENTITY_DOOR, loc)) {
+    if (!df->df_add_at(id, entitytype_t::DOOR, loc)) {
         return INVALID;
     }
     ct.set<location>(id, loc);
@@ -360,8 +360,8 @@ size_t gamestate::place_doors() {
 
 entityid gamestate::create_chest_with(with_fun chestInitFunction) {
     entityid id = add_entity();
-    const StaticWorldDefinition& definition = get_static_world_definition(ENTITY_CHEST);
-    ct.set<entitytype>(id, ENTITY_CHEST);
+    const StaticWorldDefinition& definition = get_static_world_definition(entitytype_t::CHEST);
+    ct.set<entitytype>(id, entitytype_t::CHEST);
     ct.set<spritemove>(id, (Rectangle){0, 0, 0, 0});
     ct.set<update>(id, true);
     ct.set<pushable>(id, definition.pushable);
@@ -387,7 +387,7 @@ entityid gamestate::create_chest_at_with(vec3 loc, with_fun chestInitFunction) {
     if (!tile_is_walkable(tile.get_type())) {
         return ENTITYID_INVALID;
     }
-    if (tile.get_type() == TILE_UPSTAIRS || tile.get_type() == TILE_DOWNSTAIRS) {
+    if (tile.get_type() == tiletype_t::UPSTAIRS || tile.get_type() == tiletype_t::DOWNSTAIRS) {
         return ENTITYID_INVALID;
     }
     if (tile.entity_count() > 0) {
@@ -397,7 +397,7 @@ entityid gamestate::create_chest_at_with(vec3 loc, with_fun chestInitFunction) {
     if (id == ENTITYID_INVALID) {
         return ENTITYID_INVALID;
     }
-    if (df->df_add_at(id, ENTITY_CHEST, loc) == ENTITYID_INVALID) {
+    if (df->df_add_at(id, entitytype_t::CHEST, loc) == ENTITYID_INVALID) {
         return ENTITYID_INVALID;
     }
     ct.set<location>(id, loc);
@@ -419,7 +419,7 @@ entityid gamestate::place_first_floor_chest() {
             if (!tile_is_walkable(tile.get_type())) {
                 continue;
             }
-            if (tile.get_type() == TILE_UPSTAIRS || tile.get_type() == TILE_DOWNSTAIRS) {
+            if (tile.get_type() == tiletype_t::UPSTAIRS || tile.get_type() == tiletype_t::DOWNSTAIRS) {
                 continue;
             }
             if (tile.entity_count() > 0) {
@@ -438,7 +438,7 @@ entityid gamestate::place_first_floor_chest() {
 entityid gamestate::create_prop_with(proptype_t type, with_fun initFun) {
     entityid id = add_entity();
     const StaticWorldDefinition& definition = get_prop_definition(type);
-    ct.set<entitytype>(id, ENTITY_PROP);
+    ct.set<entitytype>(id, entitytype_t::PROP);
     ct.set<spritemove>(id, (Rectangle){0, 0, 0, 0});
     ct.set<update>(id, true);
     ct.set<proptype>(id, type);
@@ -465,7 +465,7 @@ entityid gamestate::create_prop_at_with(proptype_t type, vec3 loc, with_fun init
     if (id == ENTITYID_INVALID) {
         return ENTITYID_INVALID;
     }
-    entityid result = df->df_add_at(id, ENTITY_PROP, loc);
+    entityid result = df->df_add_at(id, entitytype_t::PROP, loc);
     if (result == ENTITYID_INVALID) {
         return ENTITYID_INVALID;
     }
@@ -532,14 +532,14 @@ int gamestate::place_floor_three_pullable_props() {
         }
 
         tile_t& tile = df->tile_at(loc);
-        if (!tile_is_walkable(tile.get_type()) || tile.get_type() == TILE_UPSTAIRS || tile.get_type() == TILE_DOWNSTAIRS) {
+        if (!tile_is_walkable(tile.get_type()) || tile.get_type() == tiletype_t::UPSTAIRS || tile.get_type() == tiletype_t::DOWNSTAIRS) {
             continue;
         }
         if (tile.entity_count() != 0) {
             continue;
         }
 
-        const entityid id = create_prop_at_with(PROP_DUNGEON_CANDLE_00, loc, dungeon_prop_init(PROP_DUNGEON_CANDLE_00));
+        const entityid id = create_prop_at_with(proptype_t::DUNGEON_CANDLE_00, loc, dungeon_prop_init(proptype_t::DUNGEON_CANDLE_00));
         if (id != ENTITYID_INVALID) {
             placed++;
         }
@@ -568,14 +568,14 @@ entityid gamestate::place_floor_three_pullable_sign() {
         }
 
         tile_t& tile = df->tile_at(loc);
-        if (!tile_is_walkable(tile.get_type()) || tile.get_type() == TILE_UPSTAIRS || tile.get_type() == TILE_DOWNSTAIRS) {
+        if (!tile_is_walkable(tile.get_type()) || tile.get_type() == tiletype_t::UPSTAIRS || tile.get_type() == tiletype_t::DOWNSTAIRS) {
             continue;
         }
         if (tile.entity_count() != 0) {
             continue;
         }
 
-        return create_prop_at_with(PROP_DUNGEON_WOODEN_SIGN, loc, dungeon_prop_init(PROP_DUNGEON_WOODEN_SIGN));
+        return create_prop_at_with(proptype_t::DUNGEON_WOODEN_SIGN, loc, dungeon_prop_init(proptype_t::DUNGEON_WOODEN_SIGN));
     }
 
     return ENTITYID_INVALID;
@@ -585,13 +585,13 @@ bool gamestate::create_floor_pressure_plate(vec3 loc, entityid linked_door_id) {
     if (vec3_invalid(loc) || loc.z < 0 || static_cast<size_t>(loc.z) >= d.floors.size()) {
         return false;
     }
-    if (linked_door_id == ENTITYID_INVALID || ct.get<entitytype>(linked_door_id).value_or(ENTITY_NONE) != ENTITY_DOOR) {
+    if (linked_door_id == ENTITYID_INVALID || ct.get<entitytype>(linked_door_id).value_or(entitytype_t::NONE) != entitytype_t::DOOR) {
         return false;
     }
 
     auto df = d.get_floor(static_cast<size_t>(loc.z));
     tile_t& tile = df->tile_at(loc);
-    if (!tile_is_walkable(tile.get_type()) || tile.get_type() == TILE_UPSTAIRS || tile.get_type() == TILE_DOWNSTAIRS) {
+    if (!tile_is_walkable(tile.get_type()) || tile.get_type() == tiletype_t::UPSTAIRS || tile.get_type() == tiletype_t::DOWNSTAIRS) {
         return false;
     }
 
@@ -614,7 +614,7 @@ bool gamestate::destroy_floor_pressure_plate(vec3 loc) {
         return false;
     }
 
-    if (plate->linked_door_id != ENTITYID_INVALID && ct.get<entitytype>(plate->linked_door_id).value_or(ENTITY_NONE) == ENTITY_DOOR) {
+    if (plate->linked_door_id != ENTITYID_INVALID && ct.get<entitytype>(plate->linked_door_id).value_or(entitytype_t::NONE) == entitytype_t::DOOR) {
         ct.set<door_open>(plate->linked_door_id, false);
         ct.set<update>(plate->linked_door_id, true);
     }
@@ -643,13 +643,13 @@ bool gamestate::setup_floor_four_pressure_plate_tutorial() {
     const auto tutorial_tile_type_at = [&](int x, int y) {
         const bool inside_room = x >= room_x && x < room_x + tutorial_width && y >= room_y && y < room_y + tutorial_height;
         if (!inside_room) {
-            return df->random_tiletype(TILE_FLOOR_STONE_00, TILE_FLOOR_STONE_11);
+            return df->random_tiletype(tiletype_t::FLOOR_STONE_00, tiletype_t::FLOOR_STONE_11);
         }
         const bool outer_wall = x == room_x || x == room_x + tutorial_width - 1 || y == room_y || y == room_y + tutorial_height - 1;
         const bool center_divider = x == split_x && y != center_y;
         return (outer_wall || center_divider)
-            ? TILE_STONE_WALL_00
-            : df->random_tiletype(TILE_FLOOR_STONE_00, TILE_FLOOR_STONE_11);
+            ? tiletype_t::STONE_WALL_00
+            : df->random_tiletype(tiletype_t::FLOOR_STONE_00, tiletype_t::FLOOR_STONE_11);
     };
 
     for (int x = room_x; x < room_x + tutorial_width; x++) {

@@ -14,7 +14,7 @@ void gamestate::handle_input_title_scene(inputstate& is) {
         return;
     }
     if (inputstate_is_pressed(is, KEY_ENTER) || inputstate_is_pressed(is, KEY_SPACE)) {
-        current_scene = SCENE_MAIN_MENU;
+        current_scene = scene_t::MAIN_MENU;
         frame_dirty = true;
         audio.queue("sfx/Minifantasy_Dungeon_SFX/02_chest_close_1.wav");
     }
@@ -23,7 +23,7 @@ void gamestate::handle_input_title_scene(inputstate& is) {
 void gamestate::handle_input_main_menu_scene(inputstate& is) {
     if (inputstate_is_pressed(is, KEY_ENTER) || inputstate_is_pressed(is, KEY_SPACE)) {
         if (ui.title_screen_selection == 0) {
-            current_scene = SCENE_CHARACTER_CREATION;
+            current_scene = scene_t::CHARACTER_CREATION;
             frame_dirty = true;
         }
         audio.queue("sfx/Minifantasy_Dungeon_SFX/02_chest_close_1.wav");
@@ -54,8 +54,8 @@ void gamestate::make_all_npcs_target_player() {
     auto view = registry.view<ActorKind, LegacyEntityId>();
     for (auto entity : view) {
         entityid id = view.get<LegacyEntityId>(entity).id;
-        entitytype_t t = ct.get<entitytype>(id).value_or(ENTITY_NONE);
-        if (t != ENTITY_NPC) {
+        entitytype_t t = ct.get<entitytype>(id).value_or(entitytype_t::NONE);
+        if (t != entitytype_t::NPC) {
             continue;
         }
         ct.set<target_id>(id, hero_id);
@@ -115,7 +115,7 @@ void gamestate::handle_input_character_creation_scene(inputstate& is) {
         entity_turn = create_player_at_with(start_loc, player_name, player_init(maxhp_roll));
         massert(hero_id != ENTITYID_INVALID, "heroid is invalid");
         make_all_npcs_target_player();
-        current_scene = SCENE_GAMEPLAY;
+        current_scene = scene_t::GAMEPLAY;
         if (!keyboard_profile_confirmed) {
             open_keyboard_profile_prompt();
         }
@@ -133,27 +133,27 @@ void gamestate::handle_input_character_creation_scene(inputstate& is) {
     }
     else if (inputstate_is_pressed(is, KEY_LEFT)) {
         audio.queue("sfx/Minifantasy_Dungeon_SFX/02_chest_close_1.wav");
-        int race = chara_creation.race;
-        if (chara_creation.race > 1) {
+        int race = static_cast<int>(chara_creation.race);
+        if (race > 1) {
             race--;
         }
         else {
-            race = RACE_COUNT - 1;
+            race = static_cast<int>(race_t::COUNT) - 1;
         }
-        chara_creation.race = (race_t)race;
+        chara_creation.race = static_cast<race_t>(race);
         chara_creation.hitdie = get_racial_hd(chara_creation.race);
         changed = true;
     }
     else if (inputstate_is_pressed(is, KEY_RIGHT)) {
         audio.queue("sfx/Minifantasy_Dungeon_SFX/02_chest_close_1.wav");
-        int race = chara_creation.race;
-        if (race < RACE_COUNT - 1) {
+        int race = static_cast<int>(chara_creation.race);
+        if (race < static_cast<int>(race_t::COUNT) - 1) {
             race++;
         }
         else {
-            race = RACE_NONE + 1;
+            race = static_cast<int>(race_t::NONE) + 1;
         }
-        chara_creation.race = (race_t)race;
+        chara_creation.race = static_cast<race_t>(race);
         chara_creation.hitdie = get_racial_hd(chara_creation.race);
         changed = true;
     }

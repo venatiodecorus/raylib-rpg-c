@@ -5,12 +5,12 @@
 #pragma once
 
 /// @brief Available biome styles for generated floors.
-typedef enum
+enum class biome_t
 {
-    BIOME_NONE = 0,
-    BIOME_STONE,
-    //BIOME_GRASS,
-    //BIOME_SAND,
-    //BIOME_WATER,
-    BIOME_COUNT,
-} biome_t;
+    NONE = 0,
+    STONE,
+    //GRASS,
+    //SAND,
+    //WATER,
+    COUNT,
+};

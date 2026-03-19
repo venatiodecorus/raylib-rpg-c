@@ -24,13 +24,13 @@ public:
     }
 
     void testEntityTypeToString() {
-        TS_ASSERT_EQUALS(entitytype_to_str(ENTITY_NONE), "none");
-        TS_ASSERT_EQUALS(entitytype_to_str(ENTITY_PLAYER), "player");
-        TS_ASSERT_EQUALS(entitytype_to_str(ENTITY_NPC), "npc");
-        TS_ASSERT_EQUALS(entitytype_to_str(ENTITY_ITEM), "item");
-        TS_ASSERT_EQUALS(entitytype_to_str(ENTITY_BOX), "box");
-        TS_ASSERT_EQUALS(entitytype_to_str(ENTITY_CHEST), "chest");
-        TS_ASSERT_EQUALS(entitytype_to_str(ENTITY_DOOR), "door");
-        TS_ASSERT_EQUALS(entitytype_to_str(ENTITY_PROP), "prop");
+        TS_ASSERT_EQUALS(entitytype_to_str(entitytype_t::NONE), "none");
+        TS_ASSERT_EQUALS(entitytype_to_str(entitytype_t::PLAYER), "player");
+        TS_ASSERT_EQUALS(entitytype_to_str(entitytype_t::NPC), "npc");
+        TS_ASSERT_EQUALS(entitytype_to_str(entitytype_t::ITEM), "item");
+        TS_ASSERT_EQUALS(entitytype_to_str(entitytype_t::BOX), "box");
+        TS_ASSERT_EQUALS(entitytype_to_str(entitytype_t::CHEST), "chest");
+        TS_ASSERT_EQUALS(entitytype_to_str(entitytype_t::DOOR), "door");
+        TS_ASSERT_EQUALS(entitytype_to_str(entitytype_t::PROP), "prop");
     }
 };

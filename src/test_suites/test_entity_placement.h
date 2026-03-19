@@ -8,7 +8,7 @@ private:
     size_t count_entities_of_type(gamestate& g, entitytype_t type) {
         size_t count = 0;
         for (entityid id = 1; id < g.next_entityid; id++) {
-            if (g.ct.get<entitytype>(id).value_or(ENTITY_NONE) == type) {
+            if (g.ct.get<entitytype>(id).value_or(entitytype_t::NONE) == type) {
                 count++;
             }
         }
@@ -16,23 +16,23 @@ private:
     }
 
     void add_simple_floor(gamestate& g, int width = 5, int height = 5) {
-        auto df = g.d.create_floor(BIOME_STONE, width, height);
-        df->df_set_all_tiles(TILE_FLOOR_STONE_00);
+        auto df = g.d.create_floor(biome_t::STONE, width, height);
+        df->df_set_all_tiles(tiletype_t::FLOOR_STONE_00);
         g.d.add_floor(df);
     }
 
     void add_chokepoint_floor(gamestate& g) {
-        auto df = g.d.create_floor(BIOME_STONE, 7, 7);
-        df->df_set_all_tiles(TILE_NONE);
-        df->df_set_tile(TILE_FLOOR_STONE_00, 1, 3);
-        df->df_set_tile(TILE_FLOOR_STONE_00, 2, 3);
-        df->df_set_tile(TILE_FLOOR_STONE_00, 3, 3);
-        df->df_set_tile(TILE_FLOOR_STONE_00, 4, 2);
-        df->df_set_tile(TILE_FLOOR_STONE_00, 4, 3);
-        df->df_set_tile(TILE_FLOOR_STONE_00, 4, 4);
-        df->df_set_tile(TILE_FLOOR_STONE_00, 5, 2);
-        df->df_set_tile(TILE_FLOOR_STONE_00, 5, 3);
-        df->df_set_tile(TILE_FLOOR_STONE_00, 5, 4);
+        auto df = g.d.create_floor(biome_t::STONE, 7, 7);
+        df->df_set_all_tiles(tiletype_t::NONE);
+        df->df_set_tile(tiletype_t::FLOOR_STONE_00, 1, 3);
+        df->df_set_tile(tiletype_t::FLOOR_STONE_00, 2, 3);
+        df->df_set_tile(tiletype_t::FLOOR_STONE_00, 3, 3);
+        df->df_set_tile(tiletype_t::FLOOR_STONE_00, 4, 2);
+        df->df_set_tile(tiletype_t::FLOOR_STONE_00, 4, 3);
+        df->df_set_tile(tiletype_t::FLOOR_STONE_00, 4, 4);
+        df->df_set_tile(tiletype_t::FLOOR_STONE_00, 5, 2);
+        df->df_set_tile(tiletype_t::FLOOR_STONE_00, 5, 3);
+        df->df_set_tile(tiletype_t::FLOOR_STONE_00, 5, 4);
         g.d.add_floor(df);
     }
 
@@ -40,33 +40,33 @@ public:
     void testPlaceDoorsReturnsZeroOnEmptyDungeon() {
         gamestate g;
         TS_ASSERT_EQUALS(g.place_doors(), 0U);
-        TS_ASSERT_EQUALS(count_entities_of_type(g, ENTITY_DOOR), 0U);
+        TS_ASSERT_EQUALS(count_entities_of_type(g, entitytype_t::DOOR), 0U);
     }
 
     void testPlaceDoorsCreatesDoorEntitiesWithTileAndComponentState() {
         gamestate g;
-        auto floor = g.d.create_floor(BIOME_STONE, 7, 7);
-        floor->df_set_all_tiles(TILE_NONE);
-        floor->df_set_tile(TILE_FLOOR_STONE_00, 1, 3);
-        floor->df_set_tile(TILE_FLOOR_STONE_00, 2, 3);
-        floor->df_set_tile(TILE_FLOOR_STONE_00, 3, 3);
-        floor->df_set_tile(TILE_FLOOR_STONE_00, 4, 2);
-        floor->df_set_tile(TILE_FLOOR_STONE_00, 4, 3);
-        floor->df_set_tile(TILE_FLOOR_STONE_00, 4, 4);
-        floor->df_set_tile(TILE_FLOOR_STONE_00, 5, 2);
-        floor->df_set_tile(TILE_FLOOR_STONE_00, 5, 3);
-        floor->df_set_tile(TILE_FLOOR_STONE_00, 5, 4);
+        auto floor = g.d.create_floor(biome_t::STONE, 7, 7);
+        floor->df_set_all_tiles(tiletype_t::NONE);
+        floor->df_set_tile(tiletype_t::FLOOR_STONE_00, 1, 3);
+        floor->df_set_tile(tiletype_t::FLOOR_STONE_00, 2, 3);
+        floor->df_set_tile(tiletype_t::FLOOR_STONE_00, 3, 3);
+        floor->df_set_tile(tiletype_t::FLOOR_STONE_00, 4, 2);
+        floor->df_set_tile(tiletype_t::FLOOR_STONE_00, 4, 3);
+        floor->df_set_tile(tiletype_t::FLOOR_STONE_00, 4, 4);
+        floor->df_set_tile(tiletype_t::FLOOR_STONE_00, 5, 2);
+        floor->df_set_tile(tiletype_t::FLOOR_STONE_00, 5, 3);
+        floor->df_set_tile(tiletype_t::FLOOR_STONE_00, 5, 4);
         g.d.add_floor(floor);
         floor = g.d.get_floor(0);
         floor->df_refresh_door_candidates();
 
         const size_t placed = g.place_doors();
         TS_ASSERT(placed > 0);
-        TS_ASSERT_EQUALS(count_entities_of_type(g, ENTITY_DOOR), placed);
+        TS_ASSERT_EQUALS(count_entities_of_type(g, entitytype_t::DOOR), placed);
 
         size_t verified = 0;
         for (entityid id = 1; id < g.next_entityid; id++) {
-            if (g.ct.get<entitytype>(id).value_or(ENTITY_NONE) != ENTITY_DOOR) {
+            if (g.ct.get<entitytype>(id).value_or(entitytype_t::NONE) != entitytype_t::DOOR) {
                 continue;
             }
 
@@ -91,7 +91,7 @@ public:
     void testPlacePropsReturnsZeroOnEmptyDungeon() {
         gamestate g;
         TS_ASSERT_EQUALS(g.place_props(), 0);
-        TS_ASSERT_EQUALS(count_entities_of_type(g, ENTITY_PROP), 0U);
+        TS_ASSERT_EQUALS(count_entities_of_type(g, entitytype_t::PROP), 0U);
     }
 
     void testPlacePropsCreatesPropEntitiesWithTileAndComponentState() {
@@ -100,11 +100,11 @@ public:
 
         const int placed = g.place_props();
         TS_ASSERT(placed > 0);
-        TS_ASSERT_EQUALS(count_entities_of_type(g, ENTITY_PROP), static_cast<size_t>(placed));
+        TS_ASSERT_EQUALS(count_entities_of_type(g, entitytype_t::PROP), static_cast<size_t>(placed));
 
         size_t verified = 0;
         for (entityid id = 1; id < g.next_entityid; id++) {
-            if (g.ct.get<entitytype>(id).value_or(ENTITY_NONE) != ENTITY_PROP) {
+            if (g.ct.get<entitytype>(id).value_or(entitytype_t::NONE) != entitytype_t::PROP) {
                 continue;
             }
 
@@ -117,10 +117,10 @@ public:
             tile_t& tile = df->tile_at(loc);
             TS_ASSERT_EQUALS(tile.get_cached_prop(), id);
             TS_ASSERT(tile_is_walkable(tile.get_type()));
-            TS_ASSERT(tile.get_type() != TILE_UPSTAIRS);
-            TS_ASSERT(tile.get_type() != TILE_DOWNSTAIRS);
+            TS_ASSERT(tile.get_type() != tiletype_t::UPSTAIRS);
+            TS_ASSERT(tile.get_type() != tiletype_t::DOWNSTAIRS);
             TS_ASSERT(!tile.get_can_have_door());
-            TS_ASSERT(g.ct.get<proptype>(id).value_or(PROP_NONE) != PROP_NONE);
+            TS_ASSERT(g.ct.get<proptype>(id).value_or(proptype_t::NONE) != proptype_t::NONE);
             TS_ASSERT(g.ct.get<name>(id).has_value());
             TS_ASSERT(g.ct.get<description>(id).has_value());
             TS_ASSERT(g.ct.get<solid>(id).has_value());
@@ -138,7 +138,7 @@ public:
 
         const int placed = g.place_props();
         TS_ASSERT_EQUALS(placed, 0);
-        TS_ASSERT_EQUALS(count_entities_of_type(g, ENTITY_PROP), 0U);
+        TS_ASSERT_EQUALS(count_entities_of_type(g, entitytype_t::PROP), 0U);
     }
 
     void testPlacePropsSkipsFourthFloorTutorialLevel() {
@@ -153,7 +153,7 @@ public:
 
         size_t tutorial_floor_props = 0;
         for (entityid id = 1; id < g.next_entityid; id++) {
-            if (g.ct.get<entitytype>(id).value_or(ENTITY_NONE) != ENTITY_PROP) {
+            if (g.ct.get<entitytype>(id).value_or(entitytype_t::NONE) != entitytype_t::PROP) {
                 continue;
             }
 

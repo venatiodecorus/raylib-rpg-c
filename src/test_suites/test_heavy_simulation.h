@@ -7,21 +7,21 @@
 class HeavySimulationTestSuite : public CxxTest::TestSuite {
 private:
     void add_open_floor(gamestate& g, int width = 8, int height = 8) {
-        auto df = g.d.create_floor(BIOME_STONE, width, height);
-        df->df_set_all_tiles(TILE_FLOOR_STONE_00);
+        auto df = g.d.create_floor(biome_t::STONE, width, height);
+        df->df_set_all_tiles(tiletype_t::FLOOR_STONE_00);
         g.d.add_floor(df);
         g.d.is_initialized = true;
     }
 
-    entityid find_live_npc_on_floor(gamestate& g, int floor, race_t race_value = RACE_NONE) {
+    entityid find_live_npc_on_floor(gamestate& g, int floor, race_t race_value = race_t::NONE) {
         for (entityid id = 1; id < g.next_entityid; id++) {
-            if (g.ct.get<entitytype>(id).value_or(ENTITY_NONE) != ENTITY_NPC) {
+            if (g.ct.get<entitytype>(id).value_or(entitytype_t::NONE) != entitytype_t::NPC) {
                 continue;
             }
             if (g.ct.get<dead>(id).value_or(true)) {
                 continue;
             }
-            if (race_value != RACE_NONE && g.ct.get<race>(id).value_or(RACE_NONE) != race_value) {
+            if (race_value != race_t::NONE && g.ct.get<race>(id).value_or(race_t::NONE) != race_value) {
                 continue;
             }
             const vec3 loc = g.ct.get<location>(id).value_or(vec3{-1, -1, -1});
@@ -53,7 +53,7 @@ private:
             if (tile.entity_count() != 0) {
                 continue;
             }
-            if (tile.get_type() == TILE_UPSTAIRS || tile.get_type() == TILE_DOWNSTAIRS) {
+            if (tile.get_type() == tiletype_t::UPSTAIRS || tile.get_type() == tiletype_t::DOWNSTAIRS) {
                 continue;
             }
             return loc;
@@ -74,7 +74,7 @@ public:
             if (y == 6) {
                 continue;
             }
-            df->df_set_tile(TILE_STONE_WALL_00, 5, y);
+            df->df_set_tile(tiletype_t::STONE_WALL_00, 5, y);
         }
 
         const entityid hero = g.create_player_at_with(vec3{9, 6, 0}, "hero", g.player_init(18));
@@ -133,7 +133,7 @@ public:
         g.logic_init();
 
         g.d.current_floor = 2;
-        const entityid orc = find_live_npc_on_floor(g, 2, RACE_ORC);
+        const entityid orc = find_live_npc_on_floor(g, 2, race_t::ORC);
         TS_ASSERT_DIFFERS(orc, ENTITYID_INVALID);
 
         const vec3 orc_loc = g.ct.get<location>(orc).value_or(vec3{-1, -1, -1});
@@ -152,7 +152,7 @@ public:
         g.ct.set<hp>(g.hero_id, vec2{20, 20});
 
         g.make_all_npcs_target_player();
-        g.current_scene = SCENE_GAMEPLAY;
+        g.current_scene = scene_t::GAMEPLAY;
 
         inputstate is;
         inputstate_reset(is);
@@ -160,7 +160,7 @@ public:
         bool resolved = false;
         for (int step = 0; step < 256 && !resolved; ++step) {
             g.entity_turn = orc;
-            g.flag = GAMESTATE_FLAG_NPC_TURN;
+            g.flag = gamestate_flag_t::NPC_TURN;
             g.tick(is);
 
             const bool hero_dead = g.ct.get<dead>(g.hero_id).value_or(true);

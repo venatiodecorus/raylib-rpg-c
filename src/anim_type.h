@@ -5,16 +5,16 @@
 #pragma once
 
 /// @brief Broad animation categories used by sprite and action systems.
-typedef enum anim_type_t {
+enum class anim_type_t {
 
-    ANIM_TYPE_NONE = 0,
-    ANIM_TYPE_IDLE,
-    ANIM_TYPE_WALK,
-    ANIM_TYPE_ATTACK,
-    ANIM_TYPE_CHARGED_ATTACK,
-    ANIM_TYPE_DMG,
-    ANIM_TYPE_DIE,
-    ANIM_TYPE_SPIN_DIE,
-    ANIM_TYPE_SOUL_DIE,
+    NONE = 0,
+    IDLE,
+    WALK,
+    ATTACK,
+    CHARGED_ATTACK,
+    DMG,
+    DIE,
+    SPIN_DIE,
+    SOUL_DIE,
 
-} anim_type_t;
+};

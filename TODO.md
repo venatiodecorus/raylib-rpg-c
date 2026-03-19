@@ -94,7 +94,7 @@ These must be addressed first because everything else depends on them.
   - Scene constants (`COMPANYSCENE`, `TITLESCENE`, `GAMEPLAYSCENE`) duplicate
     the `scene_t` enum — consolidate.
 
-- [ ] **Use `enum class` instead of C-style `typedef enum`**
+- [x] **Use `enum class` instead of C-style `typedef enum`**
   - All enums are unscoped: `scene_t`, `controlmode_t`, `race_t`, `alignment_t`,
     `entitytype_t`, `weapontype_t`, `tiletype_t`, `direction_t`, etc.
   - Convert to `enum class` for type safety.

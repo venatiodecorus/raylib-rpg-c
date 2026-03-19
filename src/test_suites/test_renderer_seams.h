@@ -16,12 +16,12 @@ private:
 
 public:
     void testGetTxkeyForRepresentativeTileTypes() {
-        TS_ASSERT_EQUALS(get_txkey_for_tiletype(TILE_NONE), -1);
-        TS_ASSERT_EQUALS(get_txkey_for_tiletype(TILE_UPSTAIRS), TX_TILES_UPSTAIRS_00);
-        TS_ASSERT_EQUALS(get_txkey_for_tiletype(TILE_DOWNSTAIRS), TX_TILES_DOWNSTAIRS_00);
-        TS_ASSERT_EQUALS(get_txkey_for_tiletype(TILE_STONE_WALL_00), TX_TILES_WALL_STONE_00);
-        TS_ASSERT_EQUALS(get_txkey_for_tiletype(TILE_FLOOR_STONE_10), TX_TILES_STONE_10);
-        TS_ASSERT_EQUALS(get_txkey_for_tiletype(TILE_FLOOR_GRASS_19), TX_TILES_GRASS_19);
+        TS_ASSERT_EQUALS(get_txkey_for_tiletype(tiletype_t::NONE), -1);
+        TS_ASSERT_EQUALS(get_txkey_for_tiletype(tiletype_t::UPSTAIRS), TX_TILES_UPSTAIRS_00);
+        TS_ASSERT_EQUALS(get_txkey_for_tiletype(tiletype_t::DOWNSTAIRS), TX_TILES_DOWNSTAIRS_00);
+        TS_ASSERT_EQUALS(get_txkey_for_tiletype(tiletype_t::STONE_WALL_00), TX_TILES_WALL_STONE_00);
+        TS_ASSERT_EQUALS(get_txkey_for_tiletype(tiletype_t::FLOOR_STONE_10), TX_TILES_STONE_10);
+        TS_ASSERT_EQUALS(get_txkey_for_tiletype(tiletype_t::FLOOR_GRASS_19), TX_TILES_GRASS_19);
     }
 
     void testSpriteIncrFrameLoopsWhenAnimating() {

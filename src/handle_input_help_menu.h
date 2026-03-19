@@ -13,7 +13,7 @@ static inline void handle_input_help_menu(shared_ptr<gamestate> g, inputstate& i
     massert(g, "Game state is NULL!");
     if (inputstate_any_pressed(is)) {
         g->display_help_menu = false;
-        g->controlmode = CONTROLMODE_PLAYER;
+        g->controlmode = controlmode_t::PLAYER;
         return;
     }
 }

@@ -136,7 +136,7 @@ void draw_keyboard_profile_prompt(gamestate& g) {
     DrawText("Select a default gameplay profile before entering the dungeon.", box_x + 16, box_y + 42, 10, g.ui.window_box_fgcolor);
     DrawText("You can change this later in ` -> controls.", box_x + 16, box_y + 56, 10, g.ui.window_box_fgcolor);
 
-    for (int i = 0; i < KEYBOARD_PROFILE_COUNT; i++) {
+    for (int i = 0; i < static_cast<int>(keyboard_profile_t::COUNT); i++) {
         const bool selected = g.ui.keyboard_profile_selection == (unsigned int)i;
         const int option_y = box_y + 88 + i * 18;
         const char* label = keyboard_profile_label(static_cast<keyboard_profile_t>(i));
@@ -148,17 +148,17 @@ void draw_keyboard_profile_prompt(gamestate& g) {
 
 void libdraw_render_current_scene_to_scene_texture(gamestate& g, rpg::Renderer& renderer) {
     switch (g.current_scene) {
-    case SCENE_TITLE:
+    case scene_t::TITLE:
         draw_title_screen_to_texture(g, renderer, false);
         break;
-    case SCENE_MAIN_MENU:
+    case scene_t::MAIN_MENU:
         draw_title_screen_to_texture(g, renderer, true);
         break;
-    case SCENE_CHARACTER_CREATION:
+    case scene_t::CHARACTER_CREATION:
         minfo3("draw character creation scene to texture");
         draw_char_creation_to_texture(g, renderer);
         break;
-    case SCENE_GAMEPLAY: {
+    case scene_t::GAMEPLAY: {
         const int vision_dist = g.ct.get<vision_distance>(g.hero_id).value_or(0);
         const int light_rad = g.ct.get<light_radius>(g.hero_id).value_or(0);
         libdraw_drawframe_2d_to_texture(g, renderer, vision_dist, light_rad);
@@ -170,14 +170,14 @@ void libdraw_render_current_scene_to_scene_texture(gamestate& g, rpg::Renderer& 
 
 void libdraw_draw_current_scene_from_scene_texture(gamestate& g, rpg::Renderer& renderer) {
     switch (g.current_scene) {
-    case SCENE_TITLE:
-    case SCENE_MAIN_MENU:
+    case scene_t::TITLE:
+    case scene_t::MAIN_MENU:
         draw_title_screen_from_texture(g, renderer);
         break;
-    case SCENE_CHARACTER_CREATION:
+    case scene_t::CHARACTER_CREATION:
         draw_char_creation_from_texture(g, renderer);
         break;
-    case SCENE_GAMEPLAY:
+    case scene_t::GAMEPLAY:
         libdraw_drawframe_2d_from_texture(g, renderer);
         break;
     default:

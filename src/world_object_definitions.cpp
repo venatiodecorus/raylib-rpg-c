@@ -77,8 +77,8 @@ namespace {
 const StaticWorldDefinition kPropDefinitions[] = {
     {
         "prop.none",
-        ENTITY_PROP,
-        PROP_NONE,
+        entitytype_t::PROP,
+        proptype_t::NONE,
         "prop",
         "A bit of dungeon clutter left to rot in the dark.",
         false,
@@ -91,8 +91,8 @@ const StaticWorldDefinition kPropDefinitions[] = {
     },
     {
         "prop.dungeon.banner_00",
-        ENTITY_PROP,
-        PROP_DUNGEON_BANNER_00,
+        entitytype_t::PROP,
+        proptype_t::DUNGEON_BANNER_00,
         "banner",
         "A faded banner hanging limp in the stale dungeon air.",
         false,
@@ -105,8 +105,8 @@ const StaticWorldDefinition kPropDefinitions[] = {
     },
     {
         "prop.dungeon.banner_01",
-        ENTITY_PROP,
-        PROP_DUNGEON_BANNER_01,
+        entitytype_t::PROP,
+        proptype_t::DUNGEON_BANNER_01,
         "banner",
         "A faded banner hanging limp in the stale dungeon air.",
         false,
@@ -119,8 +119,8 @@ const StaticWorldDefinition kPropDefinitions[] = {
     },
     {
         "prop.dungeon.banner_02",
-        ENTITY_PROP,
-        PROP_DUNGEON_BANNER_02,
+        entitytype_t::PROP,
+        proptype_t::DUNGEON_BANNER_02,
         "banner",
         "A faded banner hanging limp in the stale dungeon air.",
         false,
@@ -133,8 +133,8 @@ const StaticWorldDefinition kPropDefinitions[] = {
     },
     {
         "prop.dungeon.statue_00",
-        ENTITY_PROP,
-        PROP_DUNGEON_STATUE_00,
+        entitytype_t::PROP,
+        proptype_t::DUNGEON_STATUE_00,
         "statue",
         "A heavy carved statue worn smooth by years of damp air and passing hands.",
         true,
@@ -147,8 +147,8 @@ const StaticWorldDefinition kPropDefinitions[] = {
     },
     {
         "prop.dungeon.torch_00",
-        ENTITY_PROP,
-        PROP_DUNGEON_TORCH_00,
+        entitytype_t::PROP,
+        proptype_t::DUNGEON_TORCH_00,
         "torch",
         "A soot-blackened torch stand dragged from the wall and left among the rubble.",
         false,
@@ -161,8 +161,8 @@ const StaticWorldDefinition kPropDefinitions[] = {
     },
     {
         "prop.dungeon.candle_00",
-        ENTITY_PROP,
-        PROP_DUNGEON_CANDLE_00,
+        entitytype_t::PROP,
+        proptype_t::DUNGEON_CANDLE_00,
         "candle",
         "A stubby candle with wax pooled around its base.",
         false,
@@ -175,8 +175,8 @@ const StaticWorldDefinition kPropDefinitions[] = {
     },
     {
         "prop.dungeon.jar_00",
-        ENTITY_PROP,
-        PROP_DUNGEON_JAR_00,
+        entitytype_t::PROP,
+        proptype_t::DUNGEON_JAR_00,
         "jar",
         "A ceramic jar with a chipped lip and a dusting of old clay inside.",
         false,
@@ -189,8 +189,8 @@ const StaticWorldDefinition kPropDefinitions[] = {
     },
     {
         "prop.dungeon.plate_00",
-        ENTITY_PROP,
-        PROP_DUNGEON_PLATE_00,
+        entitytype_t::PROP,
+        proptype_t::DUNGEON_PLATE_00,
         "plate",
         "A dusty plate left behind by some long-finished meal.",
         false,
@@ -203,8 +203,8 @@ const StaticWorldDefinition kPropDefinitions[] = {
     },
     {
         "prop.dungeon.wooden_barrel_open_top_empty",
-        ENTITY_PROP,
-        PROP_DUNGEON_WOODEN_BARREL_OPEN_TOP_EMPTY,
+        entitytype_t::PROP,
+        proptype_t::DUNGEON_WOODEN_BARREL_OPEN_TOP_EMPTY,
         "empty barrel",
         "An open-topped barrel that smells faintly of stale ale.",
         true,
@@ -217,8 +217,8 @@ const StaticWorldDefinition kPropDefinitions[] = {
     },
     {
         "prop.dungeon.wooden_barrel_open_top_water",
-        ENTITY_PROP,
-        PROP_DUNGEON_WOODEN_BARREL_OPEN_TOP_WATER,
+        entitytype_t::PROP,
+        proptype_t::DUNGEON_WOODEN_BARREL_OPEN_TOP_WATER,
         "water barrel",
         "An open-topped barrel filled with still water dark enough to hide the bottom.",
         true,
@@ -231,8 +231,8 @@ const StaticWorldDefinition kPropDefinitions[] = {
     },
     {
         "prop.dungeon.wooden_chair_00",
-        ENTITY_PROP,
-        PROP_DUNGEON_WOODEN_CHAIR_00,
+        entitytype_t::PROP,
+        proptype_t::DUNGEON_WOODEN_CHAIR_00,
         "wooden chair",
         "A wooden chair with scraped legs and a backrest polished by use.",
         false,
@@ -245,8 +245,8 @@ const StaticWorldDefinition kPropDefinitions[] = {
     },
     {
         "prop.dungeon.wooden_table_00",
-        ENTITY_PROP,
-        PROP_DUNGEON_WOODEN_TABLE_00,
+        entitytype_t::PROP,
+        proptype_t::DUNGEON_WOODEN_TABLE_00,
         "wooden table",
         "A sturdy wooden table scarred by cuts, heat marks, and years of hard use.",
         true,
@@ -259,8 +259,8 @@ const StaticWorldDefinition kPropDefinitions[] = {
     },
     {
         "prop.dungeon.wooden_table_01",
-        ENTITY_PROP,
-        PROP_DUNGEON_WOODEN_TABLE_01,
+        entitytype_t::PROP,
+        proptype_t::DUNGEON_WOODEN_TABLE_01,
         "wooden table",
         "A sturdy wooden table scarred by cuts, heat marks, and years of hard use.",
         true,
@@ -273,8 +273,8 @@ const StaticWorldDefinition kPropDefinitions[] = {
     },
     {
         "prop.dungeon.wooden_sign",
-        ENTITY_PROP,
-        PROP_DUNGEON_WOODEN_SIGN,
+        entitytype_t::PROP,
+        proptype_t::DUNGEON_WOODEN_SIGN,
         "wooden sign",
         "Pull something onto the\npressure plate to keep the door open.",
         true,
@@ -289,8 +289,8 @@ const StaticWorldDefinition kPropDefinitions[] = {
 
 const StaticWorldDefinition kWoodenDoorDefinition = {
     "door.wooden",
-    ENTITY_DOOR,
-    PROP_NONE,
+    entitytype_t::DOOR,
+    proptype_t::NONE,
     "door",
     "A heavy wooden door bound with iron straps and swollen from the dungeon damp.",
     false,
@@ -304,8 +304,8 @@ const StaticWorldDefinition kWoodenDoorDefinition = {
 
 const StaticWorldDefinition kTreasureChestDefinition = {
     "chest.treasure",
-    ENTITY_CHEST,
-    PROP_NONE,
+    entitytype_t::CHEST,
+    proptype_t::NONE,
     "treasure chest",
     "A stout treasure chest reinforced with iron bands and built to survive rough handling.",
     true,
@@ -319,8 +319,8 @@ const StaticWorldDefinition kTreasureChestDefinition = {
 
 const StaticWorldDefinition kWoodenBoxDefinition = {
     "box.wooden",
-    ENTITY_BOX,
-    PROP_NONE,
+    entitytype_t::BOX,
+    proptype_t::NONE,
     "box",
     "A plain wooden box with rough handles cut into the sides for hauling.",
     false,
@@ -335,18 +335,18 @@ const StaticWorldDefinition kWoodenBoxDefinition = {
 
 const StaticWorldDefinition& get_static_world_definition(entitytype_t legacy_type, proptype_t prop_type) {
     switch (legacy_type) {
-    case ENTITY_PROP: {
+    case entitytype_t::PROP: {
         const int index = static_cast<int>(prop_type);
         massert(index >= 0, "prop type is negative: %d", index);
         massert(index < static_cast<int>(sizeof(kPropDefinitions) / sizeof(kPropDefinitions[0])), "prop type is out of range: %d", index);
         massert(kPropDefinitions[index].type == prop_type, "prop definition mismatch at index %d", index);
         return kPropDefinitions[index];
     }
-    case ENTITY_DOOR:
+    case entitytype_t::DOOR:
         return kWoodenDoorDefinition;
-    case ENTITY_CHEST:
+    case entitytype_t::CHEST:
         return kTreasureChestDefinition;
-    case ENTITY_BOX:
+    case entitytype_t::BOX:
         return kWoodenBoxDefinition;
     default:
         break;
@@ -357,5 +357,5 @@ const StaticWorldDefinition& get_static_world_definition(entitytype_t legacy_typ
 }
 
 const StaticWorldDefinition& get_prop_definition(proptype_t type) {
-    return get_static_world_definition(ENTITY_PROP, type);
+    return get_static_world_definition(entitytype_t::PROP, type);
 }

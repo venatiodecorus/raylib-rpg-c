@@ -143,13 +143,13 @@ public:
 
     //void testGamestateInitDungeon() {
     //    gamestate g;
-    //    g.init_dungeon(BIOME_STONE, 1, 32, 32);
+    //    g.init_dungeon(biome_t::STONE, 1, 32, 32);
     //    TS_ASSERT(g.d.floors.size() == 1);
-    //    g.init_dungeon(BIOME_STONE, 2, 32, 32);
+    //    g.init_dungeon(biome_t::STONE, 2, 32, 32);
     //    TS_ASSERT(g.d.floors.size() == 1);
     //    g.reset();
     //    TS_ASSERT(g.d.floors.size() == 0);
-    //    g.init_dungeon(BIOME_STONE, 2, 32, 32);
+    //    g.init_dungeon(biome_t::STONE, 2, 32, 32);
     //    TS_ASSERT(g.d.floors.size() == 2);
     //    g.reset();
     //}
@@ -158,7 +158,7 @@ public:
     //    gamestate g;
     //    const size_t placed_doors_0 = g.place_doors();
     //    TS_ASSERT(placed_doors_0 == 0);
-    //    g.init_dungeon(BIOME_STONE, 1, 32, 32);
+    //    g.init_dungeon(biome_t::STONE, 1, 32, 32);
     //    TS_ASSERT(g.d.floors.size() == 1);
     //    const size_t placed_doors_1 = g.place_doors();
     //    TS_ASSERT(placed_doors_1 > 0);
@@ -168,7 +168,7 @@ public:
     //    gamestate g;
     //    const size_t placed_props_0 = g.place_props();
     //    TS_ASSERT(placed_props_0 == 0);
-    //    g.init_dungeon(BIOME_STONE, 1, 32, 32);
+    //    g.init_dungeon(biome_t::STONE, 1, 32, 32);
     //    const size_t placed_props_1 = g.place_props();
     //    TS_ASSERT(placed_props_1 > 0);
     //}
@@ -177,18 +177,18 @@ public:
     //    gamestate g;
     //    TS_ASSERT(g.d.floors.size() == 0);
     //    //g.init_dungeon(1);
-    //    g.init_dungeon(BIOME_STONE, 1, 32, 32);
+    //    g.init_dungeon(biome_t::STONE, 1, 32, 32);
     //    TS_ASSERT(g.d.floors.size() == 1);
     //    const vec3 loc = g.d.floors[0].df_get_random_loc();
     //    TS_ASSERT(!vec3_equal(loc, (vec3){-1, -1, -1}));
     //    const entityid id = g.create_weapon_at_with(g.ct, loc, g.dagger_init());
     //    TS_ASSERT(id != ENTITYID_INVALID);
     //    TS_ASSERT(g.ct.has<entitytype>(id));
-    //    TS_ASSERT(g.ct.get<entitytype>(id).value_or(ENTITY_NONE) == ENTITY_ITEM);
+    //    TS_ASSERT(g.ct.get<entitytype>(id).value_or(entitytype_t::NONE) == entitytype_t::ITEM);
     //    TS_ASSERT(g.ct.has<itemtype>(id));
-    //    TS_ASSERT(g.ct.get<itemtype>(id).value_or(ITEM_NONE) == ITEM_WEAPON);
+    //    TS_ASSERT(g.ct.get<itemtype>(id).value_or(itemtype_t::NONE) == itemtype_t::WEAPON);
     //    TS_ASSERT(g.ct.has<weapontype>(id));
-    //    TS_ASSERT(g.ct.get<weapontype>(id).value_or(WEAPON_NONE) == WEAPON_DAGGER);
+    //    TS_ASSERT(g.ct.get<weapontype>(id).value_or(weapontype_t::NONE) == weapontype_t::DAGGER);
     //    TS_ASSERT(g.ct.has<name>(id));
     //    TS_ASSERT(g.ct.get<name>(id).value_or("no-name") == "dagger");
     //}
@@ -196,54 +196,54 @@ public:
     //void testInitShield() {
     //    gamestate g;
     //    //g.init_dungeon(1);
-    //    g.init_dungeon(BIOME_STONE, 1, 32, 32);
+    //    g.init_dungeon(biome_t::STONE, 1, 32, 32);
     //    TS_ASSERT(g.d.floors.size() > 0);
     //    const vec3 loc = g.d.floors[0].df_get_random_loc();
     //    TS_ASSERT(!vec3_equal(loc, (vec3){-1, -1, -1}));
     //    const entityid id = g.create_shield_at_with(loc, g.shield_init());
     //    TS_ASSERT(id != ENTITYID_INVALID);
     //    TS_ASSERT(g.ct.has<entitytype>(id));
-    //    TS_ASSERT(g.ct.get<entitytype>(id).value_or(ENTITY_NONE) == ENTITY_ITEM);
+    //    TS_ASSERT(g.ct.get<entitytype>(id).value_or(entitytype_t::NONE) == entitytype_t::ITEM);
     //    TS_ASSERT(g.ct.has<itemtype>(id));
-    //    TS_ASSERT(g.ct.get<itemtype>(id).value_or(ITEM_NONE) == ITEM_SHIELD);
+    //    TS_ASSERT(g.ct.get<itemtype>(id).value_or(itemtype_t::NONE) == itemtype_t::SHIELD);
     //    TS_ASSERT(g.ct.has<shieldtype>(id));
-    //    TS_ASSERT(g.ct.get<shieldtype>(id).value_or(SHIELD_NONE) == SHIELD_KITE);
+    //    TS_ASSERT(g.ct.get<shieldtype>(id).value_or(shieldtype_t::NONE) == shieldtype_t::KITE);
     //    TS_ASSERT(g.ct.has<name>(id));
     //    TS_ASSERT(g.ct.get<name>(id).value_or("no-name") == "kite shield");
     //}
 
     //void testInitPotion() {
     //    gamestate g;
-    //    g.init_dungeon(BIOME_STONE, 1, 32, 32);
+    //    g.init_dungeon(biome_t::STONE, 1, 32, 32);
     //    TS_ASSERT(g.d.floors.size() > 0);
     //    const vec3 loc = g.d.floors[0].df_get_random_loc();
     //    TS_ASSERT(!vec3_equal(loc, (vec3){-1, -1, -1}));
-    //    const entityid id = g.create_potion_at_with(loc, g.potion_init(POTION_HP_SMALL));
+    //    const entityid id = g.create_potion_at_with(loc, g.potion_init(potiontype_t::HP_SMALL));
     //    TS_ASSERT(id != ENTITYID_INVALID);
     //    TS_ASSERT(g.ct.has<entitytype>(id));
-    //    TS_ASSERT(g.ct.get<entitytype>(id).value_or(ENTITY_NONE) == ENTITY_ITEM);
+    //    TS_ASSERT(g.ct.get<entitytype>(id).value_or(entitytype_t::NONE) == entitytype_t::ITEM);
     //    TS_ASSERT(g.ct.has<itemtype>(id));
-    //    TS_ASSERT(g.ct.get<itemtype>(id).value_or(ITEM_NONE) == ITEM_POTION);
+    //    TS_ASSERT(g.ct.get<itemtype>(id).value_or(itemtype_t::NONE) == itemtype_t::POTION);
     //    TS_ASSERT(g.ct.has<potiontype>(id));
-    //    TS_ASSERT(g.ct.get<potiontype>(id).value_or(POTION_NONE) == POTION_HP_SMALL);
+    //    TS_ASSERT(g.ct.get<potiontype>(id).value_or(potiontype_t::NONE) == potiontype_t::HP_SMALL);
     //    TS_ASSERT(g.ct.has<name>(id));
     //    TS_ASSERT(g.ct.get<name>(id).value_or("no-name") == "small healing potion");
     //}
 
     //void testMonsterInitSingle() {
     //    gamestate g;
-    //    g.init_dungeon(BIOME_STONE, 1, 32, 32);
+    //    g.init_dungeon(biome_t::STONE, 1, 32, 32);
     //    TS_ASSERT(g.d.floors.size() > 0);
     //    const vec3 loc = g.d.floors[0].df_get_random_loc();
     //    TS_ASSERT(!vec3_equal(loc, (vec3){-1, -1, -1}));
     //    const entityid id = g.create_random_monster_at_with(loc, [](CT& ct, const entityid id) {});
     //    TS_ASSERT(id != ENTITYID_INVALID);
     //    TS_ASSERT(g.ct.has<entitytype>(id));
-    //    TS_ASSERT(g.ct.get<entitytype>(id).value_or(ENTITY_NONE) == ENTITY_NPC);
+    //    TS_ASSERT(g.ct.get<entitytype>(id).value_or(entitytype_t::NONE) == entitytype_t::NPC);
     //    //TS_ASSERT(g.ct.has<itemtype>(id));
-    //    //TS_ASSERT(g.ct.get<itemtype>(id).value_or(ITEM_NONE) == ITEM_POTION);
+    //    //TS_ASSERT(g.ct.get<itemtype>(id).value_or(itemtype_t::NONE) == itemtype_t::POTION);
     //    TS_ASSERT(g.ct.has<race>(id));
-    //    TS_ASSERT(g.ct.get<race>(id).value_or(RACE_NONE) == RACE_ORC);
+    //    TS_ASSERT(g.ct.get<race>(id).value_or(race_t::NONE) == race_t::ORC);
     //    TS_ASSERT(g.ct.has<name>(id));
     //    TS_ASSERT(g.ct.has<inventory>(id));
     //    TS_ASSERT(g.ct.get<inventory>(id).value()->size() > 0);
@@ -258,7 +258,7 @@ public:
     //void testMonsterMulti() {
     //    gamestate g;
     //    //g.init_dungeon(1);
-    //    g.init_dungeon(BIOME_STONE, 1, 32, 32);
+    //    g.init_dungeon(biome_t::STONE, 1, 32, 32);
     //    constexpr int monster_count = 4;
     //    std::set<entityid> monster_set;
     //    for (int i = 0; i < monster_count; i++) {
@@ -276,7 +276,7 @@ public:
     //void testMonsterMax() {
     //    gamestate g;
     //    //g.init_dungeon(1);
-    //    g.init_dungeon(BIOME_STONE, 1, 32, 32);
+    //    g.init_dungeon(biome_t::STONE, 1, 32, 32);
     //    constexpr int monster_count = 31;
     //    std::set<entityid> monster_set;
     //    for (int i = 0; i < monster_count; i++) {
@@ -293,7 +293,7 @@ public:
 
     //void testMonsterTooMany() {
     //    gamestate g;
-    //    g.init_dungeon(BIOME_STONE, 1, 32, 32);
+    //    g.init_dungeon(biome_t::STONE, 1, 32, 32);
     //    TS_ASSERT(g.d.floors.size() > 0);
     //    constexpr int monster_count = 32;
     //    std::set<entityid> monster_set;
@@ -313,7 +313,7 @@ public:
     //void testLogicInit() {
     //    gamestate g;
     //    g.test = true;
-    //    g.init_dungeon(BIOME_STONE, 1, 32, 32);
+    //    g.init_dungeon(biome_t::STONE, 1, 32, 32);
     //    TS_ASSERT(g.d.floors.size() > 0);
     //    // place doors
     //    const size_t placed_doors_0 = g.place_doors();
@@ -332,7 +332,7 @@ public:
     //    // create potion
     //    const vec3 loc3 = g.d.floors[0].df_get_random_loc();
     //    TS_ASSERT(!vec3_equal(loc3, (vec3){-1, -1, -1}));
-    //    const entityid id3 = g.create_potion_at_with(loc3, g.potion_init(POTION_HP_SMALL));
+    //    const entityid id3 = g.create_potion_at_with(loc3, g.potion_init(potiontype_t::HP_SMALL));
     //    TS_ASSERT(id3 != ENTITYID_INVALID);
     //    // create NPCs (orcs)
     //    constexpr int monster_count = 4;
@@ -353,7 +353,7 @@ public:
     //    TS_ASSERT(g.hero_id != ENTITYID_INVALID);
     //    inputstate is;
     //    inputstate_update(is);
-    //    g.current_scene = SCENE_GAMEPLAY;
+    //    g.current_scene = scene_t::GAMEPLAY;
     //    TS_ASSERT(g.test);
     //    //constexpr int num_ticks = 1000;
     //    //for (int i = 0; i < num_ticks; i++) {
@@ -377,7 +377,7 @@ public:
     //    for (unsigned int i = 0; i < sim_count; i++) {
     //        gamestate g;
     //        g.test = true;
-    //        g.init_dungeon(BIOME_STONE, 1, 32, 32);
+    //        g.init_dungeon(biome_t::STONE, 1, 32, 32);
     //        TS_ASSERT(g.d.floors.size() > 0);
     //        const vec3 player_loc = g.d.floors[0].df_get_random_loc();
     //        TS_ASSERT(!vec3_equal(player_loc, (vec3){-1, -1, -1}));
@@ -401,9 +401,9 @@ public:
     //            });
     //        inputstate is;
     //        inputstate_update(is);
-    //        g.current_scene = SCENE_GAMEPLAY;
+    //        g.current_scene = scene_t::GAMEPLAY;
     //        TS_ASSERT(g.test);
-    //        TS_ASSERT(g.current_scene == SCENE_GAMEPLAY);
+    //        TS_ASSERT(g.current_scene == scene_t::GAMEPLAY);
     //        constexpr int num_ticks = 100;
     //        //minfo("simulating game for %d ticks...", num_ticks);
     //        for (int i = 0; i < num_ticks; i++) {
@@ -417,11 +417,11 @@ public:
     //        //TS_ASSERT(!g.ct.get<dead>(g.hero_id).value());
     //        const unsigned int live_npc_count = g.count_live_npcs_on_floor(0);
     //        //minfo("live npc_count: %u", live_npc_count);
-    //        //minfo("id %d race: %d", g.hero_id, g.ct.get<race>(g.hero_id).value_or(RACE_NONE));
+    //        //minfo("id %d race: %d", g.hero_id, g.ct.get<race>(g.hero_id).value_or(race_t::NONE));
     //        //minfo("id %d hp: %d", g.hero_id, g.ct.get<hp>(g.hero_id).value_or(-666));
     //        //minfo("id %d maxhp: %d", g.hero_id, g.ct.get<maxhp>(g.hero_id).value_or(-666));
     //        //minfo("id %d dead: %d", g.hero_id, g.ct.get<dead>(g.hero_id).value_or(true));
-    //        //minfo("id %d race: %d", id, g.ct.get<race>(id).value_or(RACE_NONE));
+    //        //minfo("id %d race: %d", id, g.ct.get<race>(id).value_or(race_t::NONE));
     //        //minfo("id %d dead: %d", id, g.ct.get<dead>(id).value_or(true));
     //        //minfo("id %d hp: %d", id, g.ct.get<hp>(id).value_or(-666));
     //        //minfo("id %d maxhp: %d", id, g.ct.get<maxhp>(id).value_or(-666));
@@ -457,7 +457,7 @@ public:
     //    gamestate g;
     //    inputstate is;
     //    g.test = true;
-    //    g.init_dungeon(BIOME_STONE, 1, 32, 2);
+    //    g.init_dungeon(biome_t::STONE, 1, 32, 2);
     //    TS_ASSERT(g.d.floors.size() > 0);
     //    const vec3 loc = g.d.floors[0].df_get_random_loc();
     //    TS_ASSERT(!vec3_equal(loc, (vec3){-1, -1, -1}));
@@ -467,7 +467,7 @@ public:
     //    TS_ASSERT(g.ct.has<location>(g.hero_id));
     //    auto loc2 = g.ct.get<location>(g.hero_id).value();
     //    TS_ASSERT(!vec3_invalid(loc2));
-    //    g.current_scene = SCENE_GAMEPLAY;
+    //    g.current_scene = scene_t::GAMEPLAY;
     //    for (int i = 0; i < turns; i++) {
     //        g.tick(is);
     //        g.tick(is);

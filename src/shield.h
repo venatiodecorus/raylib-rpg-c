@@ -5,11 +5,11 @@
 #pragma once
 
 /// @brief Supported shield subtypes for inventory and armor calculations.
-typedef enum
+enum class shieldtype_t
 {
-    SHIELD_NONE,
-    SHIELD_BUCKLER,
-    SHIELD_KITE,
-    SHIELD_TOWER,
-    SHIELD_TYPE_COUNT
-} shieldtype_t;
+    NONE,
+    BUCKLER,
+    KITE,
+    TOWER,
+    TYPE_COUNT
+};

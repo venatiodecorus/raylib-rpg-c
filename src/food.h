@@ -5,4 +5,4 @@
 #pragma once
 
 /// @brief Supported food subtypes.
-typedef enum { FOOD_NONE, FOOD_COUNT } food_t;
+enum class food_t { NONE, COUNT };

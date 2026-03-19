@@ -5,11 +5,11 @@
 #pragma once
 
 /// @brief Supported high-level damage categories.
-typedef enum {
-    DAMAGE_NONE,
-    DAMAGE_CUTTING,
-    //DAMAGE_PIERCING,
-    //DAMAGE_BLUNT,
-    DAMAGE_COUNT
+enum class damagetype_t {
+    NONE,
+    CUTTING,
+    //PIERCING,
+    //BLUNT,
+    COUNT
 
-} damagetype_t;
+};

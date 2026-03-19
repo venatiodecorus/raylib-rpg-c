@@ -13,49 +13,49 @@ using std::array;
 using std::string;
 
 /// @brief Built-in keyboard layouts offered by the controls UI.
-typedef enum {
-    KEYBOARD_PROFILE_FULL = 0,
-    KEYBOARD_PROFILE_LAPTOP,
-    KEYBOARD_PROFILE_COUNT
-} keyboard_profile_t;
+enum class keyboard_profile_t {
+    FULL = 0,
+    LAPTOP,
+    COUNT
+};
 
 /// @brief Bindable gameplay actions exposed through the controls system.
-typedef enum {
-    INPUT_ACTION_MOVE_UP = 0,
-    INPUT_ACTION_MOVE_DOWN,
-    INPUT_ACTION_MOVE_LEFT,
-    INPUT_ACTION_MOVE_RIGHT,
-    INPUT_ACTION_MOVE_UP_LEFT,
-    INPUT_ACTION_MOVE_UP_RIGHT,
-    INPUT_ACTION_MOVE_DOWN_LEFT,
-    INPUT_ACTION_MOVE_DOWN_RIGHT,
-    INPUT_ACTION_DIRECTION_MODE,
-    INPUT_ACTION_FACE_WAIT,
-    INPUT_ACTION_FACE_UP,
-    INPUT_ACTION_FACE_DOWN,
-    INPUT_ACTION_FACE_LEFT,
-    INPUT_ACTION_FACE_RIGHT,
-    INPUT_ACTION_FACE_UP_LEFT,
-    INPUT_ACTION_FACE_UP_RIGHT,
-    INPUT_ACTION_FACE_DOWN_LEFT,
-    INPUT_ACTION_FACE_DOWN_RIGHT,
-    INPUT_ACTION_FACE_ATTACK,
-    INPUT_ACTION_ATTACK,
-    INPUT_ACTION_PICKUP,
-    INPUT_ACTION_STAIRS,
-    INPUT_ACTION_OPEN,
-    INPUT_ACTION_INTERACT,
-    INPUT_ACTION_INVENTORY,
-    INPUT_ACTION_PULL,
-    INPUT_ACTION_HELP,
-    INPUT_ACTION_OPTIONS,
-    INPUT_ACTION_CAMERA_TOGGLE,
-    INPUT_ACTION_RESTART,
-    INPUT_ACTION_TOGGLE_FULL_LIGHT,
-    INPUT_ACTION_ZOOM_IN,
-    INPUT_ACTION_ZOOM_OUT,
-    INPUT_ACTION_COUNT
-} gameplay_input_action_t;
+enum class gameplay_input_action_t {
+    MOVE_UP = 0,
+    MOVE_DOWN,
+    MOVE_LEFT,
+    MOVE_RIGHT,
+    MOVE_UP_LEFT,
+    MOVE_UP_RIGHT,
+    MOVE_DOWN_LEFT,
+    MOVE_DOWN_RIGHT,
+    DIRECTION_MODE,
+    FACE_WAIT,
+    FACE_UP,
+    FACE_DOWN,
+    FACE_LEFT,
+    FACE_RIGHT,
+    FACE_UP_LEFT,
+    FACE_UP_RIGHT,
+    FACE_DOWN_LEFT,
+    FACE_DOWN_RIGHT,
+    FACE_ATTACK,
+    ATTACK,
+    PICKUP,
+    STAIRS,
+    OPEN,
+    INTERACT,
+    INVENTORY,
+    PULL,
+    HELP,
+    OPTIONS,
+    CAMERA_TOGGLE,
+    RESTART,
+    TOGGLE_FULL_LIGHT,
+    ZOOM_IN,
+    ZOOM_OUT,
+    COUNT
+};
 
 /// @brief Number of key slots stored for each bindable gameplay action.
 static constexpr int GAMEPLAY_KEYBINDING_SLOTS = 3;
@@ -65,11 +65,11 @@ using gameplay_keybinding_t = array<int, GAMEPLAY_KEYBINDING_SLOTS>;
 /** @brief Return the user-facing label for a keyboard profile. */
 static inline const char* keyboard_profile_label(keyboard_profile_t profile) {
     switch (profile) {
-    case KEYBOARD_PROFILE_FULL:
+    case keyboard_profile_t::FULL:
         return "Full Keyboard";
-    case KEYBOARD_PROFILE_LAPTOP:
+    case keyboard_profile_t::LAPTOP:
         return "Laptop Keyboard";
-    case KEYBOARD_PROFILE_COUNT:
+    case keyboard_profile_t::COUNT:
     default:
         break;
     }
@@ -79,40 +79,40 @@ static inline const char* keyboard_profile_label(keyboard_profile_t profile) {
 /** @brief Return the user-facing label for a bindable gameplay action. */
 static inline const char* gameplay_input_action_label(gameplay_input_action_t action) {
     switch (action) {
-    case INPUT_ACTION_MOVE_UP: return "Move Up";
-    case INPUT_ACTION_MOVE_DOWN: return "Move Down";
-    case INPUT_ACTION_MOVE_LEFT: return "Move Left";
-    case INPUT_ACTION_MOVE_RIGHT: return "Move Right";
-    case INPUT_ACTION_MOVE_UP_LEFT: return "Move Up-Left";
-    case INPUT_ACTION_MOVE_UP_RIGHT: return "Move Up-Right";
-    case INPUT_ACTION_MOVE_DOWN_LEFT: return "Move Down-Left";
-    case INPUT_ACTION_MOVE_DOWN_RIGHT: return "Move Down-Right";
-    case INPUT_ACTION_DIRECTION_MODE: return "Face Direction Mode";
-    case INPUT_ACTION_FACE_WAIT: return "Face Mode Wait";
-    case INPUT_ACTION_FACE_UP: return "Face Up";
-    case INPUT_ACTION_FACE_DOWN: return "Face Down";
-    case INPUT_ACTION_FACE_LEFT: return "Face Left";
-    case INPUT_ACTION_FACE_RIGHT: return "Face Right";
-    case INPUT_ACTION_FACE_UP_LEFT: return "Face Up-Left";
-    case INPUT_ACTION_FACE_UP_RIGHT: return "Face Up-Right";
-    case INPUT_ACTION_FACE_DOWN_LEFT: return "Face Down-Left";
-    case INPUT_ACTION_FACE_DOWN_RIGHT: return "Face Down-Right";
-    case INPUT_ACTION_FACE_ATTACK: return "Face Mode Attack";
-    case INPUT_ACTION_ATTACK: return "Attack";
-    case INPUT_ACTION_PICKUP: return "Pick Up Item";
-    case INPUT_ACTION_STAIRS: return "Use Stairs";
-    case INPUT_ACTION_OPEN: return "Open Door / Chest";
-    case INPUT_ACTION_INTERACT: return "Interact / Examine";
-    case INPUT_ACTION_INVENTORY: return "Inventory";
-    case INPUT_ACTION_PULL: return "Pull";
-    case INPUT_ACTION_HELP: return "Help";
-    case INPUT_ACTION_OPTIONS: return "Options";
-    case INPUT_ACTION_CAMERA_TOGGLE: return "Camera Mode";
-    case INPUT_ACTION_RESTART: return "Restart";
-    case INPUT_ACTION_TOGGLE_FULL_LIGHT: return "Toggle Full Light";
-    case INPUT_ACTION_ZOOM_IN: return "Zoom In";
-    case INPUT_ACTION_ZOOM_OUT: return "Zoom Out";
-    case INPUT_ACTION_COUNT:
+    case gameplay_input_action_t::MOVE_UP: return "Move Up";
+    case gameplay_input_action_t::MOVE_DOWN: return "Move Down";
+    case gameplay_input_action_t::MOVE_LEFT: return "Move Left";
+    case gameplay_input_action_t::MOVE_RIGHT: return "Move Right";
+    case gameplay_input_action_t::MOVE_UP_LEFT: return "Move Up-Left";
+    case gameplay_input_action_t::MOVE_UP_RIGHT: return "Move Up-Right";
+    case gameplay_input_action_t::MOVE_DOWN_LEFT: return "Move Down-Left";
+    case gameplay_input_action_t::MOVE_DOWN_RIGHT: return "Move Down-Right";
+    case gameplay_input_action_t::DIRECTION_MODE: return "Face Direction Mode";
+    case gameplay_input_action_t::FACE_WAIT: return "Face Mode Wait";
+    case gameplay_input_action_t::FACE_UP: return "Face Up";
+    case gameplay_input_action_t::FACE_DOWN: return "Face Down";
+    case gameplay_input_action_t::FACE_LEFT: return "Face Left";
+    case gameplay_input_action_t::FACE_RIGHT: return "Face Right";
+    case gameplay_input_action_t::FACE_UP_LEFT: return "Face Up-Left";
+    case gameplay_input_action_t::FACE_UP_RIGHT: return "Face Up-Right";
+    case gameplay_input_action_t::FACE_DOWN_LEFT: return "Face Down-Left";
+    case gameplay_input_action_t::FACE_DOWN_RIGHT: return "Face Down-Right";
+    case gameplay_input_action_t::FACE_ATTACK: return "Face Mode Attack";
+    case gameplay_input_action_t::ATTACK: return "Attack";
+    case gameplay_input_action_t::PICKUP: return "Pick Up Item";
+    case gameplay_input_action_t::STAIRS: return "Use Stairs";
+    case gameplay_input_action_t::OPEN: return "Open Door / Chest";
+    case gameplay_input_action_t::INTERACT: return "Interact / Examine";
+    case gameplay_input_action_t::INVENTORY: return "Inventory";
+    case gameplay_input_action_t::PULL: return "Pull";
+    case gameplay_input_action_t::HELP: return "Help";
+    case gameplay_input_action_t::OPTIONS: return "Options";
+    case gameplay_input_action_t::CAMERA_TOGGLE: return "Camera Mode";
+    case gameplay_input_action_t::RESTART: return "Restart";
+    case gameplay_input_action_t::TOGGLE_FULL_LIGHT: return "Toggle Full Light";
+    case gameplay_input_action_t::ZOOM_IN: return "Zoom In";
+    case gameplay_input_action_t::ZOOM_OUT: return "Zoom Out";
+    case gameplay_input_action_t::COUNT:
     default:
         break;
     }

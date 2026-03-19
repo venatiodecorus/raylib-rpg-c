@@ -120,7 +120,7 @@ bool gamestate::drop_from_inventory(entityid actor_id, entityid item_id) {
         }
         vec3 loc = maybe_loc.value();
         auto df = d.get_current_floor();
-        entityid retval = df->df_add_at(item_id, ENTITY_ITEM, loc);
+        entityid retval = df->df_add_at(item_id, entitytype_t::ITEM, loc);
         if (retval == ENTITYID_INVALID) {
             merror("Failed to add to tile");
             return false;
@@ -155,8 +155,8 @@ void gamestate::handle_hero_inventory_equip_weapon(entityid item_id) {
     else {
         ct.set<equipped_weapon>(hero_id, item_id);
     }
-    flag = GAMESTATE_FLAG_PLAYER_ANIM;
-    controlmode = CONTROLMODE_PLAYER;
+    flag = gamestate_flag_t::PLAYER_ANIM;
+    controlmode = controlmode_t::PLAYER;
     ui.display_inventory_menu = false;
 }
 
@@ -168,17 +168,17 @@ void gamestate::handle_hero_inventory_equip_shield(entityid item_id) {
     else {
         ct.set<equipped_shield>(hero_id, item_id);
     }
-    flag = GAMESTATE_FLAG_PLAYER_ANIM;
-    controlmode = CONTROLMODE_PLAYER;
+    flag = gamestate_flag_t::PLAYER_ANIM;
+    controlmode = controlmode_t::PLAYER;
     ui.display_inventory_menu = false;
 }
 
 void gamestate::handle_hero_inventory_equip_item(entityid item_id) {
-    itemtype_t item_type = ct.get<itemtype>(item_id).value_or(ITEM_NONE);
+    itemtype_t item_type = ct.get<itemtype>(item_id).value_or(itemtype_t::NONE);
     switch (item_type) {
-    case ITEM_NONE: break;
-    case ITEM_WEAPON: handle_hero_inventory_equip_weapon(item_id); break;
-    case ITEM_SHIELD: handle_hero_inventory_equip_shield(item_id); break;
+    case itemtype_t::NONE: break;
+    case itemtype_t::WEAPON: handle_hero_inventory_equip_weapon(item_id); break;
+    case itemtype_t::SHIELD: handle_hero_inventory_equip_shield(item_id); break;
     default: break;
     }
 }
@@ -195,8 +195,8 @@ void gamestate::handle_hero_inventory_equip() {
         return;
     }
     entityid item_id = inventory->at(index);
-    entitytype_t type = ct.get<entitytype>(item_id).value_or(ENTITY_NONE);
-    if (type == ENTITY_ITEM) {
+    entitytype_t type = ct.get<entitytype>(item_id).value_or(entitytype_t::NONE);
+    if (type == entitytype_t::ITEM) {
         run_equip_item_action(hero_id, item_id);
     }
 }
@@ -247,7 +247,7 @@ bool gamestate::drop_inventory_item(entityid actor_id, entityid item_id) {
     if (static_cast<size_t>(loc.z) < d.get_floor_count()) {
         df = d.get_floor(loc.z);
     }
-    if (!df->df_add_at(item_id, ENTITY_ITEM, loc)) {
+    if (!df->df_add_at(item_id, entitytype_t::ITEM, loc)) {
         merror("Failed to add to %d, %d, %d", loc.x, loc.y, loc.z);
         add_to_inventory(actor_id, item_id);
         return false;
@@ -274,8 +274,8 @@ bool gamestate::is_in_inventory(entityid actor_id, entityid item_id) {
 bool gamestate::use_potion(entityid actor_id, entityid item_id) {
     massert(actor_id != ENTITYID_INVALID, "actor_id is invalid");
     massert(item_id != ENTITYID_INVALID, "actor_id is invalid");
-    bool is_item = ct.get<entitytype>(item_id).value_or(ENTITY_NONE) == ENTITY_ITEM;
-    bool is_potion = ct.get<itemtype>(item_id).value_or(ITEM_NONE) == ITEM_POTION;
+    bool is_item = ct.get<entitytype>(item_id).value_or(entitytype_t::NONE) == entitytype_t::ITEM;
+    bool is_potion = ct.get<itemtype>(item_id).value_or(itemtype_t::NONE) == itemtype_t::POTION;
     bool in_inventory = is_in_inventory(actor_id, item_id);
     if (is_item && is_potion && in_inventory) {
         optional<vec3> maybe_heal = ct.get<healing>(item_id);
@@ -307,12 +307,12 @@ bool gamestate::use_potion(entityid actor_id, entityid item_id) {
 }
 
 void gamestate::handle_hero_potion_use(entityid id) {
-    entitytype_t type = ct.get<entitytype>(id).value_or(ENTITY_NONE);
-    if (type != ENTITY_ITEM) {
+    entitytype_t type = ct.get<entitytype>(id).value_or(entitytype_t::NONE);
+    if (type != entitytype_t::ITEM) {
         return;
     }
-    itemtype_t i_type = ct.get<itemtype>(id).value_or(ITEM_NONE);
-    if (i_type == ITEM_NONE || i_type != ITEM_POTION) {
+    itemtype_t i_type = ct.get<itemtype>(id).value_or(itemtype_t::NONE);
+    if (i_type == itemtype_t::NONE || i_type != itemtype_t::POTION) {
         return;
     }
     run_use_item_action(hero_id, id);
@@ -329,15 +329,15 @@ void gamestate::handle_hero_item_use() {
         return;
     }
     entityid item_id = inventory->at(index);
-    entitytype_t type = ct.get<entitytype>(item_id).value_or(ENTITY_NONE);
-    if (type != ENTITY_ITEM) {
+    entitytype_t type = ct.get<entitytype>(item_id).value_or(entitytype_t::NONE);
+    if (type != entitytype_t::ITEM) {
         return;
     }
-    itemtype_t i_type = ct.get<itemtype>(item_id).value_or(ITEM_NONE);
-    if (i_type == ITEM_NONE) {
+    itemtype_t i_type = ct.get<itemtype>(item_id).value_or(itemtype_t::NONE);
+    if (i_type == itemtype_t::NONE) {
         return;
     }
-    if (i_type == ITEM_POTION) {
+    if (i_type == itemtype_t::POTION) {
         handle_hero_potion_use(item_id);
     }
 }
@@ -368,7 +368,7 @@ bool gamestate::transfer_inventory_item(entityid from_id, entityid to_id, entity
 }
 
 bool gamestate::open_chest_menu(entityid chest_id) {
-    if (chest_id == ENTITYID_INVALID || ct.get<entitytype>(chest_id).value_or(ENTITY_NONE) != ENTITY_CHEST) {
+    if (chest_id == ENTITYID_INVALID || ct.get<entitytype>(chest_id).value_or(entitytype_t::NONE) != entitytype_t::CHEST) {
         return false;
     }
     ct.set<door_open>(chest_id, true);
@@ -380,7 +380,7 @@ bool gamestate::open_chest_menu(entityid chest_id) {
     ui.chest_deposit_mode = false;
     ui.mini_inventory_scroll_offset = 0;
     ui.inventory_cursor = Vector2{0, 0};
-    controlmode = CONTROLMODE_CHEST;
+    controlmode = controlmode_t::CHEST;
     frame_dirty = true;
     audio.queue("sfx/Minifantasy_Dungeon_SFX/01_chest_open_1.wav");
     return true;
@@ -395,7 +395,7 @@ void gamestate::close_chest_menu() {
     ui.display_chest_menu = false;
     ui.chest_deposit_mode = false;
     ui.active_chest_id = ENTITYID_INVALID;
-    controlmode = CONTROLMODE_PLAYER;
+    controlmode = controlmode_t::PLAYER;
     frame_dirty = true;
 }
 
@@ -432,7 +432,7 @@ void gamestate::handle_chest_menu_confirm() {
 }
 
 void gamestate::handle_input_chest(inputstate& is) {
-    if (controlmode != CONTROLMODE_CHEST || !ui.display_chest_menu) {
+    if (controlmode != controlmode_t::CHEST || !ui.display_chest_menu) {
         return;
     }
     if (inputstate_is_pressed(is, KEY_D) || inputstate_is_pressed(is, KEY_ESCAPE)) {

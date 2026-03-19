@@ -45,7 +45,7 @@ bool create_spritegroup(gamestate& g, rpg::Renderer& renderer, entityid id, cons
 
         string n = g.ct.get<name>(id).value_or("no-name");
         minfo2("name: %s", n.c_str());
-        entitytype_t t = g.ct.get<entitytype>(id).value_or(ENTITY_NONE);
+        entitytype_t t = g.ct.get<entitytype>(id).value_or(entitytype_t::NONE);
         string t_s = entitytype_to_str(t);
         minfo2("type: %s", t_s.c_str());
         minfo2("group->get(0)");

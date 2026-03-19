@@ -6,8 +6,8 @@
 class WorldInteractionTestSuite : public CxxTest::TestSuite {
 private:
     void add_floor(gamestate& g, int width = 6, int height = 6) {
-        auto df = g.d.create_floor(BIOME_STONE, width, height);
-        df->df_set_all_tiles(TILE_FLOOR_STONE_00);
+        auto df = g.d.create_floor(biome_t::STONE, width, height);
+        df->df_set_all_tiles(tiletype_t::FLOOR_STONE_00);
         g.d.add_floor(df);
         g.d.is_initialized = true;
     }
@@ -29,7 +29,7 @@ public:
         add_floor(g);
         const vec3 hero_loc{1, 1, 0};
         const entityid hero = create_hero(g, hero_loc);
-        g.d.get_floor(0)->df_set_tile(TILE_STONE_WALL_00, 2, 1);
+        g.d.get_floor(0)->df_set_tile(tiletype_t::STONE_WALL_00, 2, 1);
 
         TS_ASSERT(!g.try_entity_move(hero, vec3{1, 0, 0}));
         TS_ASSERT(vec3_equal(g.ct.get<location>(hero).value_or(vec3{-1, -1, -1}), hero_loc));
@@ -41,7 +41,7 @@ public:
         const vec3 hero_loc{1, 1, 0};
         const entityid hero = create_hero(g, hero_loc);
 
-        const entityid prop_id = g.create_prop_at_with(PROP_DUNGEON_WOODEN_BARREL_OPEN_TOP_EMPTY, vec3{2, 1, 0}, dungeon_prop_init(PROP_DUNGEON_WOODEN_BARREL_OPEN_TOP_EMPTY));
+        const entityid prop_id = g.create_prop_at_with(proptype_t::DUNGEON_WOODEN_BARREL_OPEN_TOP_EMPTY, vec3{2, 1, 0}, dungeon_prop_init(proptype_t::DUNGEON_WOODEN_BARREL_OPEN_TOP_EMPTY));
         TS_ASSERT_DIFFERS(prop_id, ENTITYID_INVALID);
         TS_ASSERT(!g.try_entity_move(hero, vec3{1, 0, 0}));
         TS_ASSERT(vec3_equal(g.ct.get<location>(hero).value_or(vec3{-1, -1, -1}), hero_loc));
@@ -60,7 +60,7 @@ public:
         gamestate g;
         add_floor(g);
 
-        const entityid prop_id = g.create_prop_at_with(PROP_DUNGEON_STATUE_00, vec3{2, 2, 0}, dungeon_prop_init(PROP_DUNGEON_STATUE_00));
+        const entityid prop_id = g.create_prop_at_with(proptype_t::DUNGEON_STATUE_00, vec3{2, 2, 0}, dungeon_prop_init(proptype_t::DUNGEON_STATUE_00));
         TS_ASSERT_DIFFERS(prop_id, ENTITYID_INVALID);
         TS_ASSERT_EQUALS(g.create_door_at_with(vec3{2, 2, 0}, [](CT&, const entityid) {}), ENTITYID_INVALID);
         TS_ASSERT_EQUALS(g.d.get_floor(0)->tile_at(vec3{2, 2, 0}).get_cached_door(), ENTITYID_INVALID);
@@ -83,7 +83,7 @@ public:
         gamestate g;
         add_floor(g);
         const entityid hero = create_hero(g, vec3{2, 2, 0});
-        g.ct.set<direction>(hero, DIR_RIGHT);
+        g.ct.set<direction>(hero, direction_t::RIGHT);
         const entityid box = g.create_box_at_with(vec3{3, 2, 0});
 
         TS_ASSERT_DIFFERS(box, ENTITYID_INVALID);
@@ -97,7 +97,7 @@ public:
         gamestate g;
         add_floor(g);
         const entityid hero = create_hero(g, vec3{2, 2, 0});
-        g.ct.set<direction>(hero, DIR_RIGHT);
+        g.ct.set<direction>(hero, direction_t::RIGHT);
 
         const vec3 corpse_loc{3, 2, 0};
         const entityid corpse = g.create_orc_at_with(corpse_loc, [](CT&, const entityid) {});
@@ -122,12 +122,12 @@ public:
         gamestate g;
         add_floor(g);
         const entityid hero = create_hero(g, vec3{2, 2, 0});
-        g.ct.set<direction>(hero, DIR_RIGHT);
+        g.ct.set<direction>(hero, direction_t::RIGHT);
 
         const entityid candle = g.create_prop_at_with(
-            PROP_DUNGEON_CANDLE_00,
+            proptype_t::DUNGEON_CANDLE_00,
             vec3{3, 2, 0},
-            dungeon_prop_init(PROP_DUNGEON_CANDLE_00));
+            dungeon_prop_init(proptype_t::DUNGEON_CANDLE_00));
 
         TS_ASSERT_DIFFERS(candle, ENTITYID_INVALID);
         TS_ASSERT(g.ct.get<pullable>(candle).value_or(false));
@@ -143,9 +143,9 @@ public:
         add_floor(g);
         const entityid hero = create_hero(g, vec3{2, 2, 0});
         const entityid table = g.create_prop_at_with(
-            PROP_DUNGEON_WOODEN_TABLE_00,
+            proptype_t::DUNGEON_WOODEN_TABLE_00,
             vec3{3, 2, 0},
-            dungeon_prop_init(PROP_DUNGEON_WOODEN_TABLE_00));
+            dungeon_prop_init(proptype_t::DUNGEON_WOODEN_TABLE_00));
 
         TS_ASSERT_DIFFERS(table, ENTITYID_INVALID);
         TS_ASSERT(g.ct.get<pushable>(table).value_or(false));
@@ -185,9 +185,9 @@ public:
         add_floor(g);
         const entityid hero = create_hero(g, vec3{2, 2, 0});
         const entityid table = g.create_prop_at_with(
-            PROP_DUNGEON_WOODEN_TABLE_00,
+            proptype_t::DUNGEON_WOODEN_TABLE_00,
             vec3{3, 2, 0},
-            dungeon_prop_init(PROP_DUNGEON_WOODEN_TABLE_00));
+            dungeon_prop_init(proptype_t::DUNGEON_WOODEN_TABLE_00));
 
         TS_ASSERT_DIFFERS(table, ENTITYID_INVALID);
         TS_ASSERT(g.ct.get<pushable>(table).value_or(false));
@@ -202,11 +202,11 @@ public:
         gamestate g;
         add_floor(g);
         const entityid hero = create_hero(g, vec3{2, 2, 0});
-        g.ct.set<direction>(hero, DIR_RIGHT);
+        g.ct.set<direction>(hero, direction_t::RIGHT);
         const entityid table = g.create_prop_at_with(
-            PROP_DUNGEON_WOODEN_TABLE_01,
+            proptype_t::DUNGEON_WOODEN_TABLE_01,
             vec3{3, 2, 0},
-            dungeon_prop_init(PROP_DUNGEON_WOODEN_TABLE_01));
+            dungeon_prop_init(proptype_t::DUNGEON_WOODEN_TABLE_01));
 
         TS_ASSERT_DIFFERS(table, ENTITYID_INVALID);
         TS_ASSERT(g.ct.get<pullable>(table).value_or(false));
@@ -222,7 +222,7 @@ public:
         add_floor(g);
 
         const entityid hero = create_hero(g, vec3{2, 2, 0});
-        g.ct.set<direction>(hero, DIR_RIGHT);
+        g.ct.set<direction>(hero, direction_t::RIGHT);
         const entityid box = g.create_box_at_with(vec3{3, 2, 0});
 
         TS_ASSERT_DIFFERS(box, ENTITYID_INVALID);
@@ -351,7 +351,7 @@ public:
         TS_ASSERT(g.queue_pressure_plate_refresh_event(0));
         const gameplay_event_result_t result = g.process_gameplay_events();
 
-        TS_ASSERT_EQUALS(result.type, EVENT_REFRESH_PRESSURE_PLATES);
+        TS_ASSERT_EQUALS(result.type, event_type_t::REFRESH_PRESSURE_PLATES);
         TS_ASSERT(result.succeeded);
         TS_ASSERT(plate->active);
         TS_ASSERT(g.ct.get<door_open>(door).value_or(false));
@@ -363,7 +363,7 @@ public:
         add_floor(g);
 
         const entityid hero = create_hero(g, vec3{2, 1, 0});
-        g.ct.set<direction>(hero, DIR_RIGHT);
+        g.ct.set<direction>(hero, direction_t::RIGHT);
         const entityid box = g.create_box_at_with(vec3{3, 1, 0});
         const entityid door = g.create_door_at_with(vec3{5, 1, 0}, [](CT&, const entityid) {});
         TS_ASSERT_DIFFERS(hero, ENTITYID_INVALID);
@@ -397,7 +397,7 @@ public:
         TS_ASSERT(plate != nullptr);
         TS_ASSERT(g.queue_pressure_plate_refresh_event(0));
         const gameplay_event_result_t refresh_result = g.process_gameplay_events();
-        TS_ASSERT_EQUALS(refresh_result.type, EVENT_REFRESH_PRESSURE_PLATES);
+        TS_ASSERT_EQUALS(refresh_result.type, event_type_t::REFRESH_PRESSURE_PLATES);
         TS_ASSERT(refresh_result.succeeded);
         TS_ASSERT(plate->active);
         TS_ASSERT(g.ct.get<door_open>(door).value_or(false));
@@ -499,7 +499,7 @@ public:
         TS_ASSERT(g.ct.get<door_open>(chest).value_or(false));
         TS_ASSERT_EQUALS(g.ui.active_chest_id, chest);
         TS_ASSERT(g.ui.display_chest_menu);
-        TS_ASSERT_EQUALS(g.controlmode, CONTROLMODE_CHEST);
+        TS_ASSERT_EQUALS(g.controlmode, controlmode_t::CHEST);
     }
 
     void testRunOpenChestActionUsesQueuedChestIntent() {
@@ -518,7 +518,7 @@ public:
         TS_ASSERT(g.ct.get<door_open>(chest).value_or(false));
         TS_ASSERT_EQUALS(g.ui.active_chest_id, chest);
         TS_ASSERT(g.ui.display_chest_menu);
-        TS_ASSERT_EQUALS(g.controlmode, CONTROLMODE_CHEST);
+        TS_ASSERT_EQUALS(g.controlmode, controlmode_t::CHEST);
         TS_ASSERT(g.queue_state.gameplay_events.empty());
     }
 
@@ -540,7 +540,7 @@ public:
         TS_ASSERT(!g.ct.get<door_open>(chest).value_or(true));
         TS_ASSERT_EQUALS(g.ui.active_chest_id, ENTITYID_INVALID);
         TS_ASSERT(!g.ui.display_chest_menu);
-        TS_ASSERT_EQUALS(g.controlmode, CONTROLMODE_PLAYER);
+        TS_ASSERT_EQUALS(g.controlmode, controlmode_t::PLAYER);
         TS_ASSERT(g.queue_state.gameplay_events.empty());
     }
 
@@ -643,7 +643,7 @@ public:
         TS_ASSERT_DIFFERS(door, ENTITYID_INVALID);
 
         g.hero_id = hero;
-        g.ct.set<direction>(hero, DIR_RIGHT);
+        g.ct.set<direction>(hero, direction_t::RIGHT);
 
         inputstate is = {};
         press_key(is, KEY_D);
@@ -662,7 +662,7 @@ public:
         add_floor(g);
 
         const entityid hero = create_hero(g, vec3{1, 1, 0});
-        const entityid npc = g.create_npc_at_with(RACE_DWARF, vec3{2, 1, 0}, [](CT& ct, const entityid id) {
+        const entityid npc = g.create_npc_at_with(race_t::DWARF, vec3{2, 1, 0}, [](CT& ct, const entityid id) {
             ct.set<name>(id, "Borin");
             ct.set<dialogue_text>(id, "Keep your torch high.");
         });
@@ -671,7 +671,7 @@ public:
         TS_ASSERT_DIFFERS(npc, ENTITYID_INVALID);
         TS_ASSERT(g.try_entity_interact(hero, vec3{2, 1, 0}));
         TS_ASSERT(g.ui.display_interaction_modal);
-        TS_ASSERT_EQUALS(g.controlmode, CONTROLMODE_INTERACTION);
+        TS_ASSERT_EQUALS(g.controlmode, controlmode_t::INTERACTION);
         TS_ASSERT_EQUALS(g.ui.active_interaction_entity_id, npc);
         TS_ASSERT_EQUALS(g.ui.interaction_title, "Borin");
         TS_ASSERT_EQUALS(g.ui.interaction_body, "Keep your torch high.");
@@ -682,7 +682,7 @@ public:
         add_floor(g);
 
         const entityid hero = create_hero(g, vec3{1, 1, 0});
-        const entityid npc = g.create_npc_at_with(RACE_DWARF, vec3{2, 1, 0}, [](CT& ct, const entityid id) {
+        const entityid npc = g.create_npc_at_with(race_t::DWARF, vec3{2, 1, 0}, [](CT& ct, const entityid id) {
             ct.set<name>(id, "Borin");
             ct.set<dialogue_text>(id, "Keep your torch high.");
         });
@@ -691,7 +691,7 @@ public:
         TS_ASSERT_DIFFERS(npc, ENTITYID_INVALID);
         TS_ASSERT(g.run_interact_action(hero, vec3{2, 1, 0}));
         TS_ASSERT(g.ui.display_interaction_modal);
-        TS_ASSERT_EQUALS(g.controlmode, CONTROLMODE_INTERACTION);
+        TS_ASSERT_EQUALS(g.controlmode, controlmode_t::INTERACTION);
         TS_ASSERT_EQUALS(g.ui.active_interaction_entity_id, npc);
         TS_ASSERT_EQUALS(g.ui.interaction_title, "Borin");
         TS_ASSERT_EQUALS(g.ui.interaction_body, "Keep your torch high.");
@@ -715,7 +715,7 @@ public:
         add_floor(g);
 
         const entityid hero = create_hero(g, vec3{1, 1, 0});
-        const entityid prop = g.create_prop_at_with(PROP_DUNGEON_JAR_00, vec3{2, 1, 0}, [](CT& ct, const entityid id) {
+        const entityid prop = g.create_prop_at_with(proptype_t::DUNGEON_JAR_00, vec3{2, 1, 0}, [](CT& ct, const entityid id) {
             ct.set<name>(id, "jar");
             ct.set<description>(id, "A cracked jar with dry clay inside.");
         });
@@ -724,7 +724,7 @@ public:
         TS_ASSERT_DIFFERS(prop, ENTITYID_INVALID);
         TS_ASSERT(g.try_entity_interact(hero, vec3{2, 1, 0}));
         TS_ASSERT(g.ui.display_interaction_modal);
-        TS_ASSERT_EQUALS(g.controlmode, CONTROLMODE_INTERACTION);
+        TS_ASSERT_EQUALS(g.controlmode, controlmode_t::INTERACTION);
         TS_ASSERT_EQUALS(g.ui.active_interaction_entity_id, prop);
         TS_ASSERT_EQUALS(g.ui.interaction_title, "jar");
         TS_ASSERT_EQUALS(g.ui.interaction_body, "A cracked jar with dry clay inside.");
@@ -792,7 +792,7 @@ public:
         gamestate g;
         add_floor(g);
         g.test = true;
-        g.controlmode = CONTROLMODE_PLAYER;
+        g.controlmode = controlmode_t::PLAYER;
         g.open_interaction_modal(42, "Speaker", "Line");
 
         inputstate is{};
@@ -800,7 +800,7 @@ public:
         g.handle_input_interaction(is);
 
         TS_ASSERT(!g.ui.display_interaction_modal);
-        TS_ASSERT_EQUALS(g.controlmode, CONTROLMODE_PLAYER);
+        TS_ASSERT_EQUALS(g.controlmode, controlmode_t::PLAYER);
         TS_ASSERT_EQUALS(g.ui.active_interaction_entity_id, ENTITYID_INVALID);
         TS_ASSERT(g.ui.interaction_title.empty());
         TS_ASSERT(g.ui.interaction_body.empty());
@@ -809,7 +809,7 @@ public:
     void testUpdatePlayerTilesExploredRevealsClosedDoorTileButNotBeyond() {
         gamestate g;
         add_floor(g);
-        g.current_scene = SCENE_GAMEPLAY;
+        g.current_scene = scene_t::GAMEPLAY;
 
         const entityid hero = create_hero(g, vec3{1, 1, 0});
         TS_ASSERT_DIFFERS(hero, ENTITYID_INVALID);
@@ -833,7 +833,7 @@ public:
     void testUpdatePlayerTilesExploredClearsVisibilityBeyondClosedDoorAfterClosing() {
         gamestate g;
         add_floor(g);
-        g.current_scene = SCENE_GAMEPLAY;
+        g.current_scene = scene_t::GAMEPLAY;
 
         const entityid hero = create_hero(g, vec3{1, 1, 0});
         TS_ASSERT_DIFFERS(hero, ENTITYID_INVALID);
@@ -877,7 +877,7 @@ public:
         g.ct.set<dexterity>(orc, 1);
         g.ct.set<hp>(orc, vec2{1, 1});
         tile_t& target_tile = g.d.get_floor(0)->tile_at(vec3{2, 1, 0});
-        TS_ASSERT_EQUALS(g.run_attack_action(hero, vec3{2, 1, 0}), ATTACK_RESULT_HIT);
+        TS_ASSERT_EQUALS(g.run_attack_action(hero, vec3{2, 1, 0}), attack_result_t::HIT);
 
         TS_ASSERT(g.ct.get<dead>(orc).value_or(false));
         TS_ASSERT_EQUALS(target_tile.get_cached_live_npc(), ENTITYID_INVALID);

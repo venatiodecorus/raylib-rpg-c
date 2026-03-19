@@ -11,27 +11,27 @@ void libdraw_update_sprite_context_ptr(gamestate& g, spritegroup* group, directi
     massert(group != NULL, "group is NULL");
     int old_ctx = group->sprites.at(group->current)->get_currentcontext();
     int ctx = old_ctx;
-    ctx = dir == DIR_NONE                                      ? old_ctx
-          : dir == DIR_DOWN_RIGHT                              ? SPRITEGROUP_CONTEXT_R_D
-          : dir == DIR_DOWN_LEFT                               ? SPRITEGROUP_CONTEXT_L_D
-          : dir == DIR_UP_RIGHT                                ? SPRITEGROUP_CONTEXT_R_U
-          : dir == DIR_UP_LEFT                                 ? SPRITEGROUP_CONTEXT_L_U
-          : dir == DIR_DOWN && ctx == SPRITEGROUP_CONTEXT_R_D  ? SPRITEGROUP_CONTEXT_R_D
-          : dir == DIR_DOWN && ctx == SPRITEGROUP_CONTEXT_L_D  ? SPRITEGROUP_CONTEXT_L_D
-          : dir == DIR_DOWN && ctx == SPRITEGROUP_CONTEXT_R_U  ? SPRITEGROUP_CONTEXT_R_D
-          : dir == DIR_DOWN && ctx == SPRITEGROUP_CONTEXT_L_U  ? SPRITEGROUP_CONTEXT_L_D
-          : dir == DIR_UP && ctx == SPRITEGROUP_CONTEXT_R_D    ? SPRITEGROUP_CONTEXT_R_U
-          : dir == DIR_UP && ctx == SPRITEGROUP_CONTEXT_L_D    ? SPRITEGROUP_CONTEXT_L_U
-          : dir == DIR_UP && ctx == SPRITEGROUP_CONTEXT_R_U    ? SPRITEGROUP_CONTEXT_R_U
-          : dir == DIR_UP && ctx == SPRITEGROUP_CONTEXT_L_U    ? SPRITEGROUP_CONTEXT_L_U
-          : dir == DIR_RIGHT && ctx == SPRITEGROUP_CONTEXT_R_D ? SPRITEGROUP_CONTEXT_R_D
-          : dir == DIR_RIGHT && ctx == SPRITEGROUP_CONTEXT_L_D ? SPRITEGROUP_CONTEXT_R_D
-          : dir == DIR_RIGHT && ctx == SPRITEGROUP_CONTEXT_R_U ? SPRITEGROUP_CONTEXT_R_U
-          : dir == DIR_RIGHT && ctx == SPRITEGROUP_CONTEXT_L_U ? SPRITEGROUP_CONTEXT_R_U
-          : dir == DIR_LEFT && ctx == SPRITEGROUP_CONTEXT_R_D  ? SPRITEGROUP_CONTEXT_L_D
-          : dir == DIR_LEFT && ctx == SPRITEGROUP_CONTEXT_L_D  ? SPRITEGROUP_CONTEXT_L_D
-          : dir == DIR_LEFT && ctx == SPRITEGROUP_CONTEXT_R_U  ? SPRITEGROUP_CONTEXT_L_U
-          : dir == DIR_LEFT && ctx == SPRITEGROUP_CONTEXT_L_U  ? SPRITEGROUP_CONTEXT_L_U
+    ctx = dir == direction_t::NONE                                      ? old_ctx
+          : dir == direction_t::DOWN_RIGHT                              ? SPRITEGROUP_CONTEXT_R_D
+          : dir == direction_t::DOWN_LEFT                               ? SPRITEGROUP_CONTEXT_L_D
+          : dir == direction_t::UP_RIGHT                                ? SPRITEGROUP_CONTEXT_R_U
+          : dir == direction_t::UP_LEFT                                 ? SPRITEGROUP_CONTEXT_L_U
+          : dir == direction_t::DOWN && ctx == SPRITEGROUP_CONTEXT_R_D  ? SPRITEGROUP_CONTEXT_R_D
+          : dir == direction_t::DOWN && ctx == SPRITEGROUP_CONTEXT_L_D  ? SPRITEGROUP_CONTEXT_L_D
+          : dir == direction_t::DOWN && ctx == SPRITEGROUP_CONTEXT_R_U  ? SPRITEGROUP_CONTEXT_R_D
+          : dir == direction_t::DOWN && ctx == SPRITEGROUP_CONTEXT_L_U  ? SPRITEGROUP_CONTEXT_L_D
+          : dir == direction_t::UP && ctx == SPRITEGROUP_CONTEXT_R_D    ? SPRITEGROUP_CONTEXT_R_U
+          : dir == direction_t::UP && ctx == SPRITEGROUP_CONTEXT_L_D    ? SPRITEGROUP_CONTEXT_L_U
+          : dir == direction_t::UP && ctx == SPRITEGROUP_CONTEXT_R_U    ? SPRITEGROUP_CONTEXT_R_U
+          : dir == direction_t::UP && ctx == SPRITEGROUP_CONTEXT_L_U    ? SPRITEGROUP_CONTEXT_L_U
+          : dir == direction_t::RIGHT && ctx == SPRITEGROUP_CONTEXT_R_D ? SPRITEGROUP_CONTEXT_R_D
+          : dir == direction_t::RIGHT && ctx == SPRITEGROUP_CONTEXT_L_D ? SPRITEGROUP_CONTEXT_R_D
+          : dir == direction_t::RIGHT && ctx == SPRITEGROUP_CONTEXT_R_U ? SPRITEGROUP_CONTEXT_R_U
+          : dir == direction_t::RIGHT && ctx == SPRITEGROUP_CONTEXT_L_U ? SPRITEGROUP_CONTEXT_R_U
+          : dir == direction_t::LEFT && ctx == SPRITEGROUP_CONTEXT_R_D  ? SPRITEGROUP_CONTEXT_L_D
+          : dir == direction_t::LEFT && ctx == SPRITEGROUP_CONTEXT_L_D  ? SPRITEGROUP_CONTEXT_L_D
+          : dir == direction_t::LEFT && ctx == SPRITEGROUP_CONTEXT_R_U  ? SPRITEGROUP_CONTEXT_L_U
+          : dir == direction_t::LEFT && ctx == SPRITEGROUP_CONTEXT_L_U  ? SPRITEGROUP_CONTEXT_L_U
                                                                : old_ctx;
     if (ctx != old_ctx) {
         g.frame_dirty = true;
@@ -50,14 +50,14 @@ void libdraw_update_sprite_position(gamestate& g, entityid id, spritegroup* sg) 
     if (sprite_move.x != 0 || sprite_move.y != 0) {
         sg->move.x = sprite_move.x;
         sg->move.y = sprite_move.y;
-        entitytype_t type = g.ct.get<entitytype>(id).value_or(ENTITY_NONE);
-        massert(type != ENTITY_NONE, "entity type is none");
-        if (type == ENTITY_PLAYER || type == ENTITY_NPC) {
-            race_t r = g.ct.get<race>(id).value_or(RACE_NONE);
-            if (r == RACE_BAT) {
+        entitytype_t type = g.ct.get<entitytype>(id).value_or(entitytype_t::NONE);
+        massert(type != entitytype_t::NONE, "entity type is none");
+        if (type == entitytype_t::PLAYER || type == entitytype_t::NPC) {
+            race_t r = g.ct.get<race>(id).value_or(race_t::NONE);
+            if (r == race_t::BAT) {
                 sg->current = SG_ANIM_BAT_IDLE;
             }
-            else if (r == RACE_GREEN_SLIME) {
+            else if (r == race_t::GREEN_SLIME) {
                 sg->current = SG_ANIM_SLIME_IDLE;
             }
             else {
@@ -93,7 +93,7 @@ void libdraw_update_sprite_ptr(gamestate& g, rpg::Renderer& renderer, entityid i
         libdraw_set_sg_is_attacking(g, renderer, id, sg);
     }
 
-    const entitytype_t type = g.ct.get<entitytype>(id).value_or(ENTITY_NONE);
+    const entitytype_t type = g.ct.get<entitytype>(id).value_or(entitytype_t::NONE);
 
     if (g.ct.get<dead>(id).value_or(false)) {
         libdraw_set_sg_is_dead(g, renderer, id, sg);
@@ -102,7 +102,7 @@ void libdraw_update_sprite_ptr(gamestate& g, rpg::Renderer& renderer, entityid i
         libdraw_set_sg_is_damaged(g, renderer, id, sg);
     }
 
-    if (type == ENTITY_DOOR || type == ENTITY_CHEST) {
+    if (type == entitytype_t::DOOR || type == entitytype_t::CHEST) {
         auto maybe_door_open = g.ct.get<door_open>(id);
         if (maybe_door_open.has_value()) {
             sg->set_current(maybe_door_open.value() ? 1 : 0);
@@ -142,7 +142,7 @@ void libdraw_handle_dirty_entities(gamestate& g, rpg::Renderer& renderer) {
 
 void libdraw_update_sprites_pre(gamestate& g, rpg::Renderer& renderer) {
     minfo2("BEGIN update sprites pre");
-    if (g.current_scene == SCENE_GAMEPLAY) {
+    if (g.current_scene == scene_t::GAMEPLAY) {
         libdraw_handle_dirty_entities(g, renderer);
         for (entityid id = 0; id < g.next_entityid; id++) {
             libdraw_update_sprite_pre(g, renderer, id);
@@ -152,7 +152,7 @@ void libdraw_update_sprites_pre(gamestate& g, rpg::Renderer& renderer) {
 }
 
 void libdraw_update_sprites_post(gamestate& g, rpg::Renderer& renderer) {
-    if (g.current_scene != SCENE_GAMEPLAY) {
+    if (g.current_scene != scene_t::GAMEPLAY) {
         g.frame_dirty = false;
         return;
     }
@@ -164,8 +164,8 @@ void libdraw_update_sprites_post(gamestate& g, rpg::Renderer& renderer) {
     g.frame_dirty = true;
 
     for (entityid id = 0; id < g.next_entityid; id++) {
-        const entitytype_t type = g.ct.get<entitytype>(id).value_or(ENTITY_NONE);
-        if (type == ENTITY_NONE) {
+        const entitytype_t type = g.ct.get<entitytype>(id).value_or(entitytype_t::NONE);
+        if (type == entitytype_t::NONE) {
             continue;
         }
 
@@ -182,16 +182,16 @@ void libdraw_update_sprites_post(gamestate& g, rpg::Renderer& renderer) {
 
         s->incr_frame();
 
-        if (type == ENTITY_PLAYER || type == ENTITY_NPC) {
+        if (type == entitytype_t::PLAYER || type == entitytype_t::NPC) {
             if (s->get_num_loops() >= 1) {
                 sg->current = sg->default_anim;
                 s->set_num_loops(0);
             }
         }
-        else if (type == ENTITY_ITEM) {
-            const itemtype_t itype = g.ct.get<itemtype>(id).value_or(ITEM_NONE);
+        else if (type == entitytype_t::ITEM) {
+            const itemtype_t itype = g.ct.get<itemtype>(id).value_or(itemtype_t::NONE);
             switch (itype) {
-            case ITEM_WEAPON: {
+            case itemtype_t::WEAPON: {
                 if (sg->current == 0) {
                     break;
                 }
@@ -206,7 +206,7 @@ void libdraw_update_sprites_post(gamestate& g, rpg::Renderer& renderer) {
                     s2->set_num_loops(0);
                 }
             } break;
-            case ITEM_SHIELD: {
+            case itemtype_t::SHIELD: {
                 if (sg->current == 0) {
                     break;
                 }

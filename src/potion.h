@@ -5,14 +5,14 @@
 #pragma once
 
 /// @brief Supported potion variants used by inventory and consumption logic.
-typedef enum
+enum class potiontype_t
 {
-    POTION_NONE,
-    POTION_HP_SMALL,
-    POTION_HP_MEDIUM,
-    POTION_HP_LARGE,
-    POTION_MP_SMALL,
-    POTION_MP_MEDIUM,
-    POTION_MP_LARGE,
-    POTION_TYPE_COUNT
-} potiontype_t;
+    NONE,
+    HP_SMALL,
+    HP_MEDIUM,
+    HP_LARGE,
+    MP_SMALL,
+    MP_MEDIUM,
+    MP_LARGE,
+    TYPE_COUNT
+};

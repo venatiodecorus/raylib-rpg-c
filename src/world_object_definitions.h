@@ -19,5 +19,5 @@ struct StaticWorldDefinition {
     int sprite_count;
 };
 
-const StaticWorldDefinition& get_static_world_definition(entitytype_t legacy_type, proptype_t prop_type = PROP_NONE);
+const StaticWorldDefinition& get_static_world_definition(entitytype_t legacy_type, proptype_t prop_type = proptype_t::NONE);
 const StaticWorldDefinition& get_prop_definition(proptype_t type);

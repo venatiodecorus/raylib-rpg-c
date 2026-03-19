@@ -5,10 +5,10 @@
 #pragma once
 
 /// @brief Primary scenes that the game loop can present.
-typedef enum {
-    SCENE_COMPANY = 0,
-    SCENE_TITLE,
-    SCENE_MAIN_MENU,
-    SCENE_CHARACTER_CREATION,
-    SCENE_GAMEPLAY,
-} scene_t;
+enum class scene_t {
+    COMPANY = 0,
+    TITLE,
+    MAIN_MENU,
+    CHARACTER_CREATION,
+    GAMEPLAY,
+};
