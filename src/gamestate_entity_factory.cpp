@@ -273,7 +273,7 @@ entityid gamestate::create_potion_at_with(vec3 loc, with_fun potionInitFunction)
 }
 
 race_t gamestate::random_monster_type() {
-    vector<race_t> monster_races = {race_t::GOBLIN, race_t::ORC, race_t::BAT, race_t::WOLF, race_t::WARG, race_t::ZOMBIE, race_t::SKELETON, race_t::RAT, race_t::GREEN_SLIME};
+    static const vector<race_t> monster_races = {race_t::GOBLIN, race_t::ORC, race_t::BAT, race_t::WOLF, race_t::WARG, race_t::ZOMBIE, race_t::SKELETON, race_t::RAT, race_t::GREEN_SLIME};
     uniform_int_distribution<int> gen(0, monster_races.size() - 1);
     int random_index = gen(mt);
     return monster_races[random_index];

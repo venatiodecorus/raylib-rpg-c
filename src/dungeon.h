@@ -49,7 +49,7 @@ public:
     }
 
     /** @brief Return the number of floors currently owned by the dungeon. */
-    size_t get_floor_count() {
+    size_t get_floor_count() const {
         return floors.size();
     }
 
@@ -60,7 +60,7 @@ public:
      * @return Shared pointer to the requested floor.
      * @warning Asserts when `index` is out of bounds.
      */
-    shared_ptr<dungeon_floor> get_floor(const size_t index) {
+    shared_ptr<dungeon_floor> get_floor(const size_t index) const {
         massert(index >= 0 && index < floors.size(), "index is OOB: index is %ld", index);
         return floors.at(index);
     }
@@ -70,7 +70,7 @@ public:
      *
      * @return Shared pointer to the floor selected by `current_floor`.
      */
-    shared_ptr<dungeon_floor> get_current_floor() {
+    shared_ptr<dungeon_floor> get_current_floor() const {
         return get_floor(current_floor);
     }
 

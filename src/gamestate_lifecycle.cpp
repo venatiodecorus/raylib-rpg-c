@@ -16,7 +16,7 @@ void gamestate::update_tile(tile_t& tile) {
 bool gamestate::path_blocked(vec3 a, vec3 b) {
     vector<vec3> path = calculate_path_with_thickness(a, b);
     auto df = d.get_current_floor();
-    for (auto loc : path) {
+    for (const auto& loc : path) {
         tile_t& t = df->tile_at(loc);
         if (tiletype_is_none(t.get_type())) {
             return true;
@@ -38,7 +38,7 @@ bool gamestate::path_blocked(vec3 a, vec3 b) {
 bool gamestate::visibility_path_blocked(vec3 a, vec3 b) {
     vector<vec3> path = calculate_path_with_thickness(a, b);
     auto df = d.get_current_floor();
-    for (auto loc : path) {
+    for (const auto& loc : path) {
         tile_t& t = df->tile_at(loc);
         if (tiletype_is_none(t.get_type())) {
             return true;

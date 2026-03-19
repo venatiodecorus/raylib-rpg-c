@@ -94,12 +94,12 @@ public:
     }
 
     /** @brief Return the width in pixels of one animation frame. */
-    int get_width() {
+    int get_width() const {
         return width;
     }
 
     /** @brief Return the height in pixels of one animation context row. */
-    int get_height() {
+    int get_height() const {
         return height;
     }
 
@@ -114,27 +114,27 @@ public:
     }
 
     /** @brief Return the number of context rows available in the spritesheet. */
-    int get_numcontexts() {
+    int get_numcontexts() const {
         return numcontexts;
     }
 
     /** @brief Return the number of frames per context row. */
-    int get_numframes() {
+    int get_numframes() const {
         return numframes;
     }
 
     /** @brief Return the active frame index. */
-    int get_currentframe() {
+    int get_currentframe() const {
         return currentframe;
     }
 
     /** @brief Return the active context-row index. */
-    int get_currentcontext() {
+    int get_currentcontext() const {
         return currentcontext;
     }
 
     /** @brief Return how many times this animation has looped. */
-    int get_num_loops() {
+    int get_num_loops() const {
         return num_loops;
     }
 
@@ -160,12 +160,12 @@ public:
     }
 
     /** @brief Return the non-owning backing texture pointer. */
-    const Texture2D* get_texture() {
+    const Texture2D* get_texture() const {
         return texture;
     }
 
     /** @brief Return the source rectangle currently used for rendering. */
-    Rectangle get_src() {
+    Rectangle get_src() const {
         return src;
     }
 
@@ -185,7 +185,7 @@ public:
     }
 
     /** @brief Return whether frame advancement is currently enabled. */
-    bool get_is_animating() {
+    bool get_is_animating() const {
         return is_animating;
     }
 
@@ -195,7 +195,7 @@ public:
     }
 
     /** @brief Return whether the animation should stop on the last frame. */
-    bool get_stop_on_last_frame() {
+    bool get_stop_on_last_frame() const {
         return stop_on_last_frame;
     }
 

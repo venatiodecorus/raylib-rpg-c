@@ -99,7 +99,7 @@ These must be addressed first because everything else depends on them.
     `entitytype_t`, `weapontype_t`, `tiletype_t`, `direction_t`, etc.
   - Convert to `enum class` for type safety.
 
-- [ ] **Add const-correctness throughout**
+- [x] **Add const-correctness throughout**
   - Many simple getters are not `const`: `dungeon_floor::get_upstairs_loc()`,
     `get_downstairs_loc()`, `get_biome()`, `get_height()`, `get_width()`, etc.
   - `dead_npc_cache::get_count()`, `contains()`, `top()` — all non-const.

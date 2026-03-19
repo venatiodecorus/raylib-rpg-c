@@ -44,7 +44,7 @@ public:
      *
      * @return Count of cached live entities, dead bodies, and item stack entries.
      */
-    inline size_t entity_count() {
+    inline size_t entity_count() const {
         size_t count = 0;
         count += cached_live_npc != INVALID ? 1 : 0;
         count += cached_prop != INVALID ? 1 : 0;
@@ -66,11 +66,11 @@ public:
         cached_prop = id;
     }
 
-    entityid get_cached_prop() {
+    entityid get_cached_prop() const {
         return cached_prop;
     }
 
-    entityid get_cached_box() {
+    entityid get_cached_box() const {
         return cached_box;
     }
 
@@ -78,7 +78,7 @@ public:
         cached_chest = id;
     }
 
-    entityid get_cached_chest() {
+    entityid get_cached_chest() const {
         return cached_chest;
     }
 
@@ -86,7 +86,7 @@ public:
         cached_door = id;
     }
 
-    entityid get_cached_door() {
+    entityid get_cached_door() const {
         return cached_door;
     }
 
@@ -95,15 +95,15 @@ public:
     }
 
     /** @brief Return the top visible item from the tile item cache. */
-    entityid get_cached_item() {
+    entityid get_cached_item() const {
         return items.top();
     }
 
-    entityid get_cached_item_at(size_t index) {
+    entityid get_cached_item_at(size_t index) const {
         return items.at(index);
     }
 
-    size_t get_item_count() {
+    size_t get_item_count() const {
         return items.get_count();
     }
 
@@ -112,7 +112,7 @@ public:
     }
 
     /** @brief Return the primary live NPC cached on this tile, if any. */
-    entityid get_cached_live_npc() {
+    entityid get_cached_live_npc() const {
         return cached_live_npc;
     }
 
@@ -121,7 +121,7 @@ public:
         dirty_entities = true;
     }
 
-    size_t get_dead_npc_count() {
+    size_t get_dead_npc_count() const {
         return dead_npcs.get_count();
     }
 
@@ -129,7 +129,7 @@ public:
         dirty_entities = b;
     }
 
-    bool get_dirty_entities() {
+    bool get_dirty_entities() const {
         return dirty_entities;
     }
 
@@ -137,7 +137,7 @@ public:
         cached_player_present = b;
     }
 
-    bool get_cached_player_present() {
+    bool get_cached_player_present() const {
         return cached_player_present;
     }
 
@@ -145,7 +145,7 @@ public:
         explored = b;
     }
 
-    bool get_explored() {
+    bool get_explored() const {
         return explored;
     }
 
@@ -154,11 +154,11 @@ public:
     }
 
     /** @brief Return whether this tile is currently visible to the player. */
-    bool get_visible() {
+    bool get_visible() const {
         return visible;
     }
 
-    tiletype_t get_type() {
+    tiletype_t get_type() const {
         return type;
     }
 
@@ -167,7 +167,7 @@ public:
     }
 
     /** @brief Return whether this tile may currently host a generated door. */
-    bool get_can_have_door() {
+    bool get_can_have_door() const {
         return can_have_door;
     }
 
@@ -175,7 +175,7 @@ public:
         can_have_door = b;
     }
 
-    constexpr inline bool tile_is_wall() {
+    constexpr inline bool tile_is_wall() const {
         return tiletype_is_wall(type);
     }
 
@@ -326,7 +326,7 @@ public:
     }
 
     /** @brief Return the top cached dead NPC on this tile, if any. */
-    entityid get_cached_dead_npc() {
+    entityid get_cached_dead_npc() const {
         return dead_npcs.top();
     }
 };

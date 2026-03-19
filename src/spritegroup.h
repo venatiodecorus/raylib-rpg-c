@@ -54,17 +54,17 @@ public:
     }
 
     /** @brief Return the sprite at `index`. */
-    std::shared_ptr<sprite> get(int index) {
+    std::shared_ptr<sprite> get(int index) const {
         return sprites.at(index);
     }
 
     /** @brief Return the number of sprites currently stored in the group. */
-    size_t count() {
+    size_t count() const {
         return sprites.size();
     }
 
     /** @brief Return the sprite for the currently selected animation. */
-    std::shared_ptr<sprite> get_current() {
+    std::shared_ptr<sprite> get_current() const {
         return sprites.at(current);
     }
 

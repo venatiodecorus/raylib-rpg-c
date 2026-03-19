@@ -40,7 +40,7 @@ public:
 
 
     /** @brief Return the currently highlighted option index. */
-    size_t get_selection() {
+    size_t get_selection() const {
         return selection;
     }
 
@@ -64,17 +64,17 @@ public:
     }
 
     /** @brief Return the number of menu options currently present. */
-    size_t get_option_count() {
+    size_t get_option_count() const {
         return options.size();
     }
 
     /** @brief Return the option entry at the provided index. */
-    option_type get_option(size_t i) {
+    option_type get_option(size_t i) const {
         return options[i];
     }
 
     /** @brief Return a display string for the provided option type. */
-    std::string get_option_str(option_type t) {
+    std::string get_option_str(option_type t) const {
         switch (t) {
         case option_type::NONE: return "none";
         case option_type::CONTROLS: return "controls";

@@ -10,7 +10,7 @@ void draw_message_box(gamestate& g) {
     constexpr float text_height = font_size;
     constexpr float y = (DEFAULT_TARGET_HEIGHT - text_height) / 2.0 - DEFAULT_PAD;
 
-    const string msg = g.ui.display_confirm_prompt ? g.ui.confirm_prompt_message : g.messages.system.at(0);
+    const string& msg = g.ui.display_confirm_prompt ? g.ui.confirm_prompt_message : g.messages.system.at(0);
     char tmp[1024] = {0};
     snprintf(tmp, sizeof(tmp), "%s", msg.c_str());
 

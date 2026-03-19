@@ -59,6 +59,27 @@ public:
         // static_pointer_cast preserves shared_ptr's memory management.
         return static_pointer_cast<unordered_map<entityid, typename ComponentTraits<Kind>::Type>>(it->second);
     }
+
+    /**
+     * @brief Return the backing entity map for a component kind (read-only).
+     *
+     * Unlike the mutable overload, this does NOT create an empty store for
+     * previously-unused component kinds — it returns `nullptr` instead.
+     *
+     * @tparam Kind Component tag type resolved through `ComponentTraits`.
+     * @return Shared pointer to the typed map, or `nullptr` when the kind has no store.
+     */
+    template <typename Kind>
+    shared_ptr<const unordered_map<entityid, typename ComponentTraits<Kind>::Type>> getStore() const
+    {
+        auto type = type_index(typeid(Kind));
+        auto it = stores.find(type);
+        if (it == stores.end())
+        {
+            return nullptr;
+        }
+        return static_pointer_cast<const unordered_map<entityid, typename ComponentTraits<Kind>::Type>>(it->second);
+    }
     /**
      * @brief Add or replace a component value for an entity.
      *
@@ -89,6 +110,30 @@ public:
         }
         return it->second;
     }
+
+    /**
+     * @brief Return a component value for an entity, if present (read-only).
+     *
+     * @tparam Kind Component tag type resolved through `ComponentTraits`.
+     * @param entity Entity to query.
+     * @return Stored component value, or `nullopt` when absent.
+     */
+    template <typename Kind>
+    optional<typename ComponentTraits<Kind>::Type> get(entityid entity) const
+    {
+        auto store = getStore<Kind>();
+        if (!store)
+        {
+            return nullopt;
+        }
+        auto it = store->find(entity);
+        if (it == store->end())
+        {
+            return nullopt;
+        }
+        return it->second;
+    }
+
     /**
      * @brief Return whether an entity currently has a component of the requested kind.
      *
@@ -101,6 +146,24 @@ public:
     bool has(entityid entity)
     {
         return getStore<Kind>()->find(entity) != getStore<Kind>()->end();
+    }
+
+    /**
+     * @brief Return whether an entity currently has a component of the requested kind (read-only).
+     *
+     * @tparam Kind Component tag type resolved through `ComponentTraits`.
+     * @param entity Entity to query.
+     * @return `true` when the component exists.
+     */
+    template <typename Kind>
+    bool has(entityid entity) const
+    {
+        auto store = getStore<Kind>();
+        if (!store)
+        {
+            return false;
+        }
+        return store->find(entity) != store->end();
     }
     /**
      * @brief Remove a component of the requested kind from an entity.

@@ -41,33 +41,33 @@ private:
 
 public:
     /** @brief Return the upstairs location for this floor, or an invalid vec3 if unset. */
-    vec3 get_upstairs_loc() {
+    vec3 get_upstairs_loc() const {
         return upstairs_loc;
     }
 
     /** @brief Return the downstairs location for this floor, or an invalid vec3 if unset. */
-    vec3 get_downstairs_loc() {
+    vec3 get_downstairs_loc() const {
         return downstairs_loc;
     }
 
-    biome_t get_biome() {
+    biome_t get_biome() const {
         return biome;
     }
 
-    int get_height() {
+    int get_height() const {
         return height;
     }
 
-    int get_width() {
+    int get_width() const {
         return width;
     }
 
-    int get_floor() {
+    int get_floor() const {
         return floor;
     }
 
     /** @brief Return whether debug full-light mode is enabled for this floor. */
-    bool get_full_light() {
+    bool get_full_light() const {
         return full_light;
     }
 
@@ -130,12 +130,23 @@ public:
         return grid[tile_index(loc)];
     }
 
+    /**
+     * @brief Return read-only access to a tile on this floor.
+     *
+     * @param loc Tile location on this floor.
+     * @return Const reference to the addressed tile.
+     */
+    const tile_t& tile_at(vec3 loc) const {
+        minfo3("tile_at: (%d, %d, %d)", loc.x, loc.y, loc.z);
+        return grid[tile_index(loc)];
+    }
+
     void df_set_can_have_door(vec3 loc) {
         tile_t& tile = tile_at(loc);
         tile.set_can_have_door(true);
     }
 
-    int df_count_walkable_cardinal_neighbors(vec3 loc) {
+    int df_count_walkable_cardinal_neighbors(vec3 loc) const {
         static constexpr vec3 offsets[] = {
             vec3{0, -1, 0},
             vec3{-1, 0, 0},
@@ -149,7 +160,7 @@ public:
             if (neighbor_loc.x < 0 || neighbor_loc.x >= width || neighbor_loc.y < 0 || neighbor_loc.y >= height) {
                 continue;
             }
-            tile_t& neighbor = tile_at(neighbor_loc);
+            const tile_t& neighbor = tile_at(neighbor_loc);
             if (tile_is_walkable(neighbor.get_type())) {
                 count++;
             }
@@ -164,8 +175,8 @@ public:
      * @param loc Tile location to evaluate.
      * @return `true` when the tile matches the local doorway topology rules.
      */
-    bool df_is_good_door_loc(vec3 loc) {
-        tile_t& tile = tile_at(loc);
+    bool df_is_good_door_loc(vec3 loc) const {
+        const tile_t& tile = tile_at(loc);
         if (!tile_is_walkable(tile.get_type())) {
             return false;
         }
@@ -178,10 +189,10 @@ public:
         const vec3 up_loc = {loc.x, loc.y - 1, loc.z};
         const vec3 down_loc = {loc.x, loc.y + 1, loc.z};
 
-        tile_t& left = tile_at(left_loc);
-        tile_t& right = tile_at(right_loc);
-        tile_t& up = tile_at(up_loc);
-        tile_t& down = tile_at(down_loc);
+        const tile_t& left = tile_at(left_loc);
+        const tile_t& right = tile_at(right_loc);
+        const tile_t& up = tile_at(up_loc);
+        const tile_t& down = tile_at(down_loc);
 
         const bool left_walkable = tile_is_walkable(left.get_type());
         const bool right_walkable = tile_is_walkable(right.get_type());
@@ -217,17 +228,16 @@ public:
         return up_has_branch != down_has_branch;
     }
 
-    bool tile_is_good_for_upgrade(vec3 loc) {
-        auto tile = tile_at(loc);
+    bool tile_is_good_for_upgrade(vec3 loc) const {
         if (loc.x >= 1 && loc.y >= 1 && loc.x < width - 1 && loc.y < height - 1) {
-            auto t0 = tile_at((vec3){loc.x - 1, loc.y - 1, loc.z});
-            auto t1 = tile_at((vec3){loc.x - 1, loc.y, loc.z});
-            auto t2 = tile_at((vec3){loc.x - 1, loc.y + 1, loc.z});
-            auto t3 = tile_at((vec3){loc.x, loc.y - 1, loc.z});
-            auto t4 = tile_at((vec3){loc.x, loc.y + 1, loc.z});
-            auto t5 = tile_at((vec3){loc.x + 1, loc.y - 1, loc.z});
-            auto t6 = tile_at((vec3){loc.x + 1, loc.y, loc.z});
-            auto t7 = tile_at((vec3){loc.x + 1, loc.y + 1, loc.z});
+            const tile_t& t0 = tile_at((vec3){loc.x - 1, loc.y - 1, loc.z});
+            const tile_t& t1 = tile_at((vec3){loc.x - 1, loc.y, loc.z});
+            const tile_t& t2 = tile_at((vec3){loc.x - 1, loc.y + 1, loc.z});
+            const tile_t& t3 = tile_at((vec3){loc.x, loc.y - 1, loc.z});
+            const tile_t& t4 = tile_at((vec3){loc.x, loc.y + 1, loc.z});
+            const tile_t& t5 = tile_at((vec3){loc.x + 1, loc.y - 1, loc.z});
+            const tile_t& t6 = tile_at((vec3){loc.x + 1, loc.y, loc.z});
+            const tile_t& t7 = tile_at((vec3){loc.x + 1, loc.y + 1, loc.z});
             auto top_row_none = t0.get_type() == tiletype_t::NONE && t3.get_type() == tiletype_t::NONE && t5.get_type() == tiletype_t::NONE;
             auto bottom_row_none = t2.get_type() == tiletype_t::NONE && t4.get_type() == tiletype_t::NONE && t7.get_type() == tiletype_t::NONE;
             auto left_not_none = t1.get_type() != tiletype_t::NONE;
@@ -488,7 +498,7 @@ public:
         mLambda();
     }
 
-    int df_get_possible_downstairs_count_in_area(Rectangle r) {
+    int df_get_possible_downstairs_count_in_area(Rectangle r) const {
         massert(r.x >= 0, "x is less than zero");
         massert(r.x < width, "x is out of bounds");
         massert(r.y >= 0, "y is less than zero");
@@ -500,7 +510,7 @@ public:
         int count = 0;
         for (int y0 = r.y; y0 < height; y0++) {
             for (int x0 = r.x; x0 < width; x0++) {
-                tile_t& tile = tile_at(vec3{x0, y0, -1});
+                const tile_t& tile = tile_at(vec3{x0, y0, -1});
                 // check if the tile is possible downstairs
                 if (tile_is_possible_downstairs(tile.get_type())) {
                     count++;
@@ -510,7 +520,7 @@ public:
         return count;
     }
 
-    int df_get_possible_upstairs_count_in_area(Rectangle r) {
+    int df_get_possible_upstairs_count_in_area(Rectangle r) const {
         massert(r.x >= 0, "x is less than zero");
         massert(r.x < width, "x is out of bounds");
         massert(r.y >= 0, "y is less than zero");
@@ -522,7 +532,7 @@ public:
         int count = 0;
         for (int y0 = r.y; y0 < height; y0++) {
             for (int x0 = r.x; x0 < width; x0++) {
-                tile_t& tile = tile_at(vec3{x0, y0, -1});
+                const tile_t& tile = tile_at(vec3{x0, y0, -1});
                 if (tile_is_possible_upstairs(tile.get_type())) {
                     count++;
                 }
@@ -532,13 +542,13 @@ public:
     }
 
     /** @brief Return all valid upstairs candidate locations inside the given area. */
-    shared_ptr<vector<vec3>> df_get_possible_upstairs_locs_in_area(Rectangle r) {
+    shared_ptr<vector<vec3>> df_get_possible_upstairs_locs_in_area(Rectangle r) const {
         auto locations = make_shared<vector<vec3>>();
         massert(locations, "failed to make_shared locations");
         // now we can loop thru the dungeon floor again and fill the array with the locations
         for (int y0 = r.y; y0 < height; y0++) {
             for (int x0 = r.x; x0 < width; x0++) {
-                tile_t& tile = tile_at(vec3{x0, y0, -1});
+                const tile_t& tile = tile_at(vec3{x0, y0, -1});
                 // there wont be any entities yet so do not check for them
                 if (tile_is_possible_upstairs(tile.get_type())) {
                     locations->push_back(vec3{x0, y0, floor});
@@ -549,7 +559,7 @@ public:
     }
 
     /** @brief Return all valid downstairs candidate locations inside the given area. */
-    shared_ptr<vector<vec3>> df_get_possible_downstairs_locs_in_area(Rectangle r) {
+    shared_ptr<vector<vec3>> df_get_possible_downstairs_locs_in_area(Rectangle r) const {
         massert(r.x >= 0, "x is less than zero");
         massert(r.x < width, "x is out of bounds");
         massert(r.y >= 0, "y is less than zero");
@@ -559,7 +569,7 @@ public:
         // now we can loop thru the dungeon floor again and fill the array with the locations
         for (int y0 = r.y; y0 < height; y0++) {
             for (int x0 = r.x; x0 < width; x0++) {
-                tile_t& tile = tile_at(vec3{x0, y0, -1});
+                const tile_t& tile = tile_at(vec3{x0, y0, -1});
                 // there wont be any entities yet so do not check for them
                 if (tile_is_possible_downstairs(tile.get_type())) {
                     locations->push_back(vec3{x0, y0, floor});
@@ -569,21 +579,21 @@ public:
         return locations;
     }
 
-    int df_get_possible_upstairs_count() {
+    int df_get_possible_upstairs_count() const {
         return df_get_possible_upstairs_count_in_area((Rectangle){0, 0, (float)width, (float)height});
     }
 
-    int df_get_possible_downstairs_count() {
+    int df_get_possible_downstairs_count() const {
         return df_get_possible_downstairs_count_in_area((Rectangle){0, 0, (float)width, (float)height});
     }
 
-    shared_ptr<vector<vec3>> df_get_possible_upstairs_locs() {
+    shared_ptr<vector<vec3>> df_get_possible_upstairs_locs() const {
         auto locs = df_get_possible_upstairs_locs_in_area((Rectangle){0, 0, (float)width, (float)height});
         massert(locs, "failed to get possible upstairs locations");
         return locs;
     }
 
-    shared_ptr<vector<vec3>> df_get_possible_downstairs_locs() {
+    shared_ptr<vector<vec3>> df_get_possible_downstairs_locs() const {
         auto locs = df_get_possible_downstairs_locs_in_area((Rectangle){0, 0, (float)width, (float)height});
         massert(locs, "failed to get possible downstairs locations");
         return locs;

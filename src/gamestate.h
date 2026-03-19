@@ -403,7 +403,7 @@ public:
     /** @brief Create a door entity and apply additional component initialization. */
     entityid create_door_with(with_fun doorInitFunction);
 
-    bool tile_has_player(shared_ptr<tile_t> t) {
+    bool tile_has_player(shared_ptr<tile_t> t) const {
         return t->get_cached_player_present();
     }
 
@@ -531,19 +531,19 @@ public:
     /** @brief Create an NPC entity of the requested race and apply extra initialization. */
     entityid create_npc_with(race_t rt, with_fun npcInitFunction);
 
-    entityid tile_has_box(int x, int y, int z) {
+    entityid tile_has_box(int x, int y, int z) const {
         massert(z >= 0, "floor is out of bounds");
         massert((size_t)z < d.floors.size(), "floor is out of bounds");
         auto df = d.get_floor(z);
-        tile_t& t = df->tile_at((vec3){x, y, z});
+        const tile_t& t = df->tile_at((vec3){x, y, z});
         return t.get_cached_box();
     }
 
-    entityid tile_has_chest(int x, int y, int z) {
+    entityid tile_has_chest(int x, int y, int z) const {
         massert(z >= 0, "floor is out of bounds");
         massert((size_t)z < d.floors.size(), "floor is out of bounds");
         auto df = d.get_floor(z);
-        tile_t& t = df->tile_at((vec3){x, y, z});
+        const tile_t& t = df->tile_at((vec3){x, y, z});
         return t.get_cached_chest();
     }
 
@@ -1036,7 +1036,7 @@ public:
     /** @brief Return the dungeon location directly in front of the player actor. */
     vec3 get_loc_facing_player();
 
-    entityid get_cached_live_npc(shared_ptr<tile_t> t) {
+    entityid get_cached_live_npc(shared_ptr<tile_t> t) const {
         if (t == nullptr) {
             return INVALID;
         }
