@@ -2,6 +2,8 @@
 
 #include "ecs_item_components.h"
 #include "item_definitions.h"
+#include "ecs_actor_components.h"
+#include "actor_definitions.h"
 
 namespace {
 void mirror_item_common(gamestate& g, entityid id, const ItemDefinition* definition) {
@@ -282,12 +284,13 @@ void gamestate::set_npc_starting_stats(entityid id) {
     if (rt == RACE_NONE) {
         return;
     }
-    int str_m = get_racial_modifiers(rt, 0);
-    int dex_m = get_racial_modifiers(rt, 1);
-    int int_m = get_racial_modifiers(rt, 2);
-    int wis_m = get_racial_modifiers(rt, 3);
-    int con_m = get_racial_modifiers(rt, 4);
-    int cha_m = get_racial_modifiers(rt, 5);
+    const ActorDefinition* def = get_actor_definition(rt);
+    int str_m = def ? def->modifiers[0] : get_racial_modifiers(rt, 0);
+    int dex_m = def ? def->modifiers[1] : get_racial_modifiers(rt, 1);
+    int int_m = def ? def->modifiers[2] : get_racial_modifiers(rt, 2);
+    int wis_m = def ? def->modifiers[3] : get_racial_modifiers(rt, 3);
+    int con_m = def ? def->modifiers[4] : get_racial_modifiers(rt, 4);
+    int cha_m = def ? def->modifiers[5] : get_racial_modifiers(rt, 5);
     uniform_int_distribution<int> gen(3, 18);
     int strength_ = gen(mt) + str_m;
     int dexterity_ = gen(mt) + dex_m;
@@ -301,22 +304,24 @@ void gamestate::set_npc_starting_stats(entityid id) {
     ct.set<wisdom>(id, wisdom_);
     ct.set<constitution>(id, constitution_);
     ct.set<charisma>(id, charisma_);
-    vec3 hitdie = {1, 8, 0};
-    switch (rt) {
-    case RACE_HUMAN: hitdie.y = 8; break;
-    case RACE_ELF: hitdie.y = 6; break;
-    case RACE_DWARF: hitdie.y = 10; break;
-    case RACE_HALFLING: hitdie.y = 6; break;
-    case RACE_GOBLIN: hitdie.y = 6; break;
-    case RACE_ORC: hitdie.y = 8; break;
-    case RACE_BAT: hitdie.y = 3; break;
-    case RACE_GREEN_SLIME: hitdie.y = 4; break;
-    case RACE_WOLF: hitdie.y = 6; break;
-    case RACE_WARG: hitdie.y = 12; break;
-    case RACE_RAT: hitdie.y = 4; break;
-    case RACE_SKELETON: hitdie.y = 8; break;
-    case RACE_ZOMBIE: hitdie.y = 8; break;
-    default: break;
+    vec3 hitdie = {1, def ? def->default_hitdie : 8, 0};
+    if (!def) {
+        switch (rt) {
+        case RACE_HUMAN: hitdie.y = 8; break;
+        case RACE_ELF: hitdie.y = 6; break;
+        case RACE_DWARF: hitdie.y = 10; break;
+        case RACE_HALFLING: hitdie.y = 6; break;
+        case RACE_GOBLIN: hitdie.y = 6; break;
+        case RACE_ORC: hitdie.y = 8; break;
+        case RACE_BAT: hitdie.y = 3; break;
+        case RACE_GREEN_SLIME: hitdie.y = 4; break;
+        case RACE_WOLF: hitdie.y = 6; break;
+        case RACE_WARG: hitdie.y = 12; break;
+        case RACE_RAT: hitdie.y = 4; break;
+        case RACE_SKELETON: hitdie.y = 8; break;
+        case RACE_ZOMBIE: hitdie.y = 8; break;
+        default: break;
+        }
     }
     uniform_int_distribution<int> gen2(1, hitdie.y);
     int my_maxhp = std::max(1, gen2(mt) + get_stat_bonus(constitution_));
@@ -352,17 +357,28 @@ entityid gamestate::create_npc_with(race_t rt, with_fun npcInitFunction) {
     entityid id = add_entity();
     set_npc_defaults(id);
     ct.set<race>(id, rt);
-    const alignment_t default_alignment = default_alignment_for_race(rt);
+    
+    const ActorDefinition* def = get_actor_definition(rt);
+    const alignment_t default_alignment = def ? def->default_alignment : default_alignment_for_race(rt);
+    
     npc_alignment_init(default_alignment)(ct, id);
     ct.set<aggro>(id, alignment_is_aggressive(default_alignment));
     set_npc_starting_stats(id);
     npcInitFunction(ct, id);
     if (!ct.get<name>(id).has_value()) {
-        ct.set<name>(id, race2str(rt));
+        ct.set<name>(id, def ? def->default_name : race2str(rt));
     }
     if (!ct.get<dialogue_text>(id).has_value()) {
-        ct.set<dialogue_text>(id, "They give you a guarded look but say nothing.");
+        ct.set<dialogue_text>(id, def ? def->default_description : "They give you a guarded look but say nothing.");
     }
+    
+    if (def) {
+        const entt::entity registry_entity = ensure_registry_entity(id);
+        registry.emplace_or_replace<ActorKind>(registry_entity, ActorKind{rt});
+        registry.emplace_or_replace<ActorVisual>(registry_entity, ActorVisual{def->sprite_keys, def->sprite_key_count});
+        registry.emplace_or_replace<ActorText>(registry_entity, ActorText{def->default_name, def->default_description});
+    }
+    
     return id;
 }
 
@@ -397,6 +413,7 @@ entityid gamestate::create_npc_at_with(race_t rt, vec3 loc, with_fun npcInitFunc
     }
     minfo2("setting location for %d", id);
     ct.set<location>(id, loc);
+    sync_registry_grid_position(id, loc);
     msuccess2("created npc %d", id);
     return id;
 }

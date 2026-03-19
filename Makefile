@@ -52,6 +52,7 @@ GAMESTATE_C = $(addprefix $(SRCDIR)/, \
 	world_object_definitions.cpp \
 	item_definitions.cpp \
 	prop_definitions.cpp \
+	actor_definitions.cpp \
 	gamestate_world_interaction.cpp \
 	gamestate_entity_factory.cpp)
 GAMESTATE_O = $(GAMESTATE_C:.cpp=.o)

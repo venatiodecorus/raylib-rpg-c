@@ -1,5 +1,6 @@
 #include "create_sg_byid.h"
 
+#include "ecs_actor_components.h"
 #include "ecs_item_components.h"
 #include "ecs_world_object_components.h"
 #include "entitytype.h"
@@ -17,6 +18,21 @@
 #include "tx_keys_weapons.h"
 
 namespace {
+bool create_actor_sg_from_registry(gamestate& g, entityid id) {
+    const entt::entity registry_entity = g.lookup_registry_entity(id);
+    if (registry_entity == entt::null || !g.registry.all_of<ActorVisual>(registry_entity)) {
+        return false;
+    }
+
+    const ActorVisual& visual = g.registry.get<ActorVisual>(registry_entity);
+    if (visual.keys == nullptr || visual.key_count <= 0) {
+        return false;
+    }
+
+    create_sg(g, id, const_cast<int*>(visual.keys), visual.key_count);
+    return true;
+}
+
 bool create_item_sg_from_registry(gamestate& g, entityid id) {
     const entt::entity registry_entity = g.lookup_registry_entity(id);
     if (registry_entity == entt::null || !g.registry.all_of<ItemVisual>(registry_entity)) {
@@ -50,6 +66,10 @@ bool create_static_world_sg_from_registry(gamestate& g, entityid id) {
 
 void create_npc_sg_byid(gamestate& g, entityid id) {
     massert(id != ENTITYID_INVALID, "entityid is invalid");
+
+    if (create_actor_sg_from_registry(g, id)) {
+        return;
+    }
 
     const race_t r = g.ct.get<race>(id).value_or(RACE_NONE);
     massert(r != RACE_NONE, "race is none for id %d", id);
