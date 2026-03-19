@@ -52,7 +52,7 @@ These must be addressed first because everything else depends on them.
   - Remove all `using` declarations from headers; use fully-qualified names or
     confine `using` to .cpp files.
 
-- [ ] **Replace the component system with a proper ECS or clean it up**
+- [x] **Replace the component system with a proper ECS or clean it up**
   - The current "ECS" is a type-erased map-of-maps (`ComponentTable.h`). Every
     component read does 2 hash lookups + shared_ptr cast + value copy via
     `optional<T>`.
