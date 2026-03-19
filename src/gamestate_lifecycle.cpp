@@ -1,4 +1,7 @@
 #include "gamestate.h"
+#include "ecs_core_components.h"
+#include "ecs_actor_components.h"
+#include <entt/entt.hpp>
 
 /** @file gamestate_lifecycle.cpp
  *  @brief Core gameplay lifecycle, visibility, and tick helpers implemented on `gamestate`.
@@ -116,7 +119,9 @@ void gamestate::update_npcs_state() {
     auto df = d.get_current_floor();
     (void)df;
     minfo2("begin loop");
-    for (entityid id = 0; id < next_entityid; id++) {
+    auto view = registry.view<ActorKind, LegacyEntityId>();
+    for (auto entity : view) {
+        entityid id = view.get<LegacyEntityId>(entity).id;
         auto type = ct.get<entitytype>(id).value_or(ENTITY_NONE);
         if (type == ENTITY_NPC) {
             ct.set<damaged>(id, false);
@@ -297,7 +302,9 @@ void gamestate::advance_animation_phase() {
 }
 
 void gamestate::finalize_render_feedback() {
-    for (entityid id = 0; id < next_entityid; id++) {
+    auto view = registry.view<LegacyEntityId>();
+    for (auto entity : view) {
+        entityid id = view.get<LegacyEntityId>(entity).id;
         if (ct.has<update>(id)) {
             ct.set<update>(id, false);
         }

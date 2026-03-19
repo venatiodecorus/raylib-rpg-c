@@ -1,4 +1,7 @@
 #include "gamestate.h"
+#include "ecs_core_components.h"
+#include "ecs_actor_components.h"
+#include <entt/entt.hpp>
 
 /** @file gamestate_npc_combat.cpp
  *  @brief Combat, NPC behavior, and pathing helpers implemented on `gamestate`.
@@ -564,15 +567,17 @@ void gamestate::handle_npcs() {
 #else
         auto df = d.get_current_floor();
         (void)df;
-        for (entityid id = 0; id < next_entityid; id++) {
+        auto view = registry.view<ActorKind, LegacyEntityId>();
+        for (auto entity : view) {
+            entityid id = view.get<LegacyEntityId>(entity).id;
             auto type = ct.get<entitytype>(id).value_or(ENTITY_NONE);
             if (type == ENTITY_NPC) {
                 const bool result = handle_npc(id);
                 if (result) {
-                    msuccess2("npc %d handled successfully", entity_turn);
+                    msuccess2("npc %d handled successfully", id);
                 }
                 else {
-                    merror2("npc %d handle failed", entity_turn);
+                    merror2("npc %d handle failed", id);
                 }
             }
         }

@@ -13,6 +13,7 @@
 #include "controlmode.h"
 #include "debugpanel.h"
 #include "dungeon.h"
+#include "ecs_core_components.h"
 #include "ecs_world_object_components.h"
 #include "event_type.h"
 #include "gameplay_keybindings.h"
@@ -310,6 +311,7 @@ public:
             return entity;
         }
         const entt::entity created = registry.create();
+        registry.emplace<LegacyEntityId>(created, LegacyEntityId{id});
         legacy_to_entt[id] = created;
         return created;
     }

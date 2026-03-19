@@ -1,4 +1,7 @@
 #include "gamestate.h"
+#include "ecs_core_components.h"
+#include "ecs_actor_components.h"
+#include <entt/entt.hpp>
 
 /** @file gamestate_scene.cpp
  *  @brief Scene-specific input and character-creation helpers implemented on `gamestate`.
@@ -48,7 +51,9 @@ void gamestate::handle_input_main_menu_scene(inputstate& is) {
 
 void gamestate::make_all_npcs_target_player() {
     massert(hero_id != ENTITYID_INVALID, "hero_id is invalid");
-    for (entityid id = 0; id < next_entityid; id++) {
+    auto view = registry.view<ActorKind, LegacyEntityId>();
+    for (auto entity : view) {
+        entityid id = view.get<LegacyEntityId>(entity).id;
         entitytype_t t = ct.get<entitytype>(id).value_or(ENTITY_NONE);
         if (t != ENTITY_NPC) {
             continue;
