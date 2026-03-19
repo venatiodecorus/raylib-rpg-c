@@ -11,11 +11,10 @@ struct PresentationState {
     bool gridon = false;
     bool cam_lockon = false;
     bool cam_changed = false;
-    unsigned int fadealpha = 0;
-    unsigned int targetwidth = 0;
-    unsigned int targetheight = 0;
-    unsigned int windowwidth = 0;
-    unsigned int windowheight = 0;
+    int targetwidth = 0;
+    int targetheight = 0;
+    int windowwidth = 0;
+    int windowheight = 0;
     unsigned int font_size = 0;
     int pad = 0;
     float line_spacing = 1.0f;

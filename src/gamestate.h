@@ -157,10 +157,10 @@ public:
         presentation.debugpanel.fg_color = RAYWHITE;
         presentation.debugpanel.bg_color = RED;
         presentation.debugpanel.font_size = GAMESTATE_DEBUGPANEL_DEFAULT_FONT_SIZE;
-        presentation.targetwidth = static_cast<unsigned int>(-1);
-        presentation.targetheight = static_cast<unsigned int>(-1);
-        presentation.windowwidth = static_cast<unsigned int>(-1);
-        presentation.windowheight = static_cast<unsigned int>(-1);
+        presentation.targetwidth = -1;
+        presentation.targetheight = -1;
+        presentation.windowwidth = -1;
+        presentation.windowheight = -1;
         hero_id = INVALID;
         ui.active_chest_id = INVALID;
         entity_turn = 1;
@@ -219,8 +219,7 @@ public:
         ui.mini_inventory_scroll_offset = 0;
         presentation.cam2d.target = presentation.cam2d.offset = Vector2{0, 0};
         presentation.cam2d.zoom = DEFAULT_ZOOM_LEVEL;
-        presentation.cam2d.rotation = 0.0;
-        presentation.fadealpha = 0.0;
+        presentation.cam2d.rotation = 0.0f;
         controlmode = controlmode_t::PLAYER;
         controlmode_before_confirm = controlmode_t::PLAYER;
         // current displayed dungeon floor
@@ -230,7 +229,7 @@ public:
         presentation.line_spacing = 1.0f;
         // weird bug maybe when set to 0?
         next_entityid = 1;
-        do_restart = 0;
+        do_restart = false;
         ui.title_screen_selection = 0;
         lock = 0;
         timing = rpg::FrameTimingState();
@@ -1347,11 +1346,10 @@ public:
     bool& gridon = presentation.gridon;
     bool& cam_lockon = presentation.cam_lockon;
     bool& cam_changed = presentation.cam_changed;
-    unsigned int& fadealpha = presentation.fadealpha;
-    unsigned int& targetwidth = presentation.targetwidth;
-    unsigned int& targetheight = presentation.targetheight;
-    unsigned int& windowwidth = presentation.windowwidth;
-    unsigned int& windowheight = presentation.windowheight;
+    int& targetwidth = presentation.targetwidth;
+    int& targetheight = presentation.targetheight;
+    int& windowwidth = presentation.windowwidth;
+    int& windowheight = presentation.windowheight;
     unsigned int& font_size = presentation.font_size;
     int& pad = presentation.pad;
     float& line_spacing = presentation.line_spacing;

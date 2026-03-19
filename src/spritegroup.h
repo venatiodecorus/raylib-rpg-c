@@ -49,7 +49,7 @@ public:
         id = 0;
         sprites.reserve(cap);
         dest = move = Rectangle{0, 0, 0, 0};
-        move_rate = 1.0;
+        move_rate = 1.0f;
         visible = true;
     }
 
