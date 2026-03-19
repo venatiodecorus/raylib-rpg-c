@@ -21,7 +21,7 @@ void draw_message_history(gamestate& g) {
     if (msg_count > max_messages) {
         int outer_count = 0;
         for (int i = msg_count - max_messages; i < msg_count; i++) {
-            const string msg = g.messages.history.at(i);
+            const string& msg = g.messages.history.at(i);
             bzero(tmp, 1024);
             snprintf(tmp, sizeof(tmp), "%s", msg.c_str());
             const float msg_x = box.x + g.pad / 2.0;
@@ -32,7 +32,7 @@ void draw_message_history(gamestate& g) {
         return;
     }
     for (int i = 0; i < msg_count; i++) {
-        const string msg = g.messages.history.at(i);
+        const string& msg = g.messages.history.at(i);
         bzero(tmp, 1024);
         snprintf(tmp, sizeof(tmp), "%s", msg.c_str());
         const float msg_x = box.x + g.pad / 2.0;

@@ -57,8 +57,8 @@ const static inline string race2str(const race_t r) {
 }
 
 /** @brief Convert a configured race string into a race enum, or `race_t::NONE`. */
-const static inline race_t str2race(const string str) {
-    for (auto i : rn)
+const static inline race_t str2race(const string& str) {
+    for (const auto& i : rn)
         if (str == i.second)
             return i.first;
     return race_t::NONE;

@@ -77,31 +77,31 @@ public:
     }
 
     /** @brief Return the room description text. */
-    string get_description() const
+    const string& get_description() const
     {
         return description;
     }
 
     /** @brief Set the room description text. */
-    void set_description(string n)
+    void set_description(const string& n)
     {
         description = n;
     }
 
     /** @brief Return the room name. */
-    string get_name() const
+    const string& get_name() const
     {
         return name;
     }
 
     /** @brief Set the room name. */
-    void set_name(string n)
+    void set_name(const string& n)
     {
         name = n;
     }
 
     /** @brief Construct a fully specified room. */
-    room(room_id i, string n, string d, Rectangle a)
+    room(room_id i, const string& n, const string& d, Rectangle a)
         : id(i)
         , name(n)
         , description(d)
@@ -110,7 +110,7 @@ public:
     }
 
     /** @brief Construct a room with an unspecified id. */
-    room(string n, string d, Rectangle a)
+    room(const string& n, const string& d, Rectangle a)
         : name(n)
         , description(d)
         , area(a)
@@ -119,7 +119,7 @@ public:
     }
 
     /** @brief Construct a room with a default description and unspecified id. */
-    room(string n, Rectangle a)
+    room(const string& n, Rectangle a)
         : name(n)
         , area(a)
     {

@@ -426,7 +426,7 @@ void gamestate::update_path_to_target(entityid id) {
         openSet.erase(current.pos);
 
         vec3 directions[8] = {{1, 0, 0}, {-1, 0, 0}, {0, 1, 0}, {0, -1, 0}, {1, 1, 0}, {-1, 1, 0}, {1, -1, 0}, {-1, -1, 0}};
-        for (vec3 dir : directions) {
+        for (const vec3& dir : directions) {
             vec3 neighbor = {current.pos.x + dir.x, current.pos.y + dir.y, current.pos.z};
             if (neighbor.x < 0 || neighbor.x >= df->get_width() || neighbor.y < 0 || neighbor.y >= df->get_height()) {
                 continue;

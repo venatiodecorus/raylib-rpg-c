@@ -103,7 +103,7 @@ void draw_dungeon_floor_pressure_plates(gamestate& g, rpg::Renderer& renderer, i
     }
 }
 
-void draw_dungeon_floor_entitytype(gamestate& g, rpg::Renderer& renderer, entitytype_t type_0, int vision_dist, int light_rad, std::function<bool(gamestate&, entityid)> extra_check) {
+void draw_dungeon_floor_entitytype(gamestate& g, rpg::Renderer& renderer, entitytype_t type_0, int vision_dist, int light_rad, const std::function<bool(gamestate&, entityid)>& extra_check) {
     (void)vision_dist;
     auto df = g.d.get_current_floor();
     auto hero_loc = g.ct.get<location>(g.hero_id).value_or(vec3{-1, -1, -1});
