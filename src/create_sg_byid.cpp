@@ -1,5 +1,6 @@
 #include "create_sg_byid.h"
 
+#include "ecs_item_components.h"
 #include "ecs_world_object_components.h"
 #include "entitytype.h"
 #include "item.h"
@@ -16,6 +17,21 @@
 #include "tx_keys_weapons.h"
 
 namespace {
+bool create_item_sg_from_registry(gamestate& g, entityid id) {
+    const entt::entity registry_entity = g.lookup_registry_entity(id);
+    if (registry_entity == entt::null || !g.registry.all_of<ItemVisual>(registry_entity)) {
+        return false;
+    }
+
+    const ItemVisual& visual = g.registry.get<ItemVisual>(registry_entity);
+    if (visual.keys == nullptr || visual.key_count <= 0) {
+        return false;
+    }
+
+    create_sg(g, id, const_cast<int*>(visual.keys), visual.key_count);
+    return true;
+}
+
 bool create_static_world_sg_from_registry(gamestate& g, entityid id) {
     const entt::entity registry_entity = g.lookup_registry_entity(id);
     if (registry_entity == entt::null || !g.registry.all_of<StaticVisual>(registry_entity)) {
@@ -90,6 +106,9 @@ void create_chest_sg_byid(gamestate& g, entityid id) {
 
 void create_potion_sg_byid(gamestate& g, entityid id) {
     massert(id != ENTITYID_INVALID, "entityid is invalid");
+    if (create_item_sg_from_registry(g, id)) {
+        return;
+    }
     switch (g.ct.get<potiontype>(id).value_or(POTION_NONE)) {
     case POTION_HP_SMALL: create_sg(g, id, TX_POTION_HP_SMALL_KEYS, TX_POTION_HP_SMALL_COUNT); break;
     case POTION_HP_MEDIUM: create_sg(g, id, TX_POTION_HP_MEDIUM_KEYS, TX_POTION_HP_MEDIUM_COUNT); break;
@@ -103,6 +122,9 @@ void create_potion_sg_byid(gamestate& g, entityid id) {
 
 void create_weapon_sg_byid(gamestate& g, entityid id) {
     massert(id != ENTITYID_INVALID, "entityid is invalid");
+    if (create_item_sg_from_registry(g, id)) {
+        return;
+    }
     switch (g.ct.get<weapontype>(id).value_or(WEAPON_NONE)) {
     case WEAPON_DAGGER: create_sg(g, id, TX_DAGGER_KEYS, TX_DAGGER_COUNT); break;
     case WEAPON_SHORT_SWORD: create_sg(g, id, TX_SHORT_SWORD_KEYS, TX_SHORT_SWORD_COUNT); break;
@@ -113,9 +135,12 @@ void create_weapon_sg_byid(gamestate& g, entityid id) {
 
 void create_shield_sg_byid(gamestate& g, entityid id) {
     massert(id != ENTITYID_INVALID, "entityid is invalid");
+    if (create_item_sg_from_registry(g, id)) {
+        return;
+    }
     switch (g.ct.get<shieldtype>(id).value_or(SHIELD_NONE)) {
     case SHIELD_BUCKLER: create_sg(g, id, TX_BUCKLER_KEYS, TX_BUCKLER_COUNT); break;
-    case SHIELD_KITE: create_sg(g, id, TX_KITE_SHIELD_KEYS, TX_BUCKLER_COUNT); break;
+    case SHIELD_KITE: create_sg(g, id, TX_KITE_SHIELD_KEYS, TX_KITE_SHIELD_COUNT); break;
     case SHIELD_TOWER: create_sg(g, id, TX_TOWER_SHIELD_KEYS, TX_TOWER_SHIELD_COUNT); break;
     default: break;
     }

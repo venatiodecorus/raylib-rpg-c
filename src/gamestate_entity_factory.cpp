@@ -1,5 +1,47 @@
 #include "gamestate.h"
 
+#include "ecs_item_components.h"
+#include "item_definitions.h"
+
+namespace {
+void mirror_item_common(gamestate& g, entityid id, const ItemDefinition* definition) {
+    const entt::entity registry_entity = g.ensure_registry_entity(id);
+    if (definition == nullptr) {
+        return;
+    }
+
+    g.registry.emplace_or_replace<ItemVisual>(registry_entity, ItemVisual{definition->sprite_keys, definition->sprite_key_count});
+    g.registry.emplace_or_replace<ItemText>(registry_entity, ItemText{definition->name, definition->description});
+}
+
+void mirror_weapon_item(gamestate& g, entityid id, weapontype_t type) {
+    const ItemDefinition* definition = find_weapon_definition(type);
+    mirror_item_common(g, id, definition);
+
+    const entt::entity registry_entity = g.ensure_registry_entity(id);
+    g.registry.emplace_or_replace<ItemKind>(registry_entity, ItemKind{ITEM_WEAPON});
+    g.registry.emplace_or_replace<WeaponKind>(registry_entity, WeaponKind{type});
+}
+
+void mirror_shield_item(gamestate& g, entityid id, shieldtype_t type) {
+    const ItemDefinition* definition = find_shield_definition(type);
+    mirror_item_common(g, id, definition);
+
+    const entt::entity registry_entity = g.ensure_registry_entity(id);
+    g.registry.emplace_or_replace<ItemKind>(registry_entity, ItemKind{ITEM_SHIELD});
+    g.registry.emplace_or_replace<ShieldKind>(registry_entity, ShieldKind{type});
+}
+
+void mirror_potion_item(gamestate& g, entityid id, potiontype_t type) {
+    const ItemDefinition* definition = find_potion_definition(type);
+    mirror_item_common(g, id, definition);
+
+    const entt::entity registry_entity = g.ensure_registry_entity(id);
+    g.registry.emplace_or_replace<ItemKind>(registry_entity, ItemKind{ITEM_POTION});
+    g.registry.emplace_or_replace<PotionKind>(registry_entity, PotionKind{type});
+}
+}
+
 /** @file gamestate_entity_factory.cpp
  *  @brief Entity/item/NPC factory helpers implemented on `gamestate`.
  */
@@ -12,6 +54,7 @@ entityid gamestate::create_weapon_with(with_fun weaponInitFunction) {
     ct.set<spritemove>(id, Rectangle{0, 0, 0, 0});
     ct.set<update>(id, true);
     weaponInitFunction(ct, id);
+    mirror_weapon_item(*this, id, ct.get<weapontype>(id).value_or(WEAPON_NONE));
     return id;
 }
 
@@ -158,6 +201,7 @@ entityid gamestate::create_weapon_at_with(ComponentTable& ct, vec3 loc, with_fun
         return INVALID;
     }
     ct.set<location>(id, loc);
+    sync_registry_grid_position(id, loc);
     return id;
 }
 
@@ -179,6 +223,7 @@ entityid gamestate::create_shield_with(ComponentTable& ct, with_fun shieldInitFu
     ct.set<rarity>(id, RARITY_COMMON);
     ct.set<update>(id, false);
     shieldInitFunction(ct, id);
+    mirror_shield_item(*this, id, ct.get<shieldtype>(id).value_or(SHIELD_NONE));
     return id;
 }
 
@@ -192,6 +237,7 @@ entityid gamestate::create_shield_at_with(ComponentTable& ct, vec3 loc, with_fun
         return INVALID;
     }
     ct.set<location>(id, loc);
+    sync_registry_grid_position(id, loc);
     return id;
 }
 
@@ -201,6 +247,7 @@ entityid gamestate::create_potion_with(with_fun potionInitFunction) {
     ct.set<itemtype>(id, ITEM_POTION);
     ct.set<update>(id, true);
     potionInitFunction(ct, id);
+    mirror_potion_item(*this, id, ct.get<potiontype>(id).value_or(POTION_NONE));
     return id;
 }
 
@@ -219,6 +266,7 @@ entityid gamestate::create_potion_at_with(vec3 loc, with_fun potionInitFunction)
     }
     ct.set<location>(id, loc);
     ct.set<update>(id, true);
+    sync_registry_grid_position(id, loc);
     return id;
 }
 
