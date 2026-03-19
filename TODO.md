@@ -106,7 +106,7 @@ These must be addressed first because everything else depends on them.
   - `gamestate::get_avg_last_frame_time()` — non-const.
   - Audit all getters and mark const.
 
-- [ ] **Fix type safety bugs**
+- [x] **Fix type safety bugs**
   - `gamestate.h:267-269`: `targetwidth = -1; targetheight = -1;` assigned to
     `unsigned int` — implicit conversion to UINT_MAX.
   - `gamestate.h:333`: `fadealpha = 0.0` assigned to `unsigned int`.

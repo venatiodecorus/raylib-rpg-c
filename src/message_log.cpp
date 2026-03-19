@@ -38,7 +38,7 @@ void MessageLog::cycle() {
         return;
     }
     std::string msg = system.front();
-    unsigned int len = msg.length();
+    size_t len = msg.length();
     if (len > max_len_msg) {
         max_len_msg = len;
         constexpr int font_size = DEFAULT_MSG_HISTORY_FONT_SIZE;
