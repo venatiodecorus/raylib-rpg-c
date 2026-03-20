@@ -12,9 +12,9 @@
 /** @brief Print a minimal debug summary for an entity id. */
 static inline void debug_entity(gamestate& g, entityid id) {
     minfo("id: %d", id);
-    minfo("name: %s", g.ct.get<name>(id).value_or("no-name").c_str());
+    minfo("name: %s", g.ct.get_or<name>(id, "no-name").c_str());
 
-    entitytype_t t = g.ct.get<entitytype>(id).value_or(entitytype_t::NONE);
+    entitytype_t t = g.ct.get_or<entitytype>(id, entitytype_t::NONE);
     std::string t_s = entitytype_to_str(t);
 
     minfo("type: %d", t);

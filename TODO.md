@@ -130,7 +130,7 @@ These must be addressed first because everything else depends on them.
     do `for (id = 0; id < next_entityid; id++)` scanning ALL entities to find
     NPCs. Maintain per-type entity lists or use archetype iteration.
 
-- [ ] **Optimize component access**
+- [x] **Optimize component access**
   - `ComponentTable::get<>()` returns `optional<T>` by value — causes copies
     for `string`, `shared_ptr<vector<entityid>>`.
   - `ComponentTable::has()` calls `getStore<Kind>()` twice (redundant hash).

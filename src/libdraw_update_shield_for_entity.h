@@ -15,7 +15,7 @@ static inline void update_shield_for_entity(gamestate& g, rpg::Renderer& rendere
     massert(sg, "spritegroup is NULL");
     spritegroup* shield_sg = nullptr;
     int ctx = -1;
-    const entityid shield_id = g.ct.get<equipped_shield>(id).value_or(ENTITYID_INVALID);
+    const entityid shield_id = g.ct.get_or<equipped_shield>(id, ENTITYID_INVALID);
     if (shield_id == ENTITYID_INVALID) {
         merror2("shield_id invalid");
         return;

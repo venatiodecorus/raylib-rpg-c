@@ -46,7 +46,7 @@
 #include <algorithm>
 #include <functional>
 #include <map>
-#include <optional>
+
 #include <queue>
 #include <raylib.h>
 #include <raymath.h>
@@ -77,7 +77,7 @@ using std::map;
 using std::mt19937;
 using std::pair;
 using std::function;
-using std::optional;
+
 using std::priority_queue;
 using std::round;
 using std::string;
@@ -377,7 +377,7 @@ public:
         }
 
         if (definition.openable) {
-            registry.emplace_or_replace<OpenState>(registry_entity, OpenState{ct.get<door_open>(id).value_or(false)});
+            registry.emplace_or_replace<OpenState>(registry_entity, OpenState{ct.get_or<door_open>(id, false)});
         }
         else if (registry.any_of<OpenState>(registry_entity)) {
             registry.remove<OpenState>(registry_entity);
@@ -1256,7 +1256,7 @@ public:
         vec3 loc = {0, 0, 0};
         inventory_count = -1;
         if (hero_id != ENTITYID_INVALID) {
-            loc = ct.get<location>(hero_id).value_or(vec3{-1, -1, -1});
+            loc = ct.get_or<location>(hero_id, vec3{-1, -1, -1});
         }
         // current df
         shared_ptr<dungeon_floor> df = d.get_current_floor();
@@ -1268,7 +1268,7 @@ public:
         // zero out the buffer
         //memset(debugpanel.buffer, 0, sizeof(debugpanel.buffer));
 
-        direction_t player_dir = ct.get<direction>(hero_id).value_or(direction_t::NONE);
+        direction_t player_dir = ct.get_or<direction>(hero_id, direction_t::NONE);
 
         bzero(presentation.debugpanel.buffer, sizeof(presentation.debugpanel.buffer));
         // Format the string in one pass
@@ -1332,7 +1332,7 @@ public:
             loc.x,
             loc.y,
             loc.z,
-            ct.get<equipped_weapon>(hero_id).value_or(ENTITYID_INVALID),
+            ct.get_or<equipped_weapon>(hero_id, ENTITYID_INVALID),
             inventory_count,
             message_count,
             df_w,

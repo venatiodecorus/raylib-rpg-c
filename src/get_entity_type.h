@@ -8,5 +8,5 @@
 
 /** @brief Return the entity type for `id`, or `entitytype_t::NONE` when absent. */
 static inline entitytype_t get_entity_type(gamestate& g, entityid id) {
-    return g.ct.get<entitytype>(id).value_or(entitytype_t::NONE);
+    return g.ct.get_or<entitytype>(id, entitytype_t::NONE);
 }

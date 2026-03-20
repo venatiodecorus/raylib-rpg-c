@@ -42,18 +42,18 @@ void libdraw_update_sprite_context_ptr(gamestate& g, spritegroup* group, directi
 void libdraw_update_sprite_position(gamestate& g, entityid id, spritegroup* sg) {
     massert(sg, "spritegroup is NULL");
     massert(id != ENTITYID_INVALID, "entityid is invalid");
-    auto maybe_sprite_move = g.ct.get<spritemove>(id);
-    if (!maybe_sprite_move.has_value()) {
+    const Rectangle* sprite_move_ptr = g.ct.get<spritemove>(id);
+    if (!sprite_move_ptr) {
         return;
     }
-    Rectangle sprite_move = g.ct.get<spritemove>(id).value();
+    Rectangle sprite_move = *sprite_move_ptr;
     if (sprite_move.x != 0 || sprite_move.y != 0) {
         sg->move.x = sprite_move.x;
         sg->move.y = sprite_move.y;
-        entitytype_t type = g.ct.get<entitytype>(id).value_or(entitytype_t::NONE);
+        entitytype_t type = g.ct.get_or<entitytype>(id, entitytype_t::NONE);
         massert(type != entitytype_t::NONE, "entity type is none");
         if (type == entitytype_t::PLAYER || type == entitytype_t::NPC) {
-            race_t r = g.ct.get<race>(id).value_or(race_t::NONE);
+            race_t r = g.ct.get_or<race>(id, race_t::NONE);
             if (r == race_t::BAT) {
                 sg->current = SG_ANIM_BAT_IDLE;
             }
@@ -72,40 +72,40 @@ void libdraw_update_sprite_ptr(gamestate& g, rpg::Renderer& renderer, entityid i
     minfo3("Begin update sprite ptr: %d", id);
     massert(id != ENTITYID_INVALID, "entityid is invalid");
     massert(sg, "spritegroup is NULL");
-    massert(g.ct.has<update>(id), "id %d has no update component, name %s", id, g.ct.get<name>(id).value().c_str());
+    massert(g.ct.has<update>(id), "id %d has no update component, name %s", id, g.ct.get_or<name>(id, "unknown").c_str());
 
-    const bool do_update = g.ct.get<update>(id).value();
+    const bool do_update = *g.ct.get<update>(id);
 
     if (do_update) {
         if (g.ct.has<direction>(id)) {
-            const direction_t d = g.ct.get<direction>(id).value();
+            const direction_t d = *g.ct.get<direction>(id);
             libdraw_update_sprite_context_ptr(g, sg, d);
         }
     }
 
     libdraw_update_sprite_position(g, id, sg);
 
-    if (g.ct.get<block_success>(id).value_or(false)) {
+    if (g.ct.get_or<block_success>(id, false)) {
         libdraw_set_sg_block_success(g, renderer, id, sg);
     }
 
-    if (g.ct.get<attacking>(id).value_or(false)) {
+    if (g.ct.get_or<attacking>(id, false)) {
         libdraw_set_sg_is_attacking(g, renderer, id, sg);
     }
 
-    const entitytype_t type = g.ct.get<entitytype>(id).value_or(entitytype_t::NONE);
+    const entitytype_t type = g.ct.get_or<entitytype>(id, entitytype_t::NONE);
 
-    if (g.ct.get<dead>(id).value_or(false)) {
+    if (g.ct.get_or<dead>(id, false)) {
         libdraw_set_sg_is_dead(g, renderer, id, sg);
     }
-    else if (g.ct.get<damaged>(id).value_or(false)) {
+    else if (g.ct.get_or<damaged>(id, false)) {
         libdraw_set_sg_is_damaged(g, renderer, id, sg);
     }
 
     if (type == entitytype_t::DOOR || type == entitytype_t::CHEST) {
-        auto maybe_door_open = g.ct.get<door_open>(id);
-        if (maybe_door_open.has_value()) {
-            sg->set_current(maybe_door_open.value() ? 1 : 0);
+        const bool* door_open_ptr = g.ct.get<door_open>(id);
+        if (door_open_ptr) {
+            sg->set_current(*door_open_ptr ? 1 : 0);
         }
     }
 
@@ -113,11 +113,11 @@ void libdraw_update_sprite_ptr(gamestate& g, rpg::Renderer& renderer, entityid i
         g.frame_dirty = true;
     }
 
-    auto maybe_loc = g.ct.get<location>(id);
-    if (!maybe_loc.has_value()) {
+    const vec3* loc_ptr = g.ct.get<location>(id);
+    if (!loc_ptr) {
         return;
     }
-    const vec3 loc = maybe_loc.value();
+    const vec3 loc = *loc_ptr;
     sg->snap_dest(loc.x, loc.y);
 }
 
@@ -193,7 +193,7 @@ void libdraw_update_sprites_post(gamestate& g, rpg::Renderer& renderer) {
             }
         }
         else if (type == entitytype_t::ITEM) {
-            const itemtype_t itype = g.ct.get<itemtype>(id).value_or(itemtype_t::NONE);
+            const itemtype_t itype = g.ct.get_or<itemtype>(id, itemtype_t::NONE);
             switch (itype) {
             case itemtype_t::WEAPON: {
                 if (sg->current == 0) {

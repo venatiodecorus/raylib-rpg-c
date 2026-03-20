@@ -32,7 +32,7 @@ public:
         g.d.get_floor(0)->df_set_tile(tiletype_t::STONE_WALL_00, 2, 1);
 
         TS_ASSERT(!g.try_entity_move(hero, vec3{1, 0, 0}));
-        TS_ASSERT(vec3_equal(g.ct.get<location>(hero).value_or(vec3{-1, -1, -1}), hero_loc));
+        TS_ASSERT(vec3_equal(g.ct.get_or<location>(hero, vec3{-1, -1, -1}), hero_loc));
     }
 
     void testTryEntityMoveBlockedBySolidPropAndClosedDoor() {
@@ -44,7 +44,7 @@ public:
         const entityid prop_id = g.create_prop_at_with(proptype_t::DUNGEON_WOODEN_BARREL_OPEN_TOP_EMPTY, vec3{2, 1, 0}, dungeon_prop_init(proptype_t::DUNGEON_WOODEN_BARREL_OPEN_TOP_EMPTY));
         TS_ASSERT_DIFFERS(prop_id, ENTITYID_INVALID);
         TS_ASSERT(!g.try_entity_move(hero, vec3{1, 0, 0}));
-        TS_ASSERT(vec3_equal(g.ct.get<location>(hero).value_or(vec3{-1, -1, -1}), hero_loc));
+        TS_ASSERT(vec3_equal(g.ct.get_or<location>(hero, vec3{-1, -1, -1}), hero_loc));
 
         g.d.get_floor(0)->tile_at(vec3{2, 1, 0}).tile_remove(prop_id);
         const entityid door_id = g.create_door_at_with(vec3{2, 1, 0}, [](CT&, const entityid) {});
@@ -53,7 +53,7 @@ public:
 
         g.ct.set<door_open>(door_id, true);
         TS_ASSERT(g.try_entity_move(hero, vec3{1, 0, 0}));
-        TS_ASSERT(vec3_equal(g.ct.get<location>(hero).value_or(vec3{-1, -1, -1}), vec3{2, 1, 0}));
+        TS_ASSERT(vec3_equal(g.ct.get_or<location>(hero, vec3{-1, -1, -1}), vec3{2, 1, 0}));
     }
 
     void testCreateDoorAtWithRejectsOccupiedTile() {
@@ -74,8 +74,8 @@ public:
 
         TS_ASSERT_DIFFERS(box, ENTITYID_INVALID);
         TS_ASSERT(g.try_entity_move(hero, vec3{1, 0, 0}));
-        TS_ASSERT(vec3_equal(g.ct.get<location>(hero).value_or(vec3{-1, -1, -1}), vec3{2, 2, 0}));
-        TS_ASSERT(vec3_equal(g.ct.get<location>(box).value_or(vec3{-1, -1, -1}), vec3{4, 2, 0}));
+        TS_ASSERT(vec3_equal(g.ct.get_or<location>(hero, vec3{-1, -1, -1}), vec3{2, 2, 0}));
+        TS_ASSERT(vec3_equal(g.ct.get_or<location>(box, vec3{-1, -1, -1}), vec3{4, 2, 0}));
         TS_ASSERT_EQUALS(g.d.get_floor(0)->tile_at(vec3{4, 2, 0}).get_cached_box(), box);
     }
 
@@ -88,8 +88,8 @@ public:
 
         TS_ASSERT_DIFFERS(box, ENTITYID_INVALID);
         TS_ASSERT(g.try_entity_pull(hero));
-        TS_ASSERT(vec3_equal(g.ct.get<location>(hero).value_or(vec3{-1, -1, -1}), vec3{1, 2, 0}));
-        TS_ASSERT(vec3_equal(g.ct.get<location>(box).value_or(vec3{-1, -1, -1}), vec3{2, 2, 0}));
+        TS_ASSERT(vec3_equal(g.ct.get_or<location>(hero, vec3{-1, -1, -1}), vec3{1, 2, 0}));
+        TS_ASSERT(vec3_equal(g.ct.get_or<location>(box, vec3{-1, -1, -1}), vec3{2, 2, 0}));
         TS_ASSERT_EQUALS(g.d.get_floor(0)->tile_at(vec3{2, 2, 0}).get_cached_box(), box);
     }
 
@@ -110,8 +110,8 @@ public:
         g.ct.set<pullable>(corpse, true);
 
         TS_ASSERT(g.try_entity_pull(hero));
-        TS_ASSERT(vec3_equal(g.ct.get<location>(hero).value_or(vec3{-1, -1, -1}), vec3{1, 2, 0}));
-        TS_ASSERT(vec3_equal(g.ct.get<location>(corpse).value_or(vec3{-1, -1, -1}), vec3{2, 2, 0}));
+        TS_ASSERT(vec3_equal(g.ct.get_or<location>(hero, vec3{-1, -1, -1}), vec3{1, 2, 0}));
+        TS_ASSERT(vec3_equal(g.ct.get_or<location>(corpse, vec3{-1, -1, -1}), vec3{2, 2, 0}));
 
         tile_t& new_tile = g.d.get_floor(0)->tile_at(vec3{2, 2, 0});
         TS_ASSERT_EQUALS(new_tile.get_cached_dead_npc(), corpse);
@@ -130,11 +130,11 @@ public:
             dungeon_prop_init(proptype_t::DUNGEON_CANDLE_00));
 
         TS_ASSERT_DIFFERS(candle, ENTITYID_INVALID);
-        TS_ASSERT(g.ct.get<pullable>(candle).value_or(false));
+        TS_ASSERT(g.ct.get_or<pullable>(candle, false));
 
         TS_ASSERT(g.try_entity_pull(hero));
-        TS_ASSERT(vec3_equal(g.ct.get<location>(hero).value_or(vec3{-1, -1, -1}), vec3{1, 2, 0}));
-        TS_ASSERT(vec3_equal(g.ct.get<location>(candle).value_or(vec3{-1, -1, -1}), vec3{2, 2, 0}));
+        TS_ASSERT(vec3_equal(g.ct.get_or<location>(hero, vec3{-1, -1, -1}), vec3{1, 2, 0}));
+        TS_ASSERT(vec3_equal(g.ct.get_or<location>(candle, vec3{-1, -1, -1}), vec3{2, 2, 0}));
         TS_ASSERT_EQUALS(g.d.get_floor(0)->tile_at(vec3{2, 2, 0}).get_cached_prop(), candle);
     }
 
@@ -148,11 +148,11 @@ public:
             dungeon_prop_init(proptype_t::DUNGEON_WOODEN_TABLE_00));
 
         TS_ASSERT_DIFFERS(table, ENTITYID_INVALID);
-        TS_ASSERT(g.ct.get<pushable>(table).value_or(false));
+        TS_ASSERT(g.ct.get_or<pushable>(table, false));
 
         TS_ASSERT(g.try_entity_move(hero, vec3{1, 0, 0}));
-        TS_ASSERT(vec3_equal(g.ct.get<location>(hero).value_or(vec3{-1, -1, -1}), vec3{2, 2, 0}));
-        TS_ASSERT(vec3_equal(g.ct.get<location>(table).value_or(vec3{-1, -1, -1}), vec3{4, 2, 0}));
+        TS_ASSERT(vec3_equal(g.ct.get_or<location>(hero, vec3{-1, -1, -1}), vec3{2, 2, 0}));
+        TS_ASSERT(vec3_equal(g.ct.get_or<location>(table, vec3{-1, -1, -1}), vec3{4, 2, 0}));
         TS_ASSERT_EQUALS(g.d.get_floor(0)->tile_at(vec3{4, 2, 0}).get_cached_prop(), table);
     }
 
@@ -164,7 +164,7 @@ public:
         TS_ASSERT_DIFFERS(hero, ENTITYID_INVALID);
 
         TS_ASSERT(g.run_move_action(hero, vec3{1, 0, 0}));
-        TS_ASSERT(vec3_equal(g.ct.get<location>(hero).value_or(vec3{-1, -1, -1}), vec3{2, 1, 0}));
+        TS_ASSERT(vec3_equal(g.ct.get_or<location>(hero, vec3{-1, -1, -1}), vec3{2, 1, 0}));
         TS_ASSERT(g.queue_state.gameplay_events.empty());
     }
 
@@ -176,7 +176,7 @@ public:
         TS_ASSERT_DIFFERS(box, ENTITYID_INVALID);
 
         TS_ASSERT(g.run_push_action(box, vec3{1, 0, 0}));
-        TS_ASSERT(vec3_equal(g.ct.get<location>(box).value_or(vec3{-1, -1, -1}), vec3{3, 2, 0}));
+        TS_ASSERT(vec3_equal(g.ct.get_or<location>(box, vec3{-1, -1, -1}), vec3{3, 2, 0}));
         TS_ASSERT(g.queue_state.gameplay_events.empty());
     }
 
@@ -190,11 +190,11 @@ public:
             dungeon_prop_init(proptype_t::DUNGEON_WOODEN_TABLE_00));
 
         TS_ASSERT_DIFFERS(table, ENTITYID_INVALID);
-        TS_ASSERT(g.ct.get<pushable>(table).value_or(false));
+        TS_ASSERT(g.ct.get_or<pushable>(table, false));
 
         TS_ASSERT(g.run_move_action(hero, vec3{1, 0, 0}));
-        TS_ASSERT(vec3_equal(g.ct.get<location>(hero).value_or(vec3{-1, -1, -1}), vec3{2, 2, 0}));
-        TS_ASSERT(vec3_equal(g.ct.get<location>(table).value_or(vec3{-1, -1, -1}), vec3{4, 2, 0}));
+        TS_ASSERT(vec3_equal(g.ct.get_or<location>(hero, vec3{-1, -1, -1}), vec3{2, 2, 0}));
+        TS_ASSERT(vec3_equal(g.ct.get_or<location>(table, vec3{-1, -1, -1}), vec3{4, 2, 0}));
         TS_ASSERT(g.queue_state.gameplay_events.empty());
     }
 
@@ -209,11 +209,11 @@ public:
             dungeon_prop_init(proptype_t::DUNGEON_WOODEN_TABLE_01));
 
         TS_ASSERT_DIFFERS(table, ENTITYID_INVALID);
-        TS_ASSERT(g.ct.get<pullable>(table).value_or(false));
+        TS_ASSERT(g.ct.get_or<pullable>(table, false));
 
         TS_ASSERT(g.try_entity_pull(hero));
-        TS_ASSERT(vec3_equal(g.ct.get<location>(hero).value_or(vec3{-1, -1, -1}), vec3{1, 2, 0}));
-        TS_ASSERT(vec3_equal(g.ct.get<location>(table).value_or(vec3{-1, -1, -1}), vec3{2, 2, 0}));
+        TS_ASSERT(vec3_equal(g.ct.get_or<location>(hero, vec3{-1, -1, -1}), vec3{1, 2, 0}));
+        TS_ASSERT(vec3_equal(g.ct.get_or<location>(table, vec3{-1, -1, -1}), vec3{2, 2, 0}));
         TS_ASSERT_EQUALS(g.d.get_floor(0)->tile_at(vec3{2, 2, 0}).get_cached_prop(), table);
     }
 
@@ -227,8 +227,8 @@ public:
 
         TS_ASSERT_DIFFERS(box, ENTITYID_INVALID);
         TS_ASSERT(g.run_pull_action(hero));
-        TS_ASSERT(vec3_equal(g.ct.get<location>(hero).value_or(vec3{-1, -1, -1}), vec3{1, 2, 0}));
-        TS_ASSERT(vec3_equal(g.ct.get<location>(box).value_or(vec3{-1, -1, -1}), vec3{2, 2, 0}));
+        TS_ASSERT(vec3_equal(g.ct.get_or<location>(hero, vec3{-1, -1, -1}), vec3{1, 2, 0}));
+        TS_ASSERT(vec3_equal(g.ct.get_or<location>(box, vec3{-1, -1, -1}), vec3{2, 2, 0}));
         TS_ASSERT(g.queue_state.gameplay_events.empty());
     }
 
@@ -243,10 +243,10 @@ public:
 
         TS_ASSERT_DIFFERS(npc, ENTITYID_INVALID);
         TS_ASSERT_DIFFERS(door, ENTITYID_INVALID);
-        TS_ASSERT(!g.ct.get<door_open>(door).value_or(true));
+        TS_ASSERT(!g.ct.get_or<door_open>(door, true));
 
         TS_ASSERT(!g.try_entity_move(npc, vec3{1, 0, 0}));
-        TS_ASSERT(vec3_equal(g.ct.get<location>(npc).value_or(vec3{-1, -1, -1}), vec3{1, 1, 1}));
+        TS_ASSERT(vec3_equal(g.ct.get_or<location>(npc, vec3{-1, -1, -1}), vec3{1, 1, 1}));
     }
 
     void testTryEntityOpenDoorUsesDoorLocationFloor() {
@@ -260,10 +260,10 @@ public:
 
         TS_ASSERT_DIFFERS(hero, ENTITYID_INVALID);
         TS_ASSERT_DIFFERS(door, ENTITYID_INVALID);
-        TS_ASSERT(!g.ct.get<door_open>(door).value_or(true));
+        TS_ASSERT(!g.ct.get_or<door_open>(door, true));
 
         TS_ASSERT(g.try_entity_open_door(hero, vec3{2, 1, 1}));
-        TS_ASSERT(g.ct.get<door_open>(door).value_or(false));
+        TS_ASSERT(g.ct.get_or<door_open>(door, false));
     }
 
     void testPressurePlateOpensAndClosesLinkedDoorWhenPlayerMovesOnAndOff() {
@@ -282,11 +282,11 @@ public:
         TS_ASSERT_EQUALS(plate->txkey_up, TX_SWITCHES_PRESSURE_PLATE_UP_00);
         TS_ASSERT_EQUALS(plate->txkey_down, TX_SWITCHES_PRESSURE_PLATE_DOWN_00);
         TS_ASSERT(g.try_entity_move(hero, vec3{1, 0, 0}));
-        TS_ASSERT(g.ct.get<door_open>(door).value_or(false));
+        TS_ASSERT(g.ct.get_or<door_open>(door, false));
         TS_ASSERT(plate->active);
 
         TS_ASSERT(g.try_entity_move(hero, vec3{1, 0, 0}));
-        TS_ASSERT(!g.ct.get<door_open>(door).value_or(true));
+        TS_ASSERT(!g.ct.get_or<door_open>(door, true));
         TS_ASSERT(!plate->active);
     }
 
@@ -303,11 +303,11 @@ public:
         TS_ASSERT(plate != nullptr);
 
         TS_ASSERT(g.try_entity_move(box, vec3{1, 0, 0}));
-        TS_ASSERT(g.ct.get<door_open>(door).value_or(false));
+        TS_ASSERT(g.ct.get_or<door_open>(door, false));
         TS_ASSERT(plate->active);
 
         TS_ASSERT(g.try_entity_move(box, vec3{1, 0, 0}));
-        TS_ASSERT(!g.ct.get<door_open>(door).value_or(true));
+        TS_ASSERT(!g.ct.get_or<door_open>(door, true));
         TS_ASSERT(!plate->active);
     }
 
@@ -326,7 +326,7 @@ public:
         TS_ASSERT(!plate->active);
 
         TS_ASSERT(g.run_move_action(hero, vec3{1, 0, 0}));
-        TS_ASSERT(g.ct.get<door_open>(door).value_or(false));
+        TS_ASSERT(g.ct.get_or<door_open>(door, false));
         TS_ASSERT(plate->active);
         TS_ASSERT(g.queue_state.gameplay_events.empty());
     }
@@ -354,7 +354,7 @@ public:
         TS_ASSERT_EQUALS(result.type, event_type_t::REFRESH_PRESSURE_PLATES);
         TS_ASSERT(result.succeeded);
         TS_ASSERT(plate->active);
-        TS_ASSERT(g.ct.get<door_open>(door).value_or(false));
+        TS_ASSERT(g.ct.get_or<door_open>(door, false));
         TS_ASSERT(g.queue_state.gameplay_events.empty());
     }
 
@@ -376,10 +376,10 @@ public:
         TS_ASSERT(!plate->active);
 
         TS_ASSERT(g.run_pull_action(hero));
-        TS_ASSERT(g.ct.get<door_open>(door).value_or(false));
+        TS_ASSERT(g.ct.get_or<door_open>(door, false));
         TS_ASSERT(plate->active);
-        TS_ASSERT(vec3_equal(g.ct.get<location>(hero).value_or(vec3{-1, -1, -1}), vec3{1, 1, 0}));
-        TS_ASSERT(vec3_equal(g.ct.get<location>(box).value_or(vec3{-1, -1, -1}), vec3{2, 1, 0}));
+        TS_ASSERT(vec3_equal(g.ct.get_or<location>(hero, vec3{-1, -1, -1}), vec3{1, 1, 0}));
+        TS_ASSERT(vec3_equal(g.ct.get_or<location>(box, vec3{-1, -1, -1}), vec3{2, 1, 0}));
         TS_ASSERT(g.queue_state.gameplay_events.empty());
     }
 
@@ -400,12 +400,12 @@ public:
         TS_ASSERT_EQUALS(refresh_result.type, event_type_t::REFRESH_PRESSURE_PLATES);
         TS_ASSERT(refresh_result.succeeded);
         TS_ASSERT(plate->active);
-        TS_ASSERT(g.ct.get<door_open>(door).value_or(false));
+        TS_ASSERT(g.ct.get_or<door_open>(door, false));
 
         TS_ASSERT(g.run_move_action(hero, vec3{1, 0, 0}));
-        TS_ASSERT(vec3_equal(g.ct.get<location>(hero).value_or(vec3{-1, -1, -1}), vec3{2, 1, 0}));
+        TS_ASSERT(vec3_equal(g.ct.get_or<location>(hero, vec3{-1, -1, -1}), vec3{2, 1, 0}));
         TS_ASSERT(!plate->active);
-        TS_ASSERT(!g.ct.get<door_open>(door).value_or(true));
+        TS_ASSERT(!g.ct.get_or<door_open>(door, true));
         TS_ASSERT(g.queue_state.gameplay_events.empty());
     }
 
@@ -420,7 +420,7 @@ public:
         TS_ASSERT(g.create_floor_pressure_plate(vec3{3, 1, 0}, door));
 
         TS_ASSERT(g.try_entity_open_door(hero, vec3{2, 1, 0}));
-        TS_ASSERT(!g.ct.get<door_open>(door).value_or(true));
+        TS_ASSERT(!g.ct.get_or<door_open>(door, true));
         TS_ASSERT(g.messages.is_active);
         TS_ASSERT(!g.messages.system.empty());
         TS_ASSERT_EQUALS(g.messages.system.front(), "You cannot open this door with your hands");
@@ -435,10 +435,10 @@ public:
         const entityid door = g.create_door_at_with(vec3{2, 1, 0}, [](CT&, const entityid) {});
         TS_ASSERT_DIFFERS(hero, ENTITYID_INVALID);
         TS_ASSERT_DIFFERS(door, ENTITYID_INVALID);
-        TS_ASSERT(!g.ct.get<door_open>(door).value_or(true));
+        TS_ASSERT(!g.ct.get_or<door_open>(door, true));
 
         TS_ASSERT(g.run_open_door_action(hero, vec3{2, 1, 0}));
-        TS_ASSERT(g.ct.get<door_open>(door).value_or(false));
+        TS_ASSERT(g.ct.get_or<door_open>(door, false));
         TS_ASSERT(g.queue_state.gameplay_events.empty());
     }
 
@@ -453,7 +453,7 @@ public:
         TS_ASSERT(g.create_floor_pressure_plate(vec3{3, 1, 0}, door));
 
         TS_ASSERT(g.run_open_door_action(hero, vec3{2, 1, 0}));
-        TS_ASSERT(!g.ct.get<door_open>(door).value_or(true));
+        TS_ASSERT(!g.ct.get_or<door_open>(door, true));
         TS_ASSERT(g.messages.is_active);
         TS_ASSERT(!g.messages.system.empty());
         TS_ASSERT_EQUALS(g.messages.system.front(), "You cannot open this door with your hands");
@@ -470,14 +470,14 @@ public:
         TS_ASSERT_DIFFERS(door, ENTITYID_INVALID);
         TS_ASSERT(g.create_floor_pressure_plate(vec3{2, 1, 0}, door));
         TS_ASSERT(g.try_entity_move(hero, vec3{1, 0, 0}));
-        TS_ASSERT(g.ct.get<door_open>(door).value_or(false));
+        TS_ASSERT(g.ct.get_or<door_open>(door, false));
 
         TS_ASSERT(g.destroy_floor_pressure_plate(vec3{2, 1, 0}));
         floor_pressure_plate_t* plate = g.get_floor_pressure_plate(vec3{2, 1, 0});
         TS_ASSERT(plate != nullptr);
         TS_ASSERT(plate->destroyed);
         TS_ASSERT_EQUALS(plate->linked_door_id, ENTITYID_INVALID);
-        TS_ASSERT(!g.ct.get<door_open>(door).value_or(true));
+        TS_ASSERT(!g.ct.get_or<door_open>(door, true));
         TS_ASSERT(!g.door_is_pressure_plate_controlled(door));
     }
 
@@ -493,10 +493,10 @@ public:
 
         TS_ASSERT_DIFFERS(hero, ENTITYID_INVALID);
         TS_ASSERT_DIFFERS(chest, ENTITYID_INVALID);
-        TS_ASSERT(!g.ct.get<door_open>(chest).value_or(true));
+        TS_ASSERT(!g.ct.get_or<door_open>(chest, true));
 
         TS_ASSERT(g.try_entity_open_chest(hero, vec3{2, 1, 1}));
-        TS_ASSERT(g.ct.get<door_open>(chest).value_or(false));
+        TS_ASSERT(g.ct.get_or<door_open>(chest, false));
         TS_ASSERT_EQUALS(g.ui.active_chest_id, chest);
         TS_ASSERT(g.ui.display_chest_menu);
         TS_ASSERT_EQUALS(g.controlmode, controlmode_t::CHEST);
@@ -512,10 +512,10 @@ public:
 
         TS_ASSERT_DIFFERS(hero, ENTITYID_INVALID);
         TS_ASSERT_DIFFERS(chest, ENTITYID_INVALID);
-        TS_ASSERT(!g.ct.get<door_open>(chest).value_or(true));
+        TS_ASSERT(!g.ct.get_or<door_open>(chest, true));
 
         TS_ASSERT(g.run_open_chest_action(hero, vec3{2, 1, 0}));
-        TS_ASSERT(g.ct.get<door_open>(chest).value_or(false));
+        TS_ASSERT(g.ct.get_or<door_open>(chest, false));
         TS_ASSERT_EQUALS(g.ui.active_chest_id, chest);
         TS_ASSERT(g.ui.display_chest_menu);
         TS_ASSERT_EQUALS(g.controlmode, controlmode_t::CHEST);
@@ -537,7 +537,7 @@ public:
         TS_ASSERT_EQUALS(g.ui.active_chest_id, chest);
 
         TS_ASSERT(g.run_open_chest_action(hero, vec3{2, 1, 0}));
-        TS_ASSERT(!g.ct.get<door_open>(chest).value_or(true));
+        TS_ASSERT(!g.ct.get_or<door_open>(chest, true));
         TS_ASSERT_EQUALS(g.ui.active_chest_id, ENTITYID_INVALID);
         TS_ASSERT(!g.ui.display_chest_menu);
         TS_ASSERT_EQUALS(g.controlmode, controlmode_t::PLAYER);
@@ -562,7 +562,7 @@ public:
 
         TS_ASSERT(g.run_traverse_stairs_action(hero));
         TS_ASSERT_EQUALS(g.d.current_floor, 1);
-        TS_ASSERT(vec3_equal(g.ct.get<location>(hero).value_or(vec3{-1, -1, -1}), vec3{2, 2, 1}));
+        TS_ASSERT(vec3_equal(g.ct.get_or<location>(hero, vec3{-1, -1, -1}), vec3{2, 2, 1}));
         TS_ASSERT(g.queue_state.gameplay_events.empty());
     }
 
@@ -597,17 +597,17 @@ public:
         TS_ASSERT(g.queue_pressure_plate_refresh_event(0));
         TS_ASSERT(g.process_gameplay_events().succeeded);
         TS_ASSERT(source_plate->active);
-        TS_ASSERT(g.ct.get<door_open>(source_door).value_or(false));
+        TS_ASSERT(g.ct.get_or<door_open>(source_door, false));
         TS_ASSERT(!destination_plate->active);
-        TS_ASSERT(!g.ct.get<door_open>(destination_door).value_or(true));
+        TS_ASSERT(!g.ct.get_or<door_open>(destination_door, true));
 
         TS_ASSERT(g.run_traverse_stairs_action(hero));
         TS_ASSERT_EQUALS(g.d.current_floor, 1);
-        TS_ASSERT(vec3_equal(g.ct.get<location>(hero).value_or(vec3{-1, -1, -1}), vec3{2, 2, 1}));
+        TS_ASSERT(vec3_equal(g.ct.get_or<location>(hero, vec3{-1, -1, -1}), vec3{2, 2, 1}));
         TS_ASSERT(!source_plate->active);
-        TS_ASSERT(!g.ct.get<door_open>(source_door).value_or(true));
+        TS_ASSERT(!g.ct.get_or<door_open>(source_door, true));
         TS_ASSERT(destination_plate->active);
-        TS_ASSERT(g.ct.get<door_open>(destination_door).value_or(false));
+        TS_ASSERT(g.ct.get_or<door_open>(destination_door, false));
         TS_ASSERT(g.queue_state.gameplay_events.empty());
     }
 
@@ -625,7 +625,7 @@ public:
 
         TS_ASSERT(!g.run_traverse_stairs_action(hero));
         TS_ASSERT_EQUALS(g.d.current_floor, 0);
-        TS_ASSERT(vec3_equal(g.ct.get<location>(hero).value_or(vec3{-1, -1, -1}), vec3{1, 1, 0}));
+        TS_ASSERT(vec3_equal(g.ct.get_or<location>(hero, vec3{-1, -1, -1}), vec3{1, 1, 0}));
         TS_ASSERT(g.messages.is_active);
         TS_ASSERT(!g.messages.system.empty());
         TS_ASSERT_EQUALS(g.messages.system.front(), "You are already on the top floor!");
@@ -648,13 +648,13 @@ public:
         inputstate is = {};
         press_key(is, KEY_D);
         TS_ASSERT(g.handle_open_door(is, false));
-        TS_ASSERT(g.ct.get<door_open>(door).value_or(false));
+        TS_ASSERT(g.ct.get_or<door_open>(door, false));
 
         g.ct.set<door_open>(door, false);
         inputstate_reset(is);
         press_key(is, KEY_O);
         TS_ASSERT(!g.handle_open_door(is, false));
-        TS_ASSERT(!g.ct.get<door_open>(door).value_or(true));
+        TS_ASSERT(!g.ct.get_or<door_open>(door, true));
     }
 
     void testTryEntityInteractOpensNpcDialogueModal() {
@@ -818,7 +818,7 @@ public:
 
         const entityid door = g.create_door_at_with(vec3{2, 1, 0}, [](CT&, const entityid) {});
         TS_ASSERT_DIFFERS(door, ENTITYID_INVALID);
-        TS_ASSERT(!g.ct.get<door_open>(door).value_or(true));
+        TS_ASSERT(!g.ct.get_or<door_open>(door, true));
 
         TS_ASSERT(g.update_player_tiles_explored());
 
@@ -879,12 +879,12 @@ public:
         tile_t& target_tile = g.d.get_floor(0)->tile_at(vec3{2, 1, 0});
         TS_ASSERT_EQUALS(g.run_attack_action(hero, vec3{2, 1, 0}), attack_result_t::HIT);
 
-        TS_ASSERT(g.ct.get<dead>(orc).value_or(false));
+        TS_ASSERT(g.ct.get_or<dead>(orc, false));
         TS_ASSERT_EQUALS(target_tile.get_cached_live_npc(), ENTITYID_INVALID);
         TS_ASSERT_EQUALS(target_tile.get_cached_dead_npc(), orc);
 
         TS_ASSERT(g.try_entity_move(hero, vec3{1, 0, 0}));
-        TS_ASSERT(vec3_equal(g.ct.get<location>(hero).value_or(vec3{-1, -1, -1}), vec3{2, 1, 0}));
+        TS_ASSERT(vec3_equal(g.ct.get_or<location>(hero, vec3{-1, -1, -1}), vec3{2, 1, 0}));
         TS_ASSERT_EQUALS(target_tile.get_cached_live_npc(), hero);
         TS_ASSERT_EQUALS(target_tile.get_cached_dead_npc(), orc);
     }

@@ -16,7 +16,7 @@ static inline void update_weapon_for_entity(gamestate& g, rpg::Renderer& rendere
     spritegroup* w_sg = nullptr;
     entityid weaponid = ENTITYID_INVALID;
     int ctx = -1;
-    weaponid = g.ct.get<equipped_weapon>(id).value_or(ENTITYID_INVALID);
+    weaponid = g.ct.get_or<equipped_weapon>(id, ENTITYID_INVALID);
     if (weaponid == ENTITYID_INVALID) return;
     auto it = renderer.spritegroups.find(weaponid);
     if (it == renderer.spritegroups.end()) return;

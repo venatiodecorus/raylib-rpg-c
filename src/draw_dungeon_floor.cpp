@@ -13,8 +13,8 @@ bool libdraw_draw_player_target_box(gamestate& g, rpg::Renderer& renderer) {
     if (id == -1) {
         return false;
     }
-    direction_t dir = g.ct.get<direction>(id).value();
-    vec3 loc = g.ct.get<location>(id).value();
+    direction_t dir = *g.ct.get<direction>(id);
+    vec3 loc = *g.ct.get<location>(id);
     float x = loc.x + get_x_from_dir(dir);
     float y = loc.y + get_y_from_dir(dir);
     float w = DEFAULT_TILE_SIZE;
@@ -63,7 +63,7 @@ bool draw_dungeon_floor_tile(gamestate& g, rpg::Renderer& renderer, int x, int y
 void draw_dungeon_floor_pressure_plates(gamestate& g, rpg::Renderer& renderer, int light_rad) {
     auto df = g.d.get_current_floor();
     const int z = g.d.current_floor;
-    const vec3 hero_loc = g.ct.get<location>(g.hero_id).value_or(vec3{-1, -1, -1});
+    const vec3 hero_loc = g.ct.get_or<location>(g.hero_id, vec3{-1, -1, -1});
     const bool full_light = df->get_full_light();
     constexpr float ts = static_cast<float>(DEFAULT_TILE_SIZE);
 
@@ -162,12 +162,12 @@ void draw_dungeon_floor_entitytype(gamestate& g, rpg::Renderer& renderer, entity
 bool draw_dungeon_floor(gamestate& g, rpg::Renderer& renderer, int vision_dist, int light_rad) {
     shared_ptr<dungeon_floor> df = g.d.get_current_floor();
     const int z = g.d.current_floor;
-    auto maybe_hero_loc = g.ct.get<location>(g.hero_id);
-    if (!maybe_hero_loc.has_value()) {
+    const vec3* hero_loc_ptr = g.ct.get<location>(g.hero_id);
+    if (!hero_loc_ptr) {
         return false;
     }
 
-    const vec3 hero_loc = maybe_hero_loc.value();
+    const vec3 hero_loc = *hero_loc_ptr;
     for (int y = 0; y < df->get_height(); y++) {
         for (int x = 0; x < df->get_width(); x++) {
             const vec3 loc = {x, y, z};
@@ -179,17 +179,17 @@ bool draw_dungeon_floor(gamestate& g, rpg::Renderer& renderer, int vision_dist, 
 
     auto mydefault = [](gamestate& g, entityid id) { return true; };
     auto alive_check = [](gamestate& g, entityid id) {
-        auto maybe_dead = g.ct.get<dead>(id);
-        if (maybe_dead.has_value()) {
-            return !maybe_dead.value();
+        const bool* dead_ptr = g.ct.get<dead>(id);
+        if (dead_ptr) {
+            return !*dead_ptr;
         }
         return false;
     };
 
     auto dead_check = [](gamestate& g, entityid id) {
-        auto maybe_dead = g.ct.get<dead>(id);
-        if (maybe_dead.has_value()) {
-            return maybe_dead.value();
+        const bool* dead_ptr = g.ct.get<dead>(id);
+        if (dead_ptr) {
+            return *dead_ptr;
         }
         return false;
     };

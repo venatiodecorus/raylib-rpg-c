@@ -34,18 +34,16 @@ void draw_inventory_menu(gamestate& g, rpg::Renderer& renderer) {
     DrawRectangleRec(right_box, g.ui.window_box_bgcolor);
     DrawRectangleLinesEx(right_box, 2, g.ui.window_box_fgcolor);
 
-    auto maybe_inventory = g.ct.get<inventory>(g.hero_id);
-    if (!maybe_inventory.has_value()) {
+    auto inv = g.ct.get<inventory>(g.hero_id);
+    if (inv == nullptr) {
         return;
     }
+    draw_inventory_grid(g, renderer, *inv, left_box, true);
 
-    auto inventory = maybe_inventory.value();
-    draw_inventory_grid(g, renderer, inventory, left_box, true);
-
-    if (!inventory->empty()) {
+    if (!(*inv)->empty()) {
         size_t index = static_cast<size_t>(g.ui.inventory_cursor.y) * 7 + static_cast<size_t>(g.ui.inventory_cursor.x);
-        if (index < inventory->size()) {
-            draw_item_detail_panel(g, renderer, right_box, inventory->at(index));
+        if (index < (*inv)->size()) {
+            draw_item_detail_panel(g, renderer, right_box, (*inv)->at(index));
         }
     }
 }

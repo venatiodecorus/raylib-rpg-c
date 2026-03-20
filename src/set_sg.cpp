@@ -8,7 +8,7 @@ void libdraw_set_sg_block_success(gamestate& g, rpg::Renderer& renderer, entityi
     minfo("set sg block success");
     massert(id != ENTITYID_INVALID, "entity id is -1");
     massert(sg, "spritegroup is NULL");
-    const race_t r = g.ct.get<race>(id).value_or(race_t::NONE);
+    const race_t r = g.ct.get_or<race>(id, race_t::NONE);
     if (r == race_t::GREEN_SLIME) {
         minfo("setting SG_ANIM_SLIME_IDLE");
         sg->set_current(SG_ANIM_SLIME_IDLE);
@@ -27,7 +27,7 @@ void libdraw_set_sg_block_success(gamestate& g, rpg::Renderer& renderer, entityi
 void libdraw_set_sg_is_damaged(gamestate& g, rpg::Renderer& renderer, entityid id, spritegroup* const sg) {
     massert(id != ENTITYID_INVALID, "entity id is -1");
     massert(sg, "spritegroup is NULL");
-    const race_t r = g.ct.get<race>(id).value_or(race_t::NONE);
+    const race_t r = g.ct.get_or<race>(id, race_t::NONE);
     const int anim_index = r == race_t::GREEN_SLIME ? SG_ANIM_SLIME_DMG : SG_ANIM_NPC_DMG;
     sg->set_current(anim_index);
 }
@@ -40,11 +40,11 @@ void libdraw_set_sg_is_dead(gamestate& g, rpg::Renderer& renderer, entityid id, 
         return;
     }
 
-    if (!g.ct.get<dead>(id).value()) {
+    if (!*g.ct.get<dead>(id)) {
         return;
     }
 
-    const race_t r = g.ct.get<race>(id).value();
+    const race_t r = *g.ct.get<race>(id);
     if (r == race_t::NONE) {
         return;
     }
@@ -67,7 +67,7 @@ void libdraw_set_sg_is_dead(gamestate& g, rpg::Renderer& renderer, entityid id, 
 void libdraw_set_sg_is_attacking(gamestate& g, rpg::Renderer& renderer, entityid id, spritegroup* const sg) {
     massert(id != ENTITYID_INVALID, "entityid is invalid");
     massert(sg, "spritegroup is NULL");
-    const race_t r = g.ct.get<race>(id).value_or(race_t::NONE);
+    const race_t r = g.ct.get_or<race>(id, race_t::NONE);
     massert(r != race_t::NONE, "race cant be none");
     sg->set_current(
         r == race_t::GREEN_SLIME ? SG_ANIM_SLIME_JUMP_ATTACK

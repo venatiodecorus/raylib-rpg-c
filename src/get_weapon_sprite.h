@@ -16,7 +16,7 @@ static inline shared_ptr<sprite> get_weapon_front_sprite(gamestate& g, rpg::Rend
     massert(id != ENTITYID_INVALID, "id is -1");
     massert(sg, "spritegroup is NULL");
     shared_ptr<sprite> retval = nullptr;
-    entityid weapon = g.ct.get<equipped_weapon>(id).value_or(ENTITYID_INVALID);
+    entityid weapon = g.ct.get_or<equipped_weapon>(id, ENTITYID_INVALID);
     if (weapon == ENTITYID_INVALID)
         return retval;
     auto it = renderer.spritegroups.find(weapon);
@@ -40,7 +40,7 @@ static inline shared_ptr<sprite> get_weapon_back_sprite(gamestate& g, rpg::Rende
     massert(id != ENTITYID_INVALID, "id is -1");
     massert(sg, "spritegroup is NULL");
     shared_ptr<sprite> retval = nullptr;
-    entityid weapon = g.ct.get<equipped_weapon>(id).value_or(ENTITYID_INVALID);
+    entityid weapon = g.ct.get_or<equipped_weapon>(id, ENTITYID_INVALID);
     if (weapon == ENTITYID_INVALID) return retval;
     auto it = renderer.spritegroups.find(weapon);
     if (it == renderer.spritegroups.end()) return retval;

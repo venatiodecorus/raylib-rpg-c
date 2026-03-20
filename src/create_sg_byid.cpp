@@ -65,7 +65,7 @@ void create_npc_sg_byid(gamestate& g, rpg::Renderer& renderer, entityid id) {
     }
 
     // Fallback: look up actor definition by race
-    const race_t r = g.ct.get<race>(id).value_or(race_t::NONE);
+    const race_t r = g.ct.get_or<race>(id, race_t::NONE);
     massert(r != race_t::NONE, "race is none for id %d", id);
     const ActorDefinition* def = get_actor_definition(r);
     massert(def != nullptr, "no actor definition for race %d", r);
@@ -105,7 +105,7 @@ void create_potion_sg_byid(gamestate& g, rpg::Renderer& renderer, entityid id) {
     if (create_item_sg_from_registry(g, renderer, id)) {
         return;
     }
-    const potiontype_t pt = g.ct.get<potiontype>(id).value_or(potiontype_t::NONE);
+    const potiontype_t pt = g.ct.get_or<potiontype>(id, potiontype_t::NONE);
     const ItemDefinition* def = find_potion_definition(pt);
     if (def) {
         create_sg(g, renderer, id, def->sprites, def->sprite_count);
@@ -117,7 +117,7 @@ void create_weapon_sg_byid(gamestate& g, rpg::Renderer& renderer, entityid id) {
     if (create_item_sg_from_registry(g, renderer, id)) {
         return;
     }
-    const weapontype_t wt = g.ct.get<weapontype>(id).value_or(weapontype_t::NONE);
+    const weapontype_t wt = g.ct.get_or<weapontype>(id, weapontype_t::NONE);
     const ItemDefinition* def = find_weapon_definition(wt);
     if (def) {
         create_sg(g, renderer, id, def->sprites, def->sprite_count);
@@ -129,7 +129,7 @@ void create_shield_sg_byid(gamestate& g, rpg::Renderer& renderer, entityid id) {
     if (create_item_sg_from_registry(g, renderer, id)) {
         return;
     }
-    const shieldtype_t st = g.ct.get<shieldtype>(id).value_or(shieldtype_t::NONE);
+    const shieldtype_t st = g.ct.get_or<shieldtype>(id, shieldtype_t::NONE);
     const ItemDefinition* def = find_shield_definition(st);
     if (def) {
         create_sg(g, renderer, id, def->sprites, def->sprite_count);
@@ -138,7 +138,7 @@ void create_shield_sg_byid(gamestate& g, rpg::Renderer& renderer, entityid id) {
 
 void create_item_sg_byid(gamestate& g, rpg::Renderer& renderer, entityid id) {
     massert(id != ENTITYID_INVALID, "entityid is invalid");
-    switch (g.ct.get<itemtype>(id).value_or(itemtype_t::NONE)) {
+    switch (g.ct.get_or<itemtype>(id, itemtype_t::NONE)) {
     case itemtype_t::POTION: create_potion_sg_byid(g, renderer, id); break;
     case itemtype_t::WEAPON: create_weapon_sg_byid(g, renderer, id); break;
     case itemtype_t::SHIELD: create_shield_sg_byid(g, renderer, id); break;
@@ -152,7 +152,7 @@ void create_prop_sg_byid(gamestate& g, rpg::Renderer& renderer, entityid id) {
         return;
     }
 
-    const proptype_t pt = g.ct.get<proptype>(id).value_or(proptype_t::NONE);
+    const proptype_t pt = g.ct.get_or<proptype>(id, proptype_t::NONE);
     const StaticWorldDefinition& def = get_prop_definition(pt);
     if (def.sprites && def.sprite_count > 0) {
         create_sg(g, renderer, id, def.sprites, def.sprite_count);
@@ -161,7 +161,7 @@ void create_prop_sg_byid(gamestate& g, rpg::Renderer& renderer, entityid id) {
 
 void create_sg_byid(gamestate& g, rpg::Renderer& renderer, entityid id) {
     massert(id != ENTITYID_INVALID, "entityid is invalid");
-    switch (g.ct.get<entitytype>(id).value_or(entitytype_t::NONE)) {
+    switch (g.ct.get_or<entitytype>(id, entitytype_t::NONE)) {
     case entitytype_t::PLAYER:
     case entitytype_t::NPC: create_npc_sg_byid(g, renderer, id); break;
     case entitytype_t::DOOR: create_door_sg_byid(g, renderer, id); break;

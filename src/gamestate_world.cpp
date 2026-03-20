@@ -295,10 +295,10 @@ entityid gamestate::create_door_with(with_fun doorInitFunction) {
     ct.set<entitytype>(id, entitytype_t::DOOR);
     sync_entt_entity_type_tags(id, entitytype_t::DOOR);
     doorInitFunction(ct, id);
-    if (!ct.get<name>(id).has_value()) {
+    if (!ct.has<name>(id)) {
         ct.set<name>(id, definition.name);
     }
-    if (!ct.get<description>(id).has_value()) {
+    if (!ct.has<description>(id)) {
         ct.set<description>(id, definition.description);
     }
     attach_static_world_definition(id, definition);
@@ -370,10 +370,10 @@ entityid gamestate::create_chest_with(with_fun chestInitFunction) {
     ct.set<hp>(id, vec2{10, 10});
     ct.set<inventory>(id, make_shared<vector<entityid>>());
     chestInitFunction(ct, id);
-    if (!ct.get<name>(id).has_value()) {
+    if (!ct.has<name>(id)) {
         ct.set<name>(id, definition.name);
     }
-    if (!ct.get<description>(id).has_value()) {
+    if (!ct.has<description>(id)) {
         ct.set<description>(id, definition.description);
     }
     attach_static_world_definition(id, definition);
@@ -401,7 +401,7 @@ entityid gamestate::create_chest_at_with(vec3 loc, with_fun chestInitFunction) {
     }
     ct.set<location>(id, loc);
     sync_registry_grid_position(id, loc);
-    sync_registry_open_state(id, ct.get<door_open>(id).value_or(false));
+    sync_registry_open_state(id, ct.get_or<door_open>(id, false));
     return id;
 }
 
@@ -443,7 +443,7 @@ entityid gamestate::create_prop_with(proptype_t type, with_fun initFun) {
     ct.set<update>(id, true);
     ct.set<proptype>(id, type);
     initFun(ct, id);
-    if (!ct.get<description>(id).has_value()) {
+    if (!ct.has<description>(id)) {
         ct.set<description>(id, "A neglected dungeon furnishing that has outlasted whoever left it here.");
     }
 
@@ -585,7 +585,7 @@ bool gamestate::create_floor_pressure_plate(vec3 loc, entityid linked_door_id) {
     if (vec3_invalid(loc) || loc.z < 0 || static_cast<size_t>(loc.z) >= d.floors.size()) {
         return false;
     }
-    if (linked_door_id == ENTITYID_INVALID || ct.get<entitytype>(linked_door_id).value_or(entitytype_t::NONE) != entitytype_t::DOOR) {
+    if (linked_door_id == ENTITYID_INVALID || ct.get_or<entitytype>(linked_door_id, entitytype_t::NONE) != entitytype_t::DOOR) {
         return false;
     }
 
@@ -614,7 +614,7 @@ bool gamestate::destroy_floor_pressure_plate(vec3 loc) {
         return false;
     }
 
-    if (plate->linked_door_id != ENTITYID_INVALID && ct.get<entitytype>(plate->linked_door_id).value_or(entitytype_t::NONE) == entitytype_t::DOOR) {
+    if (plate->linked_door_id != ENTITYID_INVALID && ct.get_or<entitytype>(plate->linked_door_id, entitytype_t::NONE) == entitytype_t::DOOR) {
         ct.set<door_open>(plate->linked_door_id, false);
         ct.set<update>(plate->linked_door_id, true);
     }

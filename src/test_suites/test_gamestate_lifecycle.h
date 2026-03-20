@@ -230,12 +230,12 @@ public:
         TS_ASSERT_DIFFERS(slime, ENTITYID_INVALID);
 
         g.ct.set<xp>(hero, 9);
-        const int old_str = g.ct.get<strength>(hero).value_or(0);
-        const vec2 old_hp = g.ct.get<hp>(hero).value_or(vec2{0, 0});
+        const int old_str = g.ct.get_or<strength>(hero, 0);
+        const vec2 old_hp = g.ct.get_or<hp>(hero, vec2{0, 0});
 
         g.update_npc_xp(hero, slime);
 
-        TS_ASSERT_EQUALS(g.ct.get<xp>(hero).value_or(0), 10);
+        TS_ASSERT_EQUALS(g.ct.get_or<xp>(hero, 0), 10);
         TS_ASSERT(g.ui.display_level_up_modal);
         TS_ASSERT_EQUALS(g.controlmode, controlmode_t::LEVEL_UP);
 
@@ -246,9 +246,9 @@ public:
 
         TS_ASSERT(!g.ui.display_level_up_modal);
         TS_ASSERT_EQUALS(g.controlmode, controlmode_t::PLAYER);
-        TS_ASSERT_EQUALS(g.ct.get<level>(hero).value_or(0), 2);
-        TS_ASSERT_EQUALS(g.ct.get<strength>(hero).value_or(0), old_str + 1);
-        const vec2 new_hp = g.ct.get<hp>(hero).value_or(vec2{0, 0});
+        TS_ASSERT_EQUALS(g.ct.get_or<level>(hero, 0), 2);
+        TS_ASSERT_EQUALS(g.ct.get_or<strength>(hero, 0), old_str + 1);
+        const vec2 new_hp = g.ct.get_or<hp>(hero, vec2{0, 0});
         TS_ASSERT_EQUALS(new_hp.x, old_hp.x);
         TS_ASSERT(new_hp.y > old_hp.y);
     }
@@ -268,8 +268,8 @@ public:
 
         g.apply_level_up_rewards(hero);
 
-        TS_ASSERT_EQUALS(g.ct.get<level>(hero).value_or(0), 2);
-        TS_ASSERT(vec2_equal(g.ct.get<hp>(hero).value_or(vec2{0, 0}), vec2{7, 11}));
+        TS_ASSERT_EQUALS(g.ct.get_or<level>(hero, 0), 2);
+        TS_ASSERT(vec2_equal(g.ct.get_or<hp>(hero, vec2{0, 0}), vec2{7, 11}));
     }
 
     void testConfirmPromptResolvesYesInputEvenIfControlmodeDrifted() {
@@ -414,7 +414,7 @@ public:
         press_key(is, KEY_H);
 
         TS_ASSERT(g.handle_move_left(is, false));
-        TS_ASSERT(vec3_equal(g.ct.get<location>(hero).value_or(vec3{-1, -1, -1}), vec3{2, 3, 0}));
+        TS_ASSERT(vec3_equal(g.ct.get_or<location>(hero, vec3{-1, -1, -1}), vec3{2, 3, 0}));
     }
 
     void testControlsMenuCanRebindAttackKeyForCurrentProfile() {
@@ -560,7 +560,7 @@ public:
         inputstate_reset(is);
         press_key(is, KEY_APOSTROPHE);
         TS_ASSERT(g.handle_change_dir(is));
-        TS_ASSERT(g.ct.get<attacking>(hero).value_or(false));
+        TS_ASSERT(g.ct.get_or<attacking>(hero, false));
         TS_ASSERT(!g.player_changing_dir);
 
         g.ct.set<attacking>(hero, false);
@@ -569,13 +569,13 @@ public:
         inputstate_reset(is);
         press_key(is, KEY_APOSTROPHE);
         TS_ASSERT(g.handle_change_dir(is));
-        TS_ASSERT(!g.ct.get<attacking>(hero).value_or(false));
+        TS_ASSERT(!g.ct.get_or<attacking>(hero, false));
         TS_ASSERT(g.player_changing_dir);
 
         inputstate_reset(is);
         press_key(is, KEY_T);
         TS_ASSERT(g.handle_change_dir(is));
-        TS_ASSERT(g.ct.get<attacking>(hero).value_or(false));
+        TS_ASSERT(g.ct.get_or<attacking>(hero, false));
         TS_ASSERT(!g.player_changing_dir);
     }
 
@@ -628,8 +628,8 @@ public:
             TS_ASSERT_EQUALS(plate.txkey_down, TX_SWITCHES_PRESSURE_PLATE_DOWN_00);
             TS_ASSERT_EQUALS(plate.linked_door_id, linked_door_id);
         }
-        TS_ASSERT_EQUALS(g.ct.get<entitytype>(linked_door_id).value_or(entitytype_t::NONE), entitytype_t::DOOR);
-        const vec3 tutorial_door_loc = g.ct.get<location>(linked_door_id).value_or(vec3{-1, -1, -1});
+        TS_ASSERT_EQUALS(g.ct.get_or<entitytype>(linked_door_id, entitytype_t::NONE), entitytype_t::DOOR);
+        const vec3 tutorial_door_loc = g.ct.get_or<location>(linked_door_id, vec3{-1, -1, -1});
         TS_ASSERT(vec3_valid(tutorial_door_loc));
         TS_ASSERT_EQUALS(tutorial_door_loc.z, 2);
         TS_ASSERT(vec3_valid(g.pressure_plate_state.floor_four_tutorial_orc_spawn));
@@ -647,10 +647,10 @@ public:
         size_t floor_four_orc_count = 0;
         bool found_orc_in_tutorial_room = false;
         g.for_entities_of_type(entitytype_t::NPC, [&](entityid id) {
-            if (g.ct.get<race>(id).value_or(race_t::NONE) != race_t::ORC) {
+            if (g.ct.get_or<race>(id, race_t::NONE) != race_t::ORC) {
                 return;
             }
-            const vec3 loc = g.ct.get<location>(id).value_or(vec3{-1, -1, -1});
+            const vec3 loc = g.ct.get_or<location>(id, vec3{-1, -1, -1});
             if (loc.z != 2) {
                 return;
             }
@@ -671,18 +671,18 @@ public:
 
         size_t floor_three_sign_count = 0;
         g.for_entities_of_type(entitytype_t::PROP, [&](entityid id) {
-            if (g.ct.get<proptype>(id).value_or(proptype_t::NONE) != proptype_t::DUNGEON_WOODEN_SIGN) {
+            if (g.ct.get_or<proptype>(id, proptype_t::NONE) != proptype_t::DUNGEON_WOODEN_SIGN) {
                 return;
             }
 
-            const vec3 loc = g.ct.get<location>(id).value_or(vec3{-1, -1, -1});
+            const vec3 loc = g.ct.get_or<location>(id, vec3{-1, -1, -1});
             TS_ASSERT(vec3_valid(loc));
             TS_ASSERT_EQUALS(loc.z, 2);
-            TS_ASSERT_EQUALS(g.ct.get<name>(id).value_or(""), "wooden sign");
-            TS_ASSERT_EQUALS(g.ct.get<description>(id).value_or(""), "Pull something onto the\npressure plate to keep the door open.");
-            TS_ASSERT(g.ct.get<solid>(id).value_or(false));
-            TS_ASSERT(!g.ct.get<pushable>(id).value_or(true));
-            TS_ASSERT(!g.ct.get<pullable>(id).value_or(true));
+            TS_ASSERT_EQUALS(g.ct.get_or<name>(id, ""), "wooden sign");
+            TS_ASSERT_EQUALS(g.ct.get_or<description>(id, ""), "Pull something onto the\npressure plate to keep the door open.");
+            TS_ASSERT(g.ct.get_or<solid>(id, false));
+            TS_ASSERT(!g.ct.get_or<pushable>(id, true));
+            TS_ASSERT(!g.ct.get_or<pullable>(id, true));
             floor_three_sign_count++;
         });
 
@@ -698,18 +698,18 @@ public:
 
         size_t floor_three_pullable_prop_count = 0;
         g.for_entities_of_type(entitytype_t::PROP, [&](entityid id) {
-            if (g.ct.get<proptype>(id).value_or(proptype_t::NONE) != proptype_t::DUNGEON_CANDLE_00) {
+            if (g.ct.get_or<proptype>(id, proptype_t::NONE) != proptype_t::DUNGEON_CANDLE_00) {
                 return;
             }
 
-            const vec3 loc = g.ct.get<location>(id).value_or(vec3{-1, -1, -1});
+            const vec3 loc = g.ct.get_or<location>(id, vec3{-1, -1, -1});
             if (loc.z != 2) {
                 return;
             }
 
             TS_ASSERT(vec3_valid(loc));
-            TS_ASSERT(g.ct.get<pullable>(id).value_or(false));
-            TS_ASSERT(!g.ct.get<solid>(id).value_or(true));
+            TS_ASSERT(g.ct.get_or<pullable>(id, false));
+            TS_ASSERT(!g.ct.get_or<solid>(id, true));
             floor_three_pullable_prop_count++;
         });
 
@@ -732,14 +732,14 @@ public:
         size_t floor_four_box_count = 0;
         size_t floor_four_prop_count = 0;
         g.for_entities_of_type(entitytype_t::BOX, [&](entityid id) {
-            const vec3 loc = g.ct.get<location>(id).value_or(vec3{-1, -1, -1});
+            const vec3 loc = g.ct.get_or<location>(id, vec3{-1, -1, -1});
             if (!vec3_valid(loc) || loc.z != 3) {
                 return;
             }
             floor_four_box_count++;
         });
         g.for_entities_of_type(entitytype_t::PROP, [&](entityid id) {
-            const vec3 loc = g.ct.get<location>(id).value_or(vec3{-1, -1, -1});
+            const vec3 loc = g.ct.get_or<location>(id, vec3{-1, -1, -1});
             if (!vec3_valid(loc) || loc.z != 3) {
                 return;
             }

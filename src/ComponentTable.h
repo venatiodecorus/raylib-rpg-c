@@ -8,14 +8,11 @@
 #include "entityid.h"
 #include "mprint.h"
 #include <memory>
-#include <optional>
 #include <string>
 #include <typeindex>
 #include <unordered_map>
 
 using std::make_shared;
-using std::nullopt;
-using std::optional;
 using std::shared_ptr;
 using std::static_pointer_cast;
 using std::string;
@@ -54,9 +51,6 @@ public:
             return store;
         }
         // Cast shared_ptr<void> back to shared_ptr<unordered_map<entityid, T>>.
-        // This is safe because type_index(typeid(Kind)) ensures we retrieve the
-        // exact map type created for this Kind (e.g., Name -> string, Hitpoints -> Vector2).
-        // static_pointer_cast preserves shared_ptr's memory management.
         return static_pointer_cast<unordered_map<entityid, typename ComponentTraits<Kind>::Type>>(it->second);
     }
 
@@ -65,9 +59,6 @@ public:
      *
      * Unlike the mutable overload, this does NOT create an empty store for
      * previously-unused component kinds — it returns `nullptr` instead.
-     *
-     * @tparam Kind Component tag type resolved through `ComponentTraits`.
-     * @return Shared pointer to the typed map, or `nullptr` when the kind has no store.
      */
     template <typename Kind>
     shared_ptr<const unordered_map<entityid, typename ComponentTraits<Kind>::Type>> getStore() const
@@ -80,76 +71,79 @@ public:
         }
         return static_pointer_cast<const unordered_map<entityid, typename ComponentTraits<Kind>::Type>>(it->second);
     }
-    /**
-     * @brief Add or replace a component value for an entity.
-     *
-     * @tparam Kind Component tag type resolved through `ComponentTraits`.
-     * @param entity Entity receiving the component value.
-     * @param component Component value to store.
-     */
+
+    /** set<Kind>(entity, component) — Add or replace a component value. */
     template <typename Kind>
     void set(entityid entity, const typename ComponentTraits<Kind>::Type& component)
     {
         (*getStore<Kind>())[entity] = component;
     }
+
     /**
-     * @brief Return a component value for an entity, if present.
+     * @brief Return a pointer to a component value for an entity, or nullptr if absent.
+     *
+     * This is the primary read accessor.  Returns a mutable pointer so callers
+     * can mutate in-place without a round-trip through get/set.
      *
      * @tparam Kind Component tag type resolved through `ComponentTraits`.
      * @param entity Entity to query.
-     * @return Stored component value, or `nullopt` when absent.
+     * @return Pointer to the stored component, or `nullptr` when absent.
      */
     template <typename Kind>
-    optional<typename ComponentTraits<Kind>::Type> get(entityid entity)
+    typename ComponentTraits<Kind>::Type* get(entityid entity)
     {
         auto store = getStore<Kind>();
         auto it = store->find(entity);
         if (it == store->end())
         {
-            return nullopt;
+            return nullptr;
         }
-        return it->second;
+        return &it->second;
     }
 
     /**
-     * @brief Return a component value for an entity, if present (read-only).
+     * @brief Return a pointer to a component value for an entity, or nullptr if absent (read-only).
      *
      * @tparam Kind Component tag type resolved through `ComponentTraits`.
      * @param entity Entity to query.
-     * @return Stored component value, or `nullopt` when absent.
+     * @return Pointer to the stored component, or `nullptr` when absent.
      */
     template <typename Kind>
-    optional<typename ComponentTraits<Kind>::Type> get(entityid entity) const
+    const typename ComponentTraits<Kind>::Type* get(entityid entity) const
     {
         auto store = getStore<Kind>();
         if (!store)
         {
-            return nullopt;
+            return nullptr;
         }
         auto it = store->find(entity);
         if (it == store->end())
         {
-            return nullopt;
+            return nullptr;
         }
-        return it->second;
+        return &it->second;
+    }
+
+    /**
+     * @brief Return a component value for an entity, or a caller-supplied default.
+     *
+     * Returns by value — intended for callers that need a local copy with a
+     * fallback.  For zero-copy access, use `get<>()` instead.
+     *
+     * @tparam Kind Component tag type resolved through `ComponentTraits`.
+     * @param entity Entity to query.
+     * @param fallback Value returned when the component is absent.
+     * @return Stored component value, or @p fallback.
+     */
+    template <typename Kind>
+    typename ComponentTraits<Kind>::Type get_or(entityid entity, const typename ComponentTraits<Kind>::Type& fallback) const
+    {
+        const auto* ptr = get<Kind>(entity);
+        return ptr ? *ptr : fallback;
     }
 
     /**
      * @brief Return whether an entity currently has a component of the requested kind.
-     *
-     * @tparam Kind Component tag type resolved through `ComponentTraits`.
-     * @param entity Entity to query.
-     * @return `true` when the component exists.
-     * @warning Calling this for a previously unused component kind creates an empty store.
-     */
-    template <typename Kind>
-    bool has(entityid entity)
-    {
-        return getStore<Kind>()->find(entity) != getStore<Kind>()->end();
-    }
-
-    /**
-     * @brief Return whether an entity currently has a component of the requested kind (read-only).
      *
      * @tparam Kind Component tag type resolved through `ComponentTraits`.
      * @param entity Entity to query.
@@ -165,6 +159,7 @@ public:
         }
         return store->find(entity) != store->end();
     }
+
     /**
      * @brief Remove a component of the requested kind from an entity.
      *

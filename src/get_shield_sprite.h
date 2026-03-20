@@ -14,7 +14,7 @@
 static inline shared_ptr<sprite> get_shield_front_sprite(gamestate& g, rpg::Renderer& renderer, entityid id, spritegroup* sg) {
     massert(id != ENTITYID_INVALID, "id is -1");
     massert(sg, "spritegroup is NULL");
-    const entityid shield = g.ct.get<equipped_shield>(id).value_or(ENTITYID_INVALID);
+    const entityid shield = g.ct.get_or<equipped_shield>(id, ENTITYID_INVALID);
     if (shield == ENTITYID_INVALID) {
         return nullptr;
     }
@@ -38,7 +38,7 @@ static inline shared_ptr<sprite> get_shield_back_sprite(gamestate& g, rpg::Rende
     massert(id != ENTITYID_INVALID, "id is -1");
     massert(sg, "spritegroup is NULL");
     shared_ptr<sprite> retval = nullptr;
-    const entityid shield = g.ct.get<equipped_shield>(id).value_or(ENTITYID_INVALID);
+    const entityid shield = g.ct.get_or<equipped_shield>(id, ENTITYID_INVALID);
     if (shield == ENTITYID_INVALID) {
         return retval;
     }

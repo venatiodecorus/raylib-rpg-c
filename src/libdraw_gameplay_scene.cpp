@@ -48,10 +48,9 @@ void libdraw_drawframe_2d(gamestate& g, rpg::Renderer& renderer, int vision_dist
 
     if (g.ui.display_inventory_menu) {
         if (g.use_mini_inventory_menu()) {
-            auto maybe_inventory = g.ct.get<inventory>(g.hero_id);
-            auto items = maybe_inventory.value_or(nullptr);
+            auto items = g.ct.get<inventory>(g.hero_id);
             if (items) {
-                draw_mini_inventory_menu(g, renderer, items, "Inventory", "E equip  Enter use  Q drop  Esc close", true);
+                draw_mini_inventory_menu(g, renderer, *items, "Inventory", "E equip  Enter use  Q drop  Esc close", true);
             }
         }
         else {
@@ -62,12 +61,11 @@ void libdraw_drawframe_2d(gamestate& g, rpg::Renderer& renderer, int vision_dist
     if (g.ui.display_chest_menu) {
         if (g.use_mini_inventory_menu()) {
             const entityid source_id = g.ui.chest_deposit_mode ? g.hero_id : g.active_chest_id;
-            auto maybe_inventory = g.ct.get<inventory>(source_id);
-            auto items = maybe_inventory.value_or(nullptr);
+            auto items = g.ct.get<inventory>(source_id);
             if (items) {
                 draw_mini_inventory_menu(
                     g, renderer,
-                    items,
+                    *items,
                     g.ui.chest_deposit_mode ? "Chest Deposit" : "Chest",
                     g.ui.chest_deposit_mode ? "Tab chest  Enter deposit  D close" : "Tab hero  Enter take  D close",
                     g.ui.chest_deposit_mode);

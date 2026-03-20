@@ -1,7 +1,7 @@
 #include "draw_mini_inventory_menu.h"
 
 Rectangle mini_inventory_panel_for_hero(gamestate& g, float width, float height) {
-    const vec3 hero_loc = g.ct.get<location>(g.hero_id).value_or(vec3{0, 0, 0});
+    const vec3 hero_loc = g.ct.get_or<location>(g.hero_id, vec3{0, 0, 0});
     const Vector2 hero_screen = GetWorldToScreen2D(
         Vector2{
             static_cast<float>(hero_loc.x * DEFAULT_TILE_SIZE) + DEFAULT_TILE_SIZE * 0.5f,
@@ -48,11 +48,11 @@ void draw_mini_inventory_menu(gamestate& g, rpg::Renderer& renderer, shared_ptr<
         }
 
         const entityid item_id = inventory->at(item_index);
-        const string item_name = g.ct.get<name>(item_id).value_or("no-name");
+        const string item_name = g.ct.get_or<name>(item_id, std::string("no-name"));
         const bool equipped =
             show_equipped &&
-            (item_id == g.ct.get<equipped_weapon>(g.hero_id).value_or(ENTITYID_INVALID) ||
-             item_id == g.ct.get<equipped_shield>(g.hero_id).value_or(ENTITYID_INVALID));
+            (item_id == g.ct.get_or<equipped_weapon>(g.hero_id, ENTITYID_INVALID) ||
+             item_id == g.ct.get_or<equipped_shield>(g.hero_id, ENTITYID_INVALID));
         DrawText(
             TextFormat("%s%s", item_index == selected_index ? "> " : "  ", item_name.c_str()),
             static_cast<int>(row.x + 6),

@@ -44,8 +44,8 @@ void draw_inventory_grid(gamestate& g, rpg::Renderer& renderer, shared_ptr<vecto
                         size_t index = static_cast<size_t>(j * cols + i);
                         if (index < inventory->size()) {
                             const entityid selection_id = inventory->at(index);
-                            const entityid cur_wpn_id = g.ct.get<equipped_weapon>(g.hero_id).value_or(ENTITYID_INVALID);
-                            const entityid cur_shield_id = g.ct.get<equipped_shield>(g.hero_id).value_or(ENTITYID_INVALID);
+                            const entityid cur_wpn_id = g.ct.get_or<equipped_weapon>(g.hero_id, ENTITYID_INVALID);
+                            const entityid cur_shield_id = g.ct.get_or<equipped_shield>(g.hero_id, ENTITYID_INVALID);
                             const bool cur_wpn_selected = selection_id == cur_wpn_id && cur_wpn_id != ENTITYID_INVALID;
                             const bool cur_shield_selected = selection_id == cur_shield_id && cur_shield_id != ENTITYID_INVALID;
                             if (cur_wpn_selected || cur_shield_selected) {
@@ -71,12 +71,12 @@ void draw_chest_menu(gamestate& g, rpg::Renderer& renderer) {
         return;
     }
 
-    auto maybe_inventory = g.ct.get<inventory>(g.ui.chest_deposit_mode ? g.hero_id : g.active_chest_id);
-    if (!maybe_inventory.has_value()) {
+    const auto* inventory_ptr = g.ct.get<inventory>(g.ui.chest_deposit_mode ? g.hero_id : g.active_chest_id);
+    if (!inventory_ptr) {
         return;
     }
 
-    auto inventory = maybe_inventory.value();
+    auto inventory = *inventory_ptr;
     const char* menu_title = g.ui.chest_deposit_mode ? "Treasure Chest - Deposit" : "Treasure Chest";
     const char* hint_text = g.ui.chest_deposit_mode ? "TAB: chest view  ENTER: deposit  ESC/D: close" : "TAB: hero inventory  ENTER: take  ESC/D: close";
     const int section_gap = 8;

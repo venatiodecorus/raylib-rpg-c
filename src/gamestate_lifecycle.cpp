@@ -26,7 +26,7 @@ bool gamestate::path_blocked(vec3 a, vec3 b) {
         }
         entityid door_id = t.get_cached_door();
         if (door_id != INVALID) {
-            bool door_is_open = ct.get<door_open>(door_id).value_or(false);
+            bool door_is_open = ct.get_or<door_open>(door_id, false);
             if (!door_is_open) {
                 return true;
             }
@@ -48,7 +48,7 @@ bool gamestate::visibility_path_blocked(vec3 a, vec3 b) {
         }
         entityid door_id = t.get_cached_door();
         if (door_id != INVALID && !vec3_equal(loc, b)) {
-            bool door_is_open = ct.get<door_open>(door_id).value_or(false);
+            bool door_is_open = ct.get_or<door_open>(door_id, false);
             if (!door_is_open) {
                 return true;
             }
@@ -66,18 +66,18 @@ bool gamestate::update_player_tiles_explored() {
         return false;
     }
     auto df = d.get_current_floor();
-    auto maybe_loc = ct.get<location>(hero_id);
-    if (!maybe_loc.has_value()) {
+    const vec3* hero_loc_ptr = ct.get<location>(hero_id);
+    if (!hero_loc_ptr) {
         merror2("hero location lacks value");
         return false;
     }
-    vec3 hero_loc = maybe_loc.value();
+    vec3 hero_loc = *hero_loc_ptr;
     for (int y = 0; y < df->get_height(); y++) {
         for (int x = 0; x < df->get_width(); x++) {
             df->tile_at(vec3{x, y, hero_loc.z}).set_visible(false);
         }
     }
-    int light_radius0 = ct.get<light_radius>(hero_id).value_or(1);
+    int light_radius0 = ct.get_or<light_radius>(hero_id, 1);
     int min_x = std::max(0, hero_loc.x - light_radius0);
     int max_x = std::min(df->get_width() - 1, hero_loc.x + light_radius0);
     int min_y = std::max(0, hero_loc.y - light_radius0);
@@ -103,7 +103,7 @@ bool gamestate::update_player_state() {
         merror2("hero_id is invalid");
         return false;
     }
-    if (ct.get<dead>(hero_id).value_or(true)) {
+    if (ct.get_or<dead>(hero_id, true)) {
         merror2("hero_id is dead");
         gameover = true;
         return true;
@@ -125,24 +125,24 @@ void gamestate::update_npcs_state() {
 }
 
 void gamestate::update_npc_behavior(entityid id) {
-    if (ct.get<entitytype>(id).value_or(entitytype_t::NONE) != entitytype_t::NPC) {
+    if (ct.get_or<entitytype>(id, entitytype_t::NONE) != entitytype_t::NPC) {
         return;
     }
-    if (ct.get<dead>(id).value_or(true)) {
+    if (ct.get_or<dead>(id, true)) {
         ct.set<entity_default_action>(id, entity_default_action_t::NONE);
         ct.set<target_id>(id, ENTITYID_INVALID);
         return;
     }
 
-    const bool is_aggressive = ct.get<aggro>(id).value_or(false);
+    const bool is_aggressive = ct.get_or<aggro>(id, false);
     if (hero_id == ENTITYID_INVALID || !is_aggressive || !ct.has<location>(hero_id)) {
         ct.set<entity_default_action>(id, entity_default_action_t::RANDOM_MOVE);
         ct.set<target_id>(id, ENTITYID_INVALID);
         return;
     }
 
-    const vec3 npc_loc = ct.get<location>(id).value_or(vec3{-1, -1, -1});
-    const vec3 hero_loc = ct.get<location>(hero_id).value_or(vec3{-1, -1, -1});
+    const vec3 npc_loc = ct.get_or<location>(id, vec3{-1, -1, -1});
+    const vec3 hero_loc = ct.get_or<location>(hero_id, vec3{-1, -1, -1});
     if (vec3_invalid(npc_loc) || vec3_invalid(hero_loc) || npc_loc.z != hero_loc.z) {
         ct.set<entity_default_action>(id, entity_default_action_t::RANDOM_MOVE);
         ct.set<target_id>(id, ENTITYID_INVALID);

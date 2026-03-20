@@ -13,9 +13,9 @@ bool create_spritegroup(gamestate& g, rpg::Renderer& renderer, entityid id, cons
     auto maybe_loc = g.ct.get<location>(id);
 
     minfo("checking if has location");
-    if (maybe_loc.has_value()) {
+    if (maybe_loc != nullptr) {
         minfo("it DOES have a location");
-        const vec3 loc = maybe_loc.value();
+        const vec3 loc = *maybe_loc;
         massert(loc.z >= 0 && static_cast<size_t>(loc.z) < g.d.get_floor_count(), "location z out of bounds: %d", loc.z);
         auto df = g.d.get_floor(loc.z);
         massert(df, "dungeon floor is NULL");
@@ -43,9 +43,9 @@ bool create_spritegroup(gamestate& g, rpg::Renderer& renderer, entityid id, cons
         minfo2("setting id: %d", id);
         group->id = id;
 
-        string n = g.ct.get<name>(id).value_or("no-name");
+        string n = g.ct.get_or<name>(id, "no-name");
         minfo2("name: %s", n.c_str());
-        entitytype_t t = g.ct.get<entitytype>(id).value_or(entitytype_t::NONE);
+        entitytype_t t = g.ct.get_or<entitytype>(id, entitytype_t::NONE);
         string t_s = entitytype_to_str(t);
         minfo2("type: %s", t_s.c_str());
         minfo2("group->get(0)");

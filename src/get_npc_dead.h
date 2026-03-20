@@ -16,5 +16,5 @@ static inline bool get_npc_dead(gamestate& g, entityid id) {
     //target_tile.dirty_entities = true;
 
 
-    return g.ct.get<dead>(id).value_or(true);
+    return g.ct.get_or<dead>(id, true);
 }

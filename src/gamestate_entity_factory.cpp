@@ -57,7 +57,7 @@ entityid gamestate::create_weapon_with(with_fun weaponInitFunction) {
     ct.set<spritemove>(id, Rectangle{0, 0, 0, 0});
     ct.set<update>(id, true);
     weaponInitFunction(ct, id);
-    mirror_weapon_item(*this, id, ct.get<weapontype>(id).value_or(weapontype_t::NONE));
+    mirror_weapon_item(*this, id, ct.get_or<weapontype>(id, weapontype_t::NONE));
     return id;
 }
 
@@ -227,7 +227,7 @@ entityid gamestate::create_shield_with(ComponentTable& ct, with_fun shieldInitFu
     ct.set<rarity>(id, rarity_t::COMMON);
     ct.set<update>(id, false);
     shieldInitFunction(ct, id);
-    mirror_shield_item(*this, id, ct.get<shieldtype>(id).value_or(shieldtype_t::NONE));
+    mirror_shield_item(*this, id, ct.get_or<shieldtype>(id, shieldtype_t::NONE));
     return id;
 }
 
@@ -252,7 +252,7 @@ entityid gamestate::create_potion_with(with_fun potionInitFunction) {
     ct.set<itemtype>(id, itemtype_t::POTION);
     ct.set<update>(id, true);
     potionInitFunction(ct, id);
-    mirror_potion_item(*this, id, ct.get<potiontype>(id).value_or(potiontype_t::NONE));
+    mirror_potion_item(*this, id, ct.get_or<potiontype>(id, potiontype_t::NONE));
     return id;
 }
 
@@ -283,7 +283,7 @@ race_t gamestate::random_monster_type() {
 }
 
 void gamestate::set_npc_starting_stats(entityid id) {
-    race_t rt = ct.get<race>(id).value_or(race_t::NONE);
+    race_t rt = ct.get_or<race>(id, race_t::NONE);
     if (rt == race_t::NONE) {
         return;
     }
@@ -369,10 +369,10 @@ entityid gamestate::create_npc_with(race_t rt, with_fun npcInitFunction) {
     ct.set<aggro>(id, alignment_is_aggressive(default_alignment));
     set_npc_starting_stats(id);
     npcInitFunction(ct, id);
-    if (!ct.get<name>(id).has_value()) {
+    if (!ct.has<name>(id)) {
         ct.set<name>(id, def ? def->default_name : race2str(rt));
     }
-    if (!ct.get<dialogue_text>(id).has_value()) {
+    if (!ct.has<dialogue_text>(id)) {
         ct.set<dialogue_text>(id, def ? def->default_description : "They give you a guarded look but say nothing.");
     }
     
@@ -424,12 +424,12 @@ entityid gamestate::create_npc_at_with(race_t rt, vec3 loc, with_fun npcInitFunc
 
 bool gamestate::add_to_inventory(entityid actor_id, entityid item_id) {
     minfo2("adding %d to %d's inventory", actor_id, item_id);
-    auto maybe_inventory = ct.get<inventory>(actor_id);
-    if (!maybe_inventory.has_value()) {
+    const auto* inventory_ptr = ct.get<inventory>(actor_id);
+    if (!inventory_ptr) {
         merror2("%d has no inventory component", actor_id);
         return false;
     }
-    auto inventory = maybe_inventory.value();
+    auto inventory = *inventory_ptr;
     inventory->push_back(item_id);
     msuccess2("added %d to %d's inventory", actor_id, item_id);
     return true;

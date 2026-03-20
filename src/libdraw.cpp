@@ -207,8 +207,8 @@ void libdraw_render_current_scene_to_scene_texture(gamestate& g, rpg::Renderer& 
         draw_char_creation_to_texture(g, renderer);
         break;
     case scene_t::GAMEPLAY: {
-        const int vision_dist = g.ct.get<vision_distance>(g.hero_id).value_or(0);
-        const int light_rad = g.ct.get<light_radius>(g.hero_id).value_or(0);
+        const int vision_dist = g.ct.get_or<vision_distance>(g.hero_id, 0);
+        const int light_rad = g.ct.get_or<light_radius>(g.hero_id, 0);
         libdraw_drawframe_2d_to_texture(g, renderer, vision_dist, light_rad);
     } break;
     default:

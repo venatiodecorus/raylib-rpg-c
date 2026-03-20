@@ -8,5 +8,5 @@
 
 /** @brief Return the entity location for `id`, or the invalid location sentinel. */
 static inline const vec3 get_entity_location(gamestate& g, const entityid id) {
-    return g.ct.get<location>(id).value_or(vec3{-1, -1, -1});
+    return g.ct.get_or<location>(id, vec3{-1, -1, -1});
 }
