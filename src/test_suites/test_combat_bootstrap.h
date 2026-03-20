@@ -7,69 +7,6 @@
 
 class CombatBootstrapTestSuite : public CxxTest::TestSuite {
 private:
-    size_t count_entities_of_type(gamestate& g, entitytype_t type) {
-        size_t count = 0;
-        for (entityid id = 1; id < g.next_entityid; id++) {
-            if (g.ct.get<entitytype>(id).value_or(entitytype_t::NONE) == type) {
-                count++;
-            }
-        }
-        return count;
-    }
-
-    size_t count_live_npcs_on_floor(gamestate& g, int floor) {
-        size_t count = 0;
-        for (entityid id = 1; id < g.next_entityid; id++) {
-            if (g.ct.get<entitytype>(id).value_or(entitytype_t::NONE) != entitytype_t::NPC) {
-                continue;
-            }
-            if (g.ct.get<dead>(id).value_or(true)) {
-                continue;
-            }
-            const vec3 loc = g.ct.get<location>(id).value_or(vec3{-1, -1, -1});
-            if (loc.z == floor) {
-                count++;
-            }
-        }
-        return count;
-    }
-
-    size_t count_live_npcs_of_race_on_floor(gamestate& g, race_t race_value, int floor) {
-        size_t count = 0;
-        for (entityid id = 1; id < g.next_entityid; id++) {
-            if (g.ct.get<entitytype>(id).value_or(entitytype_t::NONE) != entitytype_t::NPC) {
-                continue;
-            }
-            if (g.ct.get<dead>(id).value_or(true)) {
-                continue;
-            }
-            if (g.ct.get<race>(id).value_or(race_t::NONE) != race_value) {
-                continue;
-            }
-            const vec3 loc = g.ct.get<location>(id).value_or(vec3{-1, -1, -1});
-            if (loc.z == floor) {
-                count++;
-            }
-        }
-        return count;
-    }
-
-    entityid find_live_npc_on_floor(gamestate& g, int floor) {
-        for (entityid id = 1; id < g.next_entityid; id++) {
-            if (g.ct.get<entitytype>(id).value_or(entitytype_t::NONE) != entitytype_t::NPC) {
-                continue;
-            }
-            if (g.ct.get<dead>(id).value_or(true)) {
-                continue;
-            }
-            const vec3 loc = g.ct.get<location>(id).value_or(vec3{-1, -1, -1});
-            if (loc.z == floor) {
-                return id;
-            }
-        }
-        return ENTITYID_INVALID;
-    }
-
     void add_floor(gamestate& g, int width = 8, int height = 8) {
         auto df = g.d.create_floor(biome_t::STONE, width, height);
         df->df_set_all_tiles(tiletype_t::FLOOR_STONE_00);
@@ -94,7 +31,15 @@ public:
         }
 
         TS_ASSERT_EQUALS(ids.size(), 4U);
-        TS_ASSERT_EQUALS(count_live_npcs_on_floor(g, 0), 4U);
+        {
+            size_t npc_count = 0;
+            g.registry.view<LegacyEntityId, NpcTag>().each([&](auto e, auto& lid) {
+                if (!g.ct.get<dead>(lid.id).value_or(true) &&
+                    g.ct.get<location>(lid.id).value_or(vec3{-1, -1, -1}).z == 0)
+                    npc_count++;
+            });
+            TS_ASSERT_EQUALS(npc_count, 4U);
+        }
     }
 
     void testCreateOrcRejectsOccupiedTile() {
@@ -107,7 +52,15 @@ public:
 
         TS_ASSERT_DIFFERS(first, ENTITYID_INVALID);
         TS_ASSERT_EQUALS(second, ENTITYID_INVALID);
-        TS_ASSERT_EQUALS(count_live_npcs_on_floor(g, 0), 1U);
+        {
+            size_t npc_count = 0;
+            g.registry.view<LegacyEntityId, NpcTag>().each([&](auto e, auto& lid) {
+                if (!g.ct.get<dead>(lid.id).value_or(true) &&
+                    g.ct.get<location>(lid.id).value_or(vec3{-1, -1, -1}).z == 0)
+                    npc_count++;
+            });
+            TS_ASSERT_EQUALS(npc_count, 1U);
+        }
     }
 
     void testCreateOrcStopsAtWalkableTileCapacityWithoutLeakingIds() {
@@ -124,14 +77,30 @@ public:
         }
 
         TS_ASSERT_EQUALS(ids.size(), 9U);
-        TS_ASSERT_EQUALS(count_live_npcs_on_floor(g, 0), 9U);
+        {
+            size_t npc_count = 0;
+            g.registry.view<LegacyEntityId, NpcTag>().each([&](auto e, auto& lid) {
+                if (!g.ct.get<dead>(lid.id).value_or(true) &&
+                    g.ct.get<location>(lid.id).value_or(vec3{-1, -1, -1}).z == 0)
+                    npc_count++;
+            });
+            TS_ASSERT_EQUALS(npc_count, 9U);
+        }
 
         const entityid before_next_entity = g.next_entityid;
         const entityid extra = g.create_orc_at_with(vec3{1, 1, 0}, [](CT&, const entityid) {});
 
         TS_ASSERT_EQUALS(extra, ENTITYID_INVALID);
         TS_ASSERT_EQUALS(g.next_entityid, before_next_entity);
-        TS_ASSERT_EQUALS(count_live_npcs_on_floor(g, 0), 9U);
+        {
+            size_t npc_count = 0;
+            g.registry.view<LegacyEntityId, NpcTag>().each([&](auto e, auto& lid) {
+                if (!g.ct.get<dead>(lid.id).value_or(true) &&
+                    g.ct.get<location>(lid.id).value_or(vec3{-1, -1, -1}).z == 0)
+                    npc_count++;
+            });
+            TS_ASSERT_EQUALS(npc_count, 9U);
+        }
     }
 
     void testLogicInitBuildsGameplayBootstrap() {
@@ -154,12 +123,23 @@ public:
         TS_ASSERT_EQUALS(g.d.get_floor(3)->get_height(), 16);
         TS_ASSERT(vec3_valid(g.d.get_floor(0)->get_upstairs_loc()));
         TS_ASSERT(vec3_valid(g.d.get_floor(0)->get_downstairs_loc()));
-        TS_ASSERT(count_entities_of_type(g, entitytype_t::DOOR) >= 1U);
-        TS_ASSERT(count_entities_of_type(g, entitytype_t::BOX) >= 4U);
-        TS_ASSERT(count_entities_of_type(g, entitytype_t::ITEM) >= 2U);
-        TS_ASSERT(count_live_npcs_on_floor(g, 0) >= 1U);
-        TS_ASSERT(count_live_npcs_on_floor(g, 1) >= 9U);
-        TS_ASSERT(count_live_npcs_on_floor(g, 2) >= 1U);
+        TS_ASSERT(g.count_entities_of_type(entitytype_t::DOOR) >= 1U);
+        TS_ASSERT(g.count_entities_of_type(entitytype_t::BOX) >= 4U);
+        TS_ASSERT(g.count_entities_of_type(entitytype_t::ITEM) >= 2U);
+        {
+            auto count_floor = [&](int floor) {
+                size_t count = 0;
+                g.registry.view<LegacyEntityId, NpcTag>().each([&](auto e, auto& lid) {
+                    if (!g.ct.get<dead>(lid.id).value_or(true) &&
+                        g.ct.get<location>(lid.id).value_or(vec3{-1, -1, -1}).z == floor)
+                        count++;
+                });
+                return count;
+            };
+            TS_ASSERT(count_floor(0) >= 1U);
+            TS_ASSERT(count_floor(1) >= 9U);
+            TS_ASSERT(count_floor(2) >= 1U);
+        }
         TS_ASSERT(g.messages.system.size() >= 2U);
     }
 
@@ -170,9 +150,20 @@ public:
 
         g.logic_init();
 
-        const entityid floor_zero_npc = find_live_npc_on_floor(g, 0);
-        const entityid floor_one_npc = find_live_npc_on_floor(g, 1);
-        const entityid floor_two_npc = find_live_npc_on_floor(g, 2);
+        auto find_live_on_floor = [&](int floor) -> entityid {
+            entityid result = ENTITYID_INVALID;
+            g.registry.view<LegacyEntityId, NpcTag>().each([&](auto e, auto& lid) {
+                if (result != ENTITYID_INVALID) return;
+                if (g.ct.get<dead>(lid.id).value_or(true)) return;
+                if (g.ct.get<location>(lid.id).value_or(vec3{-1, -1, -1}).z == floor)
+                    result = lid.id;
+            });
+            return result;
+        };
+
+        const entityid floor_zero_npc = find_live_on_floor(0);
+        const entityid floor_one_npc = find_live_on_floor(1);
+        const entityid floor_two_npc = find_live_on_floor(2);
 
         TS_ASSERT_DIFFERS(floor_zero_npc, ENTITYID_INVALID);
         TS_ASSERT_DIFFERS(floor_one_npc, ENTITYID_INVALID);
@@ -180,7 +171,16 @@ public:
         TS_ASSERT(!g.ct.get<aggro>(floor_zero_npc).value_or(true));
         TS_ASSERT_EQUALS(g.ct.get<race>(floor_one_npc).value_or(race_t::NONE), race_t::GREEN_SLIME);
         TS_ASSERT(!g.ct.get<aggro>(floor_one_npc).value_or(true));
-        TS_ASSERT_EQUALS(count_live_npcs_of_race_on_floor(g, race_t::GREEN_SLIME, 1), 9U);
+        {
+            size_t slime_count = 0;
+            g.registry.view<LegacyEntityId, NpcTag>().each([&](auto e, auto& lid) {
+                if (!g.ct.get<dead>(lid.id).value_or(true) &&
+                    g.ct.get<race>(lid.id).value_or(race_t::NONE) == race_t::GREEN_SLIME &&
+                    g.ct.get<location>(lid.id).value_or(vec3{-1, -1, -1}).z == 1)
+                    slime_count++;
+            });
+            TS_ASSERT_EQUALS(slime_count, 9U);
+        }
         TS_ASSERT_EQUALS(g.ct.get<race>(floor_two_npc).value_or(race_t::NONE), race_t::ORC);
         TS_ASSERT(g.ct.get<aggro>(floor_two_npc).value_or(false));
         const auto npc_inventory = g.ct.get<inventory>(floor_two_npc).value_or(nullptr);

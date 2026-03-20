@@ -51,13 +51,9 @@ void gamestate::handle_input_main_menu_scene(inputstate& is) {
 
 void gamestate::make_all_npcs_target_player() {
     massert(hero_id != ENTITYID_INVALID, "hero_id is invalid");
-    auto view = registry.view<ActorKind, LegacyEntityId>();
+    auto view = registry.view<LegacyEntityId, NpcTag>();
     for (auto entity : view) {
         entityid id = view.get<LegacyEntityId>(entity).id;
-        entitytype_t t = ct.get<entitytype>(id).value_or(entitytype_t::NONE);
-        if (t != entitytype_t::NPC) {
-            continue;
-        }
         ct.set<target_id>(id, hero_id);
     }
 }

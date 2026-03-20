@@ -5,16 +5,6 @@
 
 class EntityPlacementTestSuite : public CxxTest::TestSuite {
 private:
-    size_t count_entities_of_type(gamestate& g, entitytype_t type) {
-        size_t count = 0;
-        for (entityid id = 1; id < g.next_entityid; id++) {
-            if (g.ct.get<entitytype>(id).value_or(entitytype_t::NONE) == type) {
-                count++;
-            }
-        }
-        return count;
-    }
-
     void add_simple_floor(gamestate& g, int width = 5, int height = 5) {
         auto df = g.d.create_floor(biome_t::STONE, width, height);
         df->df_set_all_tiles(tiletype_t::FLOOR_STONE_00);
@@ -40,7 +30,7 @@ public:
     void testPlaceDoorsReturnsZeroOnEmptyDungeon() {
         gamestate g;
         TS_ASSERT_EQUALS(g.place_doors(), 0U);
-        TS_ASSERT_EQUALS(count_entities_of_type(g, entitytype_t::DOOR), 0U);
+        TS_ASSERT_EQUALS(g.count_entities_of_type(entitytype_t::DOOR), 0U);
     }
 
     void testPlaceDoorsCreatesDoorEntitiesWithTileAndComponentState() {
@@ -62,14 +52,10 @@ public:
 
         const size_t placed = g.place_doors();
         TS_ASSERT(placed > 0);
-        TS_ASSERT_EQUALS(count_entities_of_type(g, entitytype_t::DOOR), placed);
+        TS_ASSERT_EQUALS(g.count_entities_of_type(entitytype_t::DOOR), placed);
 
         size_t verified = 0;
-        for (entityid id = 1; id < g.next_entityid; id++) {
-            if (g.ct.get<entitytype>(id).value_or(entitytype_t::NONE) != entitytype_t::DOOR) {
-                continue;
-            }
-
+        g.for_entities_of_type(entitytype_t::DOOR, [&](entityid id) {
             auto maybe_loc = g.ct.get<location>(id);
             TS_ASSERT(maybe_loc.has_value());
             const vec3 loc = maybe_loc.value_or(vec3{-1, -1, -1});
@@ -83,7 +69,7 @@ public:
             TS_ASSERT(!g.ct.get<door_open>(id).value_or(true));
             TS_ASSERT(g.ct.get<update>(id).value_or(false));
             verified++;
-        }
+        });
 
         TS_ASSERT_EQUALS(verified, placed);
     }
@@ -91,7 +77,7 @@ public:
     void testPlacePropsReturnsZeroOnEmptyDungeon() {
         gamestate g;
         TS_ASSERT_EQUALS(g.place_props(), 0);
-        TS_ASSERT_EQUALS(count_entities_of_type(g, entitytype_t::PROP), 0U);
+        TS_ASSERT_EQUALS(g.count_entities_of_type(entitytype_t::PROP), 0U);
     }
 
     void testPlacePropsCreatesPropEntitiesWithTileAndComponentState() {
@@ -100,14 +86,10 @@ public:
 
         const int placed = g.place_props();
         TS_ASSERT(placed > 0);
-        TS_ASSERT_EQUALS(count_entities_of_type(g, entitytype_t::PROP), static_cast<size_t>(placed));
+        TS_ASSERT_EQUALS(g.count_entities_of_type(entitytype_t::PROP), static_cast<size_t>(placed));
 
         size_t verified = 0;
-        for (entityid id = 1; id < g.next_entityid; id++) {
-            if (g.ct.get<entitytype>(id).value_or(entitytype_t::NONE) != entitytype_t::PROP) {
-                continue;
-            }
-
+        g.for_entities_of_type(entitytype_t::PROP, [&](entityid id) {
             auto maybe_loc = g.ct.get<location>(id);
             TS_ASSERT(maybe_loc.has_value());
             const vec3 loc = maybe_loc.value_or(vec3{-1, -1, -1});
@@ -127,7 +109,7 @@ public:
             TS_ASSERT(g.ct.get<pushable>(id).has_value());
             TS_ASSERT(g.ct.get<update>(id).value_or(false));
             verified++;
-        }
+        });
 
         TS_ASSERT_EQUALS(verified, static_cast<size_t>(placed));
     }
@@ -138,7 +120,7 @@ public:
 
         const int placed = g.place_props();
         TS_ASSERT_EQUALS(placed, 0);
-        TS_ASSERT_EQUALS(count_entities_of_type(g, entitytype_t::PROP), 0U);
+        TS_ASSERT_EQUALS(g.count_entities_of_type(entitytype_t::PROP), 0U);
     }
 
     void testPlacePropsSkipsFourthFloorTutorialLevel() {
@@ -152,17 +134,13 @@ public:
         TS_ASSERT(placed > 0);
 
         size_t tutorial_floor_props = 0;
-        for (entityid id = 1; id < g.next_entityid; id++) {
-            if (g.ct.get<entitytype>(id).value_or(entitytype_t::NONE) != entitytype_t::PROP) {
-                continue;
-            }
-
+        g.for_entities_of_type(entitytype_t::PROP, [&](entityid id) {
             const vec3 loc = g.ct.get<location>(id).value_or(vec3{-1, -1, -1});
             TS_ASSERT(vec3_valid(loc));
             if (loc.z == 2) {
                 tutorial_floor_props++;
             }
-        }
+        });
 
         TS_ASSERT_EQUALS(tutorial_floor_props, 0U);
     }

@@ -14,10 +14,9 @@ private:
     }
 
     entityid find_live_npc_on_floor(gamestate& g, int floor, race_t race_value = race_t::NONE) {
-        for (entityid id = 1; id < g.next_entityid; id++) {
-            if (g.ct.get<entitytype>(id).value_or(entitytype_t::NONE) != entitytype_t::NPC) {
-                continue;
-            }
+        auto view = g.registry.view<LegacyEntityId, NpcTag>();
+        for (auto entity : view) {
+            entityid id = view.get<LegacyEntityId>(entity).id;
             if (g.ct.get<dead>(id).value_or(true)) {
                 continue;
             }

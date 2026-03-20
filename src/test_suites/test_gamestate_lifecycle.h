@@ -646,20 +646,17 @@ public:
 
         size_t floor_four_orc_count = 0;
         bool found_orc_in_tutorial_room = false;
-        for (entityid id = 1; id < g.next_entityid; id++) {
-            if (g.ct.get<entitytype>(id).value_or(entitytype_t::NONE) != entitytype_t::NPC) {
-                continue;
-            }
+        g.for_entities_of_type(entitytype_t::NPC, [&](entityid id) {
             if (g.ct.get<race>(id).value_or(race_t::NONE) != race_t::ORC) {
-                continue;
+                return;
             }
             const vec3 loc = g.ct.get<location>(id).value_or(vec3{-1, -1, -1});
             if (loc.z != 2) {
-                continue;
+                return;
             }
             floor_four_orc_count++;
             found_orc_in_tutorial_room = vec3_equal(loc, g.pressure_plate_state.floor_four_tutorial_orc_spawn);
-        }
+        });
 
         TS_ASSERT_EQUALS(floor_four_orc_count, 1U);
         TS_ASSERT(found_orc_in_tutorial_room);
@@ -673,12 +670,9 @@ public:
         g.logic_init();
 
         size_t floor_three_sign_count = 0;
-        for (entityid id = 1; id < g.next_entityid; id++) {
-            if (g.ct.get<entitytype>(id).value_or(entitytype_t::NONE) != entitytype_t::PROP) {
-                continue;
-            }
+        g.for_entities_of_type(entitytype_t::PROP, [&](entityid id) {
             if (g.ct.get<proptype>(id).value_or(proptype_t::NONE) != proptype_t::DUNGEON_WOODEN_SIGN) {
-                continue;
+                return;
             }
 
             const vec3 loc = g.ct.get<location>(id).value_or(vec3{-1, -1, -1});
@@ -690,7 +684,7 @@ public:
             TS_ASSERT(!g.ct.get<pushable>(id).value_or(true));
             TS_ASSERT(!g.ct.get<pullable>(id).value_or(true));
             floor_three_sign_count++;
-        }
+        });
 
         TS_ASSERT_EQUALS(floor_three_sign_count, 1U);
     }
@@ -703,24 +697,21 @@ public:
         g.logic_init();
 
         size_t floor_three_pullable_prop_count = 0;
-        for (entityid id = 1; id < g.next_entityid; id++) {
-            if (g.ct.get<entitytype>(id).value_or(entitytype_t::NONE) != entitytype_t::PROP) {
-                continue;
-            }
+        g.for_entities_of_type(entitytype_t::PROP, [&](entityid id) {
             if (g.ct.get<proptype>(id).value_or(proptype_t::NONE) != proptype_t::DUNGEON_CANDLE_00) {
-                continue;
+                return;
             }
 
             const vec3 loc = g.ct.get<location>(id).value_or(vec3{-1, -1, -1});
             if (loc.z != 2) {
-                continue;
+                return;
             }
 
             TS_ASSERT(vec3_valid(loc));
             TS_ASSERT(g.ct.get<pullable>(id).value_or(false));
             TS_ASSERT(!g.ct.get<solid>(id).value_or(true));
             floor_three_pullable_prop_count++;
-        }
+        });
 
         TS_ASSERT_EQUALS(floor_three_pullable_prop_count, 4U);
     }
@@ -740,19 +731,20 @@ public:
 
         size_t floor_four_box_count = 0;
         size_t floor_four_prop_count = 0;
-        for (entityid id = 1; id < g.next_entityid; id++) {
-            const entitytype_t type = g.ct.get<entitytype>(id).value_or(entitytype_t::NONE);
+        g.for_entities_of_type(entitytype_t::BOX, [&](entityid id) {
             const vec3 loc = g.ct.get<location>(id).value_or(vec3{-1, -1, -1});
             if (!vec3_valid(loc) || loc.z != 3) {
-                continue;
+                return;
             }
-            if (type == entitytype_t::BOX) {
-                floor_four_box_count++;
+            floor_four_box_count++;
+        });
+        g.for_entities_of_type(entitytype_t::PROP, [&](entityid id) {
+            const vec3 loc = g.ct.get<location>(id).value_or(vec3{-1, -1, -1});
+            if (!vec3_valid(loc) || loc.z != 3) {
+                return;
             }
-            else if (type == entitytype_t::PROP) {
-                floor_four_prop_count++;
-            }
-        }
+            floor_four_prop_count++;
+        });
 
         TS_ASSERT(floor_four_box_count >= 3U);
         TS_ASSERT(floor_four_prop_count >= 1U);

@@ -144,7 +144,9 @@ void libdraw_update_sprites_pre(gamestate& g, rpg::Renderer& renderer) {
     minfo2("BEGIN update sprites pre");
     if (g.current_scene == scene_t::GAMEPLAY) {
         libdraw_handle_dirty_entities(g, renderer);
-        for (entityid id = 0; id < g.next_entityid; id++) {
+        auto view = g.registry.view<LegacyEntityId, EntityTypeTag>();
+        for (auto entity : view) {
+            entityid id = view.get<LegacyEntityId>(entity).id;
             libdraw_update_sprite_pre(g, renderer, id);
         }
     }
@@ -163,8 +165,10 @@ void libdraw_update_sprites_post(gamestate& g, rpg::Renderer& renderer) {
 
     g.frame_dirty = true;
 
-    for (entityid id = 0; id < g.next_entityid; id++) {
-        const entitytype_t type = g.ct.get<entitytype>(id).value_or(entitytype_t::NONE);
+    auto view = g.registry.view<LegacyEntityId, EntityTypeTag>();
+    for (auto entity : view) {
+        entityid id = view.get<LegacyEntityId>(entity).id;
+        const entitytype_t type = view.get<EntityTypeTag>(entity).type;
         if (type == entitytype_t::NONE) {
             continue;
         }

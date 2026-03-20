@@ -293,6 +293,7 @@ entityid gamestate::create_door_with(with_fun doorInitFunction) {
     entityid id = add_entity();
     const StaticWorldDefinition& definition = get_static_world_definition(entitytype_t::DOOR);
     ct.set<entitytype>(id, entitytype_t::DOOR);
+    sync_entt_entity_type_tags(id, entitytype_t::DOOR);
     doorInitFunction(ct, id);
     if (!ct.get<name>(id).has_value()) {
         ct.set<name>(id, definition.name);
@@ -359,6 +360,7 @@ entityid gamestate::create_chest_with(with_fun chestInitFunction) {
     entityid id = add_entity();
     const StaticWorldDefinition& definition = get_static_world_definition(entitytype_t::CHEST);
     ct.set<entitytype>(id, entitytype_t::CHEST);
+    sync_entt_entity_type_tags(id, entitytype_t::CHEST);
     ct.set<spritemove>(id, Rectangle{0, 0, 0, 0});
     ct.set<update>(id, true);
     ct.set<pushable>(id, definition.pushable);
@@ -436,6 +438,7 @@ entityid gamestate::create_prop_with(proptype_t type, with_fun initFun) {
     entityid id = add_entity();
     const StaticWorldDefinition& definition = get_prop_definition(type);
     ct.set<entitytype>(id, entitytype_t::PROP);
+    sync_entt_entity_type_tags(id, entitytype_t::PROP);
     ct.set<spritemove>(id, Rectangle{0, 0, 0, 0});
     ct.set<update>(id, true);
     ct.set<proptype>(id, type);

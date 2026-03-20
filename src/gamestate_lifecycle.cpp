@@ -116,16 +116,11 @@ bool gamestate::update_player_state() {
 
 void gamestate::update_npcs_state() {
     minfo2("BEGIN update_npcs_state");
-    [[maybe_unused]] auto df = d.get_current_floor();
-    minfo2("begin loop");
-    auto view = registry.view<ActorKind, LegacyEntityId>();
+    auto view = registry.view<LegacyEntityId, NpcTag>();
     for (auto entity : view) {
         entityid id = view.get<LegacyEntityId>(entity).id;
-        auto type = ct.get<entitytype>(id).value_or(entitytype_t::NONE);
-        if (type == entitytype_t::NPC) {
-            ct.set<damaged>(id, false);
-            update_npc_behavior(id);
-        }
+        ct.set<damaged>(id, false);
+        update_npc_behavior(id);
     }
 }
 

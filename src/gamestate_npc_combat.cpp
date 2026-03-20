@@ -563,19 +563,15 @@ void gamestate::handle_npcs() {
             }
         }
 #else
-        [[maybe_unused]] auto df = d.get_current_floor();
-        auto view = registry.view<ActorKind, LegacyEntityId>();
+        auto view = registry.view<LegacyEntityId, NpcTag>();
         for (auto entity : view) {
             entityid id = view.get<LegacyEntityId>(entity).id;
-            auto type = ct.get<entitytype>(id).value_or(entitytype_t::NONE);
-            if (type == entitytype_t::NPC) {
-                const bool result = handle_npc(id);
-                if (result) {
-                    msuccess2("npc %d handled successfully", id);
-                }
-                else {
-                    merror2("npc %d handle failed", id);
-                }
+            const bool result = handle_npc(id);
+            if (result) {
+                msuccess2("npc %d handled successfully", id);
+            }
+            else {
+                merror2("npc %d handle failed", id);
             }
         }
         flag = gamestate_flag_t::NPC_ANIM;

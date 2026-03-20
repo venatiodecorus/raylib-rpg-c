@@ -326,6 +326,39 @@ public:
         return lookup_registry_entity(id) != entt::null;
     }
 
+    void sync_entt_entity_type_tags(entityid id, entitytype_t type) {
+        const entt::entity e = ensure_registry_entity(id);
+        registry.emplace_or_replace<EntityTypeTag>(e, EntityTypeTag{type});
+        if (type == entitytype_t::NPC) {
+            registry.emplace_or_replace<NpcTag>(e, NpcTag{});
+        } else if (registry.any_of<NpcTag>(e)) {
+            registry.remove<NpcTag>(e);
+        }
+    }
+
+    void for_entities_of_type(entitytype_t type, std::function<void(entityid)> fn) {
+        auto view = registry.view<LegacyEntityId, EntityTypeTag>();
+        for (auto entity : view) {
+            if (view.get<EntityTypeTag>(entity).type == type) {
+                fn(view.get<LegacyEntityId>(entity).id);
+            }
+        }
+    }
+
+    size_t count_entities_of_type(entitytype_t type) {
+        size_t count = 0;
+        for_entities_of_type(type, [&count](entityid) { ++count; });
+        return count;
+    }
+
+    entityid find_first_entity_of_type(entitytype_t type) {
+        entityid result = ENTITYID_INVALID;
+        for_entities_of_type(type, [&result](entityid id) {
+            if (result == ENTITYID_INVALID) result = id;
+        });
+        return result;
+    }
+
     void attach_static_world_definition(entityid id, const StaticWorldDefinition& definition) {
         const entt::entity registry_entity = ensure_registry_entity(id);
         registry.emplace_or_replace<DefinitionRef>(registry_entity, DefinitionRef{definition.id});

@@ -52,6 +52,7 @@ void mirror_potion_item(gamestate& g, entityid id, potiontype_t type) {
 entityid gamestate::create_weapon_with(with_fun weaponInitFunction) {
     entityid id = add_entity();
     ct.set<entitytype>(id, entitytype_t::ITEM);
+    sync_entt_entity_type_tags(id, entitytype_t::ITEM);
     ct.set<itemtype>(id, itemtype_t::WEAPON);
     ct.set<spritemove>(id, Rectangle{0, 0, 0, 0});
     ct.set<update>(id, true);
@@ -219,6 +220,7 @@ entityid gamestate::create_weapon_at_random_loc_with(CT& ct, with_fun weaponInit
 entityid gamestate::create_shield_with(ComponentTable& ct, with_fun shieldInitFunction) {
     entityid id = add_entity();
     ct.set<entitytype>(id, entitytype_t::ITEM);
+    sync_entt_entity_type_tags(id, entitytype_t::ITEM);
     ct.set<itemtype>(id, itemtype_t::SHIELD);
     ct.set<durability>(id, 100);
     ct.set<max_durability>(id, 100);
@@ -246,6 +248,7 @@ entityid gamestate::create_shield_at_with(ComponentTable& ct, vec3 loc, with_fun
 entityid gamestate::create_potion_with(with_fun potionInitFunction) {
     entityid id = add_entity();
     ct.set<entitytype>(id, entitytype_t::ITEM);
+    sync_entt_entity_type_tags(id, entitytype_t::ITEM);
     ct.set<itemtype>(id, itemtype_t::POTION);
     ct.set<update>(id, true);
     potionInitFunction(ct, id);
@@ -333,6 +336,7 @@ void gamestate::set_npc_starting_stats(entityid id) {
 
 void gamestate::set_npc_defaults(entityid id) {
     ct.set<entitytype>(id, entitytype_t::NPC);
+    sync_entt_entity_type_tags(id, entitytype_t::NPC);
     ct.set<spritemove>(id, Rectangle{0, 0, 0, 0});
     ct.set<dead>(id, false);
     ct.set<update>(id, true);
@@ -484,6 +488,7 @@ entityid gamestate::create_player_at_with(vec3 loc, string n, with_fun playerIni
     constexpr int hear_dist = 3;
     set_hero_id(id);
     ct.set<entitytype>(id, entitytype_t::PLAYER);
+    sync_entt_entity_type_tags(id, entitytype_t::PLAYER);
 
     auto df = d.get_floor(loc.z);
     tile_t& tile = df->tile_at(loc);
@@ -503,6 +508,7 @@ entityid gamestate::create_box_with() {
     entityid id = add_entity();
     const StaticWorldDefinition& definition = get_static_world_definition(entitytype_t::BOX);
     ct.set<entitytype>(id, entitytype_t::BOX);
+    sync_entt_entity_type_tags(id, entitytype_t::BOX);
     ct.set<spritemove>(id, Rectangle{0, 0, 0, 0});
     ct.set<update>(id, true);
     ct.set<pushable>(id, definition.pushable);
