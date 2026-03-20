@@ -125,7 +125,7 @@ These must be addressed first because everything else depends on them.
 
 ## P3 — Performance
 
-- [ ] **Optimize entity iteration**
+- [x] **Optimize entity iteration**
   - `gamestate_lifecycle_impl.h:118-124` and `gamestate_npc_combat_impl.h:549-578`
     do `for (id = 0; id < next_entityid; id++)` scanning ALL entities to find
     NPCs. Maintain per-type entity lists or use archetype iteration.
