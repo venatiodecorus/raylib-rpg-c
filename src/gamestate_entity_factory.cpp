@@ -65,7 +65,7 @@ with_fun gamestate::dagger_init() {
         ct.set<name>(id, "dagger");
         ct.set<description>(id, "Stabby stabby.");
         ct.set<weapontype>(id, weapontype_t::DAGGER);
-        ct.set<damage>(id, (vec3){1, 4, 0});
+        ct.set<damage>(id, vec3{1, 4, 0});
         ct.set<durability>(id, 100);
         ct.set<max_durability>(id, 100);
         ct.set<rarity>(id, rarity_t::COMMON);
@@ -77,7 +77,7 @@ with_fun gamestate::axe_init() {
         ct.set<name>(id, "axe");
         ct.set<description>(id, "Choppy choppy");
         ct.set<weapontype>(id, weapontype_t::AXE);
-        ct.set<damage>(id, (vec3){1, 8, 0});
+        ct.set<damage>(id, vec3{1, 8, 0});
         ct.set<durability>(id, 100);
         ct.set<max_durability>(id, 100);
         ct.set<rarity>(id, rarity_t::COMMON);
@@ -114,7 +114,7 @@ with_fun gamestate::potion_init(potiontype_t pt) {
         if (pt == potiontype_t::HP_SMALL) {
             ct.set<name>(id, "small healing potion");
             ct.set<description>(id, "a small healing potion");
-            ct.set<healing>(id, (vec3){1, 6, 0});
+            ct.set<healing>(id, vec3{1, 6, 0});
         }
     };
 }
@@ -127,7 +127,7 @@ with_fun gamestate::player_init(int maxhp_roll) {
         ct.set<intelligence>(id, chara_creation.intelligence);
         ct.set<wisdom>(id, chara_creation.wisdom);
         ct.set<charisma>(id, chara_creation.charisma);
-        ct.set<hd>(id, (vec3){1, chara_creation.hitdie, 0});
+        ct.set<hd>(id, vec3{1, chara_creation.hitdie, 0});
         ct.set<hp>(id, vec2{maxhp_roll, maxhp_roll});
         ct.set<alignment>(id, chara_creation.alignment);
     };
@@ -503,7 +503,7 @@ entityid gamestate::create_box_with() {
     entityid id = add_entity();
     const StaticWorldDefinition& definition = get_static_world_definition(entitytype_t::BOX);
     ct.set<entitytype>(id, entitytype_t::BOX);
-    ct.set<spritemove>(id, (Rectangle){0, 0, 0, 0});
+    ct.set<spritemove>(id, Rectangle{0, 0, 0, 0});
     ct.set<update>(id, true);
     ct.set<pushable>(id, definition.pushable);
     ct.set<pullable>(id, definition.pullable);

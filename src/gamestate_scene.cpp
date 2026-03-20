@@ -116,6 +116,9 @@ void gamestate::handle_input_character_creation_scene(inputstate& is) {
         massert(hero_id != ENTITYID_INVALID, "heroid is invalid");
         make_all_npcs_target_player();
         current_scene = scene_t::GAMEPLAY;
+        dirty_entities = true;
+        new_entityid_begin = 0;
+        new_entityid_end = next_entityid;
         if (!keyboard_profile_confirmed) {
             open_keyboard_profile_prompt();
         }
@@ -123,12 +126,12 @@ void gamestate::handle_input_character_creation_scene(inputstate& is) {
     }
     else if (inputstate_is_pressed(is, KEY_SPACE)) {
         audio.queue("sfx/Minifantasy_Dungeon_SFX/02_chest_close_1.wav");
-        chara_creation.strength = do_roll_best_of_3((vec3){3, 6, 0});
-        chara_creation.dexterity = do_roll_best_of_3((vec3){3, 6, 0});
-        chara_creation.intelligence = do_roll_best_of_3((vec3){3, 6, 0});
-        chara_creation.wisdom = do_roll_best_of_3((vec3){3, 6, 0});
-        chara_creation.constitution = do_roll_best_of_3((vec3){3, 6, 0});
-        chara_creation.charisma = do_roll_best_of_3((vec3){3, 6, 0});
+        chara_creation.strength = do_roll_best_of_3(vec3{3, 6, 0});
+        chara_creation.dexterity = do_roll_best_of_3(vec3{3, 6, 0});
+        chara_creation.intelligence = do_roll_best_of_3(vec3{3, 6, 0});
+        chara_creation.wisdom = do_roll_best_of_3(vec3{3, 6, 0});
+        chara_creation.constitution = do_roll_best_of_3(vec3{3, 6, 0});
+        chara_creation.charisma = do_roll_best_of_3(vec3{3, 6, 0});
         changed = true;
     }
     else if (inputstate_is_pressed(is, KEY_LEFT)) {

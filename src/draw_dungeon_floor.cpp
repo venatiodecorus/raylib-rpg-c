@@ -23,11 +23,11 @@ bool libdraw_draw_player_target_box(gamestate& g, rpg::Renderer& renderer) {
     if (g.player_changing_dir) {
         a = 0.9f;
     }
-    float time = (float)GetTime();
+    float time = static_cast<float>(GetTime());
     SetShaderValue(renderer.shaders[1], GetShaderLocation(renderer.shaders[1], "time"), &time, SHADER_UNIFORM_FLOAT);
     SetShaderValue(renderer.shaders[1], GetShaderLocation(renderer.shaders[1], "alpha"), &a, SHADER_UNIFORM_FLOAT);
     BeginShaderMode(renderer.shaders[1]);
-    DrawRectangleLinesEx((Rectangle){x * w, y * h, w, h}, 1, Fade(GREEN, a));
+    DrawRectangleLinesEx(Rectangle{x * w + DEFAULT_OFFSET, y * h + DEFAULT_OFFSET, w, h}, 1, Fade(GREEN, a));
     EndShaderMode();
     return true;
 }
@@ -36,36 +36,27 @@ constexpr int manhattan_distance(vec3 a, vec3 b) {
     return abs(a.x - b.x) + abs(a.y - b.y);
 }
 
-bool draw_dungeon_floor_tile(gamestate& g, rpg::Renderer& renderer, int x, int y, int z, int light_dist, vec3 hero_loc, int distance) {
-    (void)light_dist;
-    (void)hero_loc;
-    (void)distance;
+bool draw_dungeon_floor_tile(gamestate& g, rpg::Renderer& renderer, int x, int y, int z, [[maybe_unused]] int light_dist, [[maybe_unused]] vec3 hero_loc, [[maybe_unused]] int distance) {
     massert(z >= 0 && static_cast<size_t>(z) < g.d.get_floor_count(), "z is oob");
     const float px = x * DEFAULT_TILE_SIZE + DEFAULT_OFFSET;
     const float py = y * DEFAULT_TILE_SIZE + DEFAULT_OFFSET;
-    const Rectangle src = {0, 0, DEFAULT_TILE_SIZE_SCALED, DEFAULT_TILE_SIZE_SCALED};
-    const Rectangle dest = {px, py, DEFAULT_TILE_SIZE_FLOAT, DEFAULT_TILE_SIZE_FLOAT};
+    constexpr float ts = static_cast<float>(DEFAULT_TILE_SIZE);
+    const Rectangle dest = {px, py, ts, ts};
     auto df = g.d.get_floor(z);
     massert(df, "dungeon_floor is NULL");
     massert(x >= 0 && x < df->get_width(), "x is oob");
     massert(y >= 0 && y < df->get_height(), "y is oob");
     massert(!vec3_invalid(vec3{x, y, z}), "loc is invalid");
     tile_t& tile = df->tile_at(vec3{x, y, z});
-    const bool full_light = df->get_full_light();
     if (tile.get_type() == tiletype_t::NONE) {
-        return true;
-    }
-    if (!full_light && !tile.get_explored()) {
         return true;
     }
     const int txkey = get_txkey_for_tiletype(tile.get_type());
     massert(txkey >= 0, "txkey is invalid");
     const Texture2D* texture = &renderer.txinfo[txkey].texture;
     massert(texture->id > 0, "texture->id is <= 0");
-    const bool tile_visible = full_light || tile.get_visible();
-    const unsigned char a = tile_visible ? 255 : 102;
-    const Color draw_color = Color{255, 255, 255, a};
-    DrawTexturePro(*texture, src, dest, Vector2{0, 0}, 0, draw_color);
+    const Rectangle src = {0, 0, static_cast<float>(texture->width), static_cast<float>(texture->height)};
+    DrawTexturePro(*texture, src, dest, Vector2{0, 0}, 0, WHITE);
     return true;
 }
 
@@ -74,7 +65,7 @@ void draw_dungeon_floor_pressure_plates(gamestate& g, rpg::Renderer& renderer, i
     const int z = g.d.current_floor;
     const vec3 hero_loc = g.ct.get<location>(g.hero_id).value_or(vec3{-1, -1, -1});
     const bool full_light = df->get_full_light();
-    const Rectangle src = {0, 0, DEFAULT_TILE_SIZE_SCALED, DEFAULT_TILE_SIZE_SCALED};
+    constexpr float ts = static_cast<float>(DEFAULT_TILE_SIZE);
 
     for (const floor_pressure_plate_t& plate : g.floor_pressure_plates) {
         if (plate.destroyed || plate.loc.z != z) {
@@ -96,34 +87,22 @@ void draw_dungeon_floor_pressure_plates(gamestate& g, rpg::Renderer& renderer, i
         const Texture2D* texture = &renderer.txinfo[txkey].texture;
         massert(texture->id > 0, "pressure plate texture->id is <= 0");
 
+        const Rectangle src = {0, 0, static_cast<float>(texture->width), static_cast<float>(texture->height)};
         const float px = plate.loc.x * DEFAULT_TILE_SIZE + DEFAULT_OFFSET;
         const float py = plate.loc.y * DEFAULT_TILE_SIZE + DEFAULT_OFFSET;
-        const Rectangle dest = {px, py, DEFAULT_TILE_SIZE_FLOAT, DEFAULT_TILE_SIZE_FLOAT};
+        const Rectangle dest = {px, py, ts, ts};
         DrawTexturePro(*texture, src, dest, Vector2{0, 0}, 0, WHITE);
     }
 }
 
-void draw_dungeon_floor_entitytype(gamestate& g, rpg::Renderer& renderer, entitytype_t type_0, int vision_dist, int light_rad, const std::function<bool(gamestate&, entityid)>& extra_check) {
-    (void)vision_dist;
+void draw_dungeon_floor_entitytype(gamestate& g, rpg::Renderer& renderer, entitytype_t type_0, [[maybe_unused]] int vision_dist, [[maybe_unused]] int light_rad, const std::function<bool(gamestate&, entityid)>& extra_check) {
     auto df = g.d.get_current_floor();
-    auto hero_loc = g.ct.get<location>(g.hero_id).value_or(vec3{-1, -1, -1});
-    const bool full_light = df->get_full_light();
-    const int min_x = full_light ? 0 : std::max(0, hero_loc.x - light_rad);
-    const int max_x = full_light ? df->get_width() - 1 : std::min(df->get_width() - 1, hero_loc.x + light_rad);
-    const int min_y = full_light ? 0 : std::max(0, hero_loc.y - light_rad);
-    const int max_y = full_light ? df->get_height() - 1 : std::min(df->get_height() - 1, hero_loc.y + light_rad);
-    for (int y = min_y; y <= max_y; y++) {
-        for (int x = min_x; x <= max_x; x++) {
-            if (!full_light && abs(x - hero_loc.x) + abs(y - hero_loc.y) > light_rad) {
-                continue;
-            }
+    for (int y = 0; y < df->get_height(); y++) {
+        for (int x = 0; x < df->get_width(); x++) {
             const vec3 loc = {x, y, g.d.current_floor};
             tile_t& tile = df->tile_at(loc);
             auto tiletype = tile.get_type();
             if (tiletype_is_none(tiletype) || tiletype_is_wall(tiletype)) {
-                continue;
-            }
-            if (!full_light && (!tile.get_visible() || !tile.get_explored())) {
                 continue;
             }
             if (tile.entity_count() == 0) {
@@ -215,13 +194,9 @@ bool draw_dungeon_floor(gamestate& g, rpg::Renderer& renderer, int vision_dist, 
         return false;
     };
 
-    draw_dungeon_floor_entitytype(g, renderer, entitytype_t::DOOR, vision_dist, light_rad, mydefault);
-    draw_dungeon_floor_entitytype(g, renderer, entitytype_t::PROP, vision_dist, light_rad, mydefault);
-    draw_dungeon_floor_entitytype(g, renderer, entitytype_t::CHEST, vision_dist, light_rad, mydefault);
+    // TODO: re-enable DOOR, PROP, CHEST, ITEM, BOX drawing when proper sprites are mapped
     libdraw_draw_player_target_box(g, renderer);
-    draw_dungeon_floor_entitytype(g, renderer, entitytype_t::ITEM, vision_dist, light_rad, mydefault);
     draw_dungeon_floor_entitytype(g, renderer, entitytype_t::NPC, vision_dist, light_rad, dead_check);
-    draw_dungeon_floor_entitytype(g, renderer, entitytype_t::BOX, vision_dist, light_rad, mydefault);
     draw_dungeon_floor_entitytype(g, renderer, entitytype_t::NPC, vision_dist, light_rad, alive_check);
     draw_dungeon_floor_entitytype(g, renderer, entitytype_t::PLAYER, vision_dist, light_rad, mydefault);
     return true;

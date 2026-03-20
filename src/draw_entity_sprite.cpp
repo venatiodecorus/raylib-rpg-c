@@ -7,8 +7,7 @@
 #include "get_weapon_sprite.h"
 #include "libdraw_context.h"
 
-void draw_entity_sprite(gamestate& g, spritegroup* sg) {
-    (void)g;
+void draw_entity_sprite([[maybe_unused]] gamestate& g, spritegroup* sg) {
     massert(sg, "spritegroup is NULL");
     Rectangle dest = {sg->dest.x, sg->dest.y, sg->dest.width, sg->dest.height};
     massert(dest.width > 0, "dest.width is 0");

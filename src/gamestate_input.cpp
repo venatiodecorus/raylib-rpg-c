@@ -369,17 +369,8 @@ bool gamestate::handle_cycle_messages_test() {
     return true;
 }
 
-void gamestate::handle_camera_zoom(inputstate& is) {
-    if (is_action_pressed(is, gameplay_input_action_t::ZOOM_IN)) {
-        minfo("camera zoom in");
-        cam2d.zoom += DEFAULT_ZOOM_INCR;
-        frame_dirty = true;
-    }
-    else if (is_action_pressed(is, gameplay_input_action_t::ZOOM_OUT)) {
-        minfo("camera zoom out");
-        cam2d.zoom -= (cam2d.zoom > 1.0) * DEFAULT_ZOOM_INCR;
-        frame_dirty = true;
-    }
+void gamestate::handle_camera_zoom([[maybe_unused]] inputstate& is) {
+    // Zoom disabled — rendering at fixed DEFAULT_ZOOM_LEVEL for uniform scaling
 }
 
 void gamestate::change_player_dir(direction_t dir) {

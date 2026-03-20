@@ -7,7 +7,7 @@
 #include <cstdio>
 #include <memory>
 #include <raylib.h>
-#include <stdint.h>
+#include <cstdint>
 
 /// @brief Maximum number of Raylib key codes tracked by the bitset input cache.
 #define MAX_KEYS 400

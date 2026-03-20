@@ -3,15 +3,15 @@
  */
 
 #pragma once
-#include <stdio.h>
-#include <stdlib.h>
+#include <cstdio>
+#include <cstdlib>
 
 // Cross-platform debug break
 #if defined(_WIN32)
 #include <windows.h>
 #define DEBUG_BREAK() DebugBreak()
 #elif defined(__linux__) || defined(__APPLE__)
-#include <signal.h>
+#include <csignal>
 #define DEBUG_BREAK() raise(SIGTRAP)
 #else
 #define DEBUG_BREAK() ((void)0)

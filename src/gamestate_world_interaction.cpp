@@ -20,7 +20,7 @@ static string interaction_door_text(const string& base_text, bool is_open) {
 entityid gamestate::tile_has_pullable(int x, int y, int z) {
     minfo("tile_has_pullable(%d, %d, %d)", x, y, z);
     massert(z >= 0, "floor is out of bounds");
-    massert((size_t)z < d.floors.size(), "floor is out of bounds");
+    massert(static_cast<size_t>(z) < d.floors.size(), "floor is out of bounds");
     shared_ptr<dungeon_floor> df = d.get_floor(z);
     tile_t& t = df->tile_at(vec3{x, y, z});
     entityid box_id = t.get_cached_box();
@@ -56,7 +56,7 @@ entityid gamestate::tile_has_pullable(int x, int y, int z) {
 
 bool gamestate::tile_has_solid(int x, int y, int z) {
     massert(z >= 0, "floor is out of bounds");
-    massert((size_t)z < d.floors.size(), "floor is out of bounds");
+    massert(static_cast<size_t>(z) < d.floors.size(), "floor is out of bounds");
     shared_ptr<dungeon_floor> df = d.get_floor(z);
     tile_t& t = df->tile_at(vec3{x, y, z});
 
@@ -116,7 +116,7 @@ bool gamestate::try_entity_push(entityid id, vec3 v) {
 
 entityid gamestate::tile_has_pushable(int x, int y, int z) {
     massert(z >= 0, "floor is out of bounds");
-    massert((size_t)z < d.floors.size(), "floor is out of bounds");
+    massert(static_cast<size_t>(z) < d.floors.size(), "floor is out of bounds");
     shared_ptr<dungeon_floor> df = d.get_floor(z);
     tile_t& t = df->tile_at(vec3{x, y, z});
 
@@ -795,7 +795,7 @@ bool gamestate::try_entity_move(entityid id, vec3 v) {
     ct.set<update>(id, true);
     massert(ct.has<location>(id), "id %d has no location", id);
 
-    vec3 loc = ct.get<location>(id).value_or((vec3){-1, -1, -1});
+    vec3 loc = ct.get<location>(id).value_or(vec3{-1, -1, -1});
     massert(!vec3_invalid(loc), "id %d location invalid", id);
     vec3 aloc = {loc.x + v.x, loc.y + v.y, loc.z};
 
@@ -863,7 +863,7 @@ bool gamestate::try_entity_move(entityid id, vec3 v) {
     sync_registry_grid_position(id, aloc);
     float mx = v.x * DEFAULT_TILE_SIZE;
     float my = v.y * DEFAULT_TILE_SIZE;
-    ct.set<spritemove>(id, (Rectangle){mx, my, 0, 0});
+    ct.set<spritemove>(id, Rectangle{mx, my, 0, 0});
     if (check_hearing(hero_id, aloc)) {
         audio.queue("sfx/Minifantasy_Dungeon_SFX/16_human_walk_stone_1.wav");
     }
@@ -880,7 +880,7 @@ bool gamestate::handle_move_up(inputstate& is, bool is_dead) {
         if (is_dead) {
             return messages.add("You cannot move while dead");
         }
-        run_move_action(hero_id, (vec3){0, -1, 0});
+        run_move_action(hero_id, vec3{0, -1, 0});
         flag = gamestate_flag_t::PLAYER_ANIM;
         return true;
     }
@@ -892,7 +892,7 @@ bool gamestate::handle_move_down(inputstate& is, bool is_dead) {
         if (is_dead) {
             return messages.add("You cannot move while dead");
         }
-        run_move_action(hero_id, (vec3){0, 1, 0});
+        run_move_action(hero_id, vec3{0, 1, 0});
         flag = gamestate_flag_t::PLAYER_ANIM;
         return true;
     }
@@ -904,7 +904,7 @@ bool gamestate::handle_move_left(inputstate& is, bool is_dead) {
         if (is_dead) {
             return messages.add("You cannot move while dead");
         }
-        run_move_action(hero_id, (vec3){-1, 0, 0});
+        run_move_action(hero_id, vec3{-1, 0, 0});
         flag = gamestate_flag_t::PLAYER_ANIM;
         return true;
     }
@@ -916,7 +916,7 @@ bool gamestate::handle_move_right(inputstate& is, bool is_dead) {
         if (is_dead) {
             return messages.add("You cannot move while dead");
         }
-        run_move_action(hero_id, (vec3){1, 0, 0});
+        run_move_action(hero_id, vec3{1, 0, 0});
         flag = gamestate_flag_t::PLAYER_ANIM;
         return true;
     }
@@ -928,7 +928,7 @@ bool gamestate::handle_move_up_left(inputstate& is, bool is_dead) {
         if (is_dead) {
             return messages.add("You cannot move while dead");
         }
-        run_move_action(hero_id, (vec3){-1, -1, 0});
+        run_move_action(hero_id, vec3{-1, -1, 0});
         flag = gamestate_flag_t::PLAYER_ANIM;
         return true;
     }
@@ -941,7 +941,7 @@ bool gamestate::handle_move_up_right(inputstate& is, bool is_dead) {
             messages.add("You cannot move while dead");
             return true;
         }
-        run_move_action(hero_id, (vec3){1, -1, 0});
+        run_move_action(hero_id, vec3{1, -1, 0});
         flag = gamestate_flag_t::PLAYER_ANIM;
         return true;
     }
@@ -953,7 +953,7 @@ bool gamestate::handle_move_down_left(inputstate& is, bool is_dead) {
         if (is_dead) {
             return messages.add("You cannot move while dead");
         }
-        run_move_action(hero_id, (vec3){-1, 1, 0});
+        run_move_action(hero_id, vec3{-1, 1, 0});
         flag = gamestate_flag_t::PLAYER_ANIM;
         return true;
     }
@@ -965,7 +965,7 @@ bool gamestate::handle_move_down_right(inputstate& is, bool is_dead) {
         if (is_dead) {
             return messages.add("You cannot move while dead");
         }
-        run_move_action(hero_id, (vec3){1, 1, 0});
+        run_move_action(hero_id, vec3{1, 1, 0});
         flag = gamestate_flag_t::PLAYER_ANIM;
         return true;
     }
@@ -1103,7 +1103,7 @@ bool gamestate::try_entity_pull(entityid id) {
     sync_registry_grid_position(id, aloc);
     float mx = v.x * DEFAULT_TILE_SIZE;
     float my = v.y * DEFAULT_TILE_SIZE;
-    ct.set<spritemove>(id, (Rectangle){mx, my, 0, 0});
+    ct.set<spritemove>(id, Rectangle{mx, my, 0, 0});
     if (check_hearing(hero_id, aloc)) {
         audio.queue("sfx/Minifantasy_Dungeon_SFX/16_human_walk_stone_1.wav");
     }
@@ -1192,7 +1192,7 @@ bool gamestate::try_entity_stairs(entityid id) {
         }
     }
     else if (t.get_type() == tiletype_t::DOWNSTAIRS) {
-        if ((size_t)current_floor < d.floors.size() - 1) {
+        if (static_cast<size_t>(current_floor) < d.floors.size() - 1) {
             df->df_remove_at(hero_id, loc);
             d.current_floor++;
             int new_floor = d.current_floor;

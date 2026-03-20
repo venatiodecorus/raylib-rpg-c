@@ -116,8 +116,7 @@ bool gamestate::update_player_state() {
 
 void gamestate::update_npcs_state() {
     minfo2("BEGIN update_npcs_state");
-    auto df = d.get_current_floor();
-    (void)df;
+    [[maybe_unused]] auto df = d.get_current_floor();
     minfo2("begin loop");
     auto view = registry.view<ActorKind, LegacyEntityId>();
     for (auto entity : view) {

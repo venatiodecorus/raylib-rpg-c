@@ -22,12 +22,10 @@ void draw_title_screen_to_texture(gamestate& g, rpg::Renderer& renderer, bool sh
     EndTextureMode();
 }
 
-void draw_title_screen_from_texture(gamestate& g, rpg::Renderer& renderer) {
-    (void)g;
+void draw_title_screen_from_texture([[maybe_unused]] gamestate& g, rpg::Renderer& renderer) {
     DrawTexturePro(renderer.title_target_texture.texture, renderer.target_src, renderer.target_dest, Vector2{0, 0}, 0.0f, WHITE);
 }
 
-void draw_char_creation_from_texture(gamestate& g, rpg::Renderer& renderer) {
-    (void)g;
+void draw_char_creation_from_texture([[maybe_unused]] gamestate& g, rpg::Renderer& renderer) {
     DrawTexturePro(renderer.char_creation_target_texture.texture, renderer.target_src, renderer.target_dest, Vector2{0, 0}, 0.0f, WHITE);
 }

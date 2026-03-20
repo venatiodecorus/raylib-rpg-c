@@ -83,6 +83,8 @@ struct texture_def {
 #define GFX_ZOMBIE     GFX_CREATURES "Undead/Zombie/"
 #define GFX_ZOMBIE_SH  GFX_ZOMBIE "_Shadows/"
 
+#define GFX_DUNGEON_TS "gfx/Minifantasy_Dungeon_v2.3_Free_Version/Minifantasy_Dungeon_Assets/Tileset/Tileset.png"
+
 /* ------------------------------------------------------------------ */
 /*  Master texture definitions array                                   */
 /* ------------------------------------------------------------------ */
@@ -107,14 +109,14 @@ static const texture_def TEXTURE_DEFS[TEXTURE_DEF_COUNT] = {
     TX_PLACEHOLDER(TX_TILES_STONE_GRASS_08,          1, 1),  //   5
     TX_PLACEHOLDER(TX_TILES_GRASS_12,                1, 1),  //   6
     TX_PLACEHOLDER(TX_TILES_TOWN_DIRT_00,            1, 1),  //   7
-    TX_PLACEHOLDER(TX_TILES_UPSTAIRS_00,             1, 1),  //   8
-    TX_PLACEHOLDER(TX_TILES_STONE_10,                1, 1),  //   9
+    TX_TILEMAP(TX_TILES_UPSTAIRS_00,             1, 1, GFX_DUNGEON_TS, 136, 40, 8, 8),  //   8
+    TX_TILEMAP(TX_TILES_STONE_10,                1, 1, GFX_DUNGEON_TS, 136, 24, 8, 8),  //   9
     TX_PLACEHOLDER(TX_TILES_STONE_GRASS_06,          1, 1),  //  10
     TX_PLACEHOLDER(TX_TILES_DIRT_GRASS_11,           1, 1),  //  11
     TX_PLACEHOLDER(TX_TILES_STONE_GRASS_01,          1, 1),  //  12
     TX_PLACEHOLDER(TX_TILES_STONE_DIRT_DL_05,        1, 1),  //  13
     TX_PLACEHOLDER(TX_TILES_TOWN_DIRT_STONE_11,      1, 1),  //  14
-    TX_PLACEHOLDER(TX_TILES_STONE_TRAP_ON_00,        1, 1),  //  15
+    TX_TILEMAP(TX_TILES_STONE_TRAP_ON_00,        1, 1, GFX_DUNGEON_TS, 104, 88, 8, 8),  //  15
     TX_PLACEHOLDER(TX_TILES_STONE_DIRT_DR_03,        1, 1),  //  16
     TX_PLACEHOLDER(TX_TILES_TOWN_DIRT_GRASS_13,      1, 1),  //  17
     TX_PLACEHOLDER(TX_TILES_STONE_DIRT_L_02,         1, 1),  //  18
@@ -134,11 +136,11 @@ static const texture_def TEXTURE_DEFS[TEXTURE_DEF_COUNT] = {
     TX_PLACEHOLDER(TX_TILES_STONE_DIRT_UR_02,        1, 1),  //  32
     TX_PLACEHOLDER(TX_TILES_TOWN_DIRT_GRASS_05,      1, 1),  //  33
     TX_PLACEHOLDER(TX_TILES_TOWN_DIRT_STONE_07,      1, 1),  //  34
-    TX_PLACEHOLDER(TX_TILES_DOWNSTAIRS_00,           1, 1),  //  35
+    TX_TILEMAP(TX_TILES_DOWNSTAIRS_00,           1, 1, GFX_DUNGEON_TS, 136, 40, 8, 8),  //  35
     TX_PLACEHOLDER(TX_TILES_TOWN_DIRT_STONE_00,      1, 1),  //  36
     TX_PLACEHOLDER(TX_TILES_TOWN_DIRT_GRASS_02,      1, 1),  //  37
-    TX_PLACEHOLDER(TX_TILES_STONE_08,                1, 1),  //  38
-    TX_PLACEHOLDER(TX_TILES_STONE_TRAP_OFF_00,       1, 1),  //  39
+    TX_TILEMAP(TX_TILES_STONE_08,                1, 1, GFX_DUNGEON_TS, 120, 24, 8, 8),  //  38
+    TX_TILEMAP(TX_TILES_STONE_TRAP_OFF_00,       1, 1, GFX_DUNGEON_TS, 144, 24, 8, 8),  //  39
     TX_PLACEHOLDER(TX_TILES_DIRT_GRASS_07,           1, 1),  //  40
     TX_PLACEHOLDER(TX_TILES_TOWN_INTERIOR_FLOOR_01,  1, 1),  //  41
     TX_PLACEHOLDER(TX_TILES_STONE_DIRT_D_00,         1, 1),  //  42
@@ -146,8 +148,8 @@ static const texture_def TEXTURE_DEFS[TEXTURE_DEF_COUNT] = {
     TX_PLACEHOLDER(TX_TILES_DIRT_GRASS_00,           1, 1),  //  44
     TX_PLACEHOLDER(TX_TILES_STONE_DIRT_C_02,         1, 1),  //  45
     TX_PLACEHOLDER(TX_TILES_GRASS_03,                1, 1),  //  46
-    TX_PLACEHOLDER(TX_TILES_STONE_01,                1, 1),  //  47
-    TX_PLACEHOLDER(TX_TILES_STONE_06,                1, 1),  //  48
+    TX_TILEMAP(TX_TILES_STONE_01,                1, 1, GFX_DUNGEON_TS, 112, 16, 8, 8),  //  47
+    TX_TILEMAP(TX_TILES_STONE_06,                1, 1, GFX_DUNGEON_TS, 104, 24, 8, 8),  //  48
     TX_PLACEHOLDER(TX_TILES_DIRT_GRASS_09,           1, 1),  //  49
     TX_PLACEHOLDER(TX_TILES_GRASS_04,                1, 1),  //  50
     TX_PLACEHOLDER(TX_TILES_DIRT_03,                 1, 1),  //  51
@@ -166,15 +168,15 @@ static const texture_def TEXTURE_DEFS[TEXTURE_DEF_COUNT] = {
     TX_PLACEHOLDER(TX_TILES_DIRT_GRASS_10,           1, 1),  //  64
     TX_PLACEHOLDER(TX_TILES_STONE_GRASS_09,          1, 1),  //  65
     TX_PLACEHOLDER(TX_TILES_GRASS_13,                1, 1),  //  66
-    TX_PLACEHOLDER(TX_TILES_STONE_11,                1, 1),  //  67
+    TX_TILEMAP(TX_TILES_STONE_11,                1, 1, GFX_DUNGEON_TS, 152, 16, 8, 8),  //  67
     TX_PLACEHOLDER(TX_TILES_GRASS_14,                1, 1),  //  68
-    TX_PLACEHOLDER(TX_TILES_STONE_07,                1, 1),  //  69
+    TX_TILEMAP(TX_TILES_STONE_07,                1, 1, GFX_DUNGEON_TS, 112, 24, 8, 8),  //  69
     TX_PLACEHOLDER(TX_TILES_DIRT_GRASS_08,           1, 1),  //  70
     TX_PLACEHOLDER(TX_TILES_GRASS_05,                1, 1),  //  71
     TX_PLACEHOLDER(TX_TILES_GRASS_02,                1, 1),  //  72
-    TX_PLACEHOLDER(TX_TILES_STONE_00,                1, 1),  //  73
+    TX_TILEMAP(TX_TILES_STONE_00,                1, 1, GFX_DUNGEON_TS, 104, 16, 8, 8),  //  73
     TX_PLACEHOLDER(TX_TILES_DIRT_GRASS_01,           1, 1),  //  74
-    TX_PLACEHOLDER(TX_TILES_STONE_09,                1, 1),  //  75
+    TX_TILEMAP(TX_TILES_STONE_09,                1, 1, GFX_DUNGEON_TS, 128, 24, 8, 8),  //  75
     TX_PLACEHOLDER(TX_TILES_TOWN_INTERIOR_FLOOR_00,  1, 1),  //  76
     TX_PLACEHOLDER(TX_TILES_DIRT_GRASS_06,           1, 1),  //  77
     TX_PLACEHOLDER(TX_TILES_STONE_DIRT_D_01,         1, 1),  //  78
@@ -191,9 +193,9 @@ static const texture_def TEXTURE_DEFS[TEXTURE_DEF_COUNT] = {
     TX_PLACEHOLDER(TX_TILES_STONE_DIRT_UL_02,        1, 1),  //  89
     TX_PLACEHOLDER(TX_TILES_STONE_DIRT_C_00,         1, 1),  //  90
     TX_PLACEHOLDER(TX_TILES_GRASS_01,                1, 1),  //  91
-    TX_PLACEHOLDER(TX_TILES_STONE_03,                1, 1),  //  92
-    TX_PLACEHOLDER(TX_TILES_WALL_STONE_00,           1, 1),  //  93
-    TX_PLACEHOLDER(TX_TILES_STONE_04,                1, 1),  //  94
+    TX_TILEMAP(TX_TILES_STONE_03,                1, 1, GFX_DUNGEON_TS, 128, 16, 8, 8),  //  92
+    TX_TILEMAP(TX_TILES_WALL_STONE_00,           1, 1, GFX_DUNGEON_TS, 40, 40, 8, 8),  //  93
+    TX_TILEMAP(TX_TILES_STONE_04,                1, 1, GFX_DUNGEON_TS, 136, 16, 8, 8),  //  94
     TX_PLACEHOLDER(TX_TILES_GRASS_06,                1, 1),  //  95
     TX_PLACEHOLDER(TX_TILES_STONE_DIRT_D_02,         1, 1),  //  96
     TX_PLACEHOLDER(TX_TILES_DIRT_GRASS_05,           1, 1),  //  97
@@ -241,12 +243,12 @@ static const texture_def TEXTURE_DEFS[TEXTURE_DEF_COUNT] = {
     TX_PLACEHOLDER(TX_TILES_DIRT_GRASS_04,           1, 1),  // 139
     TX_PLACEHOLDER(TX_TILES_GRASS_09,                1, 1),  // 140
     TX_PLACEHOLDER(TX_TILES_STONE_GRASS_13,          1, 1),  // 141
-    TX_PLACEHOLDER(TX_TILES_STONE_05,                1, 1),  // 142
+    TX_TILEMAP(TX_TILES_STONE_05,                1, 1, GFX_DUNGEON_TS, 144, 16, 8, 8),  // 142
     TX_PLACEHOLDER(TX_TILES_GRASS_07,                1, 1),  // 143
     TX_PLACEHOLDER(TX_TILES_STONE_DIRT_C_01,         1, 1),  // 144
     TX_PLACEHOLDER(TX_TILES_GRASS_00,                1, 1),  // 145
-    TX_PLACEHOLDER(TX_TILES_STONE_02,                1, 1),  // 146
-    TX_PLACEHOLDER(TX_TILES_WALL_STONE_01,           1, 1),  // 147
+    TX_TILEMAP(TX_TILES_STONE_02,                1, 1, GFX_DUNGEON_TS, 120, 16, 8, 8),  // 146
+    TX_TILEMAP(TX_TILES_WALL_STONE_01,           1, 1, GFX_DUNGEON_TS, 48, 40, 8, 8),  // 147
     TX_PLACEHOLDER(TX_TILES_GRASS_11,                1, 1),  // 148
     TX_PLACEHOLDER(TX_TILES_GRASS_16,                1, 1),  // 149
     TX_PLACEHOLDER(TX_TILES_GRASS_18,                1, 1),  // 150
@@ -872,3 +874,4 @@ static const texture_def TEXTURE_DEFS[TEXTURE_DEF_COUNT] = {
 #undef GFX_SKELETON_SH
 #undef GFX_ZOMBIE
 #undef GFX_ZOMBIE_SH
+#undef GFX_DUNGEON_TS

@@ -13,7 +13,7 @@ void draw_window_color_menu(gamestate& g) {
     const int box_h = 220;
     const int box_x = (DEFAULT_TARGET_WIDTH - box_w) / 2;
     const int box_y = (DEFAULT_TARGET_HEIGHT - box_h) / 2;
-    const Rectangle box = {(float)box_x, (float)box_y, (float)box_w, (float)box_h};
+    const Rectangle box = {static_cast<float>(box_x), static_cast<float>(box_y), static_cast<float>(box_w), static_cast<float>(box_h)};
 
     DrawRectangleRec(box, g.ui.window_box_bgcolor);
     DrawRectangleLinesEx(box, 2.0f, g.ui.window_box_fgcolor);
@@ -39,8 +39,8 @@ void draw_window_color_menu(gamestate& g) {
         y += line_height;
     }
 
-    Rectangle preview = {(float)(box_x + box_w - 112), (float)(box_y + 60), 84.0f, 84.0f};
+    Rectangle preview = {static_cast<float>(box_x + box_w - 112), static_cast<float>(box_y + 60), 84.0f, 84.0f};
     DrawRectangleRec(preview, g.ui.window_box_bgcolor);
     DrawRectangleLinesEx(preview, 2.0f, g.ui.window_box_fgcolor);
-    DrawText("Preview", (int)preview.x + 10, (int)preview.y + 32, font_size, g.ui.window_box_fgcolor);
+    DrawText("Preview", static_cast<int>(preview.x) + 10, static_cast<int>(preview.y) + 32, font_size, g.ui.window_box_fgcolor);
 }

@@ -532,17 +532,17 @@ public:
 
     entityid tile_has_box(int x, int y, int z) const {
         massert(z >= 0, "floor is out of bounds");
-        massert((size_t)z < d.floors.size(), "floor is out of bounds");
+        massert(static_cast<size_t>(z) < d.floors.size(), "floor is out of bounds");
         auto df = d.get_floor(z);
-        const tile_t& t = df->tile_at((vec3){x, y, z});
+        const tile_t& t = df->tile_at(vec3{x, y, z});
         return t.get_cached_box();
     }
 
     entityid tile_has_chest(int x, int y, int z) const {
         massert(z >= 0, "floor is out of bounds");
-        massert((size_t)z < d.floors.size(), "floor is out of bounds");
+        massert(static_cast<size_t>(z) < d.floors.size(), "floor is out of bounds");
         auto df = d.get_floor(z);
-        const tile_t& t = df->tile_at((vec3){x, y, z});
+        const tile_t& t = df->tile_at(vec3{x, y, z});
         return t.get_cached_chest();
     }
 
@@ -1223,7 +1223,7 @@ public:
         vec3 loc = {0, 0, 0};
         inventory_count = -1;
         if (hero_id != ENTITYID_INVALID) {
-            loc = ct.get<location>(hero_id).value_or((vec3){-1, -1, -1});
+            loc = ct.get<location>(hero_id).value_or(vec3{-1, -1, -1});
         }
         // current df
         shared_ptr<dungeon_floor> df = d.get_current_floor();

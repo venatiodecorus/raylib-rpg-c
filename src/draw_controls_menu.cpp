@@ -13,7 +13,7 @@ void draw_controls_menu(gamestate& g) {
     const int box_h = visible_rows * line_height + padding * 2 + 24;
     const int box_x = (DEFAULT_TARGET_WIDTH - box_w) / 2;
     const int box_y = (DEFAULT_TARGET_HEIGHT - box_h) / 2;
-    const Rectangle box = {(float)box_x, (float)box_y, (float)box_w, (float)box_h};
+    const Rectangle box = {static_cast<float>(box_x), static_cast<float>(box_y), static_cast<float>(box_w), static_cast<float>(box_h)};
 
     DrawRectangleRec(box, g.ui.window_box_bgcolor);
     DrawRectangleLinesEx(box, 2.0f, g.ui.window_box_fgcolor);

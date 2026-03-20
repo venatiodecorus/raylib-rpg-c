@@ -230,14 +230,14 @@ public:
 
     bool tile_is_good_for_upgrade(vec3 loc) const {
         if (loc.x >= 1 && loc.y >= 1 && loc.x < width - 1 && loc.y < height - 1) {
-            const tile_t& t0 = tile_at((vec3){loc.x - 1, loc.y - 1, loc.z});
-            const tile_t& t1 = tile_at((vec3){loc.x - 1, loc.y, loc.z});
-            const tile_t& t2 = tile_at((vec3){loc.x - 1, loc.y + 1, loc.z});
-            const tile_t& t3 = tile_at((vec3){loc.x, loc.y - 1, loc.z});
-            const tile_t& t4 = tile_at((vec3){loc.x, loc.y + 1, loc.z});
-            const tile_t& t5 = tile_at((vec3){loc.x + 1, loc.y - 1, loc.z});
-            const tile_t& t6 = tile_at((vec3){loc.x + 1, loc.y, loc.z});
-            const tile_t& t7 = tile_at((vec3){loc.x + 1, loc.y + 1, loc.z});
+            const tile_t& t0 = tile_at(vec3{loc.x - 1, loc.y - 1, loc.z});
+            const tile_t& t1 = tile_at(vec3{loc.x - 1, loc.y, loc.z});
+            const tile_t& t2 = tile_at(vec3{loc.x - 1, loc.y + 1, loc.z});
+            const tile_t& t3 = tile_at(vec3{loc.x, loc.y - 1, loc.z});
+            const tile_t& t4 = tile_at(vec3{loc.x, loc.y + 1, loc.z});
+            const tile_t& t5 = tile_at(vec3{loc.x + 1, loc.y - 1, loc.z});
+            const tile_t& t6 = tile_at(vec3{loc.x + 1, loc.y, loc.z});
+            const tile_t& t7 = tile_at(vec3{loc.x + 1, loc.y + 1, loc.z});
             auto top_row_none = t0.get_type() == tiletype_t::NONE && t3.get_type() == tiletype_t::NONE && t5.get_type() == tiletype_t::NONE;
             auto bottom_row_none = t2.get_type() == tiletype_t::NONE && t4.get_type() == tiletype_t::NONE && t7.get_type() == tiletype_t::NONE;
             auto left_not_none = t1.get_type() != tiletype_t::NONE;
@@ -251,7 +251,7 @@ public:
     }
 
     void df_set_tile(tiletype_t type, int x, int y) {
-        tile_t& current = tile_at((vec3){x, y, -1});
+        tile_t& current = tile_at(vec3{x, y, -1});
         current.set_type(type);
     }
 
@@ -580,21 +580,21 @@ public:
     }
 
     int df_get_possible_upstairs_count() const {
-        return df_get_possible_upstairs_count_in_area((Rectangle){0, 0, (float)width, (float)height});
+        return df_get_possible_upstairs_count_in_area(Rectangle{0, 0, static_cast<float>(width), static_cast<float>(height)});
     }
 
     int df_get_possible_downstairs_count() const {
-        return df_get_possible_downstairs_count_in_area((Rectangle){0, 0, (float)width, (float)height});
+        return df_get_possible_downstairs_count_in_area(Rectangle{0, 0, static_cast<float>(width), static_cast<float>(height)});
     }
 
     shared_ptr<vector<vec3>> df_get_possible_upstairs_locs() const {
-        auto locs = df_get_possible_upstairs_locs_in_area((Rectangle){0, 0, (float)width, (float)height});
+        auto locs = df_get_possible_upstairs_locs_in_area(Rectangle{0, 0, static_cast<float>(width), static_cast<float>(height)});
         massert(locs, "failed to get possible upstairs locations");
         return locs;
     }
 
     shared_ptr<vector<vec3>> df_get_possible_downstairs_locs() const {
-        auto locs = df_get_possible_downstairs_locs_in_area((Rectangle){0, 0, (float)width, (float)height});
+        auto locs = df_get_possible_downstairs_locs_in_area(Rectangle{0, 0, static_cast<float>(width), static_cast<float>(height)});
         massert(locs, "failed to get possible downstairs locations");
         return locs;
     }
@@ -649,7 +649,7 @@ public:
     }
 
     void df_set_all_tiles(tiletype_t type) {
-        set_area(type, type, (Rectangle){0, 0, (float)width, (float)height});
+        set_area(type, type, Rectangle{0, 0, static_cast<float>(width), static_cast<float>(height)});
     }
 
     /**

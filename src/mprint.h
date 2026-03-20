@@ -5,7 +5,7 @@
 #pragma once
 #include <cstdio>
 // Single-line macros that clang-format won't break
-#ifdef DEBUG
+#if defined(DEBUG) && DEBUG >= 1
 #define minfo(...)    do{printf("📔\033[35;1m INFO\033[0m %s:%d: ",__FILE__,__LINE__);printf(__VA_ARGS__);printf("\n");}while(0)
 #define mwarning(...) do{printf("⚠️\033[33;1m WRN \033[0m %s:%d: ",__FILE__,__LINE__);printf(__VA_ARGS__);printf("\n");}while(0)
 #define merror(...)   do{printf("☠️\033[31;1m ERR \033[0m %s:%d: ",__FILE__,__LINE__);printf(__VA_ARGS__);printf("\n");}while(0)
@@ -17,7 +17,7 @@
 #define msuccess(...) ((void)0)
 #endif
 
-#if DEBUG == 2
+#if defined(DEBUG) && DEBUG >= 2
 #define minfo2(...)    do{printf(".📔\033[35;1m INFO\033[0m %s:%d: ",__FILE__,__LINE__);printf(__VA_ARGS__);printf("\n");}while(0)
 #define mwarning2(...) do{printf(".⚠️\033[33;1m WRN \033[0m %s:%d: ",__FILE__,__LINE__);printf(__VA_ARGS__);printf("\n");}while(0)
 #define merror2(...)   do{printf(".☠️\033[31;1m ERR \033[0m %s:%d: ",__FILE__,__LINE__);printf(__VA_ARGS__);printf("\n");}while(0)
@@ -29,8 +29,7 @@
 #define msuccess2(...) ((void)0)
 #endif
 
-
-#if DEBUG == 3
+#if defined(DEBUG) && DEBUG >= 3
 #define minfo3(...)    do{printf("..📔\033[35;1m INFO\033[0m %s:%d: ",__FILE__,__LINE__);printf(__VA_ARGS__);printf("\n");}while(0)
 #define mwarning3(...) do{printf("..⚠️\033[33;1m WRN \033[0m %s:%d: ",__FILE__,__LINE__);printf(__VA_ARGS__);printf("\n");}while(0)
 #define merror3(...)   do{printf("..☠️\033[31;1m ERR \033[0m %s:%d: ",__FILE__,__LINE__);printf(__VA_ARGS__);printf("\n");}while(0)

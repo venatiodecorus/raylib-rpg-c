@@ -15,7 +15,7 @@ constexpr static inline bool libdraw_unload_texture(textureinfo* txinfo, int txk
         return false;
     }
     UnloadTexture(txinfo[txkey].texture);
-    txinfo[txkey].texture = (Texture2D){0};
+    txinfo[txkey].texture = Texture2D{0};
     txinfo[txkey].contexts = 0;
     return true;
 }

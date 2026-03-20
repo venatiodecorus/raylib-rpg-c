@@ -75,17 +75,17 @@ constexpr static inline int get_y_from_dir(direction_t dir) {
 constexpr static inline vec3 get_loc_from_dir(direction_t dir) {
     vec3 loc = {0, 0, 0};
     switch (dir) {
-    case direction_t::UP: loc = (vec3){0, -1, 0}; break;
-    case direction_t::DOWN: loc = (vec3){0, 1, 0}; break;
-    case direction_t::LEFT: loc = (vec3){-1, 0, 0}; break;
-    case direction_t::RIGHT: loc = (vec3){1, 0, 0}; break;
-    case direction_t::UP_LEFT: loc = (vec3){-1, -1, 0}; break;
-    case direction_t::UP_RIGHT: loc = (vec3){1, -1, 0}; break;
-    case direction_t::DOWN_LEFT: loc = (vec3){-1, 1, 0}; break;
-    case direction_t::DOWN_RIGHT: loc = (vec3){1, 1, 0}; break;
+    case direction_t::UP: loc = vec3{0, -1, 0}; break;
+    case direction_t::DOWN: loc = vec3{0, 1, 0}; break;
+    case direction_t::LEFT: loc = vec3{-1, 0, 0}; break;
+    case direction_t::RIGHT: loc = vec3{1, 0, 0}; break;
+    case direction_t::UP_LEFT: loc = vec3{-1, -1, 0}; break;
+    case direction_t::UP_RIGHT: loc = vec3{1, -1, 0}; break;
+    case direction_t::DOWN_LEFT: loc = vec3{-1, 1, 0}; break;
+    case direction_t::DOWN_RIGHT: loc = vec3{1, 1, 0}; break;
     case direction_t::NONE:
     case direction_t::UNKNOWN:
-    default: loc = (vec3){-1, -1, -1}; break;
+    default: loc = vec3{-1, -1, -1}; break;
     }
     return loc;
 }

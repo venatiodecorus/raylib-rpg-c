@@ -51,8 +51,6 @@
 #include <cstring>
 #include <memory>
 
-rpg::Renderer renderer;
-
 Texture2D rpg::Renderer::load_sprite_texture(const rpg::SpriteDef& def) {
     std::string cache_key;
     switch (def.src_type) {
@@ -81,6 +79,56 @@ Texture2D rpg::Renderer::load_sprite_texture(const rpg::SpriteDef& def) {
     case rpg::TXSRC_FILE: {
         image = LoadImage(def.path.c_str());
         massert(image.data != NULL, "Failed to load sprite image: %s", def.path.c_str());
+        // Trim transparent padding from sprite sheet frames
+        if (def.frames > 0 && def.contexts > 0) {
+            int cell_w = image.width / def.frames;
+            int cell_h = image.height / def.contexts;
+            if (cell_w > 8 || cell_h > 8) {
+                // Find union content rect across ALL cells
+                int u_min_x = cell_w, u_min_y = cell_h, u_max_x = -1, u_max_y = -1;
+                for (int ctx = 0; ctx < def.contexts; ctx++) {
+                    for (int fr = 0; fr < def.frames; fr++) {
+                        for (int py = 0; py < cell_h; py++) {
+                            for (int px = 0; px < cell_w; px++) {
+                                Color c = GetImageColor(image, fr * cell_w + px, ctx * cell_h + py);
+                                if (c.a > 0) {
+                                    if (px < u_min_x) u_min_x = px;
+                                    if (py < u_min_y) u_min_y = py;
+                                    if (px > u_max_x) u_max_x = px;
+                                    if (py > u_max_y) u_max_y = py;
+                                }
+                            }
+                        }
+                    }
+                }
+                if (u_max_x >= u_min_x && u_max_y >= u_min_y) {
+                    int cw = u_max_x - u_min_x + 1;
+                    int ch = u_max_y - u_min_y + 1;
+                    Image compact = GenImageColor(cw * def.frames, ch * def.contexts, Color{0, 0, 0, 0});
+                    for (int ctx = 0; ctx < def.contexts; ctx++) {
+                        for (int fr = 0; fr < def.frames; fr++) {
+                            Rectangle src_r = {
+                                static_cast<float>(fr * cell_w + u_min_x),
+                                static_cast<float>(ctx * cell_h + u_min_y),
+                                static_cast<float>(cw), static_cast<float>(ch)
+                            };
+                            Rectangle dst_r = {
+                                static_cast<float>(fr * cw),
+                                static_cast<float>(ctx * ch),
+                                static_cast<float>(cw), static_cast<float>(ch)
+                            };
+                            Image cell = ImageFromImage(image, src_r);
+                            ImageDraw(&compact, cell,
+                                      Rectangle{0, 0, static_cast<float>(cw), static_cast<float>(ch)},
+                                      dst_r, WHITE);
+                            UnloadImage(cell);
+                        }
+                    }
+                    UnloadImage(image);
+                    image = compact;
+                }
+            }
+        }
         break;
     }
     case rpg::TXSRC_PLACEHOLDER: {
@@ -128,7 +176,7 @@ void draw_keyboard_profile_prompt(gamestate& g) {
     const int box_h = 150;
     const int box_x = (DEFAULT_TARGET_WIDTH - box_w) / 2;
     const int box_y = (DEFAULT_TARGET_HEIGHT - box_h) / 2;
-    const Rectangle box = {(float)box_x, (float)box_y, (float)box_w, (float)box_h};
+    const Rectangle box = {static_cast<float>(box_x), static_cast<float>(box_y), static_cast<float>(box_w), static_cast<float>(box_h)};
 
     DrawRectangleRec(box, g.ui.window_box_bgcolor);
     DrawRectangleLinesEx(box, 2.0f, g.ui.window_box_fgcolor);
@@ -137,7 +185,7 @@ void draw_keyboard_profile_prompt(gamestate& g) {
     DrawText("You can change this later in ` -> controls.", box_x + 16, box_y + 56, 10, g.ui.window_box_fgcolor);
 
     for (int i = 0; i < static_cast<int>(keyboard_profile_t::COUNT); i++) {
-        const bool selected = g.ui.keyboard_profile_selection == (unsigned int)i;
+        const bool selected = g.ui.keyboard_profile_selection == static_cast<unsigned int>(i);
         const int option_y = box_y + 88 + i * 18;
         const char* label = keyboard_profile_label(static_cast<keyboard_profile_t>(i));
         DrawText(selected ? TextFormat("> %s", label) : TextFormat("  %s", label), box_x + 24, option_y, 12, selected ? YELLOW : g.ui.window_box_fgcolor);
@@ -204,8 +252,7 @@ void libdraw_compose_scene_to_window_target(gamestate& g, rpg::Renderer& rendere
     EndTextureMode();
 }
 
-void libdraw_present_window_target(gamestate& g, rpg::Renderer& renderer) {
-    (void)g;
+void libdraw_present_window_target([[maybe_unused]] gamestate& g, rpg::Renderer& renderer) {
     renderer.win_dest.width = GetScreenWidth();
     renderer.win_dest.height = GetScreenHeight();
     DrawTexturePro(renderer.target.texture, renderer.target_src, renderer.win_dest, Vector2{0, 0}, 0.0f, WHITE);

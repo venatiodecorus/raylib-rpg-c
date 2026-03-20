@@ -75,7 +75,7 @@ void gamestate::handle_weapon_durability_loss(entityid atk_id, entityid tgt_id) 
     ct.set<equipped_weapon>(atk_id, ENTITYID_INVALID);
     remove_from_inventory(atk_id, equipped_wpn);
     ct.set<destroyed>(equipped_wpn, true);
-    bool event_heard = check_hearing(hero_id, ct.get<location>(tgt_id).value_or((vec3){-1, -1, -1}));
+    bool event_heard = check_hearing(hero_id, ct.get<location>(tgt_id).value_or(vec3{-1, -1, -1}));
     if (event_heard) {
         audio.queue("sfx/Minifantasy_Dungeon_SFX/26_sword_hit_1.wav");
     }
@@ -96,7 +96,7 @@ void gamestate::handle_shield_durability_loss(entityid defender, entityid attack
     ct.set<equipped_shield>(defender, ENTITYID_INVALID);
     remove_from_inventory(defender, shield);
     ct.set<destroyed>(shield, true);
-    bool event_heard = check_hearing(hero_id, ct.get<location>(defender).value_or((vec3){-1, -1, -1}));
+    bool event_heard = check_hearing(hero_id, ct.get<location>(defender).value_or(vec3{-1, -1, -1}));
     if (event_heard) {
         audio.queue("sfx/Minifantasy_Dungeon_SFX/26_sword_hit_1.wav");
     }
@@ -107,8 +107,7 @@ int gamestate::get_npc_xp(entityid id) {
     return ct.get<xp>(id).value_or(0);
 }
 
-void gamestate::update_npc_xp(entityid id, entityid target_id) {
-    (void)target_id;
+void gamestate::update_npc_xp(entityid id, [[maybe_unused]] entityid target_id) {
     int old_xp = get_npc_xp(id);
     int reward_xp = 1;
     int new_xp = old_xp + reward_xp;
@@ -139,7 +138,7 @@ void gamestate::provoke_npc(entityid npc_id, entityid source_id) {
 }
 
 void gamestate::handle_shield_block_sfx(entityid target_id) {
-    bool event_heard = check_hearing(hero_id, ct.get<location>(target_id).value_or((vec3){-1, -1, -1}));
+    bool event_heard = check_hearing(hero_id, ct.get<location>(target_id).value_or(vec3{-1, -1, -1}));
     if (event_heard) {
         audio.queue("sfx/Minifantasy_Dungeon_SFX/26_sword_hit_3.wav");
     }
@@ -294,8 +293,7 @@ void gamestate::resolve_attack_drop_inventory_event(entityid target_id) {
     drop_all_from_inventory(target_id);
 }
 
-void gamestate::resolve_attack_player_death_event(entityid target_id) {
-    (void)target_id;
+void gamestate::resolve_attack_player_death_event([[maybe_unused]] entityid target_id) {
     add_combat_player_death_message();
 }
 
@@ -350,8 +348,8 @@ bool gamestate::is_entity_adjacent(entityid id0, entityid id1) {
     massert(id0 != ENTITYID_INVALID, "id0 is invalid");
     massert(id1 != ENTITYID_INVALID, "id1 is invalid");
     massert(id0 != id1, "id0 and id1 are the same");
-    vec3 a = ct.get<location>(id0).value_or((vec3){-1, -1, -1});
-    vec3 b = ct.get<location>(id1).value_or((vec3){-1, -1, -1});
+    vec3 a = ct.get<location>(id0).value_or(vec3{-1, -1, -1});
+    vec3 b = ct.get<location>(id1).value_or(vec3{-1, -1, -1});
     if (a.z == -1 || b.z == -1 || a.z != b.z) {
         return false;
     }
@@ -565,8 +563,7 @@ void gamestate::handle_npcs() {
             }
         }
 #else
-        auto df = d.get_current_floor();
-        (void)df;
+        [[maybe_unused]] auto df = d.get_current_floor();
         auto view = registry.view<ActorKind, LegacyEntityId>();
         for (auto entity : view) {
             entityid id = view.get<LegacyEntityId>(entity).id;

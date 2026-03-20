@@ -111,15 +111,15 @@ These must be addressed first because everything else depends on them.
     `unsigned int` — implicit conversion to UINT_MAX.
   - `gamestate.h:333`: `fadealpha = 0.0` assigned to `unsigned int`.
 
-- [ ] **Eliminate C-style casts**
+- [x] **Eliminate C-style casts**
   - ~40 C-style casts found across `libdraw.cpp`, `dungeon_floor.h`,
     `gamestate_scene_impl.h`, `entity_templates.h`.
   - Replace with `static_cast<>`.
 
-- [ ] **Replace C headers with C++ equivalents**
+- [x] **Replace C headers with C++ equivalents**
   - `massert.h` uses `<stdio.h>` / `<stdlib.h>` — use `<cstdio>` / `<cstdlib>`.
 
-- [ ] **Fix mprint.h logging level hierarchy**
+- [x] **Fix mprint.h logging level hierarchy**
   - `DEBUG=1` enables level-1 only. `DEBUG=2` enables level-2 only.
     `DEBUG=3` enables level-3 only. Higher levels should include lower levels.
 

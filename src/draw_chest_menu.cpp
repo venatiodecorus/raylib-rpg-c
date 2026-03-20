@@ -56,7 +56,7 @@ void draw_inventory_grid(gamestate& g, rpg::Renderer& renderer, shared_ptr<vecto
                 }
                 ++it;
             }
-            if ((float)i == g.ui.inventory_cursor.x && (float)j == g.ui.inventory_cursor.y) {
+            if (static_cast<float>(i) == g.ui.inventory_cursor.x && static_cast<float>(j) == g.ui.inventory_cursor.y) {
                 DrawRectangleLinesEx(grid_box, 2, GREEN);
             }
             x += w;

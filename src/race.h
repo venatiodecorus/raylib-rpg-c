@@ -5,7 +5,7 @@
 #pragma once
 
 #include "massert.h"
-#include <string.h>
+#include <cstring>
 #include <string>
 #include <unordered_map>
 

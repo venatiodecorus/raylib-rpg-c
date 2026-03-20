@@ -6,7 +6,7 @@
 
 #include "massert.h"
 #include "vec3.h"
-#include <stdlib.h>
+#include <cstdlib>
 
 /** @brief Roll `r.x` dice with `r.y` sides and add `r.z` as a modifier. */
 constexpr static inline int do_roll(vec3 r) {

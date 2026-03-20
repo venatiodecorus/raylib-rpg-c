@@ -15,7 +15,7 @@ static inline void axe_init_test(gamestate& g, entityid id) {
     g.ct.set<name>(id, "Axe");
     g.ct.set<description>(id, "We choppin' trees");
     g.ct.set<weapontype>(id, weapontype_t::AXE);
-    g.ct.set<damage>(id, (vec3){1, 8, 0});
+    g.ct.set<damage>(id, vec3{1, 8, 0});
     g.ct.set<durability>(id, 100);
     g.ct.set<max_durability>(id, 100);
     g.ct.set<rarity>(id, rarity_t::COMMON);
@@ -26,7 +26,7 @@ static inline void dagger_init_test(gamestate& g, entityid id) {
     g.ct.set<name>(id, "Dagger");
     g.ct.set<description>(id, "Stabby stabby.");
     g.ct.set<weapontype>(id, weapontype_t::DAGGER);
-    g.ct.set<damage>(id, (vec3){1, 4, 0});
+    g.ct.set<damage>(id, vec3{1, 4, 0});
     g.ct.set<durability>(id, 100);
     g.ct.set<max_durability>(id, 100);
     g.ct.set<rarity>(id, rarity_t::COMMON);
@@ -37,7 +37,7 @@ static inline void sword_init_test(gamestate& g, entityid id) {
     g.ct.set<name>(id, "Sword");
     g.ct.set<description>(id, "Standard sword");
     g.ct.set<weapontype>(id, WEAPON_SWORD);
-    g.ct.set<damage>(id, (vec3){1, 6, 0});
+    g.ct.set<damage>(id, vec3{1, 6, 0});
     g.ct.set<durability>(id, 100);
     g.ct.set<max_durability>(id, 100);
     g.ct.set<rarity>(id, rarity_t::COMMON);
@@ -69,7 +69,7 @@ static inline void kite_shield_init_test(gamestate& g, entityid id) {
 
 
 static inline void random_weapon_init_test(gamestate& g, entityid id) {
-    const weapontype_t t = (weapontype_t)GetRandomValue(weapontype_t::NONE + 1, weapontype_t::TYPE_COUNT - 1);
+    const weapontype_t t = static_cast<weapontype_t>(GetRandomValue(static_cast<int>(weapontype_t::NONE) + 1, static_cast<int>(weapontype_t::TYPE_COUNT) - 1));
 
     switch (t) {
     case WEAPON_SWORD: sword_init_test(g, id); break;

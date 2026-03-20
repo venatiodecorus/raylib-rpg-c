@@ -109,12 +109,10 @@ void libdraw_drawframe_2d_to_texture(gamestate& g, rpg::Renderer& renderer, int 
     EndTextureMode();
 }
 
-void draw_hud_from_texture(gamestate& g, rpg::Renderer& renderer) {
-    (void)g;
+void draw_hud_from_texture([[maybe_unused]] gamestate& g, rpg::Renderer& renderer) {
     DrawTexturePro(renderer.hud_target_texture.texture, renderer.target_src, renderer.target_dest, Vector2{0, 0}, 0.0f, WHITE);
 }
 
-void libdraw_drawframe_2d_from_texture(gamestate& g, rpg::Renderer& renderer) {
-    (void)g;
+void libdraw_drawframe_2d_from_texture([[maybe_unused]] gamestate& g, rpg::Renderer& renderer) {
     DrawTexturePro(renderer.main_game_target_texture.texture, renderer.target_src, renderer.target_dest, Vector2{0, 0}, 0.0f, WHITE);
 }

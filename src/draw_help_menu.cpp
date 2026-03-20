@@ -87,7 +87,7 @@ void draw_help_menu(gamestate& g) {
     const int box_y = (DEFAULT_TARGET_HEIGHT - box_height) / 2;
 
     DrawRectangle(box_x, box_y, box_width, box_height, g.ui.window_box_bgcolor);
-    DrawRectangleLinesEx({(float)box_x, (float)box_y, (float)box_width, (float)box_height}, 2, g.ui.window_box_fgcolor);
+    DrawRectangleLinesEx({static_cast<float>(box_x), static_cast<float>(box_y), static_cast<float>(box_width), static_cast<float>(box_height)}, 2, g.ui.window_box_fgcolor);
 
     const int text_x = box_x + padding;
     int text_y = box_y + padding;

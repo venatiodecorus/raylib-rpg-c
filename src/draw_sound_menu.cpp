@@ -13,7 +13,7 @@ void draw_sound_menu(gamestate& g) {
     const int box_h = 140;
     const int box_x = (DEFAULT_TARGET_WIDTH - box_w) / 2;
     const int box_y = (DEFAULT_TARGET_HEIGHT - box_h) / 2;
-    const Rectangle box = {(float)box_x, (float)box_y, (float)box_w, (float)box_h};
+    const Rectangle box = {static_cast<float>(box_x), static_cast<float>(box_y), static_cast<float>(box_w), static_cast<float>(box_h)};
 
     DrawRectangleRec(box, g.ui.window_box_bgcolor);
     DrawRectangleLinesEx(box, 2.0f, g.ui.window_box_fgcolor);
@@ -25,8 +25,8 @@ void draw_sound_menu(gamestate& g) {
     int y = box_y + padding + 48;
     for (size_t i = 0; i < 3; i++) {
         const bool selected = g.ui.sound_menu_selection == i;
-        DrawText(selected ? TextFormat("> %-14s %3d%%", labels[i], (int)(values[i] * 100.0f))
-                          : TextFormat("  %-14s %3d%%", labels[i], (int)(values[i] * 100.0f)),
+        DrawText(selected ? TextFormat("> %-14s %3d%%", labels[i], static_cast<int>(values[i] * 100.0f))
+                          : TextFormat("  %-14s %3d%%", labels[i], static_cast<int>(values[i] * 100.0f)),
             box_x + padding,
             y,
             font_size,

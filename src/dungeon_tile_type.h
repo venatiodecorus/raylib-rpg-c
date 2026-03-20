@@ -5,7 +5,6 @@
 #pragma once
 
 
-#include <stdbool.h>
 #include <string>
 
 /// @brief Enumerated dungeon tile variants used by floor geometry and rendering.

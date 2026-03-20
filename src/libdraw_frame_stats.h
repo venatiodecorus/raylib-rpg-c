@@ -27,7 +27,7 @@ static inline double libdraw_frame_begin_time() {
  * @param g Active game state receiving timing statistics.
  * @param start_time Timestamp returned by `libdraw_frame_begin_time()`.
  */
-static inline void libdraw_finish_frame_stats(gamestate& g, double start_time) {
+static inline void libdraw_finish_frame_stats([[maybe_unused]] gamestate& g, [[maybe_unused]] double start_time) {
 #ifdef DEBUG
     g.last_frame_time = GetTime() - start_time;
     g.last_frame_times[g.last_frame_times_current] = g.last_frame_time;
@@ -40,8 +40,5 @@ static inline void libdraw_finish_frame_stats(gamestate& g, double start_time) {
     if (g.last_frame_time > g.max_frame_time) {
         g.max_frame_time = g.last_frame_time;
     }
-#else
-    (void)g;
-    (void)start_time;
 #endif
 }

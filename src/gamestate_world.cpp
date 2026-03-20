@@ -160,9 +160,7 @@ bool dungeon_is_safe_prop_loc(shared_ptr<dungeon_floor> df, vec3 loc) {
 }
 }
 
-void gamestate::create_and_add_df_0(biome_t type, int w, int h, int df_count, float parts) {
-    (void)df_count;
-    (void)parts;
+void gamestate::create_and_add_df_0(biome_t type, int w, int h, [[maybe_unused]] int df_count, [[maybe_unused]] float parts) {
     auto df = d.create_floor(type, w, h);
     Rectangle room_area = dungeon_make_rect(1, 1, w - 2, h - 2);
     df->df_paint_floor_area(room_area);
@@ -171,8 +169,7 @@ void gamestate::create_and_add_df_0(biome_t type, int w, int h, int df_count, fl
     d.add_floor(df);
 }
 
-void gamestate::create_and_add_df_1(biome_t type, int w, int h, int df_count, float parts) {
-    (void)df_count;
+void gamestate::create_and_add_df_1(biome_t type, int w, int h, [[maybe_unused]] int df_count, float parts) {
     auto df = d.create_floor(type, w, h);
     vector<room> rooms;
     constexpr direction_t dirs[] = {direction_t::LEFT, direction_t::RIGHT, direction_t::UP, direction_t::DOWN};
@@ -362,7 +359,7 @@ entityid gamestate::create_chest_with(with_fun chestInitFunction) {
     entityid id = add_entity();
     const StaticWorldDefinition& definition = get_static_world_definition(entitytype_t::CHEST);
     ct.set<entitytype>(id, entitytype_t::CHEST);
-    ct.set<spritemove>(id, (Rectangle){0, 0, 0, 0});
+    ct.set<spritemove>(id, Rectangle{0, 0, 0, 0});
     ct.set<update>(id, true);
     ct.set<pushable>(id, definition.pushable);
     ct.set<pullable>(id, definition.pullable);
@@ -439,7 +436,7 @@ entityid gamestate::create_prop_with(proptype_t type, with_fun initFun) {
     entityid id = add_entity();
     const StaticWorldDefinition& definition = get_prop_definition(type);
     ct.set<entitytype>(id, entitytype_t::PROP);
-    ct.set<spritemove>(id, (Rectangle){0, 0, 0, 0});
+    ct.set<spritemove>(id, Rectangle{0, 0, 0, 0});
     ct.set<update>(id, true);
     ct.set<proptype>(id, type);
     initFun(ct, id);
@@ -476,7 +473,7 @@ entityid gamestate::create_prop_at_with(proptype_t type, vec3 loc, with_fun init
 
 int gamestate::place_props() {
     int placed_props = 0;
-    for (int z = 0; z < (int)d.floors.size(); z++) {
+    for (int z = 0; z < static_cast<int>(d.floors.size()); z++) {
         if (z == 2) {
             continue;
         }
