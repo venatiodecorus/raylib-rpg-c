@@ -384,79 +384,11 @@ void gamestate::update_path_to_target(entityid id) {
     }
 
     shared_ptr<dungeon_floor> df = d.floors[start.z];
+    const auto& result = pathfinder.find_path(
+        start, goal, *df,
+        [this](int x, int y, int z) { return tile_has_pushable(x, y, z); });
 
-    struct Node {
-        vec3 pos;
-        float gScore;
-        float fScore;
-        vec3 cameFrom;
-        bool operator>(const Node& other) const {
-            return fScore > other.fScore;
-        }
-    };
-
-    auto heuristic = [](vec3 a, vec3 b) { return sqrtf((a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y)); };
-
-    map<vec3, Node> openSet;
-    map<vec3, Node> cameFrom;
-    map<vec3, float> gScore;
-
-    auto node_cmp = [](const Node& a, const Node& b) { return a > b; };
-    priority_queue<Node, vector<Node>, decltype(node_cmp)> pq(node_cmp);
-
-    Node startNode = {start, 0, heuristic(start, goal), {-1, -1, -1}};
-    openSet[start] = startNode;
-    pq.push(startNode);
-    gScore[start] = 0;
-
-    bool found = false;
-    while (!pq.empty()) {
-        Node current = pq.top();
-        pq.pop();
-
-        if (vec3_equal(current.pos, goal)) {
-            found = true;
-            break;
-        }
-        if (openSet.find(current.pos) == openSet.end()) {
-            continue;
-        }
-        openSet.erase(current.pos);
-
-        vec3 directions[8] = {{1, 0, 0}, {-1, 0, 0}, {0, 1, 0}, {0, -1, 0}, {1, 1, 0}, {-1, 1, 0}, {1, -1, 0}, {-1, -1, 0}};
-        for (const vec3& dir : directions) {
-            vec3 neighbor = {current.pos.x + dir.x, current.pos.y + dir.y, current.pos.z};
-            if (neighbor.x < 0 || neighbor.x >= df->get_width() || neighbor.y < 0 || neighbor.y >= df->get_height()) {
-                continue;
-            }
-            tile_t& tile = df->tile_at(neighbor);
-            if (!tile_is_walkable(tile.get_type()) || tile_has_pushable(neighbor.x, neighbor.y, neighbor.z) != ENTITYID_INVALID) {
-                continue;
-            }
-
-            float tentative_gScore = gScore[current.pos] + 1;
-            if (dir.x != 0 && dir.y != 0) {
-                tentative_gScore = gScore[current.pos] + 1.414f;
-            }
-
-            if (gScore.find(neighbor) == gScore.end() || tentative_gScore < gScore[neighbor]) {
-                Node neighborNode = {neighbor, tentative_gScore, tentative_gScore + heuristic(neighbor, goal), current.pos};
-                cameFrom[neighbor] = current;
-                gScore[neighbor] = tentative_gScore;
-                openSet[neighbor] = neighborNode;
-                pq.push(neighborNode);
-            }
-        }
-    }
-
-    if (found) {
-        vec3 current = goal;
-        while (!vec3_equal(current, start) && cameFrom.find(current) != cameFrom.end()) {
-            (*path_to_target)->push_back(current);
-            current = cameFrom[current].pos;
-        }
-        reverse((*path_to_target)->begin(), (*path_to_target)->end());
-    }
+    (*path_to_target)->assign(result.begin(), result.end());
 }
 
 bool gamestate::try_entity_move_to_target(entityid id) {

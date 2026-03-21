@@ -14,4 +14,5 @@
 #include "test_suites/test_renderer_seams.h"
 #include "test_suites/test_tile_cache.h"
 #include "test_suites/test_utility_helpers.h"
+#include "test_suites/test_pathfinder.h"
 #include "test_suites/test_world_interaction.h"

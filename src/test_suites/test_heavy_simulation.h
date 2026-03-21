@@ -89,17 +89,17 @@ public:
         for (int step = 0; step < 32 && !became_adjacent; ++step) {
             g.update_npcs_state();
 
-            const auto* path = g.ct.get<target_path>(orc);
+            auto* path = g.ct.get<target_path>(orc);
             if (path) {
-                path->clear();
+                (*path)->clear();
             }
             g.update_path_to_target(orc);
 
-            const auto* refreshed_path = g.ct.get<target_path>(orc);
+            auto* refreshed_path = g.ct.get<target_path>(orc);
             TS_ASSERT(refreshed_path);
-            TS_ASSERT(!refreshed_path->empty());
+            TS_ASSERT(!(*refreshed_path)->empty());
 
-            const vec3 next_step = refreshed_path->front();
+            const vec3 next_step = (*refreshed_path)->front();
             TS_ASSERT(next_step.x >= 0 && next_step.x < df->get_width());
             TS_ASSERT(next_step.y >= 0 && next_step.y < df->get_height());
             TS_ASSERT(tile_is_walkable(df->tile_at(next_step).get_type()));
