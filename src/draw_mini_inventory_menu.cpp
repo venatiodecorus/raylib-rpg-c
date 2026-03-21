@@ -1,7 +1,9 @@
 #include "draw_mini_inventory_menu.h"
 
+#include "ecs_gameplay_components.h"
+
 Rectangle mini_inventory_panel_for_hero(gamestate& g, float width, float height) {
-    const vec3 hero_loc = g.ct.get_or<location>(g.hero_id, vec3{0, 0, 0});
+    const vec3 hero_loc = g.get_component_or<Position>(g.hero_id, vec3{0, 0, 0});
     const Vector2 hero_screen = GetWorldToScreen2D(
         Vector2{
             static_cast<float>(hero_loc.x * DEFAULT_TILE_SIZE) + DEFAULT_TILE_SIZE * 0.5f,
@@ -14,7 +16,7 @@ Rectangle mini_inventory_panel_for_hero(gamestate& g, float width, float height)
     return Rectangle{x, y, width, height};
 }
 
-void draw_mini_inventory_menu(gamestate& g, rpg::Renderer& renderer, shared_ptr<vector<entityid>> inventory, const char* title, const char* hint, bool show_equipped) {
+void draw_mini_inventory_menu(gamestate& g, rpg::Renderer& renderer, const vector<entityid>& inventory, const char* title, const char* hint, bool show_equipped) {
     const float width = 260.0f;
     const float row_h = 18.0f;
     const float preview_h = 118.0f;
@@ -39,20 +41,20 @@ void draw_mini_inventory_menu(gamestate& g, rpg::Renderer& renderer, shared_ptr<
         const float row_y = list_box.y + row_h * static_cast<float>(i);
         const Rectangle row = {list_box.x, row_y, list_box.width, row_h};
         const size_t item_index = scroll + i;
-        if (item_index == selected_index && item_index < inventory->size()) {
+        if (item_index == selected_index && item_index < inventory.size()) {
             DrawRectangleRec(row, Color{255, 255, 255, 28});
             DrawRectangleLinesEx(row, 1, YELLOW);
         }
-        if (item_index >= inventory->size()) {
+        if (item_index >= inventory.size()) {
             continue;
         }
 
-        const entityid item_id = inventory->at(item_index);
-        const string item_name = g.ct.get_or<name>(item_id, std::string("no-name"));
+        const entityid item_id = inventory.at(item_index);
+        const string item_name = g.get_component_or<EntityName>(item_id, std::string{"no-name"});
         const bool equipped =
             show_equipped &&
-            (item_id == g.ct.get_or<equipped_weapon>(g.hero_id, ENTITYID_INVALID) ||
-             item_id == g.ct.get_or<equipped_shield>(g.hero_id, ENTITYID_INVALID));
+            (item_id == g.get_component_or<EquippedWeapon>(g.hero_id, ENTITYID_INVALID) ||
+             item_id == g.get_component_or<EquippedShield>(g.hero_id, ENTITYID_INVALID));
         DrawText(
             TextFormat("%s%s", item_index == selected_index ? "> " : "  ", item_name.c_str()),
             static_cast<int>(row.x + 6),
@@ -67,16 +69,16 @@ void draw_mini_inventory_menu(gamestate& g, rpg::Renderer& renderer, shared_ptr<
     if (scroll > 0) {
         DrawText("^", static_cast<int>(list_box.x + list_box.width - 12), static_cast<int>(list_box.y - 10), 10, g.ui.window_box_fgcolor);
     }
-    if (scroll + visible_count < inventory->size()) {
+    if (scroll + visible_count < inventory.size()) {
         DrawText("v", static_cast<int>(list_box.x + list_box.width - 12), static_cast<int>(list_box.y + list_box.height), 10, g.ui.window_box_fgcolor);
     }
 
-    if (inventory->empty() || selected_index >= inventory->size()) {
+    if (inventory.empty() || selected_index >= inventory.size()) {
         DrawText("empty", static_cast<int>(panel.x + padding), static_cast<int>(list_box.y + list_box.height + 10), 10, g.ui.window_box_fgcolor);
         return;
     }
 
-    const entityid selection_id = inventory->at(selected_index);
+    const entityid selection_id = inventory.at(selected_index);
     const Rectangle preview = {panel.x + padding, list_box.y + list_box.height + 10.0f, panel.width - padding * 2.0f, preview_h};
     DrawRectangleLinesEx(preview, 1, g.ui.window_box_fgcolor);
     auto it = renderer.spritegroups.find(selection_id);

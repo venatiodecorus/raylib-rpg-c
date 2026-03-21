@@ -31,6 +31,7 @@
 #include "draw_sound_menu.h"
 #include "draw_title_screen.h"
 #include "draw_window_color_menu.h"
+#include "ecs_gameplay_components.h"
 #include "entitytype.h"
 #include "libdraw_frame_stats.h"
 #include "libdraw_from_texture.h"
@@ -207,8 +208,8 @@ void libdraw_render_current_scene_to_scene_texture(gamestate& g, rpg::Renderer& 
         draw_char_creation_to_texture(g, renderer);
         break;
     case scene_t::GAMEPLAY: {
-        const int vision_dist = g.ct.get_or<vision_distance>(g.hero_id, 0);
-        const int light_rad = g.ct.get_or<light_radius>(g.hero_id, 0);
+        const int vision_dist = g.get_component_or<VisionRange>(g.hero_id, 0);
+        const int light_rad = g.get_component_or<LightRadius>(g.hero_id, 0);
         libdraw_drawframe_2d_to_texture(g, renderer, vision_dist, light_rad);
     } break;
     default:

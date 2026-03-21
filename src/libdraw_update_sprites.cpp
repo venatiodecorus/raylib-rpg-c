@@ -1,6 +1,9 @@
 #include "libdraw_update_sprites.h"
 
 #include "create_sg_byid.h"
+#include "ecs_actor_components.h"
+#include "ecs_gameplay_components.h"
+#include "ecs_item_components.h"
 #include "entitytype.h"
 #include "libdraw_context.h"
 #include "set_sg.h"
@@ -42,18 +45,18 @@ void libdraw_update_sprite_context_ptr(gamestate& g, spritegroup* group, directi
 void libdraw_update_sprite_position(gamestate& g, entityid id, spritegroup* sg) {
     massert(sg, "spritegroup is NULL");
     massert(id != ENTITYID_INVALID, "entityid is invalid");
-    const Rectangle* sprite_move_ptr = g.ct.get<spritemove>(id);
+    const SpriteMoveState* sprite_move_ptr = g.get_component<SpriteMoveState>(id);
     if (!sprite_move_ptr) {
         return;
     }
-    Rectangle sprite_move = *sprite_move_ptr;
+    Rectangle sprite_move = sprite_move_ptr->value;
     if (sprite_move.x != 0 || sprite_move.y != 0) {
         sg->move.x = sprite_move.x;
         sg->move.y = sprite_move.y;
-        entitytype_t type = g.ct.get_or<entitytype>(id, entitytype_t::NONE);
+        entitytype_t type = (g.get_component<EntityTypeTag>(id) ? g.get_component<EntityTypeTag>(id)->type : entitytype_t::NONE);
         massert(type != entitytype_t::NONE, "entity type is none");
         if (type == entitytype_t::PLAYER || type == entitytype_t::NPC) {
-            race_t r = g.ct.get_or<race>(id, race_t::NONE);
+            race_t r = (g.get_component<ActorKind>(id) ? g.get_component<ActorKind>(id)->race : race_t::NONE);
             if (r == race_t::BAT) {
                 sg->current = SG_ANIM_BAT_IDLE;
             }
@@ -72,40 +75,42 @@ void libdraw_update_sprite_ptr(gamestate& g, rpg::Renderer& renderer, entityid i
     minfo3("Begin update sprite ptr: %d", id);
     massert(id != ENTITYID_INVALID, "entityid is invalid");
     massert(sg, "spritegroup is NULL");
-    massert(g.ct.has<update>(id), "id %d has no update component, name %s", id, g.ct.get_or<name>(id, "unknown").c_str());
+    massert(g.has_component<NeedsUpdate>(id), "id %d has no update component, name %s", id, g.get_component_or<EntityName>(id, std::string{"unknown"}).c_str());
 
-    const bool do_update = *g.ct.get<update>(id);
+    const NeedsUpdate* update_ptr = g.get_component<NeedsUpdate>(id);
+    const bool do_update = update_ptr ? update_ptr->value : false;
 
     if (do_update) {
-        if (g.ct.has<direction>(id)) {
-            const direction_t d = *g.ct.get<direction>(id);
+        const Facing* facing_ptr = g.get_component<Facing>(id);
+        if (facing_ptr) {
+            const direction_t d = facing_ptr->value;
             libdraw_update_sprite_context_ptr(g, sg, d);
         }
     }
 
     libdraw_update_sprite_position(g, id, sg);
 
-    if (g.ct.get_or<block_success>(id, false)) {
+    if (g.get_component_or<BlockSuccessFlag>(id, false)) {
         libdraw_set_sg_block_success(g, renderer, id, sg);
     }
 
-    if (g.ct.get_or<attacking>(id, false)) {
+    if (g.get_component_or<AttackingFlag>(id, false)) {
         libdraw_set_sg_is_attacking(g, renderer, id, sg);
     }
 
-    const entitytype_t type = g.ct.get_or<entitytype>(id, entitytype_t::NONE);
+    const entitytype_t type = (g.get_component<EntityTypeTag>(id) ? g.get_component<EntityTypeTag>(id)->type : entitytype_t::NONE);
 
-    if (g.ct.get_or<dead>(id, false)) {
+    if (g.get_component_or<DeadFlag>(id, false)) {
         libdraw_set_sg_is_dead(g, renderer, id, sg);
     }
-    else if (g.ct.get_or<damaged>(id, false)) {
+    else if (g.get_component_or<DamagedFlag>(id, false)) {
         libdraw_set_sg_is_damaged(g, renderer, id, sg);
     }
 
     if (type == entitytype_t::DOOR || type == entitytype_t::CHEST) {
-        const bool* door_open_ptr = g.ct.get<door_open>(id);
+        const DoorOpenFlag* door_open_ptr = g.get_component<DoorOpenFlag>(id);
         if (door_open_ptr) {
-            sg->set_current(*door_open_ptr ? 1 : 0);
+            sg->set_current(door_open_ptr->value ? 1 : 0);
         }
     }
 
@@ -113,11 +118,11 @@ void libdraw_update_sprite_ptr(gamestate& g, rpg::Renderer& renderer, entityid i
         g.frame_dirty = true;
     }
 
-    const vec3* loc_ptr = g.ct.get<location>(id);
+    const Position* loc_ptr = g.get_component<Position>(id);
     if (!loc_ptr) {
         return;
     }
-    const vec3 loc = *loc_ptr;
+    const vec3 loc = loc_ptr->value;
     sg->snap_dest(loc.x, loc.y);
 }
 
@@ -193,7 +198,7 @@ void libdraw_update_sprites_post(gamestate& g, rpg::Renderer& renderer) {
             }
         }
         else if (type == entitytype_t::ITEM) {
-            const itemtype_t itype = g.ct.get_or<itemtype>(id, itemtype_t::NONE);
+            const itemtype_t itype = g.get_component_or<ItemSubtype>(id, itemtype_t::NONE);
             switch (itype) {
             case itemtype_t::WEAPON: {
                 if (sg->current == 0) {

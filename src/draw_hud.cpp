@@ -1,5 +1,7 @@
 #include "draw_hud.h"
 
+#include "ecs_gameplay_components.h"
+
 #include <array>
 
 void draw_hud(gamestate& g) {
@@ -10,22 +12,22 @@ void draw_hud(gamestate& g) {
     constexpr int inner_pad = 8;
 
     const int turn = g.turn_count;
-    const vec2 hp_value = g.ct.get_or<hp>(g.hero_id, vec2{-1, -1});
+    const vec2 hp_value = g.get_component_or<HitPoints>(g.hero_id, vec2{-1, -1});
     const int myhp = hp_value.x;
     const int mymaxhp = hp_value.y;
-    const int mylevel = g.ct.get_or<level>(g.hero_id, 0);
-    const int myxp = g.ct.get_or<xp>(g.hero_id, 0);
-    const int attack_bonus = get_stat_bonus(g.ct.get_or<strength>(g.hero_id, 10));
+    const int mylevel = g.get_component_or<EntityLevel>(g.hero_id, 0);
+    const int myxp = g.get_component_or<Experience>(g.hero_id, 0);
+    const int attack_bonus = get_stat_bonus(g.get_component_or<StrengthAttr>(g.hero_id, 10));
     const int ac = g.compute_armor_class(g.hero_id);
-    const int str = g.ct.get_or<strength>(g.hero_id, -1);
-    const int dex = g.ct.get_or<dexterity>(g.hero_id, -1);
-    const int con = g.ct.get_or<constitution>(g.hero_id, -1);
-    const int int_ = g.ct.get_or<intelligence>(g.hero_id, -1);
-    const int wis = g.ct.get_or<wisdom>(g.hero_id, -1);
-    const int cha = g.ct.get_or<charisma>(g.hero_id, -1);
-    const string n = g.ct.get_or<name>(g.hero_id, "no-name");
-    const vec3 loc = g.ct.get_or<location>(g.hero_id, vec3{-1, -1, -1});
-    const alignment_t hero_alignment = g.ct.get_or<alignment>(g.hero_id, alignment_t::NONE);
+    const int str = g.get_component_or<StrengthAttr>(g.hero_id, -1);
+    const int dex = g.get_component_or<DexterityAttr>(g.hero_id, -1);
+    const int con = g.get_component_or<ConstitutionAttr>(g.hero_id, -1);
+    const int int_ = g.get_component_or<IntelligenceAttr>(g.hero_id, -1);
+    const int wis = g.get_component_or<WisdomAttr>(g.hero_id, -1);
+    const int cha = g.get_component_or<CharismaAttr>(g.hero_id, -1);
+    const string n = g.get_component_or<EntityName>(g.hero_id, std::string{"no-name"});
+    const vec3 loc = g.get_component_or<Position>(g.hero_id, vec3{-1, -1, -1});
+    const alignment_t hero_alignment = g.get_component_or<AlignmentComponent>(g.hero_id, alignment_t::NONE);
     const std::array<std::string, line_count> lines = {
         n,
         TextFormat("Lvl %d HP %d/%d  Atk: %d  AC: %d", mylevel, myhp, mymaxhp, attack_bonus, ac),

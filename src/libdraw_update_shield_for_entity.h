@@ -3,6 +3,7 @@
  */
 
 #pragma once
+#include "ecs_gameplay_components.h"
 #include "gamestate.h"
 #include "libdraw_context.h"
 #include "spritegroup.h"
@@ -15,7 +16,7 @@ static inline void update_shield_for_entity(gamestate& g, rpg::Renderer& rendere
     massert(sg, "spritegroup is NULL");
     spritegroup* shield_sg = nullptr;
     int ctx = -1;
-    const entityid shield_id = g.ct.get_or<equipped_shield>(id, ENTITYID_INVALID);
+    const entityid shield_id = g.get_component_or<EquippedShield>(id, ENTITYID_INVALID);
     if (shield_id == ENTITYID_INVALID) {
         merror2("shield_id invalid");
         return;

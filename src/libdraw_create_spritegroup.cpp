@@ -1,5 +1,6 @@
 #include "libdraw_create_spritegroup.h"
 
+#include "ecs_gameplay_components.h"
 #include "entitytype.h"
 #include "libdraw.h"
 
@@ -10,12 +11,12 @@ bool create_spritegroup(gamestate& g, rpg::Renderer& renderer, entityid id, cons
     auto group = std::make_unique<spritegroup>(SPRITEGROUP_DEFAULT_SIZE);
 
     massert(group, "spritegroup is NULL");
-    auto maybe_loc = g.ct.get<location>(id);
+    auto maybe_loc = g.get_component<Position>(id);
 
     minfo("checking if has location");
     if (maybe_loc != nullptr) {
         minfo("it DOES have a location");
-        const vec3 loc = *maybe_loc;
+        const vec3 loc = maybe_loc->value;
         massert(loc.z >= 0 && static_cast<size_t>(loc.z) < g.d.get_floor_count(), "location z out of bounds: %d", loc.z);
         auto df = g.d.get_floor(loc.z);
         massert(df, "dungeon floor is NULL");
@@ -43,9 +44,9 @@ bool create_spritegroup(gamestate& g, rpg::Renderer& renderer, entityid id, cons
         minfo2("setting id: %d", id);
         group->id = id;
 
-        string n = g.ct.get_or<name>(id, "no-name");
+        string n = g.get_component_or<EntityName>(id, std::string{"no-name"});
         minfo2("name: %s", n.c_str());
-        entitytype_t t = g.ct.get_or<entitytype>(id, entitytype_t::NONE);
+        entitytype_t t = (g.get_component<EntityTypeTag>(id) ? g.get_component<EntityTypeTag>(id)->type : entitytype_t::NONE);
         string t_s = entitytype_to_str(t);
         minfo2("type: %s", t_s.c_str());
         minfo2("group->get(0)");

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "../ecs_actor_components.h"
+#include "../ecs_gameplay_components.h"
 #include "../gamestate.h"
 #include "../inputstate.h"
 #include <cxxtest/TestSuite.h>
@@ -17,13 +19,13 @@ private:
         auto view = g.registry.view<LegacyEntityId, NpcTag>();
         for (auto entity : view) {
             entityid id = view.get<LegacyEntityId>(entity).id;
-            if (g.ct.get_or<dead>(id, true)) {
+            if (g.get_component_or<DeadFlag>(id, true)) {
                 continue;
             }
-            if (race_value != race_t::NONE && g.ct.get_or<race>(id, race_t::NONE) != race_value) {
+            if (race_value != race_t::NONE && (g.get_component<ActorKind>(id) ? g.get_component<ActorKind>(id)->race : race_t::NONE) != race_value) {
                 continue;
             }
-            const vec3 loc = g.ct.get_or<location>(id, vec3{-1, -1, -1});
+            const vec3 loc = g.get_component_or<Position>(id, vec3{-1, -1, -1});
             if (loc.z == floor) {
                 return id;
             }
@@ -84,29 +86,29 @@ public:
 
         bool crossed_gap_column = false;
         bool became_adjacent = false;
-        vec3 previous_loc = g.ct.get_or<location>(orc, vec3{-1, -1, -1});
+        vec3 previous_loc = g.get_component_or<Position>(orc, vec3{-1, -1, -1});
 
         for (int step = 0; step < 32 && !became_adjacent; ++step) {
             g.update_npcs_state();
 
-            auto* path = g.ct.get<target_path>(orc);
+            auto* path = g.get_component<NpcPath>(orc);
             if (path) {
-                (*path)->clear();
+                path->value.clear();
             }
             g.update_path_to_target(orc);
 
-            auto* refreshed_path = g.ct.get<target_path>(orc);
+            auto* refreshed_path = g.get_component<NpcPath>(orc);
             TS_ASSERT(refreshed_path);
-            TS_ASSERT(!(*refreshed_path)->empty());
+            TS_ASSERT(!refreshed_path->value.empty());
 
-            const vec3 next_step = (*refreshed_path)->front();
+            const vec3 next_step = refreshed_path->value.front();
             TS_ASSERT(next_step.x >= 0 && next_step.x < df->get_width());
             TS_ASSERT(next_step.y >= 0 && next_step.y < df->get_height());
             TS_ASSERT(tile_is_walkable(df->tile_at(next_step).get_type()));
 
             TS_ASSERT(g.handle_npc(orc));
 
-            const vec3 orc_loc = g.ct.get_or<location>(orc, vec3{-1, -1, -1});
+            const vec3 orc_loc = g.get_component_or<Position>(orc, vec3{-1, -1, -1});
             TS_ASSERT(vec3_valid(orc_loc));
             TS_ASSERT(tile_is_walkable(df->tile_at(orc_loc).get_type()));
             TS_ASSERT(!vec3_equal(orc_loc, previous_loc));
@@ -121,7 +123,7 @@ public:
 
         TS_ASSERT(crossed_gap_column);
         TS_ASSERT(became_adjacent);
-        TS_ASSERT(g.ct.get_or<steps_taken>(orc, 0) > 0);
+        TS_ASSERT(g.get_component_or<StepsTaken>(orc, 0u) > 0);
     }
 
     void testTickHeavySimulationResolvesAdjacentOrcFightWithoutBreakingTileState() {
@@ -135,7 +137,7 @@ public:
         const entityid orc = find_live_npc_on_floor(g, 2, race_t::ORC);
         TS_ASSERT_DIFFERS(orc, ENTITYID_INVALID);
 
-        const vec3 orc_loc = g.ct.get_or<location>(orc, vec3{-1, -1, -1});
+        const vec3 orc_loc = g.get_component_or<Position>(orc, vec3{-1, -1, -1});
         const vec3 hero_loc = find_open_adjacent_tile(g, orc_loc);
         TS_ASSERT(vec3_valid(hero_loc));
 
@@ -162,24 +164,24 @@ public:
             g.flag = gamestate_flag_t::NPC_TURN;
             g.tick(is);
 
-            const bool hero_dead = g.ct.get_or<dead>(g.hero_id, true);
-            const bool orc_dead = g.ct.get_or<dead>(orc, true);
+            const bool hero_dead = g.get_component_or<DeadFlag>(g.hero_id, true);
+            const bool orc_dead = g.get_component_or<DeadFlag>(orc, true);
             resolved = hero_dead || orc_dead;
         }
 
         TS_ASSERT(resolved);
-        TS_ASSERT_DIFFERS(g.ct.get_or<dead>(g.hero_id, false), g.ct.get_or<dead>(orc, false));
+        TS_ASSERT_DIFFERS(g.get_component_or<DeadFlag>(g.hero_id, false), g.get_component_or<DeadFlag>(orc, false));
 
         tile_t& hero_tile = g.d.get_floor(2)->tile_at(hero_loc);
         tile_t& orc_tile = g.d.get_floor(2)->tile_at(orc_loc);
-        if (g.ct.get_or<dead>(orc, false)) {
+        if (g.get_component_or<DeadFlag>(orc, false)) {
             TS_ASSERT_EQUALS(orc_tile.get_cached_live_npc(), ENTITYID_INVALID);
             TS_ASSERT_EQUALS(orc_tile.get_dead_npc_count(), 1U);
-            TS_ASSERT_EQUALS(g.ct.get_or<xp>(g.hero_id, 0), 1);
+            TS_ASSERT_EQUALS(g.get_component_or<Experience>(g.hero_id, 0), 1);
         } else {
             TS_ASSERT_EQUALS(hero_tile.get_cached_live_npc(), ENTITYID_INVALID);
             TS_ASSERT_EQUALS(hero_tile.get_dead_npc_count(), 1U);
-            TS_ASSERT_EQUALS(g.ct.get_or<xp>(orc, 0), 0);
+            TS_ASSERT_EQUALS(g.get_component_or<Experience>(orc, 0), 0);
         }
     }
 };

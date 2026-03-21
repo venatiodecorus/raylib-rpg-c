@@ -1,5 +1,6 @@
 #pragma once
 
+#include "../ecs_gameplay_components.h"
 #include "../gamestate.h"
 #include "../inputstate.h"
 #include <cxxtest/TestSuite.h>
@@ -22,20 +23,19 @@ public:
         std::set<entityid> ids;
         const vec3 locs[] = {{1, 1, 0}, {2, 1, 0}, {3, 1, 0}, {4, 1, 0}};
         for (const vec3 loc : locs) {
-            const entityid id = g.create_orc_at_with(loc, [](gamestate&, const entityid) {});
+            const entityid id = g.create_orc_at_with(loc, [](gamestate&, const entityid) { });
             TS_ASSERT_DIFFERS(id, ENTITYID_INVALID);
             ids.insert(id);
-            TS_ASSERT_EQUALS(g.ct.get_or<entitytype>(id, entitytype_t::NONE), entitytype_t::NPC);
-            TS_ASSERT_EQUALS(g.ct.get_or<race>(id, race_t::NONE), race_t::ORC);
-            TS_ASSERT(!g.ct.get_or<dead>(id, true));
+            TS_ASSERT_EQUALS((g.get_component<EntityTypeTag>(id) ? g.get_component<EntityTypeTag>(id)->type : entitytype_t::NONE), entitytype_t::NPC);
+            TS_ASSERT_EQUALS((g.get_component<ActorKind>(id) ? g.get_component<ActorKind>(id)->race : race_t::NONE), race_t::ORC);
+            TS_ASSERT(!g.get_component_or<DeadFlag>(id, true));
         }
 
         TS_ASSERT_EQUALS(ids.size(), 4U);
         {
             size_t npc_count = 0;
             g.registry.view<LegacyEntityId, NpcTag>().each([&](auto e, auto& lid) {
-                if (!g.ct.get_or<dead>(lid.id, true) &&
-                    g.ct.get_or<location>(lid.id, vec3{-1, -1, -1}).z == 0)
+                if (!g.get_component_or<DeadFlag>(lid.id, true) && g.get_component_or<Position>(lid.id, vec3{-1, -1, -1}).z == 0)
                     npc_count++;
             });
             TS_ASSERT_EQUALS(npc_count, 4U);
@@ -47,16 +47,15 @@ public:
         add_floor(g, 8, 8);
 
         const vec3 loc{1, 1, 0};
-        const entityid first = g.create_orc_at_with(loc, [](gamestate&, const entityid) {});
-        const entityid second = g.create_orc_at_with(loc, [](gamestate&, const entityid) {});
+        const entityid first = g.create_orc_at_with(loc, [](gamestate&, const entityid) { });
+        const entityid second = g.create_orc_at_with(loc, [](gamestate&, const entityid) { });
 
         TS_ASSERT_DIFFERS(first, ENTITYID_INVALID);
         TS_ASSERT_EQUALS(second, ENTITYID_INVALID);
         {
             size_t npc_count = 0;
             g.registry.view<LegacyEntityId, NpcTag>().each([&](auto e, auto& lid) {
-                if (!g.ct.get_or<dead>(lid.id, true) &&
-                    g.ct.get_or<location>(lid.id, vec3{-1, -1, -1}).z == 0)
+                if (!g.get_component_or<DeadFlag>(lid.id, true) && g.get_component_or<Position>(lid.id, vec3{-1, -1, -1}).z == 0)
                     npc_count++;
             });
             TS_ASSERT_EQUALS(npc_count, 1U);
@@ -70,7 +69,7 @@ public:
         std::set<entityid> ids;
         for (int y = 0; y < 3; ++y) {
             for (int x = 0; x < 3; ++x) {
-                const entityid id = g.create_orc_at_with(vec3{x, y, 0}, [](gamestate&, const entityid) {});
+                const entityid id = g.create_orc_at_with(vec3{x, y, 0}, [](gamestate&, const entityid) { });
                 TS_ASSERT_DIFFERS(id, ENTITYID_INVALID);
                 ids.insert(id);
             }
@@ -80,23 +79,21 @@ public:
         {
             size_t npc_count = 0;
             g.registry.view<LegacyEntityId, NpcTag>().each([&](auto e, auto& lid) {
-                if (!g.ct.get_or<dead>(lid.id, true) &&
-                    g.ct.get_or<location>(lid.id, vec3{-1, -1, -1}).z == 0)
+                if (!g.get_component_or<DeadFlag>(lid.id, true) && g.get_component_or<Position>(lid.id, vec3{-1, -1, -1}).z == 0)
                     npc_count++;
             });
             TS_ASSERT_EQUALS(npc_count, 9U);
         }
 
         const entityid before_next_entity = g.next_entityid;
-        const entityid extra = g.create_orc_at_with(vec3{1, 1, 0}, [](gamestate&, const entityid) {});
+        const entityid extra = g.create_orc_at_with(vec3{1, 1, 0}, [](gamestate&, const entityid) { });
 
         TS_ASSERT_EQUALS(extra, ENTITYID_INVALID);
         TS_ASSERT_EQUALS(g.next_entityid, before_next_entity);
         {
             size_t npc_count = 0;
             g.registry.view<LegacyEntityId, NpcTag>().each([&](auto e, auto& lid) {
-                if (!g.ct.get_or<dead>(lid.id, true) &&
-                    g.ct.get_or<location>(lid.id, vec3{-1, -1, -1}).z == 0)
+                if (!g.get_component_or<DeadFlag>(lid.id, true) && g.get_component_or<Position>(lid.id, vec3{-1, -1, -1}).z == 0)
                     npc_count++;
             });
             TS_ASSERT_EQUALS(npc_count, 9U);
@@ -130,9 +127,8 @@ public:
             auto count_floor = [&](int floor) {
                 size_t count = 0;
                 g.registry.view<LegacyEntityId, NpcTag>().each([&](auto e, auto& lid) {
-                if (!g.ct.get_or<dead>(lid.id, true) &&
-                    g.ct.get_or<location>(lid.id, vec3{-1, -1, -1}).z == floor)
-                    count++;
+                    if (!g.get_component_or<DeadFlag>(lid.id, true) && g.get_component_or<Position>(lid.id, vec3{-1, -1, -1}).z == floor)
+                        count++;
                 });
                 return count;
             };
@@ -153,9 +149,11 @@ public:
         auto find_live_on_floor = [&](int floor) -> entityid {
             entityid result = ENTITYID_INVALID;
             g.registry.view<LegacyEntityId, NpcTag>().each([&](auto e, auto& lid) {
-                if (result != ENTITYID_INVALID) return;
-                if (g.ct.get_or<dead>(lid.id, true)) return;
-                if (g.ct.get_or<location>(lid.id, vec3{-1, -1, -1}).z == floor)
+                if (result != ENTITYID_INVALID)
+                    return;
+                if (g.get_component_or<DeadFlag>(lid.id, true))
+                    return;
+                if (g.get_component_or<Position>(lid.id, vec3{-1, -1, -1}).z == floor)
                     result = lid.id;
             });
             return result;
@@ -168,31 +166,32 @@ public:
         TS_ASSERT_DIFFERS(floor_zero_npc, ENTITYID_INVALID);
         TS_ASSERT_DIFFERS(floor_one_npc, ENTITYID_INVALID);
         TS_ASSERT_DIFFERS(floor_two_npc, ENTITYID_INVALID);
-        TS_ASSERT(!g.ct.get_or<aggro>(floor_zero_npc, true));
-        TS_ASSERT_EQUALS(g.ct.get_or<race>(floor_one_npc, race_t::NONE), race_t::GREEN_SLIME);
-        TS_ASSERT(!g.ct.get_or<aggro>(floor_one_npc, true));
+        TS_ASSERT(!g.get_component_or<AggroFlag>(floor_zero_npc, true));
+        TS_ASSERT_EQUALS((g.get_component<ActorKind>(floor_one_npc) ? g.get_component<ActorKind>(floor_one_npc)->race : race_t::NONE), race_t::GREEN_SLIME);
+        TS_ASSERT(!g.get_component_or<AggroFlag>(floor_one_npc, true));
         {
             size_t slime_count = 0;
             g.registry.view<LegacyEntityId, NpcTag>().each([&](auto e, auto& lid) {
-                if (!g.ct.get_or<dead>(lid.id, true) &&
-                    g.ct.get_or<race>(lid.id, race_t::NONE) == race_t::GREEN_SLIME &&
-                    g.ct.get_or<location>(lid.id, vec3{-1, -1, -1}).z == 1)
+                if (!g.get_component_or<DeadFlag>(lid.id, true) &&
+                    (g.get_component<ActorKind>(lid.id) ? g.get_component<ActorKind>(lid.id)->race : race_t::NONE) == race_t::GREEN_SLIME &&
+                    g.get_component_or<Position>(lid.id, vec3{-1, -1, -1}).z == 1)
                     slime_count++;
             });
             TS_ASSERT_EQUALS(slime_count, 9U);
         }
-        TS_ASSERT_EQUALS(g.ct.get_or<race>(floor_two_npc, race_t::NONE), race_t::ORC);
-        TS_ASSERT(g.ct.get_or<aggro>(floor_two_npc, false));
-        const auto* npc_inventory = g.ct.get<inventory>(floor_two_npc);
-        TS_ASSERT(npc_inventory);
-        TS_ASSERT_EQUALS((*npc_inventory)->size(), 2U);
-        const entityid equipped_weapon_id = g.ct.get_or<equipped_weapon>(floor_two_npc, ENTITYID_INVALID);
+        TS_ASSERT_EQUALS((g.get_component<ActorKind>(floor_two_npc) ? g.get_component<ActorKind>(floor_two_npc)->race : race_t::NONE), race_t::ORC);
+        TS_ASSERT(g.get_component_or<AggroFlag>(floor_two_npc, false));
+        const auto* npc_inv = g.get_component<Inventory>(floor_two_npc);
+        TS_ASSERT(npc_inv);
+        TS_ASSERT_EQUALS(npc_inv->value.size(), 2U);
+        const entityid equipped_weapon_id = g.get_component_or<EquippedWeapon>(floor_two_npc, ENTITYID_INVALID);
         TS_ASSERT_DIFFERS(equipped_weapon_id, ENTITYID_INVALID);
-        TS_ASSERT_EQUALS(g.ct.get_or<itemtype>(equipped_weapon_id, itemtype_t::NONE), itemtype_t::WEAPON);
+        TS_ASSERT_EQUALS(
+            (g.get_component<ItemKind>(equipped_weapon_id) ? g.get_component<ItemKind>(equipped_weapon_id)->type : itemtype_t::NONE), itemtype_t::WEAPON);
         bool found_potion = false;
-        for (entityid item_id : **npc_inventory) {
-            if (g.ct.get_or<itemtype>(item_id, itemtype_t::NONE) == itemtype_t::POTION &&
-                g.ct.get_or<potiontype>(item_id, potiontype_t::NONE) == potiontype_t::HP_SMALL) {
+        for (entityid item_id : npc_inv->value) {
+            if ((g.get_component<ItemKind>(item_id) ? g.get_component<ItemKind>(item_id)->type : itemtype_t::NONE) == itemtype_t::POTION &&
+                (g.get_component<PotionKind>(item_id) ? g.get_component<PotionKind>(item_id)->type : potiontype_t::NONE) == potiontype_t::HP_SMALL) {
                 found_potion = true;
             }
         }
@@ -204,50 +203,48 @@ public:
         add_floor(g, 8, 8);
         add_floor(g, 8, 8);
 
-        const entityid friendly = g.create_npc_at_with(race_t::DWARF, vec3{1, 1, 0}, [](gamestate&, const entityid) {});
-        const entityid hostile = g.create_orc_at_with(vec3{2, 2, 1}, [](gamestate&, const entityid) {});
+        const entityid friendly = g.create_npc_at_with(race_t::DWARF, vec3{1, 1, 0}, [](gamestate&, const entityid) { });
+        const entityid hostile = g.create_orc_at_with(vec3{2, 2, 1}, [](gamestate&, const entityid) { });
 
         TS_ASSERT_DIFFERS(friendly, ENTITYID_INVALID);
         TS_ASSERT_DIFFERS(hostile, ENTITYID_INVALID);
 
         g.update_npcs_state();
 
-        TS_ASSERT_EQUALS(g.ct.get_or<entity_default_action>(friendly, entity_default_action_t::NONE), entity_default_action_t::RANDOM_MOVE);
-        TS_ASSERT_EQUALS(g.ct.get_or<entity_default_action>(hostile, entity_default_action_t::NONE), entity_default_action_t::RANDOM_MOVE);
-        TS_ASSERT_EQUALS(g.ct.get_or<target_id>(hostile, ENTITYID_INVALID), ENTITYID_INVALID);
+        TS_ASSERT_EQUALS(g.get_component_or<DefaultAction>(friendly, entity_default_action_t::NONE), entity_default_action_t::RANDOM_MOVE);
+        TS_ASSERT_EQUALS(g.get_component_or<DefaultAction>(hostile, entity_default_action_t::NONE), entity_default_action_t::RANDOM_MOVE);
+        TS_ASSERT_EQUALS(g.get_component_or<TargetEntity>(hostile, ENTITYID_INVALID), ENTITYID_INVALID);
 
         g.d.current_floor = 1;
         g.hero_id = g.create_player_at_with(vec3{4, 4, 1}, "hero", g.player_init(10));
         g.update_npcs_state();
 
-        TS_ASSERT_EQUALS(g.ct.get_or<target_id>(hostile, ENTITYID_INVALID), g.hero_id);
-        TS_ASSERT_EQUALS(g.ct.get_or<entity_default_action>(hostile, entity_default_action_t::NONE),
-                         entity_default_action_t::MOVE_TO_TARGET_AND_ATTACK_TARGET_IF_ADJACENT);
+        TS_ASSERT_EQUALS(g.get_component_or<TargetEntity>(hostile, ENTITYID_INVALID), g.hero_id);
+        TS_ASSERT_EQUALS(
+            g.get_component_or<DefaultAction>(hostile, entity_default_action_t::NONE), entity_default_action_t::MOVE_TO_TARGET_AND_ATTACK_TARGET_IF_ADJACENT);
 
         g.hero_id = g.create_player_at_with(vec3{3, 2, 1}, "hero_adjacent", g.player_init(10));
         g.update_npcs_state();
 
-        TS_ASSERT_EQUALS(g.ct.get_or<entity_default_action>(hostile, entity_default_action_t::NONE),
-                         entity_default_action_t::ATTACK_TARGET_IF_ADJACENT);
+        TS_ASSERT_EQUALS(g.get_component_or<DefaultAction>(hostile, entity_default_action_t::NONE), entity_default_action_t::ATTACK_TARGET_IF_ADJACENT);
     }
 
     void testProvokeNpcTurnsFriendlyNpcHostile() {
         gamestate g;
         add_floor(g, 8, 8);
 
-        const entityid friendly = g.create_npc_at_with(race_t::DWARF, vec3{2, 1, 0}, [](gamestate&, const entityid) {});
+        const entityid friendly = g.create_npc_at_with(race_t::DWARF, vec3{2, 1, 0}, [](gamestate&, const entityid) { });
         const entityid hero = g.create_player_at_with(vec3{1, 1, 0}, "hero", g.player_init(10));
 
         TS_ASSERT_DIFFERS(friendly, ENTITYID_INVALID);
         TS_ASSERT_DIFFERS(hero, ENTITYID_INVALID);
-        TS_ASSERT(!g.ct.get_or<aggro>(friendly, true));
+        TS_ASSERT(!g.get_component_or<AggroFlag>(friendly, true));
 
         g.provoke_npc(friendly, hero);
 
-        TS_ASSERT(g.ct.get_or<aggro>(friendly, false));
-        TS_ASSERT_EQUALS(g.ct.get_or<target_id>(friendly, ENTITYID_INVALID), hero);
-        TS_ASSERT_EQUALS(g.ct.get_or<entity_default_action>(friendly, entity_default_action_t::NONE),
-                         entity_default_action_t::ATTACK_TARGET_IF_ADJACENT);
+        TS_ASSERT(g.get_component_or<AggroFlag>(friendly, false));
+        TS_ASSERT_EQUALS(g.get_component_or<TargetEntity>(friendly, ENTITYID_INVALID), hero);
+        TS_ASSERT_EQUALS(g.get_component_or<DefaultAction>(friendly, entity_default_action_t::NONE), entity_default_action_t::ATTACK_TARGET_IF_ADJACENT);
     }
 
     void testAttackingFriendlyNpcSetsAggro() {
@@ -255,17 +252,17 @@ public:
         g.test = true;
         add_floor(g, 8, 8);
 
-        const entityid friendly = g.create_npc_at_with(race_t::DWARF, vec3{2, 1, 0}, [](gamestate&, const entityid) {});
+        const entityid friendly = g.create_npc_at_with(race_t::DWARF, vec3{2, 1, 0}, [](gamestate&, const entityid) { });
         const entityid hero = g.create_player_at_with(vec3{1, 1, 0}, "hero", g.player_init(10));
 
         TS_ASSERT_DIFFERS(friendly, ENTITYID_INVALID);
         TS_ASSERT_DIFFERS(hero, ENTITYID_INVALID);
-        TS_ASSERT(!g.ct.get_or<aggro>(friendly, true));
+        TS_ASSERT(!g.get_component_or<AggroFlag>(friendly, true));
 
         g.run_attack_action(hero, vec3{2, 1, 0});
 
-        TS_ASSERT(g.ct.get_or<aggro>(friendly, false));
-        TS_ASSERT_EQUALS(g.ct.get_or<target_id>(friendly, ENTITYID_INVALID), hero);
+        TS_ASSERT(g.get_component_or<AggroFlag>(friendly, false));
+        TS_ASSERT_EQUALS(g.get_component_or<TargetEntity>(friendly, ENTITYID_INVALID), hero);
     }
 
     void testBoundedMeleeDuelEndsWithConsistentDeathState() {
@@ -275,7 +272,7 @@ public:
         add_floor(g, 8, 8);
 
         const entityid hero = g.create_player_at_with(vec3{1, 1, 0}, "hero", g.player_init(12));
-        const entityid orc = g.create_orc_at_with(vec3{2, 1, 0}, [](gamestate&, const entityid) {});
+        const entityid orc = g.create_orc_at_with(vec3{2, 1, 0}, [](gamestate&, const entityid) { });
 
         TS_ASSERT_DIFFERS(hero, ENTITYID_INVALID);
         TS_ASSERT_DIFFERS(orc, ENTITYID_INVALID);
@@ -299,33 +296,34 @@ public:
 
         bool duel_finished = false;
         for (int round = 0; round < 16 && !duel_finished; ++round) {
-            if (!g.ct.get_or<dead>(hero, true) && !g.ct.get_or<dead>(orc, true)) {
+            if (!g.get_component_or<DeadFlag>(hero, true) && !g.get_component_or<DeadFlag>(orc, true)) {
                 g.run_attack_action(hero, vec3{2, 1, 0});
             }
-            if (!g.ct.get_or<dead>(hero, true) && !g.ct.get_or<dead>(orc, true)) {
+            if (!g.get_component_or<DeadFlag>(hero, true) && !g.get_component_or<DeadFlag>(orc, true)) {
                 g.run_attack_action(orc, vec3{1, 1, 0});
             }
-            duel_finished = g.ct.get_or<dead>(hero, false) || g.ct.get_or<dead>(orc, false);
+            duel_finished = g.get_component_or<DeadFlag>(hero, false) || g.get_component_or<DeadFlag>(orc, false);
         }
 
         TS_ASSERT(duel_finished);
-        TS_ASSERT_DIFFERS(g.ct.get_or<dead>(hero, false), g.ct.get_or<dead>(orc, false));
+        TS_ASSERT_DIFFERS(g.get_component_or<DeadFlag>(hero, false), g.get_component_or<DeadFlag>(orc, false));
 
-        const vec2 hero_hp = g.ct.get_or<hp>(hero, vec2{-1, -1});
-        const vec2 orc_hp = g.ct.get_or<hp>(orc, vec2{-1, -1});
+        const vec2 hero_hp = g.get_component_or<HitPoints>(hero, vec2{-1, -1});
+        const vec2 orc_hp = g.get_component_or<HitPoints>(orc, vec2{-1, -1});
         TS_ASSERT(hero_hp.x <= hero_hp.y);
         TS_ASSERT(orc_hp.x <= orc_hp.y);
 
         tile_t& hero_tile = g.d.get_floor(0)->tile_at(vec3{1, 1, 0});
         tile_t& orc_tile = g.d.get_floor(0)->tile_at(vec3{2, 1, 0});
-        if (g.ct.get_or<dead>(orc, false)) {
+        if (g.get_component_or<DeadFlag>(orc, false)) {
             TS_ASSERT_EQUALS(hero_tile.get_dead_npc_count(), 0U);
             TS_ASSERT_EQUALS(orc_tile.get_dead_npc_count(), 1U);
-            TS_ASSERT_EQUALS(g.ct.get_or<xp>(hero, 0), 1);
-        } else {
+            TS_ASSERT_EQUALS(g.get_component_or<Experience>(hero, 0), 1);
+        }
+        else {
             TS_ASSERT_EQUALS(hero_tile.get_dead_npc_count(), 1U);
             TS_ASSERT_EQUALS(orc_tile.get_dead_npc_count(), 0U);
-            TS_ASSERT_EQUALS(g.ct.get_or<xp>(orc, 0), 0);
+            TS_ASSERT_EQUALS(g.get_component_or<Experience>(orc, 0), 0);
         }
     }
 
@@ -336,7 +334,7 @@ public:
         add_floor(g, 8, 8);
 
         const entityid hero = g.create_player_at_with(vec3{1, 1, 0}, "hero", g.player_init(12));
-        const entityid orc = g.create_orc_at_with(vec3{2, 1, 0}, [](gamestate&, const entityid) {});
+        const entityid orc = g.create_orc_at_with(vec3{2, 1, 0}, [](gamestate&, const entityid) { });
         TS_ASSERT_DIFFERS(hero, ENTITYID_INVALID);
         TS_ASSERT_DIFFERS(orc, ENTITYID_INVALID);
 
@@ -353,7 +351,7 @@ public:
 
         TS_ASSERT_DIFFERS(result, attack_result_t::NONE);
         TS_ASSERT(g.gameplay_events.empty());
-        TS_ASSERT_EQUALS(g.ct.get_or<direction>(hero, direction_t::NONE), direction_t::RIGHT);
+        TS_ASSERT_EQUALS(g.get_component_or<Facing>(hero, direction_t::NONE), direction_t::RIGHT);
     }
 
     void testRunAttackActionProvokesFriendlyNpcThroughQueuedFollowup() {
@@ -362,7 +360,7 @@ public:
         g.mt.seed(24680);
         add_floor(g, 8, 8);
 
-        const entityid friendly = g.create_npc_at_with(race_t::DWARF, vec3{2, 1, 0}, [](gamestate&, const entityid) {});
+        const entityid friendly = g.create_npc_at_with(race_t::DWARF, vec3{2, 1, 0}, [](gamestate&, const entityid) { });
         const entityid hero = g.create_player_at_with(vec3{1, 1, 0}, "hero", g.player_init(12));
         const entityid hero_weapon = g.create_weapon_with(g.sword_init());
         TS_ASSERT_DIFFERS(friendly, ENTITYID_INVALID);
@@ -374,12 +372,12 @@ public:
         g.ct.set<strength>(hero, 18);
         g.ct.set<dexterity>(hero, 18);
 
-        TS_ASSERT(!g.ct.get_or<aggro>(friendly, true));
+        TS_ASSERT(!g.get_component_or<AggroFlag>(friendly, true));
 
         g.run_attack_action(hero, vec3{2, 1, 0});
 
-        TS_ASSERT(g.ct.get_or<aggro>(friendly, false));
-        TS_ASSERT_EQUALS(g.ct.get_or<target_id>(friendly, ENTITYID_INVALID), hero);
+        TS_ASSERT(g.get_component_or<AggroFlag>(friendly, false));
+        TS_ASSERT_EQUALS(g.get_component_or<TargetEntity>(friendly, ENTITYID_INVALID), hero);
         TS_ASSERT(g.gameplay_events.empty());
     }
 
@@ -390,7 +388,7 @@ public:
         add_floor(g, 8, 8);
 
         const entityid hero = g.create_player_at_with(vec3{1, 1, 0}, "hero", g.player_init(12));
-        const entityid orc = g.create_orc_at_with(vec3{2, 1, 0}, [](gamestate&, const entityid) {});
+        const entityid orc = g.create_orc_at_with(vec3{2, 1, 0}, [](gamestate&, const entityid) { });
         TS_ASSERT_DIFFERS(hero, ENTITYID_INVALID);
         TS_ASSERT_DIFFERS(orc, ENTITYID_INVALID);
 
@@ -407,11 +405,11 @@ public:
         const attack_result_t result = g.run_attack_action(hero, vec3{2, 1, 0});
 
         TS_ASSERT_EQUALS(result, attack_result_t::HIT);
-        TS_ASSERT(g.ct.get_or<dead>(orc, false));
+        TS_ASSERT(g.get_component_or<DeadFlag>(orc, false));
         tile_t& target_tile = g.d.get_floor(0)->tile_at(vec3{2, 1, 0});
         TS_ASSERT_EQUALS(target_tile.get_cached_live_npc(), ENTITYID_INVALID);
         TS_ASSERT_EQUALS(target_tile.get_cached_dead_npc(), orc);
-        TS_ASSERT_EQUALS(g.ct.get_or<xp>(hero, 0), 1);
+        TS_ASSERT_EQUALS(g.get_component_or<Experience>(hero, 0), 1);
         TS_ASSERT(g.gameplay_events.empty());
     }
 
@@ -422,7 +420,7 @@ public:
         add_floor(g, 8, 8);
 
         const entityid hero = g.create_player_at_with(vec3{1, 1, 0}, "hero", g.player_init(12));
-        const entityid orc = g.create_orc_at_with(vec3{2, 1, 0}, [](gamestate&, const entityid) {});
+        const entityid orc = g.create_orc_at_with(vec3{2, 1, 0}, [](gamestate&, const entityid) { });
         const entityid hero_weapon = g.create_weapon_with(g.sword_init());
         const entityid loot = g.create_weapon_at_with(g.ct, vec3{2, 1, 0}, g.dagger_init());
         TS_ASSERT_DIFFERS(hero, ENTITYID_INVALID);
@@ -442,9 +440,9 @@ public:
         const attack_result_t result = g.run_attack_action(hero, vec3{2, 1, 0});
 
         TS_ASSERT_EQUALS(result, attack_result_t::HIT);
-        TS_ASSERT(g.ct.get_or<dead>(orc, false));
+        TS_ASSERT(g.get_component_or<DeadFlag>(orc, false));
         TS_ASSERT(!g.is_in_inventory(orc, loot));
-        TS_ASSERT(vec3_equal(g.ct.get_or<location>(loot, vec3{-1, -1, -1}), vec3{2, 1, 0}));
+        TS_ASSERT(vec3_equal(g.get_component_or<Position>(loot, vec3{-1, -1, -1}), vec3{2, 1, 0}));
         tile_t& target_tile = g.d.get_floor(0)->tile_at(vec3{2, 1, 0});
         TS_ASSERT_EQUALS(target_tile.get_cached_item(), loot);
         TS_ASSERT(g.gameplay_events.empty());
@@ -457,7 +455,7 @@ public:
         add_floor(g, 8, 8);
 
         const entityid hero = g.create_player_at_with(vec3{1, 1, 0}, "hero", g.player_init(12));
-        const entityid orc = g.create_orc_at_with(vec3{2, 1, 0}, [](gamestate&, const entityid) {});
+        const entityid orc = g.create_orc_at_with(vec3{2, 1, 0}, [](gamestate&, const entityid) { });
         TS_ASSERT_DIFFERS(hero, ENTITYID_INVALID);
         TS_ASSERT_DIFFERS(orc, ENTITYID_INVALID);
 
@@ -481,10 +479,10 @@ public:
         const attack_result_t result = g.run_attack_action(hero, vec3{2, 1, 0});
 
         TS_ASSERT_EQUALS(result, attack_result_t::BLOCK);
-        const vec2 orc_hp = g.ct.get_or<hp>(orc, vec2{-1, -1});
+        const vec2 orc_hp = g.get_component_or<HitPoints>(orc, vec2{-1, -1});
         TS_ASSERT_EQUALS(orc_hp.x, 12);
         TS_ASSERT_EQUALS(orc_hp.y, 12);
-        TS_ASSERT(g.ct.get_or<block_success>(orc, false));
+        TS_ASSERT(g.get_component_or<BlockSuccessFlag>(orc, false));
         TS_ASSERT(g.gameplay_events.empty());
     }
 
@@ -495,9 +493,7 @@ public:
         add_floor(g, 8, 8);
 
         const entityid hero = g.create_player_at_with(vec3{1, 1, 0}, "hero", g.player_init(12));
-        const entityid orc = g.create_orc_at_with(vec3{2, 1, 0}, [](gamestate& g, const entityid id) {
-            g.ct.set<name>(id, "orc");
-        });
+        const entityid orc = g.create_orc_at_with(vec3{2, 1, 0}, [](gamestate& g, const entityid id) { g.ct.set<name>(id, "orc"); });
         const entityid hero_weapon = g.create_weapon_with(g.sword_init());
         const entityid shield = g.create_shield_with(g.ct, g.shield_init());
         TS_ASSERT_DIFFERS(hero, ENTITYID_INVALID);
@@ -534,9 +530,7 @@ public:
         add_floor(g, 8, 8);
 
         const entityid hero = g.create_player_at_with(vec3{1, 1, 0}, "hero", g.player_init(12));
-        const entityid orc = g.create_orc_at_with(vec3{2, 1, 0}, [](gamestate& g, const entityid id) {
-            g.ct.set<name>(id, "orc");
-        });
+        const entityid orc = g.create_orc_at_with(vec3{2, 1, 0}, [](gamestate& g, const entityid id) { g.ct.set<name>(id, "orc"); });
         const entityid hero_weapon = g.create_weapon_with(g.sword_init());
         TS_ASSERT_DIFFERS(hero, ENTITYID_INVALID);
         TS_ASSERT_DIFFERS(orc, ENTITYID_INVALID);
@@ -570,7 +564,7 @@ public:
         add_floor(g, 8, 8);
 
         const entityid hero = g.create_player_at_with(vec3{1, 1, 0}, "hero", g.player_init(12));
-        const entityid orc = g.create_orc_at_with(vec3{2, 1, 0}, [](gamestate&, const entityid) {});
+        const entityid orc = g.create_orc_at_with(vec3{2, 1, 0}, [](gamestate&, const entityid) { });
         const entityid hero_weapon = g.create_weapon_with(g.sword_init());
         TS_ASSERT_DIFFERS(hero, ENTITYID_INVALID);
         TS_ASSERT_DIFFERS(orc, ENTITYID_INVALID);
@@ -588,8 +582,8 @@ public:
         const attack_result_t result = g.run_attack_action(hero, vec3{2, 1, 0});
 
         TS_ASSERT_EQUALS(result, attack_result_t::HIT);
-        TS_ASSERT_EQUALS(g.ct.get_or<equipped_weapon>(hero, ENTITYID_INVALID), ENTITYID_INVALID);
-        TS_ASSERT(g.ct.get_or<destroyed>(hero_weapon, false));
+        TS_ASSERT_EQUALS(g.get_component_or<EquippedWeapon>(hero, ENTITYID_INVALID), ENTITYID_INVALID);
+        TS_ASSERT(g.get_component_or<DestroyedFlag>(hero_weapon, false));
         TS_ASSERT(!g.is_in_inventory(hero, hero_weapon));
         TS_ASSERT_EQUALS(g.messages.history.size(), initial_history_size + 2);
         TS_ASSERT(g.messages.history[initial_history_size].find("deals") != string::npos);
@@ -604,7 +598,7 @@ public:
         add_floor(g, 8, 8);
 
         const entityid hero = g.create_player_at_with(vec3{1, 1, 0}, "hero", g.player_init(12));
-        const entityid orc = g.create_orc_at_with(vec3{2, 1, 0}, [](gamestate&, const entityid) {});
+        const entityid orc = g.create_orc_at_with(vec3{2, 1, 0}, [](gamestate&, const entityid) { });
         const entityid hero_weapon = g.create_weapon_with(g.sword_init());
         const entityid shield = g.create_shield_with(g.ct, g.shield_init());
         TS_ASSERT_DIFFERS(hero, ENTITYID_INVALID);
@@ -627,8 +621,8 @@ public:
         const attack_result_t result = g.run_attack_action(hero, vec3{2, 1, 0});
 
         TS_ASSERT_EQUALS(result, attack_result_t::BLOCK);
-        TS_ASSERT_EQUALS(g.ct.get_or<equipped_shield>(orc, ENTITYID_INVALID), ENTITYID_INVALID);
-        TS_ASSERT(g.ct.get_or<destroyed>(shield, false));
+        TS_ASSERT_EQUALS(g.get_component_or<EquippedShield>(orc, ENTITYID_INVALID), ENTITYID_INVALID);
+        TS_ASSERT(g.get_component_or<DestroyedFlag>(shield, false));
         TS_ASSERT(!g.is_in_inventory(orc, shield));
         TS_ASSERT_EQUALS(g.messages.history.size(), initial_history_size + 2);
         TS_ASSERT(g.messages.history[initial_history_size].find("blocked an attack") != string::npos);
@@ -643,9 +637,7 @@ public:
         add_floor(g, 8, 8);
 
         const entityid hero = g.create_player_at_with(vec3{1, 1, 0}, "hero", g.player_init(12));
-        const entityid orc = g.create_orc_at_with(vec3{2, 1, 0}, [](gamestate& g, const entityid id) {
-            g.ct.set<name>(id, "orc");
-        });
+        const entityid orc = g.create_orc_at_with(vec3{2, 1, 0}, [](gamestate& g, const entityid id) { g.ct.set<name>(id, "orc"); });
         const entityid hero_weapon = g.create_weapon_with(g.sword_init());
         const entityid shield = g.create_shield_with(g.ct, g.shield_init());
         TS_ASSERT_DIFFERS(hero, ENTITYID_INVALID);
@@ -668,16 +660,16 @@ public:
         const attack_result_t result = g.run_attack_action(hero, vec3{2, 1, 0});
 
         TS_ASSERT_EQUALS(result, attack_result_t::MISS);
-        TS_ASSERT(!g.ct.get_or<damaged>(orc, false));
-        TS_ASSERT(!g.ct.get_or<dead>(orc, false));
-        TS_ASSERT(!g.ct.get_or<block_success>(orc, false));
-        TS_ASSERT_EQUALS(g.ct.get_or<hp>(orc, vec2{-1, -1}).x, 12);
-        TS_ASSERT_EQUALS(g.ct.get_or<durability>(hero_weapon, -1), 5);
-        TS_ASSERT_EQUALS(g.ct.get_or<durability>(shield, -1), 5);
-        TS_ASSERT(g.ct.get_or<aggro>(orc, false));
-        TS_ASSERT_EQUALS(g.ct.get_or<target_id>(orc, ENTITYID_INVALID), hero);
+        TS_ASSERT(!g.get_component_or<DamagedFlag>(orc, false));
+        TS_ASSERT(!g.get_component_or<DeadFlag>(orc, false));
+        TS_ASSERT(!g.get_component_or<BlockSuccessFlag>(orc, false));
+        TS_ASSERT_EQUALS(g.get_component_or<HitPoints>(orc, vec2{-1, -1}).x, 12);
+        TS_ASSERT_EQUALS(g.get_component_or<ItemDurability>(hero_weapon, -1), 5);
+        TS_ASSERT_EQUALS(g.get_component_or<ItemDurability>(shield, -1), 5);
+        TS_ASSERT(g.get_component_or<AggroFlag>(orc, false));
+        TS_ASSERT_EQUALS(g.get_component_or<TargetEntity>(orc, ENTITYID_INVALID), hero);
         TS_ASSERT(g.damage_popups_sys.popups.empty());
-        TS_ASSERT_EQUALS(g.ct.get_or<xp>(hero, 0), 0);
+        TS_ASSERT_EQUALS(g.get_component_or<Experience>(hero, 0), 0);
         TS_ASSERT_EQUALS(g.messages.history.size(), initial_history_size + 1);
         TS_ASSERT(g.messages.history.back().find("misses!") != string::npos);
         TS_ASSERT(g.messages.history.back().find("deals") == string::npos);
@@ -693,9 +685,7 @@ public:
         add_floor(g, 8, 8);
 
         const entityid hero = g.create_player_at_with(vec3{1, 1, 0}, "hero", g.player_init(12));
-        const entityid orc = g.create_orc_at_with(vec3{2, 1, 0}, [](gamestate& g, const entityid id) {
-            g.ct.set<name>(id, "orc");
-        });
+        const entityid orc = g.create_orc_at_with(vec3{2, 1, 0}, [](gamestate& g, const entityid id) { g.ct.set<name>(id, "orc"); });
         const entityid hero_weapon = g.create_weapon_with(g.sword_init());
         TS_ASSERT_DIFFERS(hero, ENTITYID_INVALID);
         TS_ASSERT_DIFFERS(orc, ENTITYID_INVALID);
@@ -714,12 +704,12 @@ public:
         const attack_result_t result = g.run_attack_action(hero, vec3{2, 1, 0});
 
         TS_ASSERT_EQUALS(result, attack_result_t::HIT);
-        TS_ASSERT(g.ct.get_or<dead>(orc, false));
+        TS_ASSERT(g.get_component_or<DeadFlag>(orc, false));
         TS_ASSERT_EQUALS(g.messages.history.size(), initial_history_size + 1);
         TS_ASSERT(g.messages.history.back().find("deals") != string::npos);
         TS_ASSERT(g.messages.history.back().find("broke") == string::npos);
         TS_ASSERT(g.messages.history.back().find("blocked") == string::npos);
-        TS_ASSERT_EQUALS(g.ct.get_or<xp>(hero, 0), 1);
+        TS_ASSERT_EQUALS(g.get_component_or<Experience>(hero, 0), 1);
         TS_ASSERT(!g.messages.is_active);
         TS_ASSERT(g.gameplay_events.empty());
     }
@@ -731,9 +721,7 @@ public:
         add_floor(g, 8, 8);
 
         const entityid hero = g.create_player_at_with(vec3{1, 1, 0}, "hero", g.player_init(12));
-        const entityid orc = g.create_orc_at_with(vec3{2, 1, 0}, [](gamestate& g, const entityid id) {
-            g.ct.set<name>(id, "orc");
-        });
+        const entityid orc = g.create_orc_at_with(vec3{2, 1, 0}, [](gamestate& g, const entityid id) { g.ct.set<name>(id, "orc"); });
         const entityid orc_weapon = g.create_weapon_with(g.sword_init());
         TS_ASSERT_DIFFERS(hero, ENTITYID_INVALID);
         TS_ASSERT_DIFFERS(orc, ENTITYID_INVALID);
@@ -753,8 +741,8 @@ public:
         const attack_result_t result = g.run_attack_action(orc, vec3{1, 1, 0});
 
         TS_ASSERT_EQUALS(result, attack_result_t::HIT);
-        TS_ASSERT(g.ct.get_or<dead>(hero, false));
-        TS_ASSERT(g.ct.get_or<pullable>(hero, false));
+        TS_ASSERT(g.get_component_or<DeadFlag>(hero, false));
+        TS_ASSERT(g.get_component_or<PullableTag>(hero, false));
         TS_ASSERT_EQUALS(hero_tile.get_cached_live_npc(), ENTITYID_INVALID);
         TS_ASSERT_EQUALS(hero_tile.get_cached_dead_npc(), hero);
         TS_ASSERT_EQUALS(g.damage_popups_sys.popups.size(), 1U);
@@ -795,8 +783,8 @@ public:
 
         TS_ASSERT(g.ticks >= before_ticks + static_cast<unsigned long>(num_ticks));
         TS_ASSERT(g.turn_count > before_turns);
-        TS_ASSERT(g.ct.has<dead>(g.hero_id));
-        TS_ASSERT(!g.ct.get_or<dead>(g.hero_id, true));
+        TS_ASSERT(g.has_component<DeadFlag>(g.hero_id));
+        TS_ASSERT(!g.get_component_or<DeadFlag>(g.hero_id, true));
     }
 
     void testResolveAttackDamageEventAddsDamagePopupForHpTarget() {
@@ -804,7 +792,7 @@ public:
         add_floor(g, 8, 8);
 
         const entityid attacker = g.create_player_at_with(vec3{1, 1, 0}, "hero", g.player_init(10));
-        const entityid target = g.create_orc_at_with(vec3{2, 1, 0}, [](gamestate&, const entityid) {});
+        const entityid target = g.create_orc_at_with(vec3{2, 1, 0}, [](gamestate&, const entityid) { });
         TS_ASSERT_DIFFERS(attacker, ENTITYID_INVALID);
         TS_ASSERT_DIFFERS(target, ENTITYID_INVALID);
 
@@ -820,11 +808,11 @@ public:
         gamestate g;
         add_floor(g, 8, 8);
 
-        const entityid target = g.create_orc_at_with(vec3{2, 2, 0}, [](gamestate&, const entityid) {});
+        const entityid target = g.create_orc_at_with(vec3{2, 2, 0}, [](gamestate&, const entityid) { });
         TS_ASSERT_DIFFERS(target, ENTITYID_INVALID);
 
         {
-            const vec3 loc = *g.ct.get<location>(target);
+            const vec3 loc = *g.get_component<Position>(target)->value;
             g.damage_popups_sys.add(loc.x, loc.y, loc.z, 3, false, g.mt);
         }
         TS_ASSERT_EQUALS(g.damage_popups_sys.popups.size(), 1U);

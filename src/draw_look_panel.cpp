@@ -1,7 +1,9 @@
 #include "draw_look_panel.h"
 
+#include "ecs_gameplay_components.h"
+
 void draw_look_panel(gamestate& g) {
-    auto loc = g.ct.get_or<location>(g.hero_id, vec3{-1, -1, -1});
+    auto loc = g.get_component_or<Position>(g.hero_id, vec3{-1, -1, -1});
     auto df = g.d.get_floor(loc.z);
     tile_t& tile = df->tile_at(loc);
     const int entity_count = tile.entity_count() - 1;

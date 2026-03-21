@@ -13,7 +13,7 @@
 void draw_item_detail_panel(gamestate& g, rpg::Renderer& renderer, const Rectangle& right_box, entityid selection_id);
 
 /** @brief Draw the left-side grid of item sprites for an inventory view. */
-void draw_inventory_grid(gamestate& g, rpg::Renderer& renderer, shared_ptr<vector<entityid>> inventory, const Rectangle& left_box, bool show_equipped_labels);
+void draw_inventory_grid(gamestate& g, rpg::Renderer& renderer, const vector<entityid>& inventory, const Rectangle& left_box, bool show_equipped_labels);
 
 /** @brief Draw the full chest transfer menu and selected-item detail view. */
 void draw_chest_menu(gamestate& g, rpg::Renderer& renderer);

@@ -1,6 +1,7 @@
 #include "draw_inventory_menu.h"
 
 #include "draw_chest_menu.h"
+#include "ecs_gameplay_components.h"
 
 void draw_inventory_menu(gamestate& g, rpg::Renderer& renderer) {
     if (!g.ui.display_inventory_menu) {
@@ -34,16 +35,16 @@ void draw_inventory_menu(gamestate& g, rpg::Renderer& renderer) {
     DrawRectangleRec(right_box, g.ui.window_box_bgcolor);
     DrawRectangleLinesEx(right_box, 2, g.ui.window_box_fgcolor);
 
-    auto inv = g.ct.get<inventory>(g.hero_id);
+    const Inventory* inv = g.get_component<Inventory>(g.hero_id);
     if (inv == nullptr) {
         return;
     }
-    draw_inventory_grid(g, renderer, *inv, left_box, true);
+    draw_inventory_grid(g, renderer, inv->value, left_box, true);
 
-    if (!(*inv)->empty()) {
+    if (!inv->value.empty()) {
         size_t index = static_cast<size_t>(g.ui.inventory_cursor.y) * 7 + static_cast<size_t>(g.ui.inventory_cursor.x);
-        if (index < (*inv)->size()) {
-            draw_item_detail_panel(g, renderer, right_box, (*inv)->at(index));
+        if (index < inv->value.size()) {
+            draw_item_detail_panel(g, renderer, right_box, inv->value.at(index));
         }
     }
 }

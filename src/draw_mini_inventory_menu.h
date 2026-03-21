@@ -14,4 +14,4 @@
 Rectangle mini_inventory_panel_for_hero(gamestate& g, float width, float height);
 
 /** @brief Draw the compact inventory/chest panel with preview and scrolling list. */
-void draw_mini_inventory_menu(gamestate& g, rpg::Renderer& renderer, shared_ptr<vector<entityid>> inventory, const char* title, const char* hint, bool show_equipped);
+void draw_mini_inventory_menu(gamestate& g, rpg::Renderer& renderer, const vector<entityid>& inventory, const char* title, const char* hint, bool show_equipped);

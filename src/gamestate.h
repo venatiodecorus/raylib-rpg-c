@@ -14,6 +14,7 @@
 #include "debugpanel.h"
 #include "dungeon.h"
 #include "ecs_core_components.h"
+#include "ecs_gameplay_components.h"
 #include "ecs_world_object_components.h"
 #include "event_type.h"
 #include "gameplay_keybindings.h"
@@ -409,7 +410,7 @@ public:
         }
 
         if (definition.openable) {
-            registry.emplace_or_replace<OpenState>(registry_entity, OpenState{ct.get_or<door_open>(id, false)});
+            registry.emplace_or_replace<OpenState>(registry_entity, OpenState{get_component_or<DoorOpenFlag>(id, false)});
         }
         else if (registry.any_of<OpenState>(registry_entity)) {
             registry.remove<OpenState>(registry_entity);
@@ -1191,7 +1192,7 @@ public:
             if (is_dead) {
                 return messages.add("You cannot attack while dead");
             }
-            if (ct.has<location>(hero_id) && ct.has<direction>(hero_id)) {
+            if (has_component<Position>(hero_id) && has_component<Facing>(hero_id)) {
                 vec3 loc = get_loc_facing_player();
                 run_attack_action(hero_id, loc);
                 flag = gamestate_flag_t::PLAYER_ANIM;
@@ -1288,7 +1289,7 @@ public:
         vec3 loc = {0, 0, 0};
         inventory_count = -1;
         if (hero_id != ENTITYID_INVALID) {
-            loc = ct.get_or<location>(hero_id, vec3{-1, -1, -1});
+            loc = get_component_or<Position>(hero_id, vec3{-1, -1, -1});
         }
         // current df
         shared_ptr<dungeon_floor> df = d.get_current_floor();
@@ -1300,7 +1301,7 @@ public:
         // zero out the buffer
         //memset(debugpanel.buffer, 0, sizeof(debugpanel.buffer));
 
-        direction_t player_dir = ct.get_or<direction>(hero_id, direction_t::NONE);
+        direction_t player_dir = get_component_or<Facing>(hero_id, direction_t::NONE);
 
         bzero(presentation.debugpanel.buffer, sizeof(presentation.debugpanel.buffer));
         // Format the string in one pass
@@ -1364,7 +1365,7 @@ public:
             loc.x,
             loc.y,
             loc.z,
-            ct.get_or<equipped_weapon>(hero_id, ENTITYID_INVALID),
+            get_component_or<EquippedWeapon>(hero_id, ENTITYID_INVALID),
             inventory_count,
             message_count,
             df_w,

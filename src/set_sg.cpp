@@ -1,5 +1,7 @@
 #include "set_sg.h"
 
+#include "ecs_actor_components.h"
+#include "ecs_gameplay_components.h"
 #include "libdraw_update_shield_for_entity.h"
 #include "libdraw_update_weapon_for_entity.h"
 #include "spritegroup_anim.h"
@@ -8,7 +10,7 @@ void libdraw_set_sg_block_success(gamestate& g, rpg::Renderer& renderer, entityi
     minfo("set sg block success");
     massert(id != ENTITYID_INVALID, "entity id is -1");
     massert(sg, "spritegroup is NULL");
-    const race_t r = g.ct.get_or<race>(id, race_t::NONE);
+    const race_t r = (g.get_component<ActorKind>(id) ? g.get_component<ActorKind>(id)->race : race_t::NONE);
     if (r == race_t::GREEN_SLIME) {
         minfo("setting SG_ANIM_SLIME_IDLE");
         sg->set_current(SG_ANIM_SLIME_IDLE);
@@ -27,7 +29,7 @@ void libdraw_set_sg_block_success(gamestate& g, rpg::Renderer& renderer, entityi
 void libdraw_set_sg_is_damaged(gamestate& g, rpg::Renderer& renderer, entityid id, spritegroup* const sg) {
     massert(id != ENTITYID_INVALID, "entity id is -1");
     massert(sg, "spritegroup is NULL");
-    const race_t r = g.ct.get_or<race>(id, race_t::NONE);
+    const race_t r = (g.get_component<ActorKind>(id) ? g.get_component<ActorKind>(id)->race : race_t::NONE);
     const int anim_index = r == race_t::GREEN_SLIME ? SG_ANIM_SLIME_DMG : SG_ANIM_NPC_DMG;
     sg->set_current(anim_index);
 }
@@ -36,15 +38,20 @@ void libdraw_set_sg_is_dead(gamestate& g, rpg::Renderer& renderer, entityid id, 
     massert(id != ENTITYID_INVALID, "entity id is -1");
     massert(sg, "spritegroup is NULL");
 
-    if (!g.ct.has<dead>(id)) {
+    if (!g.has_component<DeadFlag>(id)) {
         return;
     }
 
-    if (!*g.ct.get<dead>(id)) {
+    const DeadFlag* dead_ptr = g.get_component<DeadFlag>(id);
+    if (!dead_ptr->value) {
         return;
     }
 
-    const race_t r = *g.ct.get<race>(id);
+    const ActorKind* race_ptr = g.get_component<ActorKind>(id);
+    if (!race_ptr) {
+        return;
+    }
+    const race_t r = race_ptr->race;
     if (r == race_t::NONE) {
         return;
     }
@@ -67,7 +74,7 @@ void libdraw_set_sg_is_dead(gamestate& g, rpg::Renderer& renderer, entityid id, 
 void libdraw_set_sg_is_attacking(gamestate& g, rpg::Renderer& renderer, entityid id, spritegroup* const sg) {
     massert(id != ENTITYID_INVALID, "entityid is invalid");
     massert(sg, "spritegroup is NULL");
-    const race_t r = g.ct.get_or<race>(id, race_t::NONE);
+    const race_t r = (g.get_component<ActorKind>(id) ? g.get_component<ActorKind>(id)->race : race_t::NONE);
     massert(r != race_t::NONE, "race cant be none");
     sg->set_current(
         r == race_t::GREEN_SLIME ? SG_ANIM_SLIME_JUMP_ATTACK

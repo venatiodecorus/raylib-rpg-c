@@ -1,5 +1,6 @@
 #pragma once
 
+#include "../ecs_gameplay_components.h"
 #include "../gamestate.h"
 #include "../sfx.h"
 #include <cxxtest/TestSuite.h>
@@ -15,7 +16,7 @@ private:
     }
 
     entityid create_hero(gamestate& g, vec3 loc) {
-        return g.create_player_at_with(loc, "hero", [](gamestate&, const entityid) {});
+        return g.create_player_at_with(loc, "hero", [](gamestate&, const entityid) { });
     }
 
     void press_key(inputstate& is, int key) {
@@ -41,10 +42,10 @@ public:
 
         TS_ASSERT(g.try_entity_pickup(hero));
 
-        auto inv = g.ct.get<inventory>(hero);
+        auto inv = g.get_component<Inventory>(hero);
         TS_ASSERT(inv != nullptr);
-        TS_ASSERT_EQUALS((*inv)->size(), 1U);
-        TS_ASSERT_EQUALS((*inv)->at(0), potion);
+        TS_ASSERT_EQUALS(inv->value.size(), 1U);
+        TS_ASSERT_EQUALS(inv->value.at(0), potion);
         TS_ASSERT(g.is_in_inventory(hero, potion));
         TS_ASSERT(!g.is_in_inventory(hero, dagger));
         TS_ASSERT_EQUALS(g.d.get_floor(0)->tile_at(loc).get_cached_item(), dagger);
@@ -65,10 +66,10 @@ public:
 
         TS_ASSERT(g.run_pickup_action(hero));
 
-        auto inv = g.ct.get<inventory>(hero);
+        auto inv = g.get_component<Inventory>(hero);
         TS_ASSERT(inv != nullptr);
-        TS_ASSERT_EQUALS((*inv)->size(), 1U);
-        TS_ASSERT_EQUALS((*inv)->at(0), potion);
+        TS_ASSERT_EQUALS(inv->value.size(), 1U);
+        TS_ASSERT_EQUALS(inv->value.at(0), potion);
         TS_ASSERT(g.is_in_inventory(hero, potion));
         TS_ASSERT(!g.is_in_inventory(hero, dagger));
         TS_ASSERT_EQUALS(g.d.get_floor(0)->tile_at(loc).get_cached_item(), dagger);
@@ -82,9 +83,9 @@ public:
         TS_ASSERT_DIFFERS(hero, ENTITYID_INVALID);
 
         TS_ASSERT(!g.run_pickup_action(hero));
-        auto inv = g.ct.get<inventory>(hero);
+        auto inv = g.get_component<Inventory>(hero);
         TS_ASSERT(inv != nullptr);
-        TS_ASSERT_EQUALS((*inv)->size(), 0U);
+        TS_ASSERT_EQUALS(inv->value.size(), 0U);
         TS_ASSERT(g.queue_state.gameplay_events.empty());
     }
 
@@ -97,13 +98,13 @@ public:
         TS_ASSERT(g.add_to_inventory(hero, dagger));
         TS_ASSERT(g.is_in_inventory(hero, dagger));
 
-        auto inv = g.ct.get<inventory>(hero);
+        auto inv = g.get_component<Inventory>(hero);
         TS_ASSERT(inv != nullptr);
-        TS_ASSERT_EQUALS((*inv)->size(), 1U);
+        TS_ASSERT_EQUALS(inv->value.size(), 1U);
 
         TS_ASSERT(g.remove_from_inventory(hero, dagger));
         TS_ASSERT(!g.is_in_inventory(hero, dagger));
-        TS_ASSERT_EQUALS((*g.ct.get<inventory>(hero))->size(), 0U);
+        TS_ASSERT_EQUALS(g.get_component<Inventory>(hero)->value.size(), 0U);
         TS_ASSERT(!g.remove_from_inventory(hero, dagger));
     }
 
@@ -117,14 +118,14 @@ public:
         g.ui.display_inventory_menu = true;
         g.handle_hero_inventory_equip_weapon(dagger);
 
-        TS_ASSERT_EQUALS(g.ct.get_or<equipped_weapon>(hero, ENTITYID_INVALID), dagger);
+        TS_ASSERT_EQUALS(g.get_component_or<EquippedWeapon>(hero, ENTITYID_INVALID), dagger);
         TS_ASSERT_EQUALS(g.flag, gamestate_flag_t::PLAYER_ANIM);
         TS_ASSERT_EQUALS(g.controlmode, controlmode_t::PLAYER);
         TS_ASSERT(!g.ui.display_inventory_menu);
 
         g.ui.display_inventory_menu = true;
         g.handle_hero_inventory_equip_weapon(dagger);
-        TS_ASSERT_EQUALS(g.ct.get_or<equipped_weapon>(hero, ENTITYID_INVALID), ENTITYID_INVALID);
+        TS_ASSERT_EQUALS(g.get_component_or<EquippedWeapon>(hero, ENTITYID_INVALID), ENTITYID_INVALID);
         TS_ASSERT(!g.ui.display_inventory_menu);
     }
 
@@ -140,7 +141,7 @@ public:
         g.controlmode = controlmode_t::INVENTORY;
 
         TS_ASSERT(g.run_equip_item_action(hero, dagger));
-        TS_ASSERT_EQUALS(g.ct.get_or<equipped_weapon>(hero, ENTITYID_INVALID), dagger);
+        TS_ASSERT_EQUALS(g.get_component_or<EquippedWeapon>(hero, ENTITYID_INVALID), dagger);
         TS_ASSERT_EQUALS(g.flag, gamestate_flag_t::PLAYER_ANIM);
         TS_ASSERT_EQUALS(g.controlmode, controlmode_t::PLAYER);
         TS_ASSERT(!g.ui.display_inventory_menu);
@@ -149,7 +150,7 @@ public:
         g.ui.display_inventory_menu = true;
         g.controlmode = controlmode_t::INVENTORY;
         TS_ASSERT(g.run_equip_item_action(hero, dagger));
-        TS_ASSERT_EQUALS(g.ct.get_or<equipped_weapon>(hero, ENTITYID_INVALID), ENTITYID_INVALID);
+        TS_ASSERT_EQUALS(g.get_component_or<EquippedWeapon>(hero, ENTITYID_INVALID), ENTITYID_INVALID);
         TS_ASSERT_EQUALS(g.controlmode, controlmode_t::PLAYER);
         TS_ASSERT(!g.ui.display_inventory_menu);
         TS_ASSERT(g.queue_state.gameplay_events.empty());
@@ -165,14 +166,14 @@ public:
         g.ui.display_inventory_menu = true;
         g.handle_hero_inventory_equip_shield(shield);
 
-        TS_ASSERT_EQUALS(g.ct.get_or<equipped_shield>(hero, ENTITYID_INVALID), shield);
+        TS_ASSERT_EQUALS(g.get_component_or<EquippedShield>(hero, ENTITYID_INVALID), shield);
         TS_ASSERT_EQUALS(g.flag, gamestate_flag_t::PLAYER_ANIM);
         TS_ASSERT_EQUALS(g.controlmode, controlmode_t::PLAYER);
         TS_ASSERT(!g.ui.display_inventory_menu);
 
         g.ui.display_inventory_menu = true;
         g.handle_hero_inventory_equip_shield(shield);
-        TS_ASSERT_EQUALS(g.ct.get_or<equipped_shield>(hero, ENTITYID_INVALID), ENTITYID_INVALID);
+        TS_ASSERT_EQUALS(g.get_component_or<EquippedShield>(hero, ENTITYID_INVALID), ENTITYID_INVALID);
         TS_ASSERT(!g.ui.display_inventory_menu);
     }
 
@@ -188,7 +189,7 @@ public:
         g.controlmode = controlmode_t::INVENTORY;
 
         TS_ASSERT(g.run_equip_item_action(hero, shield));
-        TS_ASSERT_EQUALS(g.ct.get_or<equipped_shield>(hero, ENTITYID_INVALID), shield);
+        TS_ASSERT_EQUALS(g.get_component_or<EquippedShield>(hero, ENTITYID_INVALID), shield);
         TS_ASSERT_EQUALS(g.flag, gamestate_flag_t::PLAYER_ANIM);
         TS_ASSERT_EQUALS(g.controlmode, controlmode_t::PLAYER);
         TS_ASSERT(!g.ui.display_inventory_menu);
@@ -197,7 +198,7 @@ public:
         g.ui.display_inventory_menu = true;
         g.controlmode = controlmode_t::INVENTORY;
         TS_ASSERT(g.run_equip_item_action(hero, shield));
-        TS_ASSERT_EQUALS(g.ct.get_or<equipped_shield>(hero, ENTITYID_INVALID), ENTITYID_INVALID);
+        TS_ASSERT_EQUALS(g.get_component_or<EquippedShield>(hero, ENTITYID_INVALID), ENTITYID_INVALID);
         TS_ASSERT_EQUALS(g.controlmode, controlmode_t::PLAYER);
         TS_ASSERT(!g.ui.display_inventory_menu);
         TS_ASSERT(g.queue_state.gameplay_events.empty());
@@ -215,8 +216,8 @@ public:
         g.controlmode = controlmode_t::INVENTORY;
 
         TS_ASSERT(!g.run_equip_item_action(hero, potion));
-        TS_ASSERT_EQUALS(g.ct.get_or<equipped_weapon>(hero, ENTITYID_INVALID), ENTITYID_INVALID);
-        TS_ASSERT_EQUALS(g.ct.get_or<equipped_shield>(hero, ENTITYID_INVALID), ENTITYID_INVALID);
+        TS_ASSERT_EQUALS(g.get_component_or<EquippedWeapon>(hero, ENTITYID_INVALID), ENTITYID_INVALID);
+        TS_ASSERT_EQUALS(g.get_component_or<EquippedShield>(hero, ENTITYID_INVALID), ENTITYID_INVALID);
         TS_ASSERT(g.ui.display_inventory_menu);
         TS_ASSERT_EQUALS(g.controlmode, controlmode_t::INVENTORY);
         TS_ASSERT(g.queue_state.gameplay_events.empty());
@@ -234,9 +235,9 @@ public:
 
         TS_ASSERT(g.drop_item_from_hero_inventory());
 
-        TS_ASSERT_EQUALS((*g.ct.get<inventory>(hero))->size(), 0U);
-        TS_ASSERT_EQUALS(g.ct.get_or<equipped_weapon>(hero, ENTITYID_INVALID), ENTITYID_INVALID);
-        TS_ASSERT(vec3_equal(g.ct.get_or<location>(dagger, vec3{-1, -1, -1}), loc));
+        TS_ASSERT_EQUALS(g.get_component<Inventory>(hero)->value.size(), 0U);
+        TS_ASSERT_EQUALS(g.get_component_or<EquippedWeapon>(hero, ENTITYID_INVALID), ENTITYID_INVALID);
+        TS_ASSERT(vec3_equal(g.get_component_or<Position>(dagger, vec3{-1, -1, -1}), loc));
         TS_ASSERT_EQUALS(g.d.get_floor(0)->tile_at(loc).get_cached_item(), dagger);
     }
 
@@ -254,7 +255,7 @@ public:
         TS_ASSERT(g.run_drop_item_action(hero, dagger));
 
         TS_ASSERT(!g.is_in_inventory(hero, dagger));
-        TS_ASSERT(vec3_equal(g.ct.get_or<location>(dagger, vec3{-1, -1, -1}), loc));
+        TS_ASSERT(vec3_equal(g.get_component_or<Position>(dagger, vec3{-1, -1, -1}), loc));
         TS_ASSERT_EQUALS(g.d.get_floor(0)->tile_at(loc).get_cached_item(), dagger);
         TS_ASSERT(g.ui.display_inventory_menu);
         TS_ASSERT_EQUALS(g.controlmode, controlmode_t::INVENTORY);
@@ -272,7 +273,7 @@ public:
         g.hero_id = hero;
 
         TS_ASSERT(g.run_drop_item_action(hero, dagger));
-        TS_ASSERT_EQUALS(g.ct.get_or<equipped_weapon>(hero, ENTITYID_INVALID), ENTITYID_INVALID);
+        TS_ASSERT_EQUALS(g.get_component_or<EquippedWeapon>(hero, ENTITYID_INVALID), ENTITYID_INVALID);
         TS_ASSERT_EQUALS(g.d.get_floor(0)->tile_at(loc).get_cached_item(), dagger);
         TS_ASSERT(g.queue_state.gameplay_events.empty());
     }
@@ -300,8 +301,8 @@ public:
         TS_ASSERT(g.use_potion(hero, potion));
 
         TS_ASSERT(!g.is_in_inventory(hero, potion));
-        TS_ASSERT_EQUALS((*g.ct.get<inventory>(hero))->size(), 0U);
-        const vec2 hp_value = g.ct.get_or<hp>(hero, vec2{0, 0});
+        TS_ASSERT_EQUALS(g.get_component<Inventory>(hero)->value.size(), 0U);
+        const vec2 hp_value = g.get_component_or<HitPoints>(hero, vec2{0, 0});
         TS_ASSERT(hp_value.x >= 3);
         TS_ASSERT(hp_value.x <= 8);
         TS_ASSERT_EQUALS(hp_value.y, 10);
@@ -322,7 +323,7 @@ public:
 
         TS_ASSERT(g.run_use_item_action(hero, potion));
         TS_ASSERT(!g.is_in_inventory(hero, potion));
-        TS_ASSERT(g.ct.get_or<hp>(hero, vec2{0, 0}).x > 3);
+        TS_ASSERT(g.get_component_or<HitPoints>(hero, vec2{0, 0}).x > 3);
         TS_ASSERT_EQUALS(g.flag, gamestate_flag_t::PLAYER_ANIM);
         TS_ASSERT_EQUALS(g.controlmode, controlmode_t::PLAYER);
         TS_ASSERT(!g.ui.display_inventory_menu);
@@ -352,7 +353,7 @@ public:
         g.audio.sfx.resize(71);
         const vec3 loc = add_initialized_floor(g);
         const entityid hero = create_hero(g, loc);
-        const entityid chest = g.create_chest_at_with(vec3{2, 1, 0}, [](gamestate&, const entityid) {});
+        const entityid chest = g.create_chest_at_with(vec3{2, 1, 0}, [](gamestate&, const entityid) { });
         const entityid dagger = g.create_weapon_at_with(g.ct, loc, g.dagger_init());
 
         TS_ASSERT_DIFFERS(chest, ENTITYID_INVALID);
@@ -383,7 +384,7 @@ public:
         gamestate g;
         const vec3 loc = add_initialized_floor(g);
         const entityid hero = create_hero(g, loc);
-        const entityid chest = g.create_chest_at_with(vec3{2, 1, 0}, [](gamestate&, const entityid) {});
+        const entityid chest = g.create_chest_at_with(vec3{2, 1, 0}, [](gamestate&, const entityid) { });
         const entityid dagger = g.create_weapon_at_with(g.ct, loc, g.dagger_init());
 
         TS_ASSERT_DIFFERS(chest, ENTITYID_INVALID);
@@ -402,7 +403,7 @@ public:
         gamestate g;
         const vec3 loc = add_initialized_floor(g);
         const entityid hero = create_hero(g, loc);
-        const entityid chest = g.create_chest_at_with(vec3{2, 1, 0}, [](gamestate&, const entityid) {});
+        const entityid chest = g.create_chest_at_with(vec3{2, 1, 0}, [](gamestate&, const entityid) { });
         const entityid dagger = g.create_weapon_at_with(g.ct, loc, g.dagger_init());
 
         TS_ASSERT_DIFFERS(chest, ENTITYID_INVALID);
@@ -423,7 +424,7 @@ public:
         gamestate g;
         const vec3 loc = add_initialized_floor(g);
         const entityid hero = create_hero(g, loc);
-        const entityid chest = g.create_chest_at_with(vec3{2, 1, 0}, [](gamestate&, const entityid) {});
+        const entityid chest = g.create_chest_at_with(vec3{2, 1, 0}, [](gamestate&, const entityid) { });
         const entityid dagger = g.create_weapon_at_with(g.ct, loc, g.dagger_init());
 
         TS_ASSERT(g.add_to_inventory(hero, dagger));
@@ -431,7 +432,7 @@ public:
         g.ct.set<equipped_weapon>(hero, dagger);
 
         TS_ASSERT(g.run_chest_transfer_action(hero, chest, dagger));
-        TS_ASSERT_EQUALS(g.ct.get_or<equipped_weapon>(hero, ENTITYID_INVALID), ENTITYID_INVALID);
+        TS_ASSERT_EQUALS(g.get_component_or<EquippedWeapon>(hero, ENTITYID_INVALID), ENTITYID_INVALID);
         TS_ASSERT(g.is_in_inventory(chest, dagger));
         TS_ASSERT(g.queue_state.gameplay_events.empty());
     }
@@ -441,7 +442,7 @@ public:
         g.audio.sfx.resize(71);
         const vec3 loc = add_initialized_floor(g);
         const entityid hero = create_hero(g, loc);
-        const entityid chest = g.create_chest_at_with(vec3{2, 1, 0}, [](gamestate&, const entityid) {});
+        const entityid chest = g.create_chest_at_with(vec3{2, 1, 0}, [](gamestate&, const entityid) { });
 
         TS_ASSERT_DIFFERS(hero, ENTITYID_INVALID);
         TS_ASSERT_DIFFERS(chest, ENTITYID_INVALID);

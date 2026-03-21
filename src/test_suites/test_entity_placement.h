@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../gamestate.h"
+#include "../ecs_gameplay_components.h"
 #include <cxxtest/TestSuite.h>
 
 class EntityPlacementTestSuite : public CxxTest::TestSuite {
@@ -56,18 +57,18 @@ public:
 
         size_t verified = 0;
         g.for_entities_of_type(entitytype_t::DOOR, [&](entityid id) {
-            const auto* maybe_loc = g.ct.get<location>(id);
+            const auto* maybe_loc = g.get_component<Position>(id);
             TS_ASSERT(maybe_loc != nullptr);
-            const vec3 loc = *maybe_loc;
+            const vec3 loc = maybe_loc->value;
             TS_ASSERT(vec3_valid(loc));
 
             auto df = g.d.get_floor(static_cast<size_t>(loc.z));
             tile_t& tile = df->tile_at(loc);
             TS_ASSERT_EQUALS(tile.get_cached_door(), id);
             TS_ASSERT(tile_is_walkable(tile.get_type()));
-            TS_ASSERT(g.ct.get<door_open>(id) != nullptr);
-            TS_ASSERT(!g.ct.get_or<door_open>(id, true));
-            TS_ASSERT(g.ct.get_or<update>(id, false));
+            TS_ASSERT(g.get_component<DoorOpenFlag>(id) != nullptr);
+            TS_ASSERT(!g.get_component_or<DoorOpenFlag>(id, true));
+            TS_ASSERT(g.get_component_or<NeedsUpdate>(id, false));
             verified++;
         });
 
@@ -90,9 +91,9 @@ public:
 
         size_t verified = 0;
         g.for_entities_of_type(entitytype_t::PROP, [&](entityid id) {
-            const auto* maybe_loc = g.ct.get<location>(id);
+            const auto* maybe_loc = g.get_component<Position>(id);
             TS_ASSERT(maybe_loc != nullptr);
-            const vec3 loc = *maybe_loc;
+            const vec3 loc = maybe_loc->value;
             TS_ASSERT(vec3_valid(loc));
 
             auto df = g.d.get_floor(static_cast<size_t>(loc.z));
@@ -102,12 +103,12 @@ public:
             TS_ASSERT(tile.get_type() != tiletype_t::UPSTAIRS);
             TS_ASSERT(tile.get_type() != tiletype_t::DOWNSTAIRS);
             TS_ASSERT(!tile.get_can_have_door());
-            TS_ASSERT(g.ct.get_or<proptype>(id, proptype_t::NONE) != proptype_t::NONE);
-            TS_ASSERT(g.ct.get<name>(id) != nullptr);
-            TS_ASSERT(g.ct.get<description>(id) != nullptr);
-            TS_ASSERT(g.ct.get<solid>(id) != nullptr);
-            TS_ASSERT(g.ct.get<pushable>(id) != nullptr);
-            TS_ASSERT(g.ct.get_or<update>(id, false));
+            TS_ASSERT(g.get_component_or<PropTypeComponent>(id, proptype_t::NONE) != proptype_t::NONE);
+            TS_ASSERT(g.get_component<EntityName>(id) != nullptr);
+            TS_ASSERT(g.get_component<EntityDescription>(id) != nullptr);
+            TS_ASSERT(g.get_component<SolidTag>(id) != nullptr);
+            TS_ASSERT(g.get_component<PushableTag>(id) != nullptr);
+            TS_ASSERT(g.get_component_or<NeedsUpdate>(id, false));
             verified++;
         });
 
@@ -135,7 +136,7 @@ public:
 
         size_t tutorial_floor_props = 0;
         g.for_entities_of_type(entitytype_t::PROP, [&](entityid id) {
-            const vec3 loc = g.ct.get_or<location>(id, vec3{-1, -1, -1});
+            const vec3 loc = g.get_component_or<Position>(id, vec3{-1, -1, -1});
             TS_ASSERT(vec3_valid(loc));
             if (loc.z == 2) {
                 tutorial_floor_props++;
