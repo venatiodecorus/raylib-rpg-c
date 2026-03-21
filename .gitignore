@@ -70,3 +70,4 @@ tests_heavy
 tests_heavy.cpp
 *.rar
 *.zip
+.claude/

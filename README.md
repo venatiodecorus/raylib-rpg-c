@@ -1,4 +1,4 @@
-[@evildojo666](https://x.com/evildojo666) presents...
+[@venatiodecorus](https://x.com/venatiodecorus) presents...
 
 # Project.RPG 
 
@@ -74,4 +74,4 @@ make tests
 - Unit tests can be built and run using the `test` target
 - The game graphic and audio assets are not included in the repository
   - The graphics are licensed such that I cannot distribute them
-  - The sound effects are licensed such that I cannot distribute them  
+  - The sound effects are licensed such that I cannot distribute them
