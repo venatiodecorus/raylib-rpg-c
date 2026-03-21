@@ -136,7 +136,7 @@ These must be addressed first because everything else depends on them.
   - `ComponentTable::has()` calls `getStore<Kind>()` twice (redundant hash).
   - Consider returning `const T*` or `T*` instead of `optional<T>`.
 
-- [ ] **Optimize A* pathfinding**
+- [x] **Optimize A* pathfinding**
   - `gamestate_npc_combat_impl.h:357-457`: allocates three `std::map` trees +
     a `priority_queue` per NPC per turn. Uses ordered `map` (O(log n)) instead
     of `unordered_map` (O(1)). Maintain a reusable pathfinder object.

@@ -38,6 +38,7 @@
 #include "scene.h"
 #include "audio_manager.h"
 #include "message_log.h"
+#include "pathfinder.h"
 #include "damage_popups.h"
 #include "stat_bonus.h"
 #include "texture_ids.h"
@@ -119,6 +120,7 @@ public:
     scene_t current_scene;
     rpg::MessageLog messages;
     rpg::AudioManager audio;
+    Pathfinder pathfinder;
     character_creation chara_creation;
     ComponentTable ct;
     entt::registry registry;
