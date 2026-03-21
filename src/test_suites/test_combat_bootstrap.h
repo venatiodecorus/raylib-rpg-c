@@ -22,7 +22,7 @@ public:
         std::set<entityid> ids;
         const vec3 locs[] = {{1, 1, 0}, {2, 1, 0}, {3, 1, 0}, {4, 1, 0}};
         for (const vec3 loc : locs) {
-            const entityid id = g.create_orc_at_with(loc, [](CT&, const entityid) {});
+            const entityid id = g.create_orc_at_with(loc, [](gamestate&, const entityid) {});
             TS_ASSERT_DIFFERS(id, ENTITYID_INVALID);
             ids.insert(id);
             TS_ASSERT_EQUALS(g.ct.get_or<entitytype>(id, entitytype_t::NONE), entitytype_t::NPC);
@@ -47,8 +47,8 @@ public:
         add_floor(g, 8, 8);
 
         const vec3 loc{1, 1, 0};
-        const entityid first = g.create_orc_at_with(loc, [](CT&, const entityid) {});
-        const entityid second = g.create_orc_at_with(loc, [](CT&, const entityid) {});
+        const entityid first = g.create_orc_at_with(loc, [](gamestate&, const entityid) {});
+        const entityid second = g.create_orc_at_with(loc, [](gamestate&, const entityid) {});
 
         TS_ASSERT_DIFFERS(first, ENTITYID_INVALID);
         TS_ASSERT_EQUALS(second, ENTITYID_INVALID);
@@ -70,7 +70,7 @@ public:
         std::set<entityid> ids;
         for (int y = 0; y < 3; ++y) {
             for (int x = 0; x < 3; ++x) {
-                const entityid id = g.create_orc_at_with(vec3{x, y, 0}, [](CT&, const entityid) {});
+                const entityid id = g.create_orc_at_with(vec3{x, y, 0}, [](gamestate&, const entityid) {});
                 TS_ASSERT_DIFFERS(id, ENTITYID_INVALID);
                 ids.insert(id);
             }
@@ -88,7 +88,7 @@ public:
         }
 
         const entityid before_next_entity = g.next_entityid;
-        const entityid extra = g.create_orc_at_with(vec3{1, 1, 0}, [](CT&, const entityid) {});
+        const entityid extra = g.create_orc_at_with(vec3{1, 1, 0}, [](gamestate&, const entityid) {});
 
         TS_ASSERT_EQUALS(extra, ENTITYID_INVALID);
         TS_ASSERT_EQUALS(g.next_entityid, before_next_entity);
@@ -204,8 +204,8 @@ public:
         add_floor(g, 8, 8);
         add_floor(g, 8, 8);
 
-        const entityid friendly = g.create_npc_at_with(race_t::DWARF, vec3{1, 1, 0}, [](CT&, const entityid) {});
-        const entityid hostile = g.create_orc_at_with(vec3{2, 2, 1}, [](CT&, const entityid) {});
+        const entityid friendly = g.create_npc_at_with(race_t::DWARF, vec3{1, 1, 0}, [](gamestate&, const entityid) {});
+        const entityid hostile = g.create_orc_at_with(vec3{2, 2, 1}, [](gamestate&, const entityid) {});
 
         TS_ASSERT_DIFFERS(friendly, ENTITYID_INVALID);
         TS_ASSERT_DIFFERS(hostile, ENTITYID_INVALID);
@@ -235,7 +235,7 @@ public:
         gamestate g;
         add_floor(g, 8, 8);
 
-        const entityid friendly = g.create_npc_at_with(race_t::DWARF, vec3{2, 1, 0}, [](CT&, const entityid) {});
+        const entityid friendly = g.create_npc_at_with(race_t::DWARF, vec3{2, 1, 0}, [](gamestate&, const entityid) {});
         const entityid hero = g.create_player_at_with(vec3{1, 1, 0}, "hero", g.player_init(10));
 
         TS_ASSERT_DIFFERS(friendly, ENTITYID_INVALID);
@@ -255,7 +255,7 @@ public:
         g.test = true;
         add_floor(g, 8, 8);
 
-        const entityid friendly = g.create_npc_at_with(race_t::DWARF, vec3{2, 1, 0}, [](CT&, const entityid) {});
+        const entityid friendly = g.create_npc_at_with(race_t::DWARF, vec3{2, 1, 0}, [](gamestate&, const entityid) {});
         const entityid hero = g.create_player_at_with(vec3{1, 1, 0}, "hero", g.player_init(10));
 
         TS_ASSERT_DIFFERS(friendly, ENTITYID_INVALID);
@@ -275,7 +275,7 @@ public:
         add_floor(g, 8, 8);
 
         const entityid hero = g.create_player_at_with(vec3{1, 1, 0}, "hero", g.player_init(12));
-        const entityid orc = g.create_orc_at_with(vec3{2, 1, 0}, [](CT&, const entityid) {});
+        const entityid orc = g.create_orc_at_with(vec3{2, 1, 0}, [](gamestate&, const entityid) {});
 
         TS_ASSERT_DIFFERS(hero, ENTITYID_INVALID);
         TS_ASSERT_DIFFERS(orc, ENTITYID_INVALID);
@@ -336,7 +336,7 @@ public:
         add_floor(g, 8, 8);
 
         const entityid hero = g.create_player_at_with(vec3{1, 1, 0}, "hero", g.player_init(12));
-        const entityid orc = g.create_orc_at_with(vec3{2, 1, 0}, [](CT&, const entityid) {});
+        const entityid orc = g.create_orc_at_with(vec3{2, 1, 0}, [](gamestate&, const entityid) {});
         TS_ASSERT_DIFFERS(hero, ENTITYID_INVALID);
         TS_ASSERT_DIFFERS(orc, ENTITYID_INVALID);
 
@@ -362,7 +362,7 @@ public:
         g.mt.seed(24680);
         add_floor(g, 8, 8);
 
-        const entityid friendly = g.create_npc_at_with(race_t::DWARF, vec3{2, 1, 0}, [](CT&, const entityid) {});
+        const entityid friendly = g.create_npc_at_with(race_t::DWARF, vec3{2, 1, 0}, [](gamestate&, const entityid) {});
         const entityid hero = g.create_player_at_with(vec3{1, 1, 0}, "hero", g.player_init(12));
         const entityid hero_weapon = g.create_weapon_with(g.sword_init());
         TS_ASSERT_DIFFERS(friendly, ENTITYID_INVALID);
@@ -390,7 +390,7 @@ public:
         add_floor(g, 8, 8);
 
         const entityid hero = g.create_player_at_with(vec3{1, 1, 0}, "hero", g.player_init(12));
-        const entityid orc = g.create_orc_at_with(vec3{2, 1, 0}, [](CT&, const entityid) {});
+        const entityid orc = g.create_orc_at_with(vec3{2, 1, 0}, [](gamestate&, const entityid) {});
         TS_ASSERT_DIFFERS(hero, ENTITYID_INVALID);
         TS_ASSERT_DIFFERS(orc, ENTITYID_INVALID);
 
@@ -422,7 +422,7 @@ public:
         add_floor(g, 8, 8);
 
         const entityid hero = g.create_player_at_with(vec3{1, 1, 0}, "hero", g.player_init(12));
-        const entityid orc = g.create_orc_at_with(vec3{2, 1, 0}, [](CT&, const entityid) {});
+        const entityid orc = g.create_orc_at_with(vec3{2, 1, 0}, [](gamestate&, const entityid) {});
         const entityid hero_weapon = g.create_weapon_with(g.sword_init());
         const entityid loot = g.create_weapon_at_with(g.ct, vec3{2, 1, 0}, g.dagger_init());
         TS_ASSERT_DIFFERS(hero, ENTITYID_INVALID);
@@ -457,7 +457,7 @@ public:
         add_floor(g, 8, 8);
 
         const entityid hero = g.create_player_at_with(vec3{1, 1, 0}, "hero", g.player_init(12));
-        const entityid orc = g.create_orc_at_with(vec3{2, 1, 0}, [](CT&, const entityid) {});
+        const entityid orc = g.create_orc_at_with(vec3{2, 1, 0}, [](gamestate&, const entityid) {});
         TS_ASSERT_DIFFERS(hero, ENTITYID_INVALID);
         TS_ASSERT_DIFFERS(orc, ENTITYID_INVALID);
 
@@ -495,8 +495,8 @@ public:
         add_floor(g, 8, 8);
 
         const entityid hero = g.create_player_at_with(vec3{1, 1, 0}, "hero", g.player_init(12));
-        const entityid orc = g.create_orc_at_with(vec3{2, 1, 0}, [](CT& ct, const entityid id) {
-            ct.set<name>(id, "orc");
+        const entityid orc = g.create_orc_at_with(vec3{2, 1, 0}, [](gamestate& g, const entityid id) {
+            g.ct.set<name>(id, "orc");
         });
         const entityid hero_weapon = g.create_weapon_with(g.sword_init());
         const entityid shield = g.create_shield_with(g.ct, g.shield_init());
@@ -534,8 +534,8 @@ public:
         add_floor(g, 8, 8);
 
         const entityid hero = g.create_player_at_with(vec3{1, 1, 0}, "hero", g.player_init(12));
-        const entityid orc = g.create_orc_at_with(vec3{2, 1, 0}, [](CT& ct, const entityid id) {
-            ct.set<name>(id, "orc");
+        const entityid orc = g.create_orc_at_with(vec3{2, 1, 0}, [](gamestate& g, const entityid id) {
+            g.ct.set<name>(id, "orc");
         });
         const entityid hero_weapon = g.create_weapon_with(g.sword_init());
         TS_ASSERT_DIFFERS(hero, ENTITYID_INVALID);
@@ -570,7 +570,7 @@ public:
         add_floor(g, 8, 8);
 
         const entityid hero = g.create_player_at_with(vec3{1, 1, 0}, "hero", g.player_init(12));
-        const entityid orc = g.create_orc_at_with(vec3{2, 1, 0}, [](CT&, const entityid) {});
+        const entityid orc = g.create_orc_at_with(vec3{2, 1, 0}, [](gamestate&, const entityid) {});
         const entityid hero_weapon = g.create_weapon_with(g.sword_init());
         TS_ASSERT_DIFFERS(hero, ENTITYID_INVALID);
         TS_ASSERT_DIFFERS(orc, ENTITYID_INVALID);
@@ -604,7 +604,7 @@ public:
         add_floor(g, 8, 8);
 
         const entityid hero = g.create_player_at_with(vec3{1, 1, 0}, "hero", g.player_init(12));
-        const entityid orc = g.create_orc_at_with(vec3{2, 1, 0}, [](CT&, const entityid) {});
+        const entityid orc = g.create_orc_at_with(vec3{2, 1, 0}, [](gamestate&, const entityid) {});
         const entityid hero_weapon = g.create_weapon_with(g.sword_init());
         const entityid shield = g.create_shield_with(g.ct, g.shield_init());
         TS_ASSERT_DIFFERS(hero, ENTITYID_INVALID);
@@ -643,8 +643,8 @@ public:
         add_floor(g, 8, 8);
 
         const entityid hero = g.create_player_at_with(vec3{1, 1, 0}, "hero", g.player_init(12));
-        const entityid orc = g.create_orc_at_with(vec3{2, 1, 0}, [](CT& ct, const entityid id) {
-            ct.set<name>(id, "orc");
+        const entityid orc = g.create_orc_at_with(vec3{2, 1, 0}, [](gamestate& g, const entityid id) {
+            g.ct.set<name>(id, "orc");
         });
         const entityid hero_weapon = g.create_weapon_with(g.sword_init());
         const entityid shield = g.create_shield_with(g.ct, g.shield_init());
@@ -693,8 +693,8 @@ public:
         add_floor(g, 8, 8);
 
         const entityid hero = g.create_player_at_with(vec3{1, 1, 0}, "hero", g.player_init(12));
-        const entityid orc = g.create_orc_at_with(vec3{2, 1, 0}, [](CT& ct, const entityid id) {
-            ct.set<name>(id, "orc");
+        const entityid orc = g.create_orc_at_with(vec3{2, 1, 0}, [](gamestate& g, const entityid id) {
+            g.ct.set<name>(id, "orc");
         });
         const entityid hero_weapon = g.create_weapon_with(g.sword_init());
         TS_ASSERT_DIFFERS(hero, ENTITYID_INVALID);
@@ -731,8 +731,8 @@ public:
         add_floor(g, 8, 8);
 
         const entityid hero = g.create_player_at_with(vec3{1, 1, 0}, "hero", g.player_init(12));
-        const entityid orc = g.create_orc_at_with(vec3{2, 1, 0}, [](CT& ct, const entityid id) {
-            ct.set<name>(id, "orc");
+        const entityid orc = g.create_orc_at_with(vec3{2, 1, 0}, [](gamestate& g, const entityid id) {
+            g.ct.set<name>(id, "orc");
         });
         const entityid orc_weapon = g.create_weapon_with(g.sword_init());
         TS_ASSERT_DIFFERS(hero, ENTITYID_INVALID);
@@ -804,7 +804,7 @@ public:
         add_floor(g, 8, 8);
 
         const entityid attacker = g.create_player_at_with(vec3{1, 1, 0}, "hero", g.player_init(10));
-        const entityid target = g.create_orc_at_with(vec3{2, 1, 0}, [](CT&, const entityid) {});
+        const entityid target = g.create_orc_at_with(vec3{2, 1, 0}, [](gamestate&, const entityid) {});
         TS_ASSERT_DIFFERS(attacker, ENTITYID_INVALID);
         TS_ASSERT_DIFFERS(target, ENTITYID_INVALID);
 
@@ -820,7 +820,7 @@ public:
         gamestate g;
         add_floor(g, 8, 8);
 
-        const entityid target = g.create_orc_at_with(vec3{2, 2, 0}, [](CT&, const entityid) {});
+        const entityid target = g.create_orc_at_with(vec3{2, 2, 0}, [](gamestate&, const entityid) {});
         TS_ASSERT_DIFFERS(target, ENTITYID_INVALID);
 
         {

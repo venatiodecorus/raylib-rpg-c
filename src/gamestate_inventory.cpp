@@ -1,3 +1,4 @@
+#include "ecs_gameplay_components.h"
 #include "gamestate.h"
 
 /** @file gamestate_inventory.cpp
@@ -87,16 +88,16 @@ void gamestate::move_inventory_selection(int delta) {
 }
 
 bool gamestate::remove_from_inventory(entityid actor_id, entityid item_id) {
-    const auto* maybe_inventory = ct.get<inventory>(actor_id);
+    auto* maybe_inventory = get_component<Inventory>(actor_id);
     if (!maybe_inventory) {
         merror("maybe_inventory has no value for actor id %d", actor_id);
         return false;
     }
-    auto my_items = *maybe_inventory;
+    auto& my_items = maybe_inventory->value;
     bool success = false;
-    for (auto it = my_items->begin(); it != my_items->end(); it++) {
+    for (auto it = my_items.begin(); it != my_items.end(); it++) {
         if (*it == item_id) {
-            my_items->erase(it);
+            my_items.erase(it);
             success = true;
             break;
         }
@@ -113,12 +114,12 @@ bool gamestate::remove_from_inventory(entityid actor_id, entityid item_id) {
 
 bool gamestate::drop_from_inventory(entityid actor_id, entityid item_id) {
     if (remove_from_inventory(actor_id, item_id)) {
-        auto maybe_loc = ct.get<location>(actor_id);
+        auto* maybe_loc = get_component<Position>(actor_id);
         if (!maybe_loc) {
             merror("actor id %d has no location -- cannot drop item", actor_id);
             return false;
         }
-        vec3 loc = *maybe_loc;
+        vec3 loc = maybe_loc->value;
         auto df = d.get_current_floor();
         entityid retval = df->df_add_at(item_id, entitytype_t::ITEM, loc);
         if (retval == ENTITYID_INVALID) {
@@ -134,21 +135,21 @@ bool gamestate::drop_from_inventory(entityid actor_id, entityid item_id) {
 }
 
 bool gamestate::drop_all_from_inventory(entityid actor_id) {
-    const auto* maybe_inventory = ct.get<inventory>(actor_id);
+    const auto* maybe_inventory = get_component<Inventory>(actor_id);
     if (!maybe_inventory) {
         merror("no inventory");
         return false;
     }
-    auto inventory = *maybe_inventory;
-    while (inventory->size() > 0) {
-        auto id = inventory->back();
+    auto& inventory = maybe_inventory->value;
+    while (inventory.size() > 0) {
+        auto id = inventory.back();
         drop_from_inventory(actor_id, id);
     }
     return true;
 }
 
 void gamestate::handle_hero_inventory_equip_weapon(entityid item_id) {
-    entityid current_weapon = ct.get_or<equipped_weapon>(hero_id, ENTITYID_INVALID);
+    entityid current_weapon = get_component_or<EquippedWeapon>(hero_id, ENTITYID_INVALID);
     if (current_weapon == item_id) {
         ct.set<equipped_weapon>(hero_id, ENTITYID_INVALID);
     }
@@ -161,7 +162,7 @@ void gamestate::handle_hero_inventory_equip_weapon(entityid item_id) {
 }
 
 void gamestate::handle_hero_inventory_equip_shield(entityid item_id) {
-    entityid current_shield = ct.get_or<equipped_shield>(hero_id, ENTITYID_INVALID);
+    entityid current_shield = get_component_or<EquippedShield>(hero_id, ENTITYID_INVALID);
     if (current_shield == item_id) {
         ct.set<equipped_shield>(hero_id, ENTITYID_INVALID);
     }
@@ -174,7 +175,7 @@ void gamestate::handle_hero_inventory_equip_shield(entityid item_id) {
 }
 
 void gamestate::handle_hero_inventory_equip_item(entityid item_id) {
-    itemtype_t item_type = ct.get_or<itemtype>(item_id, itemtype_t::NONE);
+    itemtype_t item_type = get_component_or<ItemSubtype>(item_id, itemtype_t::NONE);
     switch (item_type) {
     case itemtype_t::NONE: break;
     case itemtype_t::WEAPON: handle_hero_inventory_equip_weapon(item_id); break;
@@ -186,35 +187,35 @@ void gamestate::handle_hero_inventory_equip_item(entityid item_id) {
 void gamestate::handle_hero_inventory_equip() {
     audio.queue("sfx/Minifantasy_Dungeon_SFX/08_human_charge_1.wav");
     size_t index = get_inventory_selection_index();
-    const auto* my_inventory = ct.get<inventory>(hero_id);
+    const auto* my_inventory = get_component<Inventory>(hero_id);
     if (!my_inventory) {
         return;
     }
-    auto inventory = *my_inventory;
-    if (index >= inventory->size()) {
+    auto& inventory = my_inventory->value;
+    if (index >= inventory.size()) {
         return;
     }
-    entityid item_id = inventory->at(index);
-    entitytype_t type = ct.get_or<entitytype>(item_id, entitytype_t::NONE);
+    entityid item_id = inventory.at(index);
+    entitytype_t type = (get_component<EntityTypeTag>(item_id) ? get_component<EntityTypeTag>(item_id)->type : entitytype_t::NONE);
     if (type == entitytype_t::ITEM) {
         run_equip_item_action(hero_id, item_id);
     }
 }
 
 bool gamestate::drop_item_from_hero_inventory() {
-    if (!ct.has<inventory>(hero_id)) {
+    if (!has_component<Inventory>(hero_id)) {
         return false;
     }
     size_t index = get_inventory_selection_index();
-    const auto* maybe_inventory = ct.get<inventory>(hero_id);
+    const auto* maybe_inventory = get_component<Inventory>(hero_id);
     if (!maybe_inventory) {
         return false;
     }
-    auto inventory = *maybe_inventory;
-    if (index >= inventory->size()) {
+    auto& inventory = maybe_inventory->value;
+    if (index >= inventory.size()) {
         return false;
     }
-    entityid item_id = inventory->at(index);
+    entityid item_id = inventory.at(index);
     return drop_inventory_item(hero_id, item_id);
 }
 
@@ -226,7 +227,7 @@ bool gamestate::drop_inventory_item(entityid actor_id, entityid item_id) {
         return false;
     }
 
-    const auto* maybe_loc = ct.get<location>(actor_id);
+    const auto* maybe_loc = get_component<Position>(actor_id);
     if (!maybe_loc) {
         return false;
     }
@@ -235,14 +236,14 @@ bool gamestate::drop_inventory_item(entityid actor_id, entityid item_id) {
         return false;
     }
 
-    if (item_id == ct.get_or<equipped_weapon>(actor_id, ENTITYID_INVALID)) {
+    if (item_id == get_component_or<EquippedWeapon>(actor_id, ENTITYID_INVALID)) {
         ct.set<equipped_weapon>(actor_id, ENTITYID_INVALID);
     }
-    if (item_id == ct.get_or<equipped_shield>(actor_id, ENTITYID_INVALID)) {
+    if (item_id == get_component_or<EquippedShield>(actor_id, ENTITYID_INVALID)) {
         ct.set<equipped_shield>(actor_id, ENTITYID_INVALID);
     }
 
-    const vec3 loc = *maybe_loc;
+    const vec3 loc = maybe_loc->value;
     auto df = d.get_current_floor();
     if (static_cast<size_t>(loc.z) < d.get_floor_count()) {
         df = d.get_floor(loc.z);
@@ -257,13 +258,13 @@ bool gamestate::drop_inventory_item(entityid actor_id, entityid item_id) {
 }
 
 bool gamestate::is_in_inventory(entityid actor_id, entityid item_id) {
-    const auto* maybe_inventory = ct.get<inventory>(actor_id);
+    const auto* maybe_inventory = get_component<Inventory>(actor_id);
     if (!maybe_inventory) {
         merror("maybe_inventory has no value for actor id %d", actor_id);
         return false;
     }
-    auto my_items = *maybe_inventory;
-    for (auto it = my_items->begin(); it != my_items->end(); it++) {
+    auto& my_items = maybe_inventory->value;
+    for (auto it = my_items.begin(); it != my_items.end(); it++) {
         if (*it == item_id) {
             return true;
         }
@@ -274,15 +275,15 @@ bool gamestate::is_in_inventory(entityid actor_id, entityid item_id) {
 bool gamestate::use_potion(entityid actor_id, entityid item_id) {
     massert(actor_id != ENTITYID_INVALID, "actor_id is invalid");
     massert(item_id != ENTITYID_INVALID, "actor_id is invalid");
-    bool is_item = ct.get_or<entitytype>(item_id, entitytype_t::NONE) == entitytype_t::ITEM;
-    bool is_potion = ct.get_or<itemtype>(item_id, itemtype_t::NONE) == itemtype_t::POTION;
+    bool is_item = (get_component<EntityTypeTag>(item_id) ? get_component<EntityTypeTag>(item_id)->type : entitytype_t::NONE) == entitytype_t::ITEM;
+    bool is_potion = get_component_or<ItemSubtype>(item_id, itemtype_t::NONE) == itemtype_t::POTION;
     bool in_inventory = is_in_inventory(actor_id, item_id);
     if (is_item && is_potion && in_inventory) {
-        const vec3* heal_ptr = ct.get<healing>(item_id);
+        const HealingDice* heal_ptr = get_component<HealingDice>(item_id);
         if (heal_ptr) {
-            vec3 heal = *heal_ptr;
+            vec3 heal = heal_ptr->value;
             int amount = do_roll(heal);
-            vec2 actor_hp = ct.get_or<hp>(actor_id, vec2{-1, -1});
+            vec2 actor_hp = get_component_or<HitPoints>(actor_id, vec2{-1, -1});
             if (vec2_invalid(actor_hp)) {
                 merror("actor has no hp component");
                 return false;
@@ -290,7 +291,7 @@ bool gamestate::use_potion(entityid actor_id, entityid item_id) {
             actor_hp.x = std::min(actor_hp.y, actor_hp.x + amount);
             ct.set<hp>(actor_id, actor_hp);
             if (actor_id == hero_id) {
-                string n = ct.get_or<name>(actor_id, "no-name");
+                string n = get_component_or<EntityName>(actor_id, "no-name");
                 messages.add_history("%s used a healing potion", n.c_str());
                 messages.add_history("%s restored %d hp", n.c_str(), amount);
             }
@@ -307,11 +308,11 @@ bool gamestate::use_potion(entityid actor_id, entityid item_id) {
 }
 
 void gamestate::handle_hero_potion_use(entityid id) {
-    entitytype_t type = ct.get_or<entitytype>(id, entitytype_t::NONE);
+    entitytype_t type = (get_component<EntityTypeTag>(id) ? get_component<EntityTypeTag>(id)->type : entitytype_t::NONE);
     if (type != entitytype_t::ITEM) {
         return;
     }
-    itemtype_t i_type = ct.get_or<itemtype>(id, itemtype_t::NONE);
+    itemtype_t i_type = get_component_or<ItemSubtype>(id, itemtype_t::NONE);
     if (i_type == itemtype_t::NONE || i_type != itemtype_t::POTION) {
         return;
     }
@@ -320,20 +321,20 @@ void gamestate::handle_hero_potion_use(entityid id) {
 
 void gamestate::handle_hero_item_use() {
     size_t index = get_inventory_selection_index();
-    const auto* maybe_inventory = ct.get<inventory>(hero_id);
+    const auto* maybe_inventory = get_component<Inventory>(hero_id);
     if (!maybe_inventory) {
         return;
     }
-    shared_ptr<vector<entityid>> inventory = *maybe_inventory;
-    if (index >= inventory->size()) {
+    auto& inventory = maybe_inventory->value;
+    if (index >= inventory.size()) {
         return;
     }
-    entityid item_id = inventory->at(index);
-    entitytype_t type = ct.get_or<entitytype>(item_id, entitytype_t::NONE);
+    entityid item_id = inventory.at(index);
+    entitytype_t type = (get_component<EntityTypeTag>(item_id) ? get_component<EntityTypeTag>(item_id)->type : entitytype_t::NONE);
     if (type != entitytype_t::ITEM) {
         return;
     }
-    itemtype_t i_type = ct.get_or<itemtype>(item_id, itemtype_t::NONE);
+    itemtype_t i_type = get_component_or<ItemSubtype>(item_id, itemtype_t::NONE);
     if (i_type == itemtype_t::NONE) {
         return;
     }
@@ -357,10 +358,10 @@ bool gamestate::transfer_inventory_item(entityid from_id, entityid to_id, entity
         return false;
     }
     if (from_id == hero_id) {
-        if (item_id == ct.get_or<equipped_weapon>(hero_id, ENTITYID_INVALID)) {
+        if (item_id == get_component_or<EquippedWeapon>(hero_id, ENTITYID_INVALID)) {
             ct.set<equipped_weapon>(hero_id, ENTITYID_INVALID);
         }
-        if (item_id == ct.get_or<equipped_shield>(hero_id, ENTITYID_INVALID)) {
+        if (item_id == get_component_or<EquippedShield>(hero_id, ENTITYID_INVALID)) {
             ct.set<equipped_shield>(hero_id, ENTITYID_INVALID);
         }
     }
@@ -368,7 +369,7 @@ bool gamestate::transfer_inventory_item(entityid from_id, entityid to_id, entity
 }
 
 bool gamestate::open_chest_menu(entityid chest_id) {
-    if (chest_id == ENTITYID_INVALID || ct.get_or<entitytype>(chest_id, entitytype_t::NONE) != entitytype_t::CHEST) {
+    if (chest_id == ENTITYID_INVALID || (get_component<EntityTypeTag>(chest_id) ? get_component<EntityTypeTag>(chest_id)->type : entitytype_t::NONE) != entitytype_t::CHEST) {
         return false;
     }
     ct.set<door_open>(chest_id, true);
@@ -415,19 +416,19 @@ void gamestate::handle_chest_menu_confirm() {
     }
     entityid source_id = ui.chest_deposit_mode ? hero_id : ui.active_chest_id;
     entityid target_id = ui.chest_deposit_mode ? ui.active_chest_id : hero_id;
-    const auto* maybe_inventory = ct.get<inventory>(source_id);
+    const auto* maybe_inventory = get_component<Inventory>(source_id);
     if (!maybe_inventory) {
         return;
     }
-    auto items = *maybe_inventory;
+    auto& items = maybe_inventory->value;
     size_t index = get_inventory_selection_index();
-    if (index >= items->size()) {
+    if (index >= items.size()) {
         return;
     }
-    entityid item_id = items->at(index);
+    entityid item_id = items.at(index);
     if (run_chest_transfer_action(source_id, target_id, item_id)) {
-        auto updated_inventory = ct.get_or<inventory>(source_id, make_shared<vector<entityid>>());
-        clamp_inventory_selection(updated_inventory->size());
+        auto* updated_inventory = get_component<Inventory>(source_id);
+        clamp_inventory_selection(updated_inventory ? updated_inventory->value.size() : 0);
     }
 }
 
@@ -478,7 +479,7 @@ void gamestate::handle_input_chest(inputstate& is) {
     else if (inputstate_is_pressed(is, KEY_ENTER)) {
         handle_chest_menu_confirm();
     }
-    auto items = ct.get_or<inventory>(ui.chest_deposit_mode ? hero_id : ui.active_chest_id, make_shared<vector<entityid>>());
-    clamp_inventory_selection(items->size());
+    auto* items = get_component<Inventory>(ui.chest_deposit_mode ? hero_id : ui.active_chest_id);
+    clamp_inventory_selection(items ? items->value.size() : 0);
     frame_dirty = true;
 }

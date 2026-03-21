@@ -15,7 +15,7 @@ private:
     }
 
     entityid create_hero(gamestate& g, vec3 loc) {
-        return g.create_player_at_with(loc, "hero", [](CT&, const entityid) {});
+        return g.create_player_at_with(loc, "hero", [](gamestate&, const entityid) {});
     }
 
     void press_key(inputstate& is, int key) {
@@ -352,7 +352,7 @@ public:
         g.audio.sfx.resize(71);
         const vec3 loc = add_initialized_floor(g);
         const entityid hero = create_hero(g, loc);
-        const entityid chest = g.create_chest_at_with(vec3{2, 1, 0}, [](CT&, const entityid) {});
+        const entityid chest = g.create_chest_at_with(vec3{2, 1, 0}, [](gamestate&, const entityid) {});
         const entityid dagger = g.create_weapon_at_with(g.ct, loc, g.dagger_init());
 
         TS_ASSERT_DIFFERS(chest, ENTITYID_INVALID);
@@ -383,7 +383,7 @@ public:
         gamestate g;
         const vec3 loc = add_initialized_floor(g);
         const entityid hero = create_hero(g, loc);
-        const entityid chest = g.create_chest_at_with(vec3{2, 1, 0}, [](CT&, const entityid) {});
+        const entityid chest = g.create_chest_at_with(vec3{2, 1, 0}, [](gamestate&, const entityid) {});
         const entityid dagger = g.create_weapon_at_with(g.ct, loc, g.dagger_init());
 
         TS_ASSERT_DIFFERS(chest, ENTITYID_INVALID);
@@ -402,7 +402,7 @@ public:
         gamestate g;
         const vec3 loc = add_initialized_floor(g);
         const entityid hero = create_hero(g, loc);
-        const entityid chest = g.create_chest_at_with(vec3{2, 1, 0}, [](CT&, const entityid) {});
+        const entityid chest = g.create_chest_at_with(vec3{2, 1, 0}, [](gamestate&, const entityid) {});
         const entityid dagger = g.create_weapon_at_with(g.ct, loc, g.dagger_init());
 
         TS_ASSERT_DIFFERS(chest, ENTITYID_INVALID);
@@ -423,7 +423,7 @@ public:
         gamestate g;
         const vec3 loc = add_initialized_floor(g);
         const entityid hero = create_hero(g, loc);
-        const entityid chest = g.create_chest_at_with(vec3{2, 1, 0}, [](CT&, const entityid) {});
+        const entityid chest = g.create_chest_at_with(vec3{2, 1, 0}, [](gamestate&, const entityid) {});
         const entityid dagger = g.create_weapon_at_with(g.ct, loc, g.dagger_init());
 
         TS_ASSERT(g.add_to_inventory(hero, dagger));
@@ -441,7 +441,7 @@ public:
         g.audio.sfx.resize(71);
         const vec3 loc = add_initialized_floor(g);
         const entityid hero = create_hero(g, loc);
-        const entityid chest = g.create_chest_at_with(vec3{2, 1, 0}, [](CT&, const entityid) {});
+        const entityid chest = g.create_chest_at_with(vec3{2, 1, 0}, [](gamestate&, const entityid) {});
 
         TS_ASSERT_DIFFERS(hero, ENTITYID_INVALID);
         TS_ASSERT_DIFFERS(chest, ENTITYID_INVALID);

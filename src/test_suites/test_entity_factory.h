@@ -115,7 +115,7 @@ public:
         gamestate g;
         const vec3 loc = add_initialized_floor(g);
 
-        const entityid id = g.create_chest_at_with(loc, [](CT&, const entityid) {});
+        const entityid id = g.create_chest_at_with(loc, [](gamestate&, const entityid) {});
 
         TS_ASSERT_DIFFERS(id, ENTITYID_INVALID);
         TS_ASSERT_EQUALS(g.ct.get_or<entitytype>(id, entitytype_t::NONE), entitytype_t::CHEST);
@@ -137,7 +137,7 @@ public:
         gamestate g;
         const vec3 loc = add_initialized_floor(g);
 
-        const entityid id = g.create_orc_at_with(loc, [](CT&, const entityid) {});
+        const entityid id = g.create_orc_at_with(loc, [](gamestate&, const entityid) {});
 
         TS_ASSERT_DIFFERS(id, ENTITYID_INVALID);
         TS_ASSERT_EQUALS(g.ct.get_or<entitytype>(id, entitytype_t::NONE), entitytype_t::NPC);
@@ -164,7 +164,7 @@ public:
         gamestate g;
         const vec3 loc = add_initialized_floor(g);
 
-        const entityid id = g.create_npc_at_with(race_t::DWARF, loc, [](CT&, const entityid) {});
+        const entityid id = g.create_npc_at_with(race_t::DWARF, loc, [](gamestate&, const entityid) {});
 
         TS_ASSERT_DIFFERS(id, ENTITYID_INVALID);
         TS_ASSERT_EQUALS(g.ct.get_or<name>(id, ""), "dwarf");
@@ -177,7 +177,7 @@ public:
         gamestate g;
         const vec3 loc = add_initialized_floor(g);
 
-        const entityid id = g.create_npc_at_with(race_t::GREEN_SLIME, loc, [](CT&, const entityid) {});
+        const entityid id = g.create_npc_at_with(race_t::GREEN_SLIME, loc, [](gamestate&, const entityid) {});
 
         TS_ASSERT_DIFFERS(id, ENTITYID_INVALID);
         TS_ASSERT_EQUALS(g.ct.get_or<name>(id, ""), "green slime");
@@ -230,7 +230,7 @@ public:
     void testCreateDoorWithSetsDefaultNameAndDescription() {
         gamestate g;
 
-        const entityid id = g.create_door_with([](CT&, const entityid) {});
+        const entityid id = g.create_door_with([](gamestate&, const entityid) {});
 
         TS_ASSERT_DIFFERS(id, ENTITYID_INVALID);
         TS_ASSERT_EQUALS(g.ct.get_or<name>(id, ""), "door");

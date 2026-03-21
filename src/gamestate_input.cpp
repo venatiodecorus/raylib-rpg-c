@@ -1,3 +1,4 @@
+#include "ecs_gameplay_components.h"
 #include "gamestate.h"
 
 /** @file gamestate_input.cpp
@@ -81,7 +82,7 @@ void gamestate::handle_input_interaction(inputstate& is) {
 }
 
 int gamestate::get_level_up_xp_threshold(entityid id) {
-    const int actor_level = ct.get_or<level>(id, 1) < 1 ? 1 : ct.get_or<level>(id, 1);
+    const int actor_level = get_component_or<EntityLevel>(id, 1) < 1 ? 1 : get_component_or<EntityLevel>(id, 1);
     return actor_level * 10;
 }
 
@@ -99,22 +100,22 @@ bool gamestate::apply_permanent_attribute_increase(entityid id, unsigned int att
 
     switch (attribute_index % 6) {
     case 0:
-        ct.set<strength>(id, ct.get_or<strength>(id, 10) + amount);
+        ct.set<strength>(id, get_component_or<StrengthAttr>(id, 10) + amount);
         return true;
     case 1:
-        ct.set<dexterity>(id, ct.get_or<dexterity>(id, 10) + amount);
+        ct.set<dexterity>(id, get_component_or<DexterityAttr>(id, 10) + amount);
         return true;
     case 2:
-        ct.set<constitution>(id, ct.get_or<constitution>(id, 10) + amount);
+        ct.set<constitution>(id, get_component_or<ConstitutionAttr>(id, 10) + amount);
         return true;
     case 3:
-        ct.set<intelligence>(id, ct.get_or<intelligence>(id, 10) + amount);
+        ct.set<intelligence>(id, get_component_or<IntelligenceAttr>(id, 10) + amount);
         return true;
     case 4:
-        ct.set<wisdom>(id, ct.get_or<wisdom>(id, 10) + amount);
+        ct.set<wisdom>(id, get_component_or<WisdomAttr>(id, 10) + amount);
         return true;
     case 5:
-        ct.set<charisma>(id, ct.get_or<charisma>(id, 10) + amount);
+        ct.set<charisma>(id, get_component_or<CharismaAttr>(id, 10) + amount);
         return true;
     default:
         break;
@@ -126,7 +127,7 @@ int gamestate::roll_level_up_max_hp_gain(entityid id) {
     if (id == ENTITYID_INVALID) {
         return 0;
     }
-    const vec3 hitdie = ct.get_or<hd>(id, vec3{1, 1, 0});
+    const vec3 hitdie = get_component_or<HitDie>(id, vec3{1, 1, 0});
     const int rolled = do_roll(hitdie);
     return rolled > 0 ? rolled : 1;
 }
@@ -136,10 +137,10 @@ void gamestate::apply_level_up_rewards(entityid id) {
         return;
     }
 
-    const int new_level = ct.get_or<level>(id, 1) + 1;
+    const int new_level = get_component_or<EntityLevel>(id, 1) + 1;
     ct.set<level>(id, new_level);
 
-    vec2 hp_value = ct.get_or<hp>(id, vec2{1, 1});
+    vec2 hp_value = get_component_or<HitPoints>(id, vec2{1, 1});
     const int hp_gain = roll_level_up_max_hp_gain(id);
     hp_value.y += hp_gain;
     if (hp_value.y < 1) {
@@ -188,7 +189,7 @@ void gamestate::apply_level_up_selection() {
     ui.display_level_up_modal = false;
     controlmode = controlmode_t::PLAYER;
     messages.add("%s increased by 1", stat_name);
-    messages.add_history("%s reached level %d", ct.get_or<name>(hero_id, "hero").c_str(), ct.get_or<level>(hero_id, 1));
+    messages.add_history("%s reached level %d", get_component_or<EntityName>(hero_id, "hero").c_str(), get_component_or<EntityLevel>(hero_id, 1));
     frame_dirty = true;
 
     if (ui.pending_level_ups > 0) {
@@ -197,12 +198,12 @@ void gamestate::apply_level_up_selection() {
 }
 
 void gamestate::maybe_unlock_level_up(entityid id) {
-    if (id != hero_id || ct.get_or<entitytype>(id, entitytype_t::NONE) != entitytype_t::PLAYER) {
+    if (id != hero_id || (get_component<EntityTypeTag>(id) ? get_component<EntityTypeTag>(id)->type : entitytype_t::NONE) != entitytype_t::PLAYER) {
         return;
     }
 
-    const int current_xp = ct.get_or<xp>(id, 0);
-    int current_level = ct.get_or<level>(id, 1) + ui.pending_level_ups;
+    const int current_xp = get_component_or<Experience>(id, 0);
+    int current_level = get_component_or<EntityLevel>(id, 1) + ui.pending_level_ups;
     if (current_level < 1) {
         current_level = 1;
     }
@@ -335,17 +336,17 @@ void gamestate::handle_input_inventory(inputstate& is) {
     else if (inputstate_is_pressed(is, KEY_Q)) {
         audio.queue("sfx/Minifantasy_Dungeon_SFX/27_sword_miss_1.wav");
         size_t index = get_inventory_selection_index();
-        auto my_items = ct.get_or<inventory>(hero_id, make_shared<vector<entityid>>());
-        if (index < my_items->size()) {
-            run_drop_item_action(hero_id, my_items->at(index));
+        auto* my_items = get_component<Inventory>(hero_id);
+        if (my_items && index < my_items->value.size()) {
+            run_drop_item_action(hero_id, my_items->value.at(index));
         }
     }
     else if (inputstate_is_pressed(is, KEY_ENTER)) {
         handle_hero_item_use();
         audio.queue("sfx/Minifantasy_Dungeon_SFX/02_chest_close_1.wav");
     }
-    auto items = ct.get_or<inventory>(hero_id, make_shared<vector<entityid>>());
-    clamp_inventory_selection(items->size());
+    auto* items = get_component<Inventory>(hero_id);
+    clamp_inventory_selection(items ? items->value.size() : 0);
     frame_dirty = true;
 }
 
@@ -372,7 +373,7 @@ void gamestate::handle_camera_zoom([[maybe_unused]] inputstate& is) {
 }
 
 void gamestate::change_player_dir(direction_t dir) {
-    if (ct.get_or<dead>(hero_id, true)) {
+    if (get_component_or<DeadFlag>(hero_id, true)) {
         return;
     }
     ct.set<direction>(hero_id, dir);
@@ -385,11 +386,11 @@ bool gamestate::handle_change_dir(inputstate& is) {
     if (!player_changing_dir) {
         return false;
     }
-    const bool* maybe_player_is_dead = ct.get<dead>(hero_id);
+    const DeadFlag* maybe_player_is_dead = get_component<DeadFlag>(hero_id);
     if (!maybe_player_is_dead) {
         return true;
     }
-    bool is_dead = *maybe_player_is_dead;
+    bool is_dead = maybe_player_is_dead->value;
     if (is_action_pressed(is, gameplay_input_action_t::FACE_WAIT)) {
         player_changing_dir = false;
         flag = gamestate_flag_t::PLAYER_ANIM;
@@ -487,7 +488,7 @@ void gamestate::handle_input_gameplay_controlmode_player(inputstate& is) {
         ui.display_help_menu = true;
         controlmode = controlmode_t::HELP_MENU;
     }
-    bool is_dead = ct.get_or<dead>(hero_id, true);
+    bool is_dead = get_component_or<DeadFlag>(hero_id, true);
     if (is_dead) {
         handle_restart(is);
         return;
@@ -496,7 +497,7 @@ void gamestate::handle_input_gameplay_controlmode_player(inputstate& is) {
         if (handle_cycle_messages_test()) {
             return;
         }
-        bool test_is_dead = ct.get_or<dead>(hero_id, true);
+        bool test_is_dead = get_component_or<DeadFlag>(hero_id, true);
         if (test_is_dead) {
             return;
         }

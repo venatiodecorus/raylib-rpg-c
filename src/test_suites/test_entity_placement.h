@@ -151,7 +151,7 @@ public:
 
         auto df = g.d.get_floor(0);
         const vec3 blocked_loc{1, 1, 0};
-        const entityid chest_id = g.create_chest_at_with(blocked_loc, [](CT&, const entityid) {});
+        const entityid chest_id = g.create_chest_at_with(blocked_loc, [](gamestate&, const entityid) {});
         TS_ASSERT_DIFFERS(chest_id, ENTITYID_INVALID);
 
         const vec3 random_loc = df->get_random_loc();

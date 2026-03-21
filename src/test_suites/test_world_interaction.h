@@ -13,7 +13,7 @@ private:
     }
 
     entityid create_hero(gamestate& g, vec3 loc) {
-        return g.create_player_at_with(loc, "hero", [](CT&, const entityid) {});
+        return g.create_player_at_with(loc, "hero", [](gamestate&, const entityid) {});
     }
 
     void press_key(inputstate& is, int key) {
@@ -47,7 +47,7 @@ public:
         TS_ASSERT(vec3_equal(g.ct.get_or<location>(hero, vec3{-1, -1, -1}), hero_loc));
 
         g.d.get_floor(0)->tile_at(vec3{2, 1, 0}).tile_remove(prop_id);
-        const entityid door_id = g.create_door_at_with(vec3{2, 1, 0}, [](CT&, const entityid) {});
+        const entityid door_id = g.create_door_at_with(vec3{2, 1, 0}, [](gamestate&, const entityid) {});
         TS_ASSERT_DIFFERS(door_id, ENTITYID_INVALID);
         TS_ASSERT(!g.try_entity_move(hero, vec3{1, 0, 0}));
 
@@ -62,7 +62,7 @@ public:
 
         const entityid prop_id = g.create_prop_at_with(proptype_t::DUNGEON_STATUE_00, vec3{2, 2, 0}, dungeon_prop_init(proptype_t::DUNGEON_STATUE_00));
         TS_ASSERT_DIFFERS(prop_id, ENTITYID_INVALID);
-        TS_ASSERT_EQUALS(g.create_door_at_with(vec3{2, 2, 0}, [](CT&, const entityid) {}), ENTITYID_INVALID);
+        TS_ASSERT_EQUALS(g.create_door_at_with(vec3{2, 2, 0}, [](gamestate&, const entityid) {}), ENTITYID_INVALID);
         TS_ASSERT_EQUALS(g.d.get_floor(0)->tile_at(vec3{2, 2, 0}).get_cached_door(), ENTITYID_INVALID);
     }
 
@@ -100,7 +100,7 @@ public:
         g.ct.set<direction>(hero, direction_t::RIGHT);
 
         const vec3 corpse_loc{3, 2, 0};
-        const entityid corpse = g.create_orc_at_with(corpse_loc, [](CT&, const entityid) {});
+        const entityid corpse = g.create_orc_at_with(corpse_loc, [](gamestate&, const entityid) {});
         TS_ASSERT_DIFFERS(corpse, ENTITYID_INVALID);
 
         tile_t& corpse_tile = g.d.get_floor(0)->tile_at(corpse_loc);
@@ -238,8 +238,8 @@ public:
         add_floor(g);
         g.d.current_floor = 0;
 
-        const entityid npc = g.create_orc_at_with(vec3{1, 1, 1}, [](CT&, const entityid) {});
-        const entityid door = g.create_door_at_with(vec3{2, 1, 1}, [](CT&, const entityid) {});
+        const entityid npc = g.create_orc_at_with(vec3{1, 1, 1}, [](gamestate&, const entityid) {});
+        const entityid door = g.create_door_at_with(vec3{2, 1, 1}, [](gamestate&, const entityid) {});
 
         TS_ASSERT_DIFFERS(npc, ENTITYID_INVALID);
         TS_ASSERT_DIFFERS(door, ENTITYID_INVALID);
@@ -256,7 +256,7 @@ public:
         g.d.current_floor = 0;
 
         const entityid hero = create_hero(g, vec3{1, 1, 0});
-        const entityid door = g.create_door_at_with(vec3{2, 1, 1}, [](CT&, const entityid) {});
+        const entityid door = g.create_door_at_with(vec3{2, 1, 1}, [](gamestate&, const entityid) {});
 
         TS_ASSERT_DIFFERS(hero, ENTITYID_INVALID);
         TS_ASSERT_DIFFERS(door, ENTITYID_INVALID);
@@ -271,7 +271,7 @@ public:
         add_floor(g);
 
         const entityid hero = create_hero(g, vec3{1, 1, 0});
-        const entityid door = g.create_door_at_with(vec3{4, 1, 0}, [](CT&, const entityid) {});
+        const entityid door = g.create_door_at_with(vec3{4, 1, 0}, [](gamestate&, const entityid) {});
         TS_ASSERT_DIFFERS(hero, ENTITYID_INVALID);
         TS_ASSERT_DIFFERS(door, ENTITYID_INVALID);
         TS_ASSERT(g.create_floor_pressure_plate(vec3{2, 1, 0}, door));
@@ -294,7 +294,7 @@ public:
         gamestate g;
         add_floor(g);
 
-        const entityid door = g.create_door_at_with(vec3{4, 1, 0}, [](CT&, const entityid) {});
+        const entityid door = g.create_door_at_with(vec3{4, 1, 0}, [](gamestate&, const entityid) {});
         const entityid box = g.create_box_at_with(vec3{1, 1, 0});
         TS_ASSERT_DIFFERS(door, ENTITYID_INVALID);
         TS_ASSERT_DIFFERS(box, ENTITYID_INVALID);
@@ -316,7 +316,7 @@ public:
         add_floor(g);
 
         const entityid hero = create_hero(g, vec3{1, 1, 0});
-        const entityid door = g.create_door_at_with(vec3{4, 1, 0}, [](CT&, const entityid) {});
+        const entityid door = g.create_door_at_with(vec3{4, 1, 0}, [](gamestate&, const entityid) {});
         TS_ASSERT_DIFFERS(hero, ENTITYID_INVALID);
         TS_ASSERT_DIFFERS(door, ENTITYID_INVALID);
         TS_ASSERT(g.create_floor_pressure_plate(vec3{2, 1, 0}, door));
@@ -336,7 +336,7 @@ public:
         add_floor(g);
 
         const entityid hero = create_hero(g, vec3{1, 1, 0});
-        const entityid door = g.create_door_at_with(vec3{4, 1, 0}, [](CT&, const entityid) {});
+        const entityid door = g.create_door_at_with(vec3{4, 1, 0}, [](gamestate&, const entityid) {});
         TS_ASSERT_DIFFERS(hero, ENTITYID_INVALID);
         TS_ASSERT_DIFFERS(door, ENTITYID_INVALID);
         TS_ASSERT(g.create_floor_pressure_plate(vec3{2, 1, 0}, door));
@@ -365,7 +365,7 @@ public:
         const entityid hero = create_hero(g, vec3{2, 1, 0});
         g.ct.set<direction>(hero, direction_t::RIGHT);
         const entityid box = g.create_box_at_with(vec3{3, 1, 0});
-        const entityid door = g.create_door_at_with(vec3{5, 1, 0}, [](CT&, const entityid) {});
+        const entityid door = g.create_door_at_with(vec3{5, 1, 0}, [](gamestate&, const entityid) {});
         TS_ASSERT_DIFFERS(hero, ENTITYID_INVALID);
         TS_ASSERT_DIFFERS(box, ENTITYID_INVALID);
         TS_ASSERT_DIFFERS(door, ENTITYID_INVALID);
@@ -388,7 +388,7 @@ public:
         add_floor(g);
 
         const entityid hero = create_hero(g, vec3{1, 1, 0});
-        const entityid door = g.create_door_at_with(vec3{4, 1, 0}, [](CT&, const entityid) {});
+        const entityid door = g.create_door_at_with(vec3{4, 1, 0}, [](gamestate&, const entityid) {});
         TS_ASSERT_DIFFERS(hero, ENTITYID_INVALID);
         TS_ASSERT_DIFFERS(door, ENTITYID_INVALID);
         TS_ASSERT(g.create_floor_pressure_plate(vec3{1, 1, 0}, door));
@@ -414,7 +414,7 @@ public:
         add_floor(g);
 
         const entityid hero = create_hero(g, vec3{1, 1, 0});
-        const entityid door = g.create_door_at_with(vec3{2, 1, 0}, [](CT&, const entityid) {});
+        const entityid door = g.create_door_at_with(vec3{2, 1, 0}, [](gamestate&, const entityid) {});
         TS_ASSERT_DIFFERS(hero, ENTITYID_INVALID);
         TS_ASSERT_DIFFERS(door, ENTITYID_INVALID);
         TS_ASSERT(g.create_floor_pressure_plate(vec3{3, 1, 0}, door));
@@ -432,7 +432,7 @@ public:
         add_floor(g);
 
         const entityid hero = create_hero(g, vec3{1, 1, 0});
-        const entityid door = g.create_door_at_with(vec3{2, 1, 0}, [](CT&, const entityid) {});
+        const entityid door = g.create_door_at_with(vec3{2, 1, 0}, [](gamestate&, const entityid) {});
         TS_ASSERT_DIFFERS(hero, ENTITYID_INVALID);
         TS_ASSERT_DIFFERS(door, ENTITYID_INVALID);
         TS_ASSERT(!g.ct.get_or<door_open>(door, true));
@@ -447,7 +447,7 @@ public:
         add_floor(g);
 
         const entityid hero = create_hero(g, vec3{1, 1, 0});
-        const entityid door = g.create_door_at_with(vec3{2, 1, 0}, [](CT&, const entityid) {});
+        const entityid door = g.create_door_at_with(vec3{2, 1, 0}, [](gamestate&, const entityid) {});
         TS_ASSERT_DIFFERS(hero, ENTITYID_INVALID);
         TS_ASSERT_DIFFERS(door, ENTITYID_INVALID);
         TS_ASSERT(g.create_floor_pressure_plate(vec3{3, 1, 0}, door));
@@ -465,7 +465,7 @@ public:
         add_floor(g);
 
         const entityid hero = create_hero(g, vec3{1, 1, 0});
-        const entityid door = g.create_door_at_with(vec3{4, 1, 0}, [](CT&, const entityid) {});
+        const entityid door = g.create_door_at_with(vec3{4, 1, 0}, [](gamestate&, const entityid) {});
         TS_ASSERT_DIFFERS(hero, ENTITYID_INVALID);
         TS_ASSERT_DIFFERS(door, ENTITYID_INVALID);
         TS_ASSERT(g.create_floor_pressure_plate(vec3{2, 1, 0}, door));
@@ -489,7 +489,7 @@ public:
         g.d.current_floor = 0;
 
         const entityid hero = create_hero(g, vec3{1, 1, 0});
-        const entityid chest = g.create_chest_at_with(vec3{2, 1, 1}, [](CT&, const entityid) {});
+        const entityid chest = g.create_chest_at_with(vec3{2, 1, 1}, [](gamestate&, const entityid) {});
 
         TS_ASSERT_DIFFERS(hero, ENTITYID_INVALID);
         TS_ASSERT_DIFFERS(chest, ENTITYID_INVALID);
@@ -508,7 +508,7 @@ public:
         add_floor(g);
 
         const entityid hero = create_hero(g, vec3{1, 1, 0});
-        const entityid chest = g.create_chest_at_with(vec3{2, 1, 0}, [](CT&, const entityid) {});
+        const entityid chest = g.create_chest_at_with(vec3{2, 1, 0}, [](gamestate&, const entityid) {});
 
         TS_ASSERT_DIFFERS(hero, ENTITYID_INVALID);
         TS_ASSERT_DIFFERS(chest, ENTITYID_INVALID);
@@ -528,7 +528,7 @@ public:
         add_floor(g);
 
         const entityid hero = create_hero(g, vec3{1, 1, 0});
-        const entityid chest = g.create_chest_at_with(vec3{2, 1, 0}, [](CT&, const entityid) {});
+        const entityid chest = g.create_chest_at_with(vec3{2, 1, 0}, [](gamestate&, const entityid) {});
 
         TS_ASSERT_DIFFERS(hero, ENTITYID_INVALID);
         TS_ASSERT_DIFFERS(chest, ENTITYID_INVALID);
@@ -572,8 +572,8 @@ public:
         add_floor(g);
         add_floor(g);
 
-        const entityid source_door = g.create_door_at_with(vec3{4, 1, 0}, [](CT&, const entityid) {});
-        const entityid destination_door = g.create_door_at_with(vec3{5, 2, 1}, [](CT&, const entityid) {});
+        const entityid source_door = g.create_door_at_with(vec3{4, 1, 0}, [](gamestate&, const entityid) {});
+        const entityid destination_door = g.create_door_at_with(vec3{5, 2, 1}, [](gamestate&, const entityid) {});
         TS_ASSERT(g.create_floor_pressure_plate(vec3{1, 1, 0}, source_door));
         TS_ASSERT(g.create_floor_pressure_plate(vec3{2, 2, 1}, destination_door));
 
@@ -638,7 +638,7 @@ public:
         add_floor(g);
 
         const entityid hero = create_hero(g, vec3{1, 1, 0});
-        const entityid door = g.create_door_at_with(vec3{2, 1, 0}, [](CT&, const entityid) {});
+        const entityid door = g.create_door_at_with(vec3{2, 1, 0}, [](gamestate&, const entityid) {});
         TS_ASSERT_DIFFERS(hero, ENTITYID_INVALID);
         TS_ASSERT_DIFFERS(door, ENTITYID_INVALID);
 
@@ -662,9 +662,9 @@ public:
         add_floor(g);
 
         const entityid hero = create_hero(g, vec3{1, 1, 0});
-        const entityid npc = g.create_npc_at_with(race_t::DWARF, vec3{2, 1, 0}, [](CT& ct, const entityid id) {
-            ct.set<name>(id, "Borin");
-            ct.set<dialogue_text>(id, "Keep your torch high.");
+        const entityid npc = g.create_npc_at_with(race_t::DWARF, vec3{2, 1, 0}, [](gamestate& g, const entityid id) {
+            g.ct.set<name>(id, "Borin");
+            g.ct.set<dialogue_text>(id, "Keep your torch high.");
         });
 
         TS_ASSERT_DIFFERS(hero, ENTITYID_INVALID);
@@ -682,9 +682,9 @@ public:
         add_floor(g);
 
         const entityid hero = create_hero(g, vec3{1, 1, 0});
-        const entityid npc = g.create_npc_at_with(race_t::DWARF, vec3{2, 1, 0}, [](CT& ct, const entityid id) {
-            ct.set<name>(id, "Borin");
-            ct.set<dialogue_text>(id, "Keep your torch high.");
+        const entityid npc = g.create_npc_at_with(race_t::DWARF, vec3{2, 1, 0}, [](gamestate& g, const entityid id) {
+            g.ct.set<name>(id, "Borin");
+            g.ct.set<dialogue_text>(id, "Keep your torch high.");
         });
 
         TS_ASSERT_DIFFERS(hero, ENTITYID_INVALID);
@@ -715,9 +715,9 @@ public:
         add_floor(g);
 
         const entityid hero = create_hero(g, vec3{1, 1, 0});
-        const entityid prop = g.create_prop_at_with(proptype_t::DUNGEON_JAR_00, vec3{2, 1, 0}, [](CT& ct, const entityid id) {
-            ct.set<name>(id, "jar");
-            ct.set<description>(id, "A cracked jar with dry clay inside.");
+        const entityid prop = g.create_prop_at_with(proptype_t::DUNGEON_JAR_00, vec3{2, 1, 0}, [](gamestate& g, const entityid id) {
+            g.ct.set<name>(id, "jar");
+            g.ct.set<description>(id, "A cracked jar with dry clay inside.");
         });
 
         TS_ASSERT_DIFFERS(hero, ENTITYID_INVALID);
@@ -751,7 +751,7 @@ public:
         add_floor(g);
 
         const entityid hero = create_hero(g, vec3{1, 1, 0});
-        const entityid chest = g.create_chest_at_with(vec3{2, 1, 0}, [](CT&, const entityid) {});
+        const entityid chest = g.create_chest_at_with(vec3{2, 1, 0}, [](gamestate&, const entityid) {});
 
         TS_ASSERT_DIFFERS(hero, ENTITYID_INVALID);
         TS_ASSERT_DIFFERS(chest, ENTITYID_INVALID);
@@ -772,7 +772,7 @@ public:
         add_floor(g);
 
         const entityid hero = create_hero(g, vec3{1, 1, 0});
-        const entityid door = g.create_door_at_with(vec3{2, 1, 0}, [](CT&, const entityid) {});
+        const entityid door = g.create_door_at_with(vec3{2, 1, 0}, [](gamestate&, const entityid) {});
 
         TS_ASSERT_DIFFERS(hero, ENTITYID_INVALID);
         TS_ASSERT_DIFFERS(door, ENTITYID_INVALID);
@@ -816,7 +816,7 @@ public:
         g.hero_id = hero;
         g.ct.set<light_radius>(hero, 4);
 
-        const entityid door = g.create_door_at_with(vec3{2, 1, 0}, [](CT&, const entityid) {});
+        const entityid door = g.create_door_at_with(vec3{2, 1, 0}, [](gamestate&, const entityid) {});
         TS_ASSERT_DIFFERS(door, ENTITYID_INVALID);
         TS_ASSERT(!g.ct.get_or<door_open>(door, true));
 
@@ -840,7 +840,7 @@ public:
         g.hero_id = hero;
         g.ct.set<light_radius>(hero, 4);
 
-        const entityid door = g.create_door_at_with(vec3{2, 1, 0}, [](CT&, const entityid) {});
+        const entityid door = g.create_door_at_with(vec3{2, 1, 0}, [](gamestate&, const entityid) {});
         TS_ASSERT_DIFFERS(door, ENTITYID_INVALID);
 
         g.ct.set<door_open>(door, true);
@@ -863,7 +863,7 @@ public:
         add_floor(g);
 
         const entityid hero = create_hero(g, vec3{1, 1, 0});
-        const entityid orc = g.create_orc_at_with(vec3{2, 1, 0}, [](CT&, const entityid) {});
+        const entityid orc = g.create_orc_at_with(vec3{2, 1, 0}, [](gamestate&, const entityid) {});
         const entityid hero_weapon = g.create_weapon_with(g.sword_init());
         TS_ASSERT_DIFFERS(hero, ENTITYID_INVALID);
         TS_ASSERT_DIFFERS(orc, ENTITYID_INVALID);

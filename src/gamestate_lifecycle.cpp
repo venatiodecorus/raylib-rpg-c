@@ -1,6 +1,7 @@
 #include "gamestate.h"
 #include "ecs_core_components.h"
 #include "ecs_actor_components.h"
+#include "ecs_gameplay_components.h"
 #include <entt/entt.hpp>
 
 /** @file gamestate_lifecycle.cpp
@@ -26,7 +27,7 @@ bool gamestate::path_blocked(vec3 a, vec3 b) {
         }
         entityid door_id = t.get_cached_door();
         if (door_id != INVALID) {
-            bool door_is_open = ct.get_or<door_open>(door_id, false);
+            bool door_is_open = get_component_or<DoorOpenFlag>(door_id, false);
             if (!door_is_open) {
                 return true;
             }
@@ -48,7 +49,7 @@ bool gamestate::visibility_path_blocked(vec3 a, vec3 b) {
         }
         entityid door_id = t.get_cached_door();
         if (door_id != INVALID && !vec3_equal(loc, b)) {
-            bool door_is_open = ct.get_or<door_open>(door_id, false);
+            bool door_is_open = get_component_or<DoorOpenFlag>(door_id, false);
             if (!door_is_open) {
                 return true;
             }
@@ -66,18 +67,18 @@ bool gamestate::update_player_tiles_explored() {
         return false;
     }
     auto df = d.get_current_floor();
-    const vec3* hero_loc_ptr = ct.get<location>(hero_id);
-    if (!hero_loc_ptr) {
+    const Position* hero_pos = get_component<Position>(hero_id);
+    if (!hero_pos) {
         merror2("hero location lacks value");
         return false;
     }
-    vec3 hero_loc = *hero_loc_ptr;
+    vec3 hero_loc = hero_pos->value;
     for (int y = 0; y < df->get_height(); y++) {
         for (int x = 0; x < df->get_width(); x++) {
             df->tile_at(vec3{x, y, hero_loc.z}).set_visible(false);
         }
     }
-    int light_radius0 = ct.get_or<light_radius>(hero_id, 1);
+    int light_radius0 = get_component_or<LightRadius>(hero_id, 1);
     int min_x = std::max(0, hero_loc.x - light_radius0);
     int max_x = std::min(df->get_width() - 1, hero_loc.x + light_radius0);
     int min_y = std::max(0, hero_loc.y - light_radius0);
@@ -103,7 +104,7 @@ bool gamestate::update_player_state() {
         merror2("hero_id is invalid");
         return false;
     }
-    if (ct.get_or<dead>(hero_id, true)) {
+    if (get_component_or<DeadFlag>(hero_id, true)) {
         merror2("hero_id is dead");
         gameover = true;
         return true;
@@ -125,24 +126,24 @@ void gamestate::update_npcs_state() {
 }
 
 void gamestate::update_npc_behavior(entityid id) {
-    if (ct.get_or<entitytype>(id, entitytype_t::NONE) != entitytype_t::NPC) {
+    if ((get_component<EntityTypeTag>(id) ? get_component<EntityTypeTag>(id)->type : entitytype_t::NONE) != entitytype_t::NPC) {
         return;
     }
-    if (ct.get_or<dead>(id, true)) {
+    if (get_component_or<DeadFlag>(id, true)) {
         ct.set<entity_default_action>(id, entity_default_action_t::NONE);
         ct.set<target_id>(id, ENTITYID_INVALID);
         return;
     }
 
-    const bool is_aggressive = ct.get_or<aggro>(id, false);
-    if (hero_id == ENTITYID_INVALID || !is_aggressive || !ct.has<location>(hero_id)) {
+    const bool is_aggressive = get_component_or<AggroFlag>(id, false);
+    if (hero_id == ENTITYID_INVALID || !is_aggressive || !has_component<Position>(hero_id)) {
         ct.set<entity_default_action>(id, entity_default_action_t::RANDOM_MOVE);
         ct.set<target_id>(id, ENTITYID_INVALID);
         return;
     }
 
-    const vec3 npc_loc = ct.get_or<location>(id, vec3{-1, -1, -1});
-    const vec3 hero_loc = ct.get_or<location>(hero_id, vec3{-1, -1, -1});
+    const vec3 npc_loc = get_component_or<Position>(id, vec3{-1, -1, -1});
+    const vec3 hero_loc = get_component_or<Position>(hero_id, vec3{-1, -1, -1});
     if (vec3_invalid(npc_loc) || vec3_invalid(hero_loc) || npc_loc.z != hero_loc.z) {
         ct.set<entity_default_action>(id, entity_default_action_t::RANDOM_MOVE);
         ct.set<target_id>(id, ENTITYID_INVALID);
@@ -196,14 +197,20 @@ void gamestate::logic_init() {
     }
     create_weapon_at_with(ct, floor_zero->get_random_loc(), sword_init());
     create_shield_at_with(ct, floor_zero->get_random_loc(), shield_init());
-    auto green_slime_init = [](CT& ct, const entityid id) {
-        ct.set<name>(id, "green slime");
-        ct.set<dialogue_text>(id, "The slime jiggles quietly.");
-        ct.set<aggro>(id, false);
-        ct.set<level>(id, 1);
-        ct.set<xp>(id, 0);
+    auto green_slime_init = [](gamestate& g, const entityid id) {
+        g.ct.set<name>(id, "green slime");
+        g.ct.set<dialogue_text>(id, "The slime jiggles quietly.");
+        g.ct.set<aggro>(id, false);
+        g.ct.set<level>(id, 1);
+        g.ct.set<xp>(id, 0);
+        auto e = g.ensure_registry_entity(id);
+        g.registry.emplace_or_replace<EntityName>(e, EntityName{"green slime"});
+        g.registry.emplace_or_replace<DialogueLine>(e, DialogueLine{"The slime jiggles quietly."});
+        g.registry.emplace_or_replace<AggroFlag>(e, AggroFlag{false});
+        g.registry.emplace_or_replace<EntityLevel>(e, EntityLevel{1});
+        g.registry.emplace_or_replace<Experience>(e, Experience{0});
     };
-    auto armed_orc_init = [this](CT& ct, const entityid id) {
+    auto armed_orc_init = [this](gamestate& g, const entityid id) {
         vector<with_fun> weapon_inits = {
             dagger_init(),
             sword_init(),
@@ -214,14 +221,18 @@ void gamestate::logic_init() {
         const entityid potion_id = create_potion_with(potion_init(potiontype_t::HP_SMALL));
         add_to_inventory(id, weapon_id);
         add_to_inventory(id, potion_id);
-        ct.set<equipped_weapon>(id, weapon_id);
-        ct.set<aggro>(id, true);
+        g.ct.set<equipped_weapon>(id, weapon_id);
+        g.ct.set<aggro>(id, true);
+        auto e = g.ensure_registry_entity(id);
+        g.registry.emplace_or_replace<EquippedWeapon>(e, EquippedWeapon{weapon_id});
+        g.registry.emplace_or_replace<AggroFlag>(e, AggroFlag{true});
     };
 
     const race_t friendly_race = static_cast<race_t>(GetRandomValue(static_cast<int>(race_t::NONE) + 1, static_cast<int>(race_t::COUNT) - 1));
     const vec3 friendly_loc = d.get_floor(0)->get_random_loc();
-    create_npc_at_with(friendly_race, friendly_loc, [](CT& ct, const entityid id) {
-        ct.set<aggro>(id, false);
+    create_npc_at_with(friendly_race, friendly_loc, [](gamestate& g, const entityid id) {
+        g.ct.set<aggro>(id, false);
+        g.registry.emplace_or_replace<AggroFlag>(g.ensure_registry_entity(id), AggroFlag{false});
     });
 
     auto floor_one = d.get_floor(1);
@@ -299,16 +310,16 @@ void gamestate::finalize_render_feedback() {
     auto view = registry.view<LegacyEntityId>();
     for (auto entity : view) {
         entityid id = view.get<LegacyEntityId>(entity).id;
-        if (ct.has<update>(id)) {
+        if (has_component<NeedsUpdate>(id)) {
             ct.set<update>(id, false);
         }
-        if (ct.has<attacking>(id)) {
+        if (has_component<AttackingFlag>(id)) {
             ct.set<attacking>(id, false);
         }
-        if (ct.has<block_success>(id)) {
+        if (has_component<BlockSuccessFlag>(id)) {
             ct.set<block_success>(id, false);
         }
-        if (ct.has<spritemove>(id)) {
+        if (has_component<SpriteMoveState>(id)) {
             ct.set<spritemove>(id, Rectangle{0, 0, 0, 0});
         }
     }

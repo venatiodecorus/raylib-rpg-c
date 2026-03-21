@@ -77,7 +77,7 @@ public:
         }
 
         const entityid hero = g.create_player_at_with(vec3{9, 6, 0}, "hero", g.player_init(18));
-        const entityid orc = g.create_orc_at_with(vec3{1, 6, 0}, [](CT&, const entityid) {});
+        const entityid orc = g.create_orc_at_with(vec3{1, 6, 0}, [](gamestate&, const entityid) {});
 
         TS_ASSERT_DIFFERS(hero, ENTITYID_INVALID);
         TS_ASSERT_DIFFERS(orc, ENTITYID_INVALID);

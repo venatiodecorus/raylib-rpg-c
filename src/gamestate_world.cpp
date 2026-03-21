@@ -1,5 +1,6 @@
 #include "gamestate.h"
 
+#include "ecs_gameplay_components.h"
 #include "ecs_world_object_components.h"
 #include "world_object_definitions.h"
 
@@ -62,13 +63,19 @@ bool dungeon_room_fits(Rectangle candidate, const vector<room>& rooms, int width
 }
 
 with_fun dungeon_prop_init(proptype_t type) {
-    return [type](CT& ct, const entityid id) {
+    return [type](gamestate& g, const entityid id) {
         const StaticWorldDefinition& definition = get_prop_definition(type);
-        ct.set<name>(id, definition.name);
-        ct.set<description>(id, definition.description);
-        ct.set<solid>(id, definition.solid);
-        ct.set<pushable>(id, definition.pushable);
-        ct.set<pullable>(id, definition.pullable);
+        g.ct.set<name>(id, definition.name);
+        g.ct.set<description>(id, definition.description);
+        g.ct.set<solid>(id, definition.solid);
+        g.ct.set<pushable>(id, definition.pushable);
+        g.ct.set<pullable>(id, definition.pullable);
+        auto e = g.ensure_registry_entity(id);
+        g.registry.emplace_or_replace<EntityName>(e, EntityName{definition.name});
+        g.registry.emplace_or_replace<EntityDescription>(e, EntityDescription{definition.description});
+        g.registry.emplace_or_replace<SolidTag>(e, SolidTag{definition.solid});
+        g.registry.emplace_or_replace<PushableTag>(e, PushableTag{definition.pushable});
+        g.registry.emplace_or_replace<PullableTag>(e, PullableTag{definition.pullable});
     };
 }
 
@@ -294,7 +301,7 @@ entityid gamestate::create_door_with(with_fun doorInitFunction) {
     const StaticWorldDefinition& definition = get_static_world_definition(entitytype_t::DOOR);
     ct.set<entitytype>(id, entitytype_t::DOOR);
     sync_entt_entity_type_tags(id, entitytype_t::DOOR);
-    doorInitFunction(ct, id);
+    doorInitFunction(*this, id);
     if (!ct.has<name>(id)) {
         ct.set<name>(id, definition.name);
     }
@@ -344,7 +351,7 @@ size_t gamestate::place_doors() {
                 if (!tile.get_can_have_door()) {
                     continue;
                 }
-                entityid door_id = create_door_at_with(loc, [](CT& ct, const entityid id) {});
+                entityid door_id = create_door_at_with(loc, [](gamestate&, const entityid) {});
                 if (door_id == ENTITYID_INVALID) {
                     continue;
                 }
@@ -369,7 +376,7 @@ entityid gamestate::create_chest_with(with_fun chestInitFunction) {
     ct.set<door_open>(id, false);
     ct.set<hp>(id, vec2{10, 10});
     ct.set<inventory>(id, make_shared<vector<entityid>>());
-    chestInitFunction(ct, id);
+    chestInitFunction(*this, id);
     if (!ct.has<name>(id)) {
         ct.set<name>(id, definition.name);
     }
@@ -431,7 +438,7 @@ entityid gamestate::place_first_floor_chest() {
         return ENTITYID_INVALID;
     }
     std::shuffle(candidates.begin(), candidates.end(), mt);
-    return create_chest_at_with(candidates.front(), [](CT&, const entityid) {});
+    return create_chest_at_with(candidates.front(), [](gamestate&, const entityid) {});
 }
 
 entityid gamestate::create_prop_with(proptype_t type, with_fun initFun) {
@@ -442,7 +449,7 @@ entityid gamestate::create_prop_with(proptype_t type, with_fun initFun) {
     ct.set<spritemove>(id, Rectangle{0, 0, 0, 0});
     ct.set<update>(id, true);
     ct.set<proptype>(id, type);
-    initFun(ct, id);
+    initFun(*this, id);
     if (!ct.has<description>(id)) {
         ct.set<description>(id, "A neglected dungeon furnishing that has outlasted whoever left it here.");
     }
@@ -677,7 +684,7 @@ bool gamestate::setup_floor_four_pressure_plate_tutorial() {
         return false;
     }
 
-    const entityid door_id = create_door_at_with(door_loc, [](CT&, const entityid) {});
+    const entityid door_id = create_door_at_with(door_loc, [](gamestate&, const entityid) {});
     if (door_id == ENTITYID_INVALID) {
         return false;
     }

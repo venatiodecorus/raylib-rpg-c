@@ -71,7 +71,9 @@ constexpr int GAMESTATE_INIT_ENTITYIDS_MAX          = 3000000;
 
 typedef ComponentTable CT;
 
-typedef function<void(CT& ct, const entityid)> with_fun;
+class gamestate;
+
+typedef function<void(gamestate& g, const entityid)> with_fun;
 
 using std::make_pair;
 using std::map;
@@ -326,6 +328,34 @@ public:
 
     bool has_registry_entity(entityid id) const {
         return lookup_registry_entity(id) != entt::null;
+    }
+
+    /// @brief Look up an EnTT component for a legacy entityid. Returns nullptr if missing.
+    template <typename T>
+    T* get_component(entityid id) {
+        auto e = lookup_registry_entity(id);
+        return e != entt::null ? registry.try_get<T>(e) : nullptr;
+    }
+
+    /// @brief Look up a const EnTT component for a legacy entityid. Returns nullptr if missing.
+    template <typename T>
+    const T* get_component(entityid id) const {
+        auto e = lookup_registry_entity(id);
+        return e != entt::null ? registry.try_get<T>(e) : nullptr;
+    }
+
+    /// @brief Return the component's .value field, or fallback if the component is absent.
+    template <typename T, typename F>
+    auto get_component_or(entityid id, const F& fallback) const -> decltype(std::declval<T>().value) {
+        const auto* ptr = get_component<T>(id);
+        return ptr ? ptr->value : fallback;
+    }
+
+    /// @brief Check whether a legacy entity has an EnTT component.
+    template <typename T>
+    bool has_component(entityid id) const {
+        auto e = lookup_registry_entity(id);
+        return e != entt::null && registry.all_of<T>(e);
     }
 
     void sync_entt_entity_type_tags(entityid id, entitytype_t type) {

@@ -225,7 +225,7 @@ public:
         g.d.is_initialized = true;
 
         const entityid hero = g.create_player_at_with(vec3{1, 1, 0}, "hero", g.player_init(10));
-        const entityid slime = g.create_npc_at_with(race_t::GREEN_SLIME, vec3{2, 1, 0}, [](CT&, const entityid) {});
+        const entityid slime = g.create_npc_at_with(race_t::GREEN_SLIME, vec3{2, 1, 0}, [](gamestate&, const entityid) {});
         TS_ASSERT_DIFFERS(hero, ENTITYID_INVALID);
         TS_ASSERT_DIFFERS(slime, ENTITYID_INVALID);
 

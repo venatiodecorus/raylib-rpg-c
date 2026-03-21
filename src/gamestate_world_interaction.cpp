@@ -1,3 +1,4 @@
+#include "ecs_gameplay_components.h"
 #include "gamestate.h"
 
 /** @file gamestate_world_interaction.cpp
@@ -25,28 +26,28 @@ entityid gamestate::tile_has_pullable(int x, int y, int z) {
     tile_t& t = df->tile_at(vec3{x, y, z});
     entityid box_id = t.get_cached_box();
     if (box_id != INVALID) {
-        bool is_pullable = ct.get_or<pullable>(box_id, false);
+        bool is_pullable = get_component_or<PullableTag>(box_id, false);
         if (is_pullable) {
             return box_id;
         }
     }
     entityid chest_id = t.get_cached_chest();
     if (chest_id != INVALID) {
-        bool is_pullable = ct.get_or<pullable>(chest_id, false);
+        bool is_pullable = get_component_or<PullableTag>(chest_id, false);
         if (is_pullable) {
             return chest_id;
         }
     }
     entityid dead_npc_id = t.get_cached_dead_npc();
     if (dead_npc_id != INVALID) {
-        bool is_pullable = ct.get_or<pullable>(dead_npc_id, false);
+        bool is_pullable = get_component_or<PullableTag>(dead_npc_id, false);
         if (is_pullable) {
             return dead_npc_id;
         }
     }
     entityid prop_id = t.get_cached_prop();
     if (prop_id != INVALID) {
-        bool is_pullable = ct.get_or<pullable>(prop_id, false);
+        bool is_pullable = get_component_or<PullableTag>(prop_id, false);
         if (is_pullable) {
             return prop_id;
         }
@@ -61,37 +62,37 @@ bool gamestate::tile_has_solid(int x, int y, int z) {
     tile_t& t = df->tile_at(vec3{x, y, z});
 
     entityid id = t.get_cached_live_npc();
-    bool is_solid = ct.get_or<solid>(id, false);
+    bool is_solid = get_component_or<SolidTag>(id, false);
     if (id != ENTITYID_INVALID && is_solid) {
         return true;
     }
 
     id = t.get_cached_box();
-    is_solid = ct.get_or<solid>(id, false);
+    is_solid = get_component_or<SolidTag>(id, false);
     if (id != ENTITYID_INVALID && is_solid) {
         return true;
     }
 
     id = t.get_cached_chest();
-    is_solid = ct.get_or<solid>(id, false);
+    is_solid = get_component_or<SolidTag>(id, false);
     if (id != ENTITYID_INVALID && is_solid) {
         return true;
     }
 
     id = t.get_cached_prop();
-    is_solid = ct.get_or<solid>(id, false);
+    is_solid = get_component_or<SolidTag>(id, false);
     if (id != ENTITYID_INVALID && is_solid) {
         return true;
     }
 
     id = t.get_cached_door();
-    is_solid = ct.get_or<solid>(id, false);
+    is_solid = get_component_or<SolidTag>(id, false);
     if (id != ENTITYID_INVALID && is_solid) {
         return true;
     }
 
     id = t.get_cached_item();
-    is_solid = ct.get_or<solid>(id, false);
+    is_solid = get_component_or<SolidTag>(id, false);
     if (id != ENTITYID_INVALID && is_solid) {
         return true;
     }
@@ -100,7 +101,7 @@ bool gamestate::tile_has_solid(int x, int y, int z) {
 }
 
 bool gamestate::handle_box_push(entityid id, vec3 v) {
-    bool can_push = ct.get_or<pushable>(id, false);
+    bool can_push = get_component_or<PushableTag>(id, false);
     if (!can_push) {
         return false;
     }
@@ -121,19 +122,19 @@ entityid gamestate::tile_has_pushable(int x, int y, int z) {
     tile_t& t = df->tile_at(vec3{x, y, z});
 
     entityid id = t.get_cached_box();
-    bool is_pushable = ct.get_or<pushable>(id, false);
+    bool is_pushable = get_component_or<PushableTag>(id, false);
     if (id != ENTITYID_INVALID && is_pushable) {
         return id;
     }
 
     id = t.get_cached_chest();
-    is_pushable = ct.get_or<pushable>(id, false);
+    is_pushable = get_component_or<PushableTag>(id, false);
     if (id != ENTITYID_INVALID && is_pushable) {
         return id;
     }
 
     id = t.get_cached_prop();
-    is_pushable = ct.get_or<pushable>(id, false);
+    is_pushable = get_component_or<PushableTag>(id, false);
     if (id != ENTITYID_INVALID && is_pushable) {
         return id;
     }
@@ -153,7 +154,7 @@ bool gamestate::check_hearing(entityid id, vec3 loc) {
     if (id == ENTITYID_INVALID || vec3_invalid(loc)) {
         return false;
     }
-    vec3 hero_loc = ct.get_or<location>(hero_id, vec3{-1, -1, -1});
+    vec3 hero_loc = get_component_or<Position>(hero_id, vec3{-1, -1, -1});
     if (vec3_invalid(hero_loc) || hero_loc.z != loc.z) {
         return false;
     }
@@ -166,7 +167,7 @@ bool gamestate::check_hearing(entityid id, vec3 loc) {
     Vector2 p1 = {x1, y1};
 
     float dist = Vector2Distance(p0, p1);
-    float hearing = ct.get_or<hearing_distance>(hero_id, 3);
+    float hearing = get_component_or<HearingRange>(hero_id, 3);
     return dist <= hearing;
 }
 
@@ -184,17 +185,17 @@ bool gamestate::tile_has_pressure_plate_occupant(vec3 loc) {
     }
 
     const entityid box_id = tile.get_cached_box();
-    if (box_id != ENTITYID_INVALID && (ct.get_or<pushable>(box_id, false) || ct.get_or<pullable>(box_id, false))) {
+    if (box_id != ENTITYID_INVALID && (get_component_or<PushableTag>(box_id, false) || get_component_or<PullableTag>(box_id, false))) {
         return true;
     }
 
     const entityid chest_id = tile.get_cached_chest();
-    if (chest_id != ENTITYID_INVALID && (ct.get_or<pushable>(chest_id, false) || ct.get_or<pullable>(chest_id, false))) {
+    if (chest_id != ENTITYID_INVALID && (get_component_or<PushableTag>(chest_id, false) || get_component_or<PullableTag>(chest_id, false))) {
         return true;
     }
 
     const entityid prop_id = tile.get_cached_prop();
-    if (prop_id != ENTITYID_INVALID && (ct.get_or<pushable>(prop_id, false) || ct.get_or<pullable>(prop_id, false))) {
+    if (prop_id != ENTITYID_INVALID && (get_component_or<PushableTag>(prop_id, false) || get_component_or<PullableTag>(prop_id, false))) {
         return true;
     }
 
@@ -230,7 +231,7 @@ void gamestate::update_pressure_plates_for_floor(int z) {
         }
 
         const bool active = tile_has_pressure_plate_occupant(plate.loc);
-        if (plate.linked_door_id == ENTITYID_INVALID || ct.get_or<entitytype>(plate.linked_door_id, entitytype_t::NONE) != entitytype_t::DOOR) {
+        if (plate.linked_door_id == ENTITYID_INVALID || (get_component<EntityTypeTag>(plate.linked_door_id) ? get_component<EntityTypeTag>(plate.linked_door_id)->type : entitytype_t::NONE) != entitytype_t::DOOR) {
             plate.linked_door_id = ENTITYID_INVALID;
             plate.active = false;
             continue;
@@ -265,11 +266,11 @@ void gamestate::update_pressure_plates_for_floor(int z) {
 }
 
 void gamestate::resolve_pressure_plate_set_door_event(entityid door_id, bool should_open) {
-    if (door_id == ENTITYID_INVALID || ct.get_or<entitytype>(door_id, entitytype_t::NONE) != entitytype_t::DOOR) {
+    if (door_id == ENTITYID_INVALID || (get_component<EntityTypeTag>(door_id) ? get_component<EntityTypeTag>(door_id)->type : entitytype_t::NONE) != entitytype_t::DOOR) {
         return;
     }
 
-    const bool was_open = ct.get_or<door_open>(door_id, false);
+    const bool was_open = get_component_or<DoorOpenFlag>(door_id, false);
     ct.set<door_open>(door_id, should_open);
     sync_registry_open_state(door_id, should_open);
     ct.set<update>(door_id, true);
@@ -495,7 +496,7 @@ gameplay_event_result_t gamestate::process_gameplay_event(const gameplay_event_t
         result.handled = true;
         result.succeeded = try_entity_move(event.actor_id, event.delta);
         if (result.succeeded) {
-            const vec3 loc = ct.get_or<location>(event.actor_id, vec3{-1, -1, -1});
+            const vec3 loc = get_component_or<Position>(event.actor_id, vec3{-1, -1, -1});
             if (vec3_valid(loc)) {
                 queue_pressure_plate_refresh_event(loc.z);
             }
@@ -506,7 +507,7 @@ gameplay_event_result_t gamestate::process_gameplay_event(const gameplay_event_t
         result.handled = true;
         result.succeeded = try_entity_push(event.actor_id, event.delta);
         if (result.succeeded) {
-            const vec3 loc = ct.get_or<location>(event.actor_id, vec3{-1, -1, -1});
+            const vec3 loc = get_component_or<Position>(event.actor_id, vec3{-1, -1, -1});
             if (vec3_valid(loc)) {
                 queue_pressure_plate_refresh_event(loc.z);
             }
@@ -518,7 +519,7 @@ gameplay_event_result_t gamestate::process_gameplay_event(const gameplay_event_t
         result.attack_result = resolve_attack_intent(event.actor_id, event.target_loc);
         handle_attack_sfx(event.actor_id, result.attack_result);
         if (!test) {
-            set_gamestate_flag_for_attack_animation(ct.get_or<entitytype>(event.actor_id, entitytype_t::NONE));
+            set_gamestate_flag_for_attack_animation((get_component<EntityTypeTag>(event.actor_id) ? get_component<EntityTypeTag>(event.actor_id)->type : entitytype_t::NONE));
         }
         result.succeeded = result.attack_result != attack_result_t::NONE;
         return result;
@@ -574,7 +575,7 @@ gameplay_event_result_t gamestate::process_gameplay_event(const gameplay_event_t
         result.handled = true;
         result.succeeded = try_entity_pull(event.actor_id);
         if (result.succeeded) {
-            const vec3 loc = ct.get_or<location>(event.actor_id, vec3{-1, -1, -1});
+            const vec3 loc = get_component_or<Position>(event.actor_id, vec3{-1, -1, -1});
             if (vec3_valid(loc)) {
                 queue_pressure_plate_refresh_event(loc.z);
             }
@@ -600,8 +601,8 @@ gameplay_event_result_t gamestate::process_gameplay_event(const gameplay_event_t
     case event_type_t::USE_ITEM_INTENT:
         result.handled = true;
         result.succeeded = false;
-        if (ct.get_or<entitytype>(event.target_id, entitytype_t::NONE) == entitytype_t::ITEM &&
-            ct.get_or<itemtype>(event.target_id, itemtype_t::NONE) == itemtype_t::POTION &&
+        if ((get_component<EntityTypeTag>(event.target_id) ? get_component<EntityTypeTag>(event.target_id)->type : entitytype_t::NONE) == entitytype_t::ITEM &&
+            get_component_or<ItemSubtype>(event.target_id, itemtype_t::NONE) == itemtype_t::POTION &&
             use_potion(event.actor_id, event.target_id)) {
             if (event.actor_id == hero_id) {
                 flag = gamestate_flag_t::PLAYER_ANIM;
@@ -614,8 +615,8 @@ gameplay_event_result_t gamestate::process_gameplay_event(const gameplay_event_t
     case event_type_t::EQUIP_ITEM_INTENT:
         result.handled = true;
         result.succeeded = false;
-        if (event.actor_id == hero_id && ct.get_or<entitytype>(event.target_id, entitytype_t::NONE) == entitytype_t::ITEM) {
-            const itemtype_t item_type = ct.get_or<itemtype>(event.target_id, itemtype_t::NONE);
+        if (event.actor_id == hero_id && (get_component<EntityTypeTag>(event.target_id) ? get_component<EntityTypeTag>(event.target_id)->type : entitytype_t::NONE) == entitytype_t::ITEM) {
+            const itemtype_t item_type = get_component_or<ItemSubtype>(event.target_id, itemtype_t::NONE);
             if (item_type == itemtype_t::WEAPON || item_type == itemtype_t::SHIELD) {
                 handle_hero_inventory_equip_item(event.target_id);
                 result.succeeded = true;
@@ -625,7 +626,7 @@ gameplay_event_result_t gamestate::process_gameplay_event(const gameplay_event_t
     case event_type_t::DROP_ITEM_INTENT:
         result.handled = true;
         result.succeeded = false;
-        if (event.actor_id == hero_id && ct.get_or<entitytype>(event.item_id, entitytype_t::NONE) == entitytype_t::ITEM) {
+        if (event.actor_id == hero_id && (get_component<EntityTypeTag>(event.item_id) ? get_component<EntityTypeTag>(event.item_id)->type : entitytype_t::NONE) == entitytype_t::ITEM) {
             result.succeeded = drop_inventory_item(event.actor_id, event.item_id);
         }
         return result;
@@ -635,8 +636,8 @@ gameplay_event_result_t gamestate::process_gameplay_event(const gameplay_event_t
         if (result.succeeded) {
             frame_dirty = true;
             audio.queue("sfx/Minifantasy_Dungeon_SFX/02_chest_close_1.wav");
-            auto updated_inventory = ct.get_or<inventory>(event.actor_id, make_shared<vector<entityid>>());
-            clamp_inventory_selection(updated_inventory->size());
+            auto* updated_inventory = get_component<Inventory>(event.actor_id);
+            clamp_inventory_selection(updated_inventory ? updated_inventory->value.size() : 0);
         }
         return result;
     case event_type_t::TRAVERSE_STAIRS_INTENT:
@@ -793,9 +794,9 @@ bool gamestate::try_entity_move(entityid id, vec3 v) {
     minfo2("entity %d is trying to move: (%d,%d,%d)", id, v.x, v.y, v.z);
     ct.set<direction>(id, get_dir_from_xy(v.x, v.y));
     ct.set<update>(id, true);
-    massert(ct.has<location>(id), "id %d has no location", id);
+    massert(has_component<Position>(id), "id %d has no location", id);
 
-    vec3 loc = ct.get_or<location>(id, vec3{-1, -1, -1});
+    vec3 loc = get_component_or<Position>(id, vec3{-1, -1, -1});
     massert(!vec3_invalid(loc), "id %d location invalid", id);
     vec3 aloc = {loc.x + v.x, loc.y + v.y, loc.z};
 
@@ -836,8 +837,8 @@ bool gamestate::try_entity_move(entityid id, vec3 v) {
 
     entityid door_id = tile_has_door(aloc);
     if (door_id != ENTITYID_INVALID) {
-        massert(ct.has<door_open>(door_id), "door_id %d doesnt have a door_open component", door_id);
-        if (!ct.get_or<door_open>(door_id, false)) {
+        massert(has_component<DoorOpenFlag>(door_id), "door_id %d doesnt have a door_open component", door_id);
+        if (!get_component_or<DoorOpenFlag>(door_id, false)) {
             merror2("door is closed");
             return false;
         }
@@ -848,8 +849,8 @@ bool gamestate::try_entity_move(entityid id, vec3 v) {
         return false;
     }
 
-    auto type = ct.get_or<entitytype>(id, entitytype_t::NONE);
-    bool is_dead_npc = type == entitytype_t::NPC && ct.get_or<dead>(id, false);
+    auto type = (get_component<EntityTypeTag>(id) ? get_component<EntityTypeTag>(id)->type : entitytype_t::NONE);
+    bool is_dead_npc = type == entitytype_t::NPC && get_component_or<DeadFlag>(id, false);
     if (is_dead_npc) {
         tile_t& dst_tile = df->tile_at(aloc);
         dst_tile.add_dead_npc(id);
@@ -867,7 +868,7 @@ bool gamestate::try_entity_move(entityid id, vec3 v) {
     if (check_hearing(hero_id, aloc)) {
         audio.queue("sfx/Minifantasy_Dungeon_SFX/16_human_walk_stone_1.wav");
     }
-    ct.set<steps_taken>(id, ct.get_or<steps_taken>(id, 0) + 1);
+    ct.set<steps_taken>(id, get_component_or<StepsTaken>(id, 0) + 1);
     if (!processing_actions) {
         update_pressure_plates_for_floor(loc.z);
     }
@@ -973,10 +974,10 @@ bool gamestate::handle_move_down_right(inputstate& is, bool is_dead) {
 }
 
 vec3 gamestate::get_loc_facing_player() {
-    const vec3* maybe_loc = ct.get<location>(hero_id);
+    const Position* maybe_loc = get_component<Position>(hero_id);
     if (maybe_loc != nullptr) {
-        vec3 loc = *maybe_loc;
-        direction_t dir = ct.get_or<direction>(hero_id, direction_t::NONE);
+        vec3 loc = maybe_loc->value;
+        direction_t dir = get_component_or<Facing>(hero_id, direction_t::NONE);
         if (dir == direction_t::UP) {
             loc.y -= 1;
         }
@@ -1018,10 +1019,10 @@ bool gamestate::try_entity_pull(entityid id) {
     minfo("try_entity_pull(%d)", id);
     massert(id != ENTITYID_INVALID, "Entity is NULL!");
     ct.set<update>(id, true);
-    vec3 loc = ct.get_or<location>(id, vec3{-1, -1, -1});
+    vec3 loc = get_component_or<Position>(id, vec3{-1, -1, -1});
     massert(!vec3_invalid(loc), "loc is invalid");
     auto df = d.get_floor(loc.z);
-    direction_t facing_d = ct.get_or<direction>(id, direction_t::NONE);
+    direction_t facing_d = get_component_or<Facing>(id, direction_t::NONE);
     massert(facing_d != direction_t::NONE, "direction d is none");
     direction_t d = get_opposite_dir(facing_d);
     vec3 v = get_loc_from_dir(d);
@@ -1070,8 +1071,8 @@ bool gamestate::try_entity_pull(entityid id) {
 
     entityid door_id = tile_has_door(aloc);
     if (door_id != ENTITYID_INVALID) {
-        massert(ct.has<door_open>(door_id), "door_id %d doesnt have a door_open component", door_id);
-        if (!ct.get_or<door_open>(door_id, false)) {
+        massert(has_component<DoorOpenFlag>(door_id), "door_id %d doesnt have a door_open component", door_id);
+        if (!get_component_or<DoorOpenFlag>(door_id, false)) {
             merror("door is closed");
             return false;
         }
@@ -1087,8 +1088,8 @@ bool gamestate::try_entity_pull(entityid id) {
         return false;
     }
 
-    auto type = ct.get_or<entitytype>(id, entitytype_t::NONE);
-    bool is_dead_npc = type == entitytype_t::NPC && ct.get_or<dead>(id, false);
+    auto type = (get_component<EntityTypeTag>(id) ? get_component<EntityTypeTag>(id)->type : entitytype_t::NONE);
+    bool is_dead_npc = type == entitytype_t::NPC && get_component_or<DeadFlag>(id, false);
     if (is_dead_npc) {
         tile_t& dst_tile = df->tile_at(aloc);
         dst_tile.add_dead_npc(id);
@@ -1108,7 +1109,7 @@ bool gamestate::try_entity_pull(entityid id) {
         audio.queue("sfx/Minifantasy_Dungeon_SFX/16_human_walk_stone_1.wav");
     }
 
-    ct.set<steps_taken>(id, ct.get_or<steps_taken>(id, 0) + 1);
+    ct.set<steps_taken>(id, get_component_or<StepsTaken>(id, 0) + 1);
     msuccess("npc %d moved to (%d,%d,%d)", id, aloc.x, aloc.y, aloc.z);
     try_entity_move(box_id2, v);
     if (!processing_actions) {
@@ -1121,12 +1122,12 @@ bool gamestate::try_entity_pull(entityid id) {
 bool gamestate::try_entity_pickup(entityid id) {
     massert(id != ENTITYID_INVALID, "Entity is NULL!");
     ct.set<update>(id, true);
-    const vec3* maybe_loc = ct.get<location>(id);
+    const Position* maybe_loc = get_component<Position>(id);
     if (maybe_loc == nullptr) {
         merror("id %d has no location", id);
         return false;
     }
-    vec3 loc = *maybe_loc;
+    vec3 loc = maybe_loc->value;
     shared_ptr<dungeon_floor> df = d.get_floor(loc.z);
     tile_t& tile = df->tile_at(loc);
     bool item_picked_up = false;
@@ -1135,13 +1136,13 @@ bool gamestate::try_entity_pickup(entityid id) {
         tile.tile_remove(item_id);
         audio.queue("sfx/Minifantasy_Dungeon_SFX/02_chest_close_1.wav");
         item_picked_up = true;
-        string item_name = ct.get_or<name>(item_id, "no-name-item");
+        string item_name = get_component_or<EntityName>(item_id, "no-name-item");
         messages.add_history("You picked up %s", item_name.c_str());
     }
     else if (item_id == ENTITYID_INVALID) {
         mwarning("No item cached");
     }
-    entitytype_t t = ct.get_or<entitytype>(id, entitytype_t::NONE);
+    entitytype_t t = (get_component<EntityTypeTag>(id) ? get_component<EntityTypeTag>(id)->type : entitytype_t::NONE);
     if (t == entitytype_t::PLAYER) {
         flag = gamestate_flag_t::PLAYER_ANIM;
     }
@@ -1163,9 +1164,9 @@ bool gamestate::handle_pickup_item(inputstate& is, bool is_dead) {
 bool gamestate::try_entity_stairs(entityid id) {
     massert(id != ENTITYID_INVALID, "Entity ID is invalid!");
     ct.set<update>(id, true);
-    const vec3* maybe_loc = ct.get<location>(id);
+    const Position* maybe_loc = get_component<Position>(id);
     massert(maybe_loc != nullptr, "id %d has no location", id);
-    vec3 loc = *maybe_loc;
+    vec3 loc = maybe_loc->value;
     int current_floor = d.current_floor;
     shared_ptr<dungeon_floor> df = d.floors[current_floor];
     tile_t& t = df->tile_at(loc);
@@ -1241,10 +1242,10 @@ bool gamestate::try_entity_open_door(entityid id, vec3 loc) {
     if (door_is_pressure_plate_controlled(door_id)) {
         return messages.add("You cannot open this door with your hands");
     }
-    const bool* maybe_is_open = ct.get<door_open>(door_id);
+    const DoorOpenFlag* maybe_is_open = get_component<DoorOpenFlag>(door_id);
     massert(maybe_is_open != nullptr, "door %d has no `is_open` component", door_id);
-    ct.set<door_open>(door_id, !*maybe_is_open);
-    sync_registry_open_state(door_id, !*maybe_is_open);
+    ct.set<door_open>(door_id, !maybe_is_open->value);
+    sync_registry_open_state(door_id, !maybe_is_open->value);
     audio.queue("sfx/Minifantasy_Dungeon_SFX/01_chest_open_1.wav");
     return true;
 }
@@ -1255,9 +1256,9 @@ bool gamestate::try_entity_open_chest(entityid id, vec3 loc) {
     if (chest_id == ENTITYID_INVALID) {
         return false;
     }
-    const bool* maybe_is_open = ct.get<door_open>(chest_id);
+    const DoorOpenFlag* maybe_is_open = get_component<DoorOpenFlag>(chest_id);
     massert(maybe_is_open != nullptr, "chest %d has no open state component", chest_id);
-    if (*maybe_is_open) {
+    if (maybe_is_open->value) {
         close_chest_menu();
         return true;
     }
@@ -1271,33 +1272,33 @@ bool gamestate::try_entity_interact(entityid id, vec3 loc) {
 
     const entityid npc_id = tile.get_cached_live_npc();
     if (npc_id != ENTITYID_INVALID && npc_id != hero_id) {
-        const string speaker_name = ct.get_or<name>(npc_id, "Someone");
-        const string text = ct.get_or<dialogue_text>(npc_id, "They have nothing to say.");
+        const string speaker_name = get_component_or<EntityName>(npc_id, "Someone");
+        const string text = get_component_or<DialogueLine>(npc_id, "They have nothing to say.");
         open_interaction_modal(npc_id, speaker_name, text);
         return true;
     }
 
     const entityid prop_id = tile.get_cached_prop();
     if (prop_id != ENTITYID_INVALID) {
-        const string prop_name = ct.get_or<name>(prop_id, "Prop");
-        const string text = ct.get_or<description>(prop_id, "There is nothing notable about it.");
+        const string prop_name = get_component_or<EntityName>(prop_id, "Prop");
+        const string text = get_component_or<EntityDescription>(prop_id, "There is nothing notable about it.");
         open_interaction_modal(prop_id, prop_name, text);
         return true;
     }
 
     const entityid box_id = tile.get_cached_box();
     if (box_id != ENTITYID_INVALID) {
-        const string box_name = ct.get_or<name>(box_id, "Box");
-        const string text = ct.get_or<description>(box_id, "A plain wooden box.");
+        const string box_name = get_component_or<EntityName>(box_id, "Box");
+        const string text = get_component_or<EntityDescription>(box_id, "A plain wooden box.");
         open_interaction_modal(box_id, box_name, text);
         return true;
     }
 
     const entityid chest_id = tile.get_cached_chest();
     if (chest_id != ENTITYID_INVALID) {
-        const string chest_name = ct.get_or<name>(chest_id, "Treasure chest");
-        const bool is_open = ct.get_or<door_open>(chest_id, false);
-        const string base_text = ct.get_or<description>(chest_id, "A stout treasure chest reinforced with iron bands and built to survive rough handling.");
+        const string chest_name = get_component_or<EntityName>(chest_id, "Treasure chest");
+        const bool is_open = get_component_or<DoorOpenFlag>(chest_id, false);
+        const string base_text = get_component_or<EntityDescription>(chest_id, "A stout treasure chest reinforced with iron bands and built to survive rough handling.");
         const string text = interaction_chest_text(base_text, is_open);
         open_interaction_modal(chest_id, chest_name, text);
         return true;
@@ -1305,9 +1306,9 @@ bool gamestate::try_entity_interact(entityid id, vec3 loc) {
 
     const entityid door_id = tile.get_cached_door();
     if (door_id != ENTITYID_INVALID) {
-        const string door_name = ct.get_or<name>(door_id, "Door");
-        const bool is_open = ct.get_or<door_open>(door_id, false);
-        const string base_text = ct.get_or<description>(door_id, "A heavy wooden door bound with iron straps and swollen from the dungeon damp.");
+        const string door_name = get_component_or<EntityName>(door_id, "Door");
+        const bool is_open = get_component_or<DoorOpenFlag>(door_id, false);
+        const string base_text = get_component_or<EntityDescription>(door_id, "A heavy wooden door bound with iron straps and swollen from the dungeon damp.");
         open_interaction_modal(door_id, door_name, interaction_door_text(base_text, is_open));
         return true;
     }
