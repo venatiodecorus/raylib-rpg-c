@@ -4,6 +4,9 @@
 #include "ecs_actor_components.h"
 #include "ecs_gameplay_components.h"
 #include "ecs_item_components.h"
+#include "entities/box.h"
+#include "entities/chest.h"
+#include "entities/door.h"
 #include "entitytype.h"
 #include "libdraw_context.h"
 #include "set_sg.h"
@@ -107,11 +110,13 @@ void libdraw_update_sprite_ptr(gamestate& g, rpg::Renderer& renderer, entityid i
         libdraw_set_sg_is_damaged(g, renderer, id, sg);
     }
 
-    if (type == entitytype_t::DOOR || type == entitytype_t::CHEST) {
-        const DoorOpenFlag* door_open_ptr = g.get_component<DoorOpenFlag>(id);
-        if (door_open_ptr) {
-            sg->set_current(door_open_ptr->value ? 1 : 0);
-        }
+    if (type == entitytype_t::DOOR) {
+        rpg::entities::Door door;
+        door.update_sprite(g, renderer, id, sg);
+    }
+    else if (type == entitytype_t::CHEST) {
+        rpg::entities::Chest chest;
+        chest.update_sprite(g, renderer, id, sg);
     }
 
     if (sg->update_dest()) {

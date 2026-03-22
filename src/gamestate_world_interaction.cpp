@@ -1,4 +1,7 @@
 #include "ecs_gameplay_components.h"
+#include "entities/box.h"
+#include "entities/chest.h"
+#include "entities/door.h"
 #include "gamestate.h"
 
 /** @file gamestate_world_interaction.cpp
@@ -100,18 +103,11 @@ bool gamestate::tile_has_solid(int x, int y, int z) {
 }
 
 bool gamestate::handle_box_push(entityid id, vec3 v) {
-    bool can_push = get_component_or<PushableTag>(id, false);
-    if (!can_push) {
-        return false;
-    }
-    if (processing_actions) {
-        return queue_push_event(id, v);
-    }
-    return try_entity_push(id, v);
+    return rpg::entities::Box::handle_push(*this, id, v);
 }
 
 bool gamestate::try_entity_push(entityid id, vec3 v) {
-    return try_entity_move(id, v);
+    return rpg::entities::Box::try_push(*this, id, v);
 }
 
 entityid gamestate::tile_has_pushable(int x, int y, int z) {
@@ -1248,35 +1244,11 @@ bool gamestate::handle_traverse_stairs(inputstate& is, bool is_dead) {
 }
 
 bool gamestate::try_entity_open_door(entityid id, vec3 loc) {
-    massert(id != ENTITYID_INVALID, "id is invalid");
-    const entityid door_id = tile_has_door(loc);
-    if (door_id == ENTITYID_INVALID) {
-        return false;
-    }
-    massert(tile_has_door(loc) == door_id, "door cache mismatch at (%d, %d, %d)", loc.x, loc.y, loc.z);
-    if (door_is_pressure_plate_controlled(door_id)) {
-        return messages.add("You cannot open this door with your hands");
-    }
-    const DoorOpenFlag* maybe_is_open = get_component<DoorOpenFlag>(door_id);
-    massert(maybe_is_open != nullptr, "door %d has no `is_open` component", door_id);
-    sync_registry_open_state(door_id, !maybe_is_open->value);
-    audio.queue("sfx/Minifantasy_Dungeon_SFX/01_chest_open_1.wav");
-    return true;
+    return rpg::entities::Door::try_open(*this, id, loc);
 }
 
 bool gamestate::try_entity_open_chest(entityid id, vec3 loc) {
-    massert(id != ENTITYID_INVALID, "id is invalid");
-    const entityid chest_id = tile_has_chest(loc.x, loc.y, loc.z);
-    if (chest_id == ENTITYID_INVALID) {
-        return false;
-    }
-    const DoorOpenFlag* maybe_is_open = get_component<DoorOpenFlag>(chest_id);
-    massert(maybe_is_open != nullptr, "chest %d has no open state component", chest_id);
-    if (maybe_is_open->value) {
-        close_chest_menu();
-        return true;
-    }
-    return open_chest_menu(chest_id);
+    return rpg::entities::Chest::try_open(*this, id, loc);
 }
 
 bool gamestate::try_entity_interact(entityid id, vec3 loc) {

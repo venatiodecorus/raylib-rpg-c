@@ -40,6 +40,13 @@ AUX_DRAW_C = $(addprefix $(SRCDIR)/, \
 AUDIO_MANAGER_C = $(SRCDIR)/audio_manager.cpp
 MESSAGE_LOG_C = $(SRCDIR)/message_log.cpp
 DAMAGE_POPUPS_C = $(SRCDIR)/damage_popups.cpp
+ENTITIES_C = $(addprefix $(SRCDIR)/entities/, \
+	actor.cpp \
+	box.cpp \
+	chest.cpp \
+	door.cpp \
+	item.cpp \
+	prop.cpp)
 GAMESTATE_C = $(addprefix $(SRCDIR)/, \
 	gamestate_lifecycle.cpp \
 	gamestate_scene.cpp \
@@ -55,7 +62,7 @@ GAMESTATE_C = $(addprefix $(SRCDIR)/, \
 	actor_definitions.cpp \
 	gamestate_world_interaction.cpp \
 	gamestate_entity_factory.cpp)
-GAMESTATE_O = $(GAMESTATE_C:.cpp=.o)
+GAMESTATE_O = $(GAMESTATE_C:.cpp=.o) $(ENTITIES_C:.cpp=.o)
 GAME_SOURCES = $(MAIN_C) $(LIBDRAW_C) $(LIBDRAW_SPLIT_C) $(AUX_DRAW_C) $(AUDIO_MANAGER_C) $(MESSAGE_LOG_C) $(DAMAGE_POPUPS_C) $(GAMESTATE_C)
 
 LINK_MATH = -lm

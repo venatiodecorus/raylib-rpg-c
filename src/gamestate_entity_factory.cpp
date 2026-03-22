@@ -4,6 +4,9 @@
 #include "ecs_gameplay_components.h"
 #include "ecs_item_components.h"
 #include "actor_definitions.h"
+#include "entities/actor.h"
+#include "entities/box.h"
+#include "entities/item.h"
 #include "item_definitions.h"
 
 namespace {
@@ -51,12 +54,7 @@ void mirror_potion_item(gamestate& g, entityid id, potiontype_t type) {
 
 
 entityid gamestate::create_weapon_with(with_fun weaponInitFunction) {
-    entityid id = add_entity();
-    sync_entt_entity_type_tags(id, entitytype_t::ITEM);
-    auto e = ensure_registry_entity(id);
-    registry.emplace_or_replace<ItemSubtype>(e, ItemSubtype{itemtype_t::WEAPON});
-    registry.emplace_or_replace<SpriteMoveState>(e, SpriteMoveState{Rectangle{0, 0, 0, 0}});
-    registry.emplace_or_replace<NeedsUpdate>(e, NeedsUpdate{true});
+    entityid id = rpg::entities::Item::create_weapon(*this);
     weaponInitFunction(*this, id);
     mirror_weapon_item(*this, id, get_component_or<WeaponSubtype>(id, weapontype_t::NONE));
     return id;
@@ -138,37 +136,11 @@ with_fun gamestate::player_init(int maxhp_roll) {
 }
 
 alignment_t gamestate::default_alignment_for_race(race_t rt) {
-    switch (rt) {
-    case race_t::HUMAN: return alignment_t::NEUTRAL_NEUTRAL;
-    case race_t::ELF: return alignment_t::GOOD_CHAOTIC;
-    case race_t::DWARF: return alignment_t::GOOD_LAWFUL;
-    case race_t::HALFLING: return alignment_t::GOOD_NEUTRAL;
-    case race_t::GOBLIN: return alignment_t::EVIL_NEUTRAL;
-    case race_t::ORC: return alignment_t::EVIL_CHAOTIC;
-    case race_t::BAT: return alignment_t::NEUTRAL_NEUTRAL;
-    case race_t::GREEN_SLIME: return alignment_t::NEUTRAL_NEUTRAL;
-    case race_t::WOLF: return alignment_t::NEUTRAL_NEUTRAL;
-    case race_t::WARG: return alignment_t::EVIL_NEUTRAL;
-    case race_t::RAT: return alignment_t::NEUTRAL_NEUTRAL;
-    case race_t::SKELETON: return alignment_t::EVIL_LAWFUL;
-    case race_t::ZOMBIE: return alignment_t::EVIL_NEUTRAL;
-    case race_t::NONE:
-    case race_t::COUNT:
-    default: break;
-    }
-    return alignment_t::NONE;
+    return rpg::entities::Actor::default_alignment_for_race(rt);
 }
 
 bool gamestate::alignment_is_aggressive(alignment_t alignment_value) {
-    switch (alignment_value) {
-    case alignment_t::EVIL_LAWFUL:
-    case alignment_t::EVIL_NEUTRAL:
-    case alignment_t::EVIL_CHAOTIC:
-        return true;
-    default:
-        break;
-    }
-    return false;
+    return rpg::entities::Actor::alignment_is_aggressive(alignment_value);
 }
 
 with_fun gamestate::npc_alignment_init(alignment_t alignment_value) {
@@ -221,13 +193,7 @@ entityid gamestate::create_weapon_at_random_loc_with(with_fun weaponInitFunction
 }
 
 entityid gamestate::create_shield_with(with_fun shieldInitFunction) {
-    entityid id = add_entity();
-    sync_entt_entity_type_tags(id, entitytype_t::ITEM);
-    auto e = ensure_registry_entity(id);
-    registry.emplace_or_replace<ItemSubtype>(e, ItemSubtype{itemtype_t::SHIELD});
-    registry.emplace_or_replace<ItemDurability>(e, ItemDurability{100});
-    registry.emplace_or_replace<ItemMaxDurability>(e, ItemMaxDurability{100});
-    registry.emplace_or_replace<NeedsUpdate>(e, NeedsUpdate{false});
+    entityid id = rpg::entities::Item::create_shield(*this);
     shieldInitFunction(*this, id);
     mirror_shield_item(*this, id, get_component_or<ShieldSubtype>(id, shieldtype_t::NONE));
     return id;
@@ -237,44 +203,26 @@ entityid gamestate::create_shield_at_with(vec3 loc, with_fun shieldInitFunction)
     if (d.floors.size() == 0) {
         return INVALID;
     }
-    entityid id = create_shield_with(shieldInitFunction);
-    shared_ptr<dungeon_floor> df = d.get_floor(loc.z);
-    if (!df->df_add_at(id, entitytype_t::ITEM, loc)) {
-        return INVALID;
-    }
-    registry.emplace_or_replace<Position>(ensure_registry_entity(id), Position{loc});
-    sync_registry_grid_position(id, loc);
+    entityid id = rpg::entities::Item::create_shield_at(*this, loc);
+    shieldInitFunction(*this, id);
+    mirror_shield_item(*this, id, get_component_or<ShieldSubtype>(id, shieldtype_t::NONE));
     return id;
 }
 
 entityid gamestate::create_potion_with(with_fun potionInitFunction) {
-    entityid id = add_entity();
-    sync_entt_entity_type_tags(id, entitytype_t::ITEM);
-    auto e = ensure_registry_entity(id);
-    registry.emplace_or_replace<ItemSubtype>(e, ItemSubtype{itemtype_t::POTION});
-    registry.emplace_or_replace<NeedsUpdate>(e, NeedsUpdate{true});
+    entityid id = rpg::entities::Item::create_potion(*this);
     potionInitFunction(*this, id);
     mirror_potion_item(*this, id, get_component_or<PotionSubtype>(id, potiontype_t::NONE));
     return id;
 }
 
 entityid gamestate::create_potion_at_with(vec3 loc, with_fun potionInitFunction) {
-    shared_ptr<dungeon_floor> df = d.get_floor(loc.z);
-    tile_t& tile = df->tile_at(loc);
-    if (!tile_is_walkable(tile.get_type())) {
-        return INVALID;
-    }
-    entityid id = create_potion_with(potionInitFunction);
+    entityid id = rpg::entities::Item::create_potion_at(*this, loc);
     if (id == INVALID) {
         return INVALID;
     }
-    if (!df->df_add_at(id, entitytype_t::ITEM, loc)) {
-        return INVALID;
-    }
-    auto e = ensure_registry_entity(id);
-    registry.emplace_or_replace<Position>(e, Position{loc});
-    registry.emplace_or_replace<NeedsUpdate>(e, NeedsUpdate{true});
-    sync_registry_grid_position(id, loc);
+    potionInitFunction(*this, id);
+    mirror_potion_item(*this, id, get_component_or<PotionSubtype>(id, potiontype_t::NONE));
     return id;
 }
 
@@ -286,143 +234,25 @@ race_t gamestate::random_monster_type() {
 }
 
 void gamestate::set_npc_starting_stats(entityid id) {
-    race_t rt = (get_component<ActorKind>(id) ? get_component<ActorKind>(id)->race : race_t::NONE);
-    if (rt == race_t::NONE) {
-        return;
-    }
-    const ActorDefinition* def = get_actor_definition(rt);
-    int str_m = def ? def->modifiers[0] : get_racial_modifiers(rt, 0);
-    int dex_m = def ? def->modifiers[1] : get_racial_modifiers(rt, 1);
-    int int_m = def ? def->modifiers[2] : get_racial_modifiers(rt, 2);
-    int wis_m = def ? def->modifiers[3] : get_racial_modifiers(rt, 3);
-    int con_m = def ? def->modifiers[4] : get_racial_modifiers(rt, 4);
-    int cha_m = def ? def->modifiers[5] : get_racial_modifiers(rt, 5);
-    uniform_int_distribution<int> gen(3, 18);
-    int strength_ = gen(mt) + str_m;
-    int dexterity_ = gen(mt) + dex_m;
-    int intelligence_ = gen(mt) + int_m;
-    int wisdom_ = gen(mt) + wis_m;
-    int constitution_ = gen(mt) + con_m;
-    int charisma_ = gen(mt) + cha_m;
-    auto e = ensure_registry_entity(id);
-    registry.emplace_or_replace<StrengthAttr>(e, StrengthAttr{strength_});
-    registry.emplace_or_replace<DexterityAttr>(e, DexterityAttr{dexterity_});
-    registry.emplace_or_replace<IntelligenceAttr>(e, IntelligenceAttr{intelligence_});
-    registry.emplace_or_replace<WisdomAttr>(e, WisdomAttr{wisdom_});
-    registry.emplace_or_replace<ConstitutionAttr>(e, ConstitutionAttr{constitution_});
-    registry.emplace_or_replace<CharismaAttr>(e, CharismaAttr{charisma_});
-    vec3 hitdie = {1, def ? def->default_hitdie : 8, 0};
-    if (!def) {
-        switch (rt) {
-        case race_t::HUMAN: hitdie.y = 8; break;
-        case race_t::ELF: hitdie.y = 6; break;
-        case race_t::DWARF: hitdie.y = 10; break;
-        case race_t::HALFLING: hitdie.y = 6; break;
-        case race_t::GOBLIN: hitdie.y = 6; break;
-        case race_t::ORC: hitdie.y = 8; break;
-        case race_t::BAT: hitdie.y = 3; break;
-        case race_t::GREEN_SLIME: hitdie.y = 4; break;
-        case race_t::WOLF: hitdie.y = 6; break;
-        case race_t::WARG: hitdie.y = 12; break;
-        case race_t::RAT: hitdie.y = 4; break;
-        case race_t::SKELETON: hitdie.y = 8; break;
-        case race_t::ZOMBIE: hitdie.y = 8; break;
-        default: break;
-        }
-    }
-    uniform_int_distribution<int> gen2(1, hitdie.y);
-    int my_maxhp = std::max(1, gen2(mt) + get_stat_bonus(constitution_));
-    int my_hp = my_maxhp;
-    registry.emplace_or_replace<HitPoints>(e, HitPoints{vec2{my_hp, my_maxhp}});
-    registry.emplace_or_replace<BaseArmorClass>(e, BaseArmorClass{10});
-    registry.emplace_or_replace<HitDie>(e, HitDie{hitdie});
+    rpg::entities::Actor::set_starting_stats(*this, id);
 }
 
 void gamestate::set_npc_defaults(entityid id) {
-    sync_entt_entity_type_tags(id, entitytype_t::NPC);
-    auto e = ensure_registry_entity(id);
-    registry.emplace_or_replace<SpriteMoveState>(e, SpriteMoveState{Rectangle{0, 0, 0, 0}});
-    registry.emplace_or_replace<DeadFlag>(e, DeadFlag{false});
-    registry.emplace_or_replace<NeedsUpdate>(e, NeedsUpdate{true});
-    registry.emplace_or_replace<Facing>(e, Facing{direction_t::DOWN_RIGHT});
-    registry.emplace_or_replace<AttackingFlag>(e, AttackingFlag{false});
-    registry.emplace_or_replace<BlockSuccessFlag>(e, BlockSuccessFlag{false});
-    registry.emplace_or_replace<DamagedFlag>(e, DamagedFlag{false});
-    registry.emplace_or_replace<Inventory>(e, Inventory{});
-    registry.emplace_or_replace<EquippedWeapon>(e, EquippedWeapon{ENTITYID_INVALID});
-    registry.emplace_or_replace<AggroFlag>(e, AggroFlag{false});
-    registry.emplace_or_replace<VisionRange>(e, VisionRange{3});
-    registry.emplace_or_replace<HearingRange>(e, HearingRange{3});
-    registry.emplace_or_replace<EntityLevel>(e, EntityLevel{1});
-    registry.emplace_or_replace<Experience>(e, Experience{0});
-    registry.emplace_or_replace<DefaultAction>(e, DefaultAction{entity_default_action_t::NONE});
-    registry.emplace_or_replace<NpcPath>(e, NpcPath{});
+    rpg::entities::Actor::set_defaults(*this, id);
 }
 
 entityid gamestate::create_npc_with(race_t rt, with_fun npcInitFunction) {
-    entityid id = add_entity();
-    set_npc_defaults(id);
-    registry.emplace_or_replace<ActorKind>(ensure_registry_entity(id), ActorKind{rt});
-
-    const ActorDefinition* def = get_actor_definition(rt);
-    const alignment_t default_alignment = def ? def->default_alignment : default_alignment_for_race(rt);
-
-    npc_alignment_init(default_alignment)(*this, id);
-    registry.emplace_or_replace<AggroFlag>(ensure_registry_entity(id), AggroFlag{alignment_is_aggressive(default_alignment)});
-    set_npc_starting_stats(id);
+    entityid id = rpg::entities::Actor::create_npc(*this, rt);
     npcInitFunction(*this, id);
-    if (!has_component<EntityName>(id)) {
-        const string npc_name = def ? def->default_name : race2str(rt);
-        registry.emplace_or_replace<EntityName>(ensure_registry_entity(id), EntityName{npc_name});
-    }
-    if (!has_component<DialogueLine>(id)) {
-        const string npc_dialogue = def ? def->default_description : "They give you a guarded look but say nothing.";
-        registry.emplace_or_replace<DialogueLine>(ensure_registry_entity(id), DialogueLine{npc_dialogue});
-    }
-
-    if (def) {
-        const entt::entity registry_entity = ensure_registry_entity(id);
-        registry.emplace_or_replace<ActorKind>(registry_entity, ActorKind{rt});
-        registry.emplace_or_replace<ActorVisual>(registry_entity, ActorVisual{def->sprites, def->sprite_count});
-        registry.emplace_or_replace<ActorText>(registry_entity, ActorText{def->default_name, def->default_description});
-    }
-
     return id;
 }
 
 entityid gamestate::create_npc_at_with(race_t rt, vec3 loc, with_fun npcInitFunction) {
-    minfo2("create npc at with: (%d, %d, %d)", loc.x, loc.y, loc.z);
-    auto df = d.get_floor(loc.z);
-    tile_t& tile = df->tile_at(loc);
-    if (!tile_is_walkable(tile.get_type())) {
-        merror2("cannot create entity on non-walkable tile: tile.type: %s", tiletype2str(tile.get_type()).c_str());
-        return INVALID;
-    }
-    if (tile_has_box(loc.x, loc.y, loc.z) != ENTITYID_INVALID) {
-        merror2("cannot create entity on tile with box");
-        return INVALID;
-    }
-    if (tile_has_pushable(loc.x, loc.y, loc.z) != ENTITYID_INVALID) {
-        merror2("cannot create entity on tile with pushable");
-        return INVALID;
-    }
-    if (tile.get_cached_live_npc() != INVALID) {
-        merror2("cannot create entity on tile with live npc");
-        return INVALID;
-    }
-    entityid id = create_npc_with(rt, npcInitFunction);
+    entityid id = rpg::entities::Actor::create_npc_at(*this, rt, loc);
     if (id == INVALID) {
-        merror("failed to create npc");
         return INVALID;
     }
-    if (df->df_add_at(id, entitytype_t::NPC, loc) == INVALID) {
-        merror("failed to add npc %d to %d, %d", id, loc.x, loc.y);
-        return INVALID;
-    }
-    minfo2("setting location for %d", id);
-    registry.emplace_or_replace<Position>(ensure_registry_entity(id), Position{loc});
-    sync_registry_grid_position(id, loc);
-    msuccess2("created npc %d", id);
+    npcInitFunction(*this, id);
     return id;
 }
 
@@ -510,38 +340,9 @@ entityid gamestate::create_player_at_with(vec3 loc, string n, with_fun playerIni
 }
 
 entityid gamestate::create_box_with() {
-    entityid id = add_entity();
-    const StaticWorldDefinition& definition = get_static_world_definition(entitytype_t::BOX);
-    sync_entt_entity_type_tags(id, entitytype_t::BOX);
-    auto e = ensure_registry_entity(id);
-    registry.emplace_or_replace<SpriteMoveState>(e, SpriteMoveState{Rectangle{0, 0, 0, 0}});
-    registry.emplace_or_replace<NeedsUpdate>(e, NeedsUpdate{true});
-    registry.emplace_or_replace<PushableTag>(e, PushableTag{definition.pushable});
-    registry.emplace_or_replace<PullableTag>(e, PullableTag{definition.pullable});
-    registry.emplace_or_replace<SolidTag>(e, SolidTag{definition.solid});
-    registry.emplace_or_replace<EntityName>(e, EntityName{definition.name});
-    registry.emplace_or_replace<EntityDescription>(e, EntityDescription{definition.description});
-    attach_static_world_definition(id, definition);
-    return id;
+    return rpg::entities::Box::create(*this);
 }
 
 entityid gamestate::create_box_at_with(vec3 loc) {
-    shared_ptr<dungeon_floor> df = d.get_floor(loc.z);
-    tile_t& tile = df->tile_at(loc);
-    if (!tile_is_walkable(tile.get_type())) {
-        merror("cannot create entity on non-walkable tile");
-        return ENTITYID_INVALID;
-    }
-    if (tile_has_box(loc.x, loc.y, loc.z) != ENTITYID_INVALID) {
-        merror("cannot create entity on tile with box");
-        return ENTITYID_INVALID;
-    }
-    entityid id = create_box_with();
-    if (df->df_add_at(id, entitytype_t::BOX, loc) == ENTITYID_INVALID) {
-        merror("failed df_add_at: %d, %d, %d", id, loc.x, loc.y);
-        return ENTITYID_INVALID;
-    }
-    registry.emplace_or_replace<Position>(ensure_registry_entity(id), Position{loc});
-    sync_registry_grid_position(id, loc);
-    return id;
+    return rpg::entities::Box::create_at(*this, loc);
 }

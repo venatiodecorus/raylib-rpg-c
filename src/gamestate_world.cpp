@@ -2,6 +2,9 @@
 
 #include "ecs_gameplay_components.h"
 #include "ecs_world_object_components.h"
+#include "entities/chest.h"
+#include "entities/door.h"
+#include "entities/prop.h"
 #include "world_object_definitions.h"
 
 /** @file gamestate_world.cpp
@@ -325,40 +328,21 @@ void gamestate::init_dungeon(biome_t type, int df_count, float parts, int width,
 }
 
 entityid gamestate::create_door_with(with_fun doorInitFunction) {
-    entityid id = add_entity();
-    const StaticWorldDefinition& definition = get_static_world_definition(entitytype_t::DOOR);
-    sync_entt_entity_type_tags(id, entitytype_t::DOOR);
-    registry.emplace_or_replace<NeedsUpdate>(ensure_registry_entity(id), NeedsUpdate{true});
+    entityid id = rpg::entities::Door::create(*this);
     doorInitFunction(*this, id);
     if (!has_component<EntityName>(id)) {
     }
     if (!has_component<EntityDescription>(id)) {
     }
-    attach_static_world_definition(id, definition);
     return id;
 }
 
 entityid gamestate::create_door_at_with(vec3 loc, with_fun doorInitFunction) {
-    shared_ptr<dungeon_floor> df = d.get_floor(loc.z);
-    tile_t& tile = df->tile_at(loc);
-    if (!tile_is_walkable(tile.get_type())) {
-        return INVALID;
-    }
-    if (tile.get_type() == tiletype_t::UPSTAIRS || tile.get_type() == tiletype_t::DOWNSTAIRS) {
-        return INVALID;
-    }
-    if (tile.entity_count() > 0) {
-        return INVALID;
-    }
-    entityid id = create_door_with(doorInitFunction);
+    entityid id = rpg::entities::Door::create_at(*this, loc);
     if (id == INVALID) {
         return INVALID;
     }
-    if (!df->df_add_at(id, entitytype_t::DOOR, loc)) {
-        return INVALID;
-    }
-    sync_registry_grid_position(id, loc);
-    sync_registry_open_state(id, false);
+    doorInitFunction(*this, id);
     return id;
 }
 
@@ -387,40 +371,21 @@ size_t gamestate::place_doors() {
 }
 
 entityid gamestate::create_chest_with(with_fun chestInitFunction) {
-    entityid id = add_entity();
-    const StaticWorldDefinition& definition = get_static_world_definition(entitytype_t::CHEST);
-    sync_entt_entity_type_tags(id, entitytype_t::CHEST);
-    registry.emplace_or_replace<NeedsUpdate>(ensure_registry_entity(id), NeedsUpdate{true});
+    entityid id = rpg::entities::Chest::create(*this);
     chestInitFunction(*this, id);
     if (!has_component<EntityName>(id)) {
     }
     if (!has_component<EntityDescription>(id)) {
     }
-    attach_static_world_definition(id, definition);
     return id;
 }
 
 entityid gamestate::create_chest_at_with(vec3 loc, with_fun chestInitFunction) {
-    shared_ptr<dungeon_floor> df = d.get_floor(loc.z);
-    tile_t& tile = df->tile_at(loc);
-    if (!tile_is_walkable(tile.get_type())) {
-        return ENTITYID_INVALID;
-    }
-    if (tile.get_type() == tiletype_t::UPSTAIRS || tile.get_type() == tiletype_t::DOWNSTAIRS) {
-        return ENTITYID_INVALID;
-    }
-    if (tile.entity_count() > 0) {
-        return ENTITYID_INVALID;
-    }
-    entityid id = create_chest_with(chestInitFunction);
+    entityid id = rpg::entities::Chest::create_at(*this, loc);
     if (id == ENTITYID_INVALID) {
         return ENTITYID_INVALID;
     }
-    if (df->df_add_at(id, entitytype_t::CHEST, loc) == ENTITYID_INVALID) {
-        return ENTITYID_INVALID;
-    }
-    sync_registry_grid_position(id, loc);
-    sync_registry_open_state(id, get_component_or<DoorOpenFlag>(id, false));
+    chestInitFunction(*this, id);
     return id;
 }
 
@@ -454,37 +419,19 @@ entityid gamestate::place_first_floor_chest() {
 }
 
 entityid gamestate::create_prop_with(proptype_t type, with_fun initFun) {
-    entityid id = add_entity();
-    const StaticWorldDefinition& definition = get_prop_definition(type);
-    sync_entt_entity_type_tags(id, entitytype_t::PROP);
-    registry.emplace_or_replace<NeedsUpdate>(ensure_registry_entity(id), NeedsUpdate{true});
+    entityid id = rpg::entities::Prop::create(*this, type);
     initFun(*this, id);
     if (!has_component<EntityDescription>(id)) {
     }
-
-    attach_static_world_definition(id, definition);
-
     return id;
 }
 
 entityid gamestate::create_prop_at_with(proptype_t type, vec3 loc, with_fun initFun) {
-    shared_ptr<dungeon_floor> df = d.get_floor(loc.z);
-    tile_t& tile = df->tile_at(loc);
-    if (!tile_is_walkable(tile.get_type())) {
-        return ENTITYID_INVALID;
-    }
-    if (tile.entity_count() > 0) {
-        return ENTITYID_INVALID;
-    }
-    entityid id = create_prop_with(type, initFun);
+    entityid id = rpg::entities::Prop::create_at(*this, type, loc);
     if (id == ENTITYID_INVALID) {
         return ENTITYID_INVALID;
     }
-    entityid result = df->df_add_at(id, entitytype_t::PROP, loc);
-    if (result == ENTITYID_INVALID) {
-        return ENTITYID_INVALID;
-    }
-    sync_registry_grid_position(id, loc);
+    initFun(*this, id);
     return id;
 }
 
