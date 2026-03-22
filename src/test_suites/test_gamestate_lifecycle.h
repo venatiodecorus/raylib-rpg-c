@@ -231,7 +231,6 @@ public:
         TS_ASSERT_DIFFERS(hero, ENTITYID_INVALID);
         TS_ASSERT_DIFFERS(slime, ENTITYID_INVALID);
 
-        g.ct.set<xp>(hero, 9);
         const int old_str = g.get_component_or<StrengthAttr>(hero, 0);
         const vec2 old_hp = g.get_component_or<HitPoints>(hero, vec2{0, 0});
 
@@ -265,8 +264,6 @@ public:
         const entityid hero = g.create_player_at_with(vec3{1, 1, 0}, "hero", g.player_init(10));
         TS_ASSERT_DIFFERS(hero, ENTITYID_INVALID);
 
-        g.ct.set<hd>(hero, vec3{1, 1, 0});
-        g.ct.set<hp>(hero, vec2{7, 10});
 
         g.apply_level_up_rewards(hero);
 
@@ -565,7 +562,6 @@ public:
         TS_ASSERT(g.get_component_or<AttackingFlag>(hero, false));
         TS_ASSERT(!g.player_changing_dir);
 
-        g.ct.set<attacking>(hero, false);
         g.player_changing_dir = true;
         g.set_keybinding_primary(keyboard_profile_t::FULL, gameplay_input_action_t::FACE_ATTACK, KEY_T);
         inputstate_reset(is);

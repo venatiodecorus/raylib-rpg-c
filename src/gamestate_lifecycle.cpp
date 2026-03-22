@@ -109,9 +109,6 @@ bool gamestate::update_player_state() {
         gameover = true;
         return true;
     }
-    ct.set<blocking>(hero_id, false);
-    ct.set<block_success>(hero_id, false);
-    ct.set<damaged>(hero_id, false);
     return true;
 }
 
@@ -120,7 +117,6 @@ void gamestate::update_npcs_state() {
     auto view = registry.view<LegacyEntityId, NpcTag>();
     for (auto entity : view) {
         entityid id = view.get<LegacyEntityId>(entity).id;
-        ct.set<damaged>(id, false);
         update_npc_behavior(id);
     }
 }
@@ -130,33 +126,24 @@ void gamestate::update_npc_behavior(entityid id) {
         return;
     }
     if (get_component_or<DeadFlag>(id, true)) {
-        ct.set<entity_default_action>(id, entity_default_action_t::NONE);
-        ct.set<target_id>(id, ENTITYID_INVALID);
         return;
     }
 
     const bool is_aggressive = get_component_or<AggroFlag>(id, false);
     if (hero_id == ENTITYID_INVALID || !is_aggressive || !has_component<Position>(hero_id)) {
-        ct.set<entity_default_action>(id, entity_default_action_t::RANDOM_MOVE);
-        ct.set<target_id>(id, ENTITYID_INVALID);
         return;
     }
 
     const vec3 npc_loc = get_component_or<Position>(id, vec3{-1, -1, -1});
     const vec3 hero_loc = get_component_or<Position>(hero_id, vec3{-1, -1, -1});
     if (vec3_invalid(npc_loc) || vec3_invalid(hero_loc) || npc_loc.z != hero_loc.z) {
-        ct.set<entity_default_action>(id, entity_default_action_t::RANDOM_MOVE);
-        ct.set<target_id>(id, ENTITYID_INVALID);
         return;
     }
 
-    ct.set<target_id>(id, hero_id);
     if (is_entity_adjacent(id, hero_id)) {
-        ct.set<entity_default_action>(id, entity_default_action_t::ATTACK_TARGET_IF_ADJACENT);
         return;
     }
 
-    ct.set<entity_default_action>(id, entity_default_action_t::MOVE_TO_TARGET_AND_ATTACK_TARGET_IF_ADJACENT);
 }
 
 void gamestate::logic_init() {
@@ -195,14 +182,9 @@ void gamestate::logic_init() {
     for (int i = 0; i < floor_three_box_count; i++) {
         create_box_at_with(floor_three->get_random_loc());
     }
-    create_weapon_at_with(ct, floor_zero->get_random_loc(), sword_init());
-    create_shield_at_with(ct, floor_zero->get_random_loc(), shield_init());
+    create_weapon_at_with(floor_zero->get_random_loc(), sword_init());
+    create_shield_at_with(floor_zero->get_random_loc(), shield_init());
     auto green_slime_init = [](gamestate& g, const entityid id) {
-        g.ct.set<name>(id, "green slime");
-        g.ct.set<dialogue_text>(id, "The slime jiggles quietly.");
-        g.ct.set<aggro>(id, false);
-        g.ct.set<level>(id, 1);
-        g.ct.set<xp>(id, 0);
         auto e = g.ensure_registry_entity(id);
         g.registry.emplace_or_replace<EntityName>(e, EntityName{"green slime"});
         g.registry.emplace_or_replace<DialogueLine>(e, DialogueLine{"The slime jiggles quietly."});
@@ -221,8 +203,6 @@ void gamestate::logic_init() {
         const entityid potion_id = create_potion_with(potion_init(potiontype_t::HP_SMALL));
         add_to_inventory(id, weapon_id);
         add_to_inventory(id, potion_id);
-        g.ct.set<equipped_weapon>(id, weapon_id);
-        g.ct.set<aggro>(id, true);
         auto e = g.ensure_registry_entity(id);
         g.registry.emplace_or_replace<EquippedWeapon>(e, EquippedWeapon{weapon_id});
         g.registry.emplace_or_replace<AggroFlag>(e, AggroFlag{true});
@@ -231,7 +211,6 @@ void gamestate::logic_init() {
     const race_t friendly_race = static_cast<race_t>(GetRandomValue(static_cast<int>(race_t::NONE) + 1, static_cast<int>(race_t::COUNT) - 1));
     const vec3 friendly_loc = d.get_floor(0)->get_random_loc();
     create_npc_at_with(friendly_race, friendly_loc, [](gamestate& g, const entityid id) {
-        g.ct.set<aggro>(id, false);
         g.registry.emplace_or_replace<AggroFlag>(g.ensure_registry_entity(id), AggroFlag{false});
     });
 
@@ -311,16 +290,12 @@ void gamestate::finalize_render_feedback() {
     for (auto entity : view) {
         entityid id = view.get<LegacyEntityId>(entity).id;
         if (has_component<NeedsUpdate>(id)) {
-            ct.set<update>(id, false);
         }
         if (has_component<AttackingFlag>(id)) {
-            ct.set<attacking>(id, false);
         }
         if (has_component<BlockSuccessFlag>(id)) {
-            ct.set<block_success>(id, false);
         }
         if (has_component<SpriteMoveState>(id)) {
-            ct.set<spritemove>(id, Rectangle{0, 0, 0, 0});
         }
     }
 

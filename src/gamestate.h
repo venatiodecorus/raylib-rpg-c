@@ -4,8 +4,6 @@
  *  @brief Top-level gameplay state, orchestration, and API surface for the game runtime.
  */
 
-#include "ComponentTable.h"
-#include "ComponentTraits.h"
 #include "attack_result.h"
 #include "biome.h"
 #include "calculate_linear_path.h"
@@ -70,8 +68,6 @@ constexpr int GAMESTATE_DEBUGPANEL_DEFAULT_HEIGHT   = 200;
 constexpr int GAMESTATE_DEBUGPANEL_DEFAULT_FONT_SIZE = 20;
 constexpr int GAMESTATE_INIT_ENTITYIDS_MAX          = 3000000;
 
-typedef ComponentTable CT;
-
 class gamestate;
 
 typedef function<void(gamestate& g, const entityid)> with_fun;
@@ -125,7 +121,6 @@ public:
     rpg::AudioManager audio;
     Pathfinder pathfinder;
     character_creation chara_creation;
-    ComponentTable ct;
     entt::registry registry;
     std::unordered_map<entityid, entt::entity> legacy_to_entt;
     rpg::UIState ui;
@@ -280,7 +275,6 @@ public:
         keybind.controls_menu_pending_action = gameplay_input_action_t::MOVE_UP;
         reset_default_keybindings();
         messages = rpg::MessageLog();
-        ct.clear();
         registry.clear();
         legacy_to_entt.clear();
         d.floors.clear();
@@ -550,28 +544,26 @@ public:
     with_fun npc_alignment_init(alignment_t alignment);
 
     /** @brief Create and place a weapon item at a specific dungeon location. */
-    entityid create_weapon_at_with(ComponentTable& ct, vec3 loc, with_fun weaponInitFunction);
+    entityid create_weapon_at_with(vec3 loc, with_fun weaponInitFunction);
 
     /**
      * @brief Create and place a weapon item at a random valid location.
      *
-     * @param ct Component table that receives the created entity components.
      * @param weaponInitFunction Additional item-specific initialization.
      * @return The created entity id, or `ENTITYID_INVALID` on failure.
      */
-    entityid create_weapon_at_random_loc_with(CT& ct, with_fun weaponInitFunction);
+    entityid create_weapon_at_random_loc_with(with_fun weaponInitFunction);
 
     /**
      * @brief Create a shield item entity and apply shield-specific initialization.
      *
-     * @param ct Component table that receives the created entity components.
      * @param shieldInitFunction Additional item-specific initialization.
      * @return The created entity id, or `ENTITYID_INVALID` on failure.
      */
-    entityid create_shield_with(ComponentTable& ct, with_fun shieldInitFunction);
+    entityid create_shield_with(with_fun shieldInitFunction);
 
     /** @brief Create and place a shield item at a specific dungeon location. */
-    entityid create_shield_at_with(ComponentTable& ct, vec3 loc, with_fun shieldInitFunction);
+    entityid create_shield_at_with(vec3 loc, with_fun shieldInitFunction);
 
     /**
      * @brief Create a potion item entity and apply potion-specific initialization.

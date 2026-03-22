@@ -1,13 +1,12 @@
+#include "ecs_actor_components.h"
+#include "ecs_core_components.h"
 #include "ecs_gameplay_components.h"
 #include "gamestate.h"
-#include "ecs_core_components.h"
-#include "ecs_actor_components.h"
 #include <entt/entt.hpp>
 
 /** @file gamestate_npc_combat.cpp
  *  @brief Combat, NPC behavior, and pathing helpers implemented on `gamestate`.
  */
-
 
 int gamestate::compute_armor_class(entityid id) {
     massert(ENTITYID_INVALID != id, "id is invalid");
@@ -69,13 +68,10 @@ void gamestate::handle_weapon_durability_loss(entityid atk_id, entityid tgt_id) 
         return;
     }
     int dura = dura_ptr->value;
-    ct.set<durability>(equipped_wpn, dura - 1 < 0 ? 0 : dura - 1);
     if (dura > 0) {
         return;
     }
-    ct.set<equipped_weapon>(atk_id, ENTITYID_INVALID);
     remove_from_inventory(atk_id, equipped_wpn);
-    ct.set<destroyed>(equipped_wpn, true);
     auto wpn_entity = lookup_registry_entity(equipped_wpn);
     if (wpn_entity != entt::null) {
         registry.destroy(wpn_entity);
@@ -94,13 +90,10 @@ void gamestate::handle_shield_durability_loss(entityid defender, entityid attack
         return;
     }
     int dura = dura_ptr->value;
-    ct.set<durability>(shield, dura - 1 < 0 ? 0 : dura - 1);
     if (dura > 0) {
         return;
     }
-    ct.set<equipped_shield>(defender, ENTITYID_INVALID);
     remove_from_inventory(defender, shield);
-    ct.set<destroyed>(shield, true);
     auto shield_entity = lookup_registry_entity(shield);
     if (shield_entity != entt::null) {
         registry.destroy(shield_entity);
@@ -120,7 +113,9 @@ void gamestate::update_npc_xp(entityid id, [[maybe_unused]] entityid target_id) 
     int old_xp = get_npc_xp(id);
     int reward_xp = 1;
     int new_xp = old_xp + reward_xp;
-    ct.set<xp>(id, new_xp);
+    if (auto* xp_comp = get_component<Experience>(id)) {
+        xp_comp->value = new_xp;
+    }
     maybe_unlock_level_up(id);
 }
 
@@ -135,12 +130,8 @@ void gamestate::provoke_npc(entityid npc_id, entityid source_id) {
         return;
     }
 
-    ct.set<aggro>(npc_id, true);
-    ct.set<update>(npc_id, true);
-
     const entityid target = source_id != ENTITYID_INVALID ? source_id : hero_id;
     if (target != ENTITYID_INVALID) {
-        ct.set<target_id>(npc_id, target);
     }
 
     update_npc_behavior(npc_id);
@@ -175,9 +166,15 @@ attack_result_t gamestate::resolve_attack_intent(entityid attacker_id, vec3 targ
     tile_t& tile = df->tile_at(vec3{target_loc.x, target_loc.y, attacker_loc.z});
     const int dx = target_loc.x - attacker_loc.x;
     const int dy = target_loc.y - attacker_loc.y;
-    ct.set<direction>(attacker_id, get_dir_from_xy(dx, dy));
-    ct.set<attacking>(attacker_id, true);
-    ct.set<update>(attacker_id, true);
+    if (auto* facing = get_component<Facing>(attacker_id)) {
+        facing->value = get_dir_from_xy(dx, dy);
+    }
+    if (auto* atk = get_component<AttackingFlag>(attacker_id)) {
+        atk->value = true;
+    }
+    if (auto* upd = get_component<NeedsUpdate>(attacker_id)) {
+        upd->value = true;
+    }
 
     const entityid target_id = tile.get_cached_live_npc();
     if (target_id == INVALID) {
@@ -222,8 +219,6 @@ void gamestate::resolve_attack_block_event(entityid attacker_id, entityid target
     }
     queue_attack_shield_durability_event(target_id, attacker_id);
     handle_shield_block_sfx(target_id);
-    ct.set<block_success>(target_id, true);
-    ct.set<update>(target_id, true);
     add_combat_block_message(attacker_id, target_id);
 }
 
@@ -241,13 +236,9 @@ void gamestate::resolve_attack_damage_event(entityid attacker_id, entityid targe
         return;
     }
 
-    ct.set<damaged>(target_id, true);
-    ct.set<update>(target_id, true);
-
     vec2 tgt_hp = tgt_hp_ptr->value;
     tgt_hp.x -= damage;
     add_combat_damage_message(attacker_id, target_id, damage);
-    ct.set<hp>(target_id, tgt_hp);
     {
         const Position* popup_loc = get_component<Position>(target_id);
         if (popup_loc) {
@@ -276,8 +267,6 @@ void gamestate::resolve_attack_death_event(entityid attacker_id, entityid target
     }
 
     tile_t& tile = d.get_floor(target_loc.z)->tile_at(target_loc);
-    ct.set<dead>(target_id, true);
-    ct.set<pullable>(target_id, true);
     tile.tile_remove(target_id);
     tile.add_dead_npc(target_id);
 
@@ -286,11 +275,8 @@ void gamestate::resolve_attack_death_event(entityid attacker_id, entityid target
         queue_attack_award_xp_event(attacker_id, target_id);
         queue_attack_drop_inventory_event(target_id);
         break;
-    case entitytype_t::PLAYER:
-        queue_attack_player_death_event(target_id);
-        break;
-    default:
-        break;
+    case entitytype_t::PLAYER: queue_attack_player_death_event(target_id); break;
+    default: break;
     }
 }
 
@@ -337,7 +323,7 @@ void gamestate::handle_attack_sfx(entityid attacker, attack_result_t result) {
         index = wpn_type == weapontype_t::SHORT_SWORD ? "sfx/Minifantasy_Dungeon_SFX/07_human_atk_sword_1.wav"
                 : wpn_type == weapontype_t::AXE       ? "sfx/Minifantasy_Dungeon_SFX/07_human_atk_sword_1.wav"
                 : wpn_type == weapontype_t::DAGGER    ? "sfx/Minifantasy_Dungeon_SFX/07_human_atk_sword_1.wav"
-                                               : "sfx/Minifantasy_Dungeon_SFX/07_human_atk_sword_1.wav";
+                                                      : "sfx/Minifantasy_Dungeon_SFX/07_human_atk_sword_1.wav";
     }
     audio.queue(index);
     msuccess("attack sfx played");
@@ -393,9 +379,7 @@ void gamestate::update_path_to_target(entityid id) {
     }
 
     shared_ptr<dungeon_floor> df = d.floors[start.z];
-    const auto& result = pathfinder.find_path(
-        start, goal, *df,
-        [this](int x, int y, int z) { return tile_has_pushable(x, y, z); });
+    const auto& result = pathfinder.find_path(start, goal, *df, [this](int x, int y, int z) { return tile_has_pushable(x, y, z); });
 
     path_to_target->value.assign(result.begin(), result.end());
 }

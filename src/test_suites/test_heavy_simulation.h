@@ -147,10 +147,6 @@ public:
         const entityid hero_weapon = g.create_weapon_with(g.sword_init());
         TS_ASSERT_DIFFERS(hero_weapon, ENTITYID_INVALID);
         g.add_to_inventory(g.hero_id, hero_weapon);
-        g.ct.set<equipped_weapon>(g.hero_id, hero_weapon);
-        g.ct.set<strength>(g.hero_id, 18);
-        g.ct.set<dexterity>(g.hero_id, 18);
-        g.ct.set<hp>(g.hero_id, vec2{20, 20});
 
         g.make_all_npcs_target_player();
         g.current_scene = scene_t::GAMEPLAY;

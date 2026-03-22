@@ -126,7 +126,6 @@ bool gamestate::drop_from_inventory(entityid actor_id, entityid item_id) {
             merror("Failed to add to tile");
             return false;
         }
-        ct.set<location>(item_id, loc);
         msuccess("Drop item successful");
         return true;
     }
@@ -151,10 +150,8 @@ bool gamestate::drop_all_from_inventory(entityid actor_id) {
 void gamestate::handle_hero_inventory_equip_weapon(entityid item_id) {
     entityid current_weapon = get_component_or<EquippedWeapon>(hero_id, ENTITYID_INVALID);
     if (current_weapon == item_id) {
-        ct.set<equipped_weapon>(hero_id, ENTITYID_INVALID);
     }
     else {
-        ct.set<equipped_weapon>(hero_id, item_id);
     }
     flag = gamestate_flag_t::PLAYER_ANIM;
     controlmode = controlmode_t::PLAYER;
@@ -164,10 +161,8 @@ void gamestate::handle_hero_inventory_equip_weapon(entityid item_id) {
 void gamestate::handle_hero_inventory_equip_shield(entityid item_id) {
     entityid current_shield = get_component_or<EquippedShield>(hero_id, ENTITYID_INVALID);
     if (current_shield == item_id) {
-        ct.set<equipped_shield>(hero_id, ENTITYID_INVALID);
     }
     else {
-        ct.set<equipped_shield>(hero_id, item_id);
     }
     flag = gamestate_flag_t::PLAYER_ANIM;
     controlmode = controlmode_t::PLAYER;
@@ -237,10 +232,8 @@ bool gamestate::drop_inventory_item(entityid actor_id, entityid item_id) {
     }
 
     if (item_id == get_component_or<EquippedWeapon>(actor_id, ENTITYID_INVALID)) {
-        ct.set<equipped_weapon>(actor_id, ENTITYID_INVALID);
     }
     if (item_id == get_component_or<EquippedShield>(actor_id, ENTITYID_INVALID)) {
-        ct.set<equipped_shield>(actor_id, ENTITYID_INVALID);
     }
 
     const vec3 loc = maybe_loc->value;
@@ -253,7 +246,6 @@ bool gamestate::drop_inventory_item(entityid actor_id, entityid item_id) {
         add_to_inventory(actor_id, item_id);
         return false;
     }
-    ct.set<location>(item_id, loc);
     return true;
 }
 
@@ -289,7 +281,6 @@ bool gamestate::use_potion(entityid actor_id, entityid item_id) {
                 return false;
             }
             actor_hp.x = std::min(actor_hp.y, actor_hp.x + amount);
-            ct.set<hp>(actor_id, actor_hp);
             if (actor_id == hero_id) {
                 string n = get_component_or<EntityName>(actor_id, "no-name");
                 messages.add_history("%s used a healing potion", n.c_str());
@@ -359,10 +350,8 @@ bool gamestate::transfer_inventory_item(entityid from_id, entityid to_id, entity
     }
     if (from_id == hero_id) {
         if (item_id == get_component_or<EquippedWeapon>(hero_id, ENTITYID_INVALID)) {
-            ct.set<equipped_weapon>(hero_id, ENTITYID_INVALID);
         }
         if (item_id == get_component_or<EquippedShield>(hero_id, ENTITYID_INVALID)) {
-            ct.set<equipped_shield>(hero_id, ENTITYID_INVALID);
         }
     }
     return true;
@@ -372,9 +361,7 @@ bool gamestate::open_chest_menu(entityid chest_id) {
     if (chest_id == ENTITYID_INVALID || (get_component<EntityTypeTag>(chest_id) ? get_component<EntityTypeTag>(chest_id)->type : entitytype_t::NONE) != entitytype_t::CHEST) {
         return false;
     }
-    ct.set<door_open>(chest_id, true);
     sync_registry_open_state(chest_id, true);
-    ct.set<update>(chest_id, true);
     ui.active_chest_id = chest_id;
     ui.display_chest_menu = true;
     ui.display_inventory_menu = false;
@@ -389,9 +376,7 @@ bool gamestate::open_chest_menu(entityid chest_id) {
 
 void gamestate::close_chest_menu() {
     if (ui.active_chest_id != ENTITYID_INVALID) {
-        ct.set<door_open>(ui.active_chest_id, false);
         sync_registry_open_state(ui.active_chest_id, false);
-        ct.set<update>(ui.active_chest_id, true);
     }
     ui.display_chest_menu = false;
     ui.chest_deposit_mode = false;

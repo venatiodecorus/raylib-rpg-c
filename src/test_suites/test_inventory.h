@@ -33,7 +33,7 @@ public:
         const vec3 loc = add_initialized_floor(g);
         const entityid hero = create_hero(g, loc);
 
-        const entityid dagger = g.create_weapon_at_with(g.ct, loc, g.dagger_init());
+        const entityid dagger = g.create_weapon_at_with(loc, g.dagger_init());
         const entityid potion = g.create_potion_at_with(loc, g.potion_init(potiontype_t::HP_SMALL));
 
         TS_ASSERT_DIFFERS(dagger, ENTITYID_INVALID);
@@ -57,7 +57,7 @@ public:
         const vec3 loc = add_initialized_floor(g);
         const entityid hero = create_hero(g, loc);
 
-        const entityid dagger = g.create_weapon_at_with(g.ct, loc, g.dagger_init());
+        const entityid dagger = g.create_weapon_at_with(loc, g.dagger_init());
         const entityid potion = g.create_potion_at_with(loc, g.potion_init(potiontype_t::HP_SMALL));
 
         TS_ASSERT_DIFFERS(dagger, ENTITYID_INVALID);
@@ -93,7 +93,7 @@ public:
         gamestate g;
         const vec3 loc = add_initialized_floor(g);
         const entityid hero = create_hero(g, loc);
-        const entityid dagger = g.create_weapon_at_with(g.ct, loc, g.dagger_init());
+        const entityid dagger = g.create_weapon_at_with(loc, g.dagger_init());
 
         TS_ASSERT(g.add_to_inventory(hero, dagger));
         TS_ASSERT(g.is_in_inventory(hero, dagger));
@@ -112,7 +112,7 @@ public:
         gamestate g;
         const vec3 loc = add_initialized_floor(g);
         const entityid hero = create_hero(g, loc);
-        const entityid dagger = g.create_weapon_at_with(g.ct, loc, g.dagger_init());
+        const entityid dagger = g.create_weapon_at_with(loc, g.dagger_init());
 
         TS_ASSERT(g.add_to_inventory(hero, dagger));
         g.ui.display_inventory_menu = true;
@@ -133,7 +133,7 @@ public:
         gamestate g;
         const vec3 loc = add_initialized_floor(g);
         const entityid hero = create_hero(g, loc);
-        const entityid dagger = g.create_weapon_at_with(g.ct, loc, g.dagger_init());
+        const entityid dagger = g.create_weapon_at_with(loc, g.dagger_init());
 
         TS_ASSERT(g.add_to_inventory(hero, dagger));
         g.hero_id = hero;
@@ -160,7 +160,7 @@ public:
         gamestate g;
         const vec3 loc = add_initialized_floor(g);
         const entityid hero = create_hero(g, loc);
-        const entityid shield = g.create_shield_at_with(g.ct, loc, g.shield_init());
+        const entityid shield = g.create_shield_at_with(loc, g.shield_init());
 
         TS_ASSERT(g.add_to_inventory(hero, shield));
         g.ui.display_inventory_menu = true;
@@ -181,7 +181,7 @@ public:
         gamestate g;
         const vec3 loc = add_initialized_floor(g);
         const entityid hero = create_hero(g, loc);
-        const entityid shield = g.create_shield_at_with(g.ct, loc, g.shield_init());
+        const entityid shield = g.create_shield_at_with(loc, g.shield_init());
 
         TS_ASSERT(g.add_to_inventory(hero, shield));
         g.hero_id = hero;
@@ -227,10 +227,9 @@ public:
         gamestate g;
         const vec3 loc = add_initialized_floor(g);
         const entityid hero = create_hero(g, loc);
-        const entityid dagger = g.create_weapon_at_with(g.ct, loc, g.dagger_init());
+        const entityid dagger = g.create_weapon_at_with(loc, g.dagger_init());
 
         TS_ASSERT(g.add_to_inventory(hero, dagger));
-        g.ct.set<equipped_weapon>(hero, dagger);
         g.ui.inventory_cursor = Vector2{0, 0};
 
         TS_ASSERT(g.drop_item_from_hero_inventory());
@@ -245,7 +244,7 @@ public:
         gamestate g;
         const vec3 loc = add_initialized_floor(g);
         const entityid hero = create_hero(g, loc);
-        const entityid dagger = g.create_weapon_at_with(g.ct, loc, g.dagger_init());
+        const entityid dagger = g.create_weapon_at_with(loc, g.dagger_init());
 
         TS_ASSERT(g.add_to_inventory(hero, dagger));
         g.hero_id = hero;
@@ -266,10 +265,9 @@ public:
         gamestate g;
         const vec3 loc = add_initialized_floor(g);
         const entityid hero = create_hero(g, loc);
-        const entityid dagger = g.create_weapon_at_with(g.ct, loc, g.dagger_init());
+        const entityid dagger = g.create_weapon_at_with(loc, g.dagger_init());
 
         TS_ASSERT(g.add_to_inventory(hero, dagger));
-        g.ct.set<equipped_weapon>(hero, dagger);
         g.hero_id = hero;
 
         TS_ASSERT(g.run_drop_item_action(hero, dagger));
@@ -282,7 +280,7 @@ public:
         gamestate g;
         const vec3 loc = add_initialized_floor(g);
         const entityid hero = create_hero(g, loc);
-        const entityid dagger = g.create_weapon_at_with(g.ct, loc, g.dagger_init());
+        const entityid dagger = g.create_weapon_at_with(loc, g.dagger_init());
 
         g.hero_id = hero;
         TS_ASSERT(!g.run_drop_item_action(hero, dagger));
@@ -296,7 +294,6 @@ public:
         const entityid potion = g.create_potion_at_with(loc, g.potion_init(potiontype_t::HP_SMALL));
 
         TS_ASSERT(g.add_to_inventory(hero, potion));
-        g.ct.set<hp>(hero, vec2{2, 10});
 
         TS_ASSERT(g.use_potion(hero, potion));
 
@@ -316,7 +313,6 @@ public:
         const entityid potion = g.create_potion_at_with(loc, g.potion_init(potiontype_t::HP_SMALL));
 
         TS_ASSERT(g.add_to_inventory(hero, potion));
-        g.ct.set<hp>(hero, vec2{3, 10});
         g.hero_id = hero;
         g.ui.display_inventory_menu = true;
         g.controlmode = controlmode_t::INVENTORY;
@@ -334,7 +330,7 @@ public:
         gamestate g;
         const vec3 loc = add_initialized_floor(g);
         const entityid hero = create_hero(g, loc);
-        const entityid dagger = g.create_weapon_at_with(g.ct, loc, g.dagger_init());
+        const entityid dagger = g.create_weapon_at_with(loc, g.dagger_init());
 
         TS_ASSERT(g.add_to_inventory(hero, dagger));
         g.hero_id = hero;
@@ -354,7 +350,7 @@ public:
         const vec3 loc = add_initialized_floor(g);
         const entityid hero = create_hero(g, loc);
         const entityid chest = g.create_chest_at_with(vec3{2, 1, 0}, [](gamestate&, const entityid) { });
-        const entityid dagger = g.create_weapon_at_with(g.ct, loc, g.dagger_init());
+        const entityid dagger = g.create_weapon_at_with(loc, g.dagger_init());
 
         TS_ASSERT_DIFFERS(chest, ENTITYID_INVALID);
         TS_ASSERT(g.add_to_inventory(hero, dagger));
@@ -385,7 +381,7 @@ public:
         const vec3 loc = add_initialized_floor(g);
         const entityid hero = create_hero(g, loc);
         const entityid chest = g.create_chest_at_with(vec3{2, 1, 0}, [](gamestate&, const entityid) { });
-        const entityid dagger = g.create_weapon_at_with(g.ct, loc, g.dagger_init());
+        const entityid dagger = g.create_weapon_at_with(loc, g.dagger_init());
 
         TS_ASSERT_DIFFERS(chest, ENTITYID_INVALID);
         TS_ASSERT(g.add_to_inventory(chest, dagger));
@@ -404,7 +400,7 @@ public:
         const vec3 loc = add_initialized_floor(g);
         const entityid hero = create_hero(g, loc);
         const entityid chest = g.create_chest_at_with(vec3{2, 1, 0}, [](gamestate&, const entityid) { });
-        const entityid dagger = g.create_weapon_at_with(g.ct, loc, g.dagger_init());
+        const entityid dagger = g.create_weapon_at_with(loc, g.dagger_init());
 
         TS_ASSERT_DIFFERS(chest, ENTITYID_INVALID);
         TS_ASSERT(g.add_to_inventory(hero, dagger));
@@ -425,11 +421,10 @@ public:
         const vec3 loc = add_initialized_floor(g);
         const entityid hero = create_hero(g, loc);
         const entityid chest = g.create_chest_at_with(vec3{2, 1, 0}, [](gamestate&, const entityid) { });
-        const entityid dagger = g.create_weapon_at_with(g.ct, loc, g.dagger_init());
+        const entityid dagger = g.create_weapon_at_with(loc, g.dagger_init());
 
         TS_ASSERT(g.add_to_inventory(hero, dagger));
         g.hero_id = hero;
-        g.ct.set<equipped_weapon>(hero, dagger);
 
         TS_ASSERT(g.run_chest_transfer_action(hero, chest, dagger));
         TS_ASSERT_EQUALS(g.get_component_or<EquippedWeapon>(hero, ENTITYID_INVALID), ENTITYID_INVALID);
@@ -471,7 +466,7 @@ public:
         g.hero_id = hero;
 
         for (int i = 0; i < 5; i++) {
-            const entityid dagger = g.create_weapon_at_with(g.ct, loc, g.dagger_init());
+            const entityid dagger = g.create_weapon_at_with(loc, g.dagger_init());
             TS_ASSERT_DIFFERS(dagger, ENTITYID_INVALID);
             TS_ASSERT(g.add_to_inventory(hero, dagger));
         }

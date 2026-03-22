@@ -4,7 +4,6 @@
  *  @brief Tile-level storage for floor geometry, visibility, and cached entities.
  */
 
-#include "ComponentTraits.h"
 #include "dead_npc_cache.h"
 #include "dungeon_tile_type.h"
 #include "entityid.h"

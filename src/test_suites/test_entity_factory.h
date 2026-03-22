@@ -25,7 +25,7 @@ public:
         gamestate g;
         const vec3 loc = add_initialized_floor(g);
 
-        const entityid id = g.create_weapon_at_with(g.ct, loc, g.dagger_init());
+        const entityid id = g.create_weapon_at_with(loc, g.dagger_init());
 
         TS_ASSERT_DIFFERS(id, ENTITYID_INVALID);
         TS_ASSERT_EQUALS((g.get_component<EntityTypeTag>(id) ? g.get_component<EntityTypeTag>(id)->type : entitytype_t::NONE), entitytype_t::ITEM);
@@ -51,7 +51,7 @@ public:
         gamestate g;
         const vec3 loc = add_initialized_floor(g);
 
-        const entityid id = g.create_shield_at_with(g.ct, loc, g.shield_init());
+        const entityid id = g.create_shield_at_with(loc, g.shield_init());
 
         TS_ASSERT_DIFFERS(id, ENTITYID_INVALID);
         TS_ASSERT_EQUALS((g.get_component<EntityTypeTag>(id) ? g.get_component<EntityTypeTag>(id)->type : entitytype_t::NONE), entitytype_t::ITEM);

@@ -65,11 +65,6 @@ bool dungeon_room_fits(Rectangle candidate, const vector<room>& rooms, int width
 with_fun dungeon_prop_init(proptype_t type) {
     return [type](gamestate& g, const entityid id) {
         const StaticWorldDefinition& definition = get_prop_definition(type);
-        g.ct.set<name>(id, definition.name);
-        g.ct.set<description>(id, definition.description);
-        g.ct.set<solid>(id, definition.solid);
-        g.ct.set<pushable>(id, definition.pushable);
-        g.ct.set<pullable>(id, definition.pullable);
         auto e = g.ensure_registry_entity(id);
         g.registry.emplace_or_replace<EntityName>(e, EntityName{definition.name});
         g.registry.emplace_or_replace<EntityDescription>(e, EntityDescription{definition.description});
@@ -299,14 +294,11 @@ void gamestate::init_dungeon(biome_t type, int df_count, float parts, int width,
 entityid gamestate::create_door_with(with_fun doorInitFunction) {
     entityid id = add_entity();
     const StaticWorldDefinition& definition = get_static_world_definition(entitytype_t::DOOR);
-    ct.set<entitytype>(id, entitytype_t::DOOR);
     sync_entt_entity_type_tags(id, entitytype_t::DOOR);
     doorInitFunction(*this, id);
     if (!has_component<EntityName>(id)) {
-        ct.set<name>(id, definition.name);
     }
     if (!has_component<EntityDescription>(id)) {
-        ct.set<description>(id, definition.description);
     }
     attach_static_world_definition(id, definition);
     return id;
@@ -331,9 +323,6 @@ entityid gamestate::create_door_at_with(vec3 loc, with_fun doorInitFunction) {
     if (!df->df_add_at(id, entitytype_t::DOOR, loc)) {
         return INVALID;
     }
-    ct.set<location>(id, loc);
-    ct.set<door_open>(id, false);
-    ct.set<update>(id, true);
     sync_registry_grid_position(id, loc);
     sync_registry_open_state(id, false);
     return id;
@@ -366,22 +355,11 @@ size_t gamestate::place_doors() {
 entityid gamestate::create_chest_with(with_fun chestInitFunction) {
     entityid id = add_entity();
     const StaticWorldDefinition& definition = get_static_world_definition(entitytype_t::CHEST);
-    ct.set<entitytype>(id, entitytype_t::CHEST);
     sync_entt_entity_type_tags(id, entitytype_t::CHEST);
-    ct.set<spritemove>(id, Rectangle{0, 0, 0, 0});
-    ct.set<update>(id, true);
-    ct.set<pushable>(id, definition.pushable);
-    ct.set<pullable>(id, definition.pullable);
-    ct.set<solid>(id, definition.solid);
-    ct.set<door_open>(id, false);
-    ct.set<hp>(id, vec2{10, 10});
-    ct.set<inventory>(id, make_shared<vector<entityid>>());
     chestInitFunction(*this, id);
     if (!has_component<EntityName>(id)) {
-        ct.set<name>(id, definition.name);
     }
     if (!has_component<EntityDescription>(id)) {
-        ct.set<description>(id, definition.description);
     }
     attach_static_world_definition(id, definition);
     return id;
@@ -406,7 +384,6 @@ entityid gamestate::create_chest_at_with(vec3 loc, with_fun chestInitFunction) {
     if (df->df_add_at(id, entitytype_t::CHEST, loc) == ENTITYID_INVALID) {
         return ENTITYID_INVALID;
     }
-    ct.set<location>(id, loc);
     sync_registry_grid_position(id, loc);
     sync_registry_open_state(id, get_component_or<DoorOpenFlag>(id, false));
     return id;
@@ -444,14 +421,9 @@ entityid gamestate::place_first_floor_chest() {
 entityid gamestate::create_prop_with(proptype_t type, with_fun initFun) {
     entityid id = add_entity();
     const StaticWorldDefinition& definition = get_prop_definition(type);
-    ct.set<entitytype>(id, entitytype_t::PROP);
     sync_entt_entity_type_tags(id, entitytype_t::PROP);
-    ct.set<spritemove>(id, Rectangle{0, 0, 0, 0});
-    ct.set<update>(id, true);
-    ct.set<proptype>(id, type);
     initFun(*this, id);
     if (!has_component<EntityDescription>(id)) {
-        ct.set<description>(id, "A neglected dungeon furnishing that has outlasted whoever left it here.");
     }
 
     attach_static_world_definition(id, definition);
@@ -476,7 +448,6 @@ entityid gamestate::create_prop_at_with(proptype_t type, vec3 loc, with_fun init
     if (result == ENTITYID_INVALID) {
         return ENTITYID_INVALID;
     }
-    ct.set<location>(id, loc);
     sync_registry_grid_position(id, loc);
     return id;
 }
@@ -622,8 +593,6 @@ bool gamestate::destroy_floor_pressure_plate(vec3 loc) {
     }
 
     if (plate->linked_door_id != ENTITYID_INVALID && (get_component<EntityTypeTag>(plate->linked_door_id) ? get_component<EntityTypeTag>(plate->linked_door_id)->type : entitytype_t::NONE) == entitytype_t::DOOR) {
-        ct.set<door_open>(plate->linked_door_id, false);
-        ct.set<update>(plate->linked_door_id, true);
     }
 
     plate->active = false;

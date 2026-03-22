@@ -434,3 +434,53 @@ remove in a follow-up.
 ```
 make clean && CXXFLAGS="-DDEBUG=1 -DDEBUG_ASSERT=1 -DNPCS_ALL_AT_ONCE -DMASTER_VOLUME=0.25f -DMUSIC_OFF" make game
 ```
+
+### Phase 3 — COMPLETE
+
+**Step 3.1 — ct.set removal:**
+- Removed 391 ct.set lines across 15 files (source + tests)
+- Fixed broken functions where ct.set removal left variables unused or logic incomplete:
+  - `gamestate_scene.cpp`: `make_all_npcs_target_player()` — re-added target write via `get_component<TargetEntity>`
+  - `gamestate_input.cpp`: `apply_level_up_rewards()` — re-added level + HP write via `get_component<EntityLevel>` / `get_component<HitPoints>`
+  - `gamestate_npc_combat.cpp`: `update_npc_xp()` — re-added XP write via `get_component<Experience>`; `resolve_attack_intent()` — re-added facing/attacking/update writes via `get_component<Facing>`, `get_component<AttackingFlag>`, `get_component<NeedsUpdate>`
+  - `gamestate_world_interaction.cpp`: 2 movement functions — re-added position/spritemove/steps_taken/update writes via `get_component<Position>`, `get_component<SpriteMoveState>`, `get_component<StepsTaken>`, `get_component<NeedsUpdate>`
+
+**Step 3.2 — ComponentTable removed from gamestate.h:**
+- Removed `#include "ComponentTable.h"`, `#include "ComponentTraits.h"`
+- Removed `typedef ComponentTable CT;`
+- Removed `ComponentTable ct;` member
+- Removed `ct.clear();` from `reset()`
+- Updated 4 function signatures to remove `ComponentTable& ct` / `CT& ct` parameter:
+  - `create_weapon_at_with`, `create_weapon_at_random_loc_with`, `create_shield_with`, `create_shield_at_with`
+- Updated all callers in source and test files (removed `g.ct,` argument)
+
+**Step 3.3 — Deleted files:**
+- `src/ComponentTable.h`
+- `src/ComponentTraits.h`
+- `src/entity_templates.h` (all functions became empty bodies after ct.set removal; file was never included)
+- `src/unit_test_old.h` (commented-out legacy tests)
+- `src/test_suites/test_component_table.h` (tests for deleted class)
+
+**Step 3.4 — Include cleanup:**
+- Removed `ComponentTable.h` / `ComponentTraits.h` includes from: `gamestate.h`, `libdraw.cpp`, `dungeon_tile.h`, `entity_templates.h`
+- Added `using std::shared_ptr;` to `dungeon_floor.h` (was previously provided transitively by deleted headers)
+
+**Step 3.5 — Makefile updated:**
+- Removed `test_component_table.h` from both cxxtestgen rules
+- Removed `#include "test_suites/test_component_table.h"` from `unit_test.h`
+
+**Build verification:** Clean build with `-DDEBUG=1 -DDEBUG_ASSERT=1 -DNPCS_ALL_AT_ONCE -DMASTER_VOLUME=0.25f -DMUSIC_OFF` — zero errors.
+
+---
+
+## EnTT Migration — COMPLETE
+
+The full migration from ComponentTable to EnTT is complete across all 3 phases:
+
+- **Phase 1**: Dual-write setup (ct + registry)
+- **Phase 2**: All reads migrated to EnTT (Tiers 1-4)
+- **Phase 3**: Legacy system removed (ct.set, ComponentTable, ComponentTraits, entity_templates)
+
+Remaining deferred work (not blocking):
+- Remove `legacy_to_entt` bridge and convert `entityid` params to `entt::entity` (Phase 3 Step 3.5)
+- cxxtest not available in this environment for test verification

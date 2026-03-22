@@ -165,3 +165,7 @@ These must be addressed first because everything else depends on them.
 - [ ] Set up CI (build + test on Linux and macOS)
 - [ ] Add clang-format configuration for consistent style
 - [ ] Add clang-tidy configuration for automated quality checks
+
+## Next Steps
+- [ ] Consolidate existing files where possible, remove all unused files (all .md, .txt, .csv, .py and .old in src/), move .frag files that are still used into src/shaders/.
+- [ ] Remove/migrate sfx.h and sfx.txt from root dir?

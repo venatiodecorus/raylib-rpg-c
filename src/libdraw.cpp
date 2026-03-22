@@ -3,7 +3,6 @@
  */
 
 #include "libdraw.h"
-#include "ComponentTraits.h"
 #include "create_sg_byid.h"
 #include "draw_action_menu.h"
 #include "draw_character_creation_screen.h"

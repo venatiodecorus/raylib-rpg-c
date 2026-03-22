@@ -52,11 +52,7 @@ void mirror_potion_item(gamestate& g, entityid id, potiontype_t type) {
 
 entityid gamestate::create_weapon_with(with_fun weaponInitFunction) {
     entityid id = add_entity();
-    ct.set<entitytype>(id, entitytype_t::ITEM);
     sync_entt_entity_type_tags(id, entitytype_t::ITEM);
-    ct.set<itemtype>(id, itemtype_t::WEAPON);
-    ct.set<spritemove>(id, Rectangle{0, 0, 0, 0});
-    ct.set<update>(id, true);
     auto e = ensure_registry_entity(id);
     registry.emplace_or_replace<ItemSubtype>(e, ItemSubtype{itemtype_t::WEAPON});
     registry.emplace_or_replace<SpriteMoveState>(e, SpriteMoveState{Rectangle{0, 0, 0, 0}});
@@ -68,12 +64,6 @@ entityid gamestate::create_weapon_with(with_fun weaponInitFunction) {
 
 with_fun gamestate::dagger_init() {
     return [](gamestate& g, const entityid id) {
-        g.ct.set<name>(id, "dagger");
-        g.ct.set<description>(id, "Stabby stabby.");
-        g.ct.set<weapontype>(id, weapontype_t::DAGGER);
-        g.ct.set<damage>(id, vec3{1, 4, 0});
-        g.ct.set<durability>(id, 100);
-        g.ct.set<max_durability>(id, 100);
         auto e = g.ensure_registry_entity(id);
         g.registry.emplace_or_replace<EntityName>(e, EntityName{"dagger"});
         g.registry.emplace_or_replace<EntityDescription>(e, EntityDescription{"Stabby stabby."});
@@ -86,12 +76,6 @@ with_fun gamestate::dagger_init() {
 
 with_fun gamestate::axe_init() {
     return [](gamestate& g, const entityid id) {
-        g.ct.set<name>(id, "axe");
-        g.ct.set<description>(id, "Choppy choppy");
-        g.ct.set<weapontype>(id, weapontype_t::AXE);
-        g.ct.set<damage>(id, vec3{1, 8, 0});
-        g.ct.set<durability>(id, 100);
-        g.ct.set<max_durability>(id, 100);
         auto e = g.ensure_registry_entity(id);
         g.registry.emplace_or_replace<EntityName>(e, EntityName{"axe"});
         g.registry.emplace_or_replace<EntityDescription>(e, EntityDescription{"Choppy choppy"});
@@ -104,12 +88,6 @@ with_fun gamestate::axe_init() {
 
 with_fun gamestate::sword_init() {
     return [](gamestate& g, const entityid id) {
-        g.ct.set<name>(id, "short sword");
-        g.ct.set<description>(id, "your basic soldier's short sword");
-        g.ct.set<weapontype>(id, weapontype_t::SHORT_SWORD);
-        g.ct.set<damage>(id, vec3{1, 6, 0});
-        g.ct.set<durability>(id, 100);
-        g.ct.set<max_durability>(id, 100);
         auto e = g.ensure_registry_entity(id);
         g.registry.emplace_or_replace<EntityName>(e, EntityName{"short sword"});
         g.registry.emplace_or_replace<EntityDescription>(e, EntityDescription{"your basic soldier's short sword"});
@@ -122,12 +100,6 @@ with_fun gamestate::sword_init() {
 
 with_fun gamestate::shield_init() {
     return [](gamestate& g, const entityid id) {
-        g.ct.set<name>(id, "kite shield");
-        g.ct.set<description>(id, "Standard knight's shield");
-        g.ct.set<shieldtype>(id, shieldtype_t::KITE);
-        g.ct.set<block_chance>(id, 90);
-        g.ct.set<durability>(id, 100);
-        g.ct.set<max_durability>(id, 100);
         auto e = g.ensure_registry_entity(id);
         g.registry.emplace_or_replace<EntityName>(e, EntityName{"kite shield"});
         g.registry.emplace_or_replace<EntityDescription>(e, EntityDescription{"Standard knight's shield"});
@@ -140,12 +112,8 @@ with_fun gamestate::shield_init() {
 
 with_fun gamestate::potion_init(potiontype_t pt) {
     return [pt](gamestate& g, const entityid id) {
-        g.ct.set<potiontype>(id, pt);
         g.registry.emplace_or_replace<PotionSubtype>(g.ensure_registry_entity(id), PotionSubtype{pt});
         if (pt == potiontype_t::HP_SMALL) {
-            g.ct.set<name>(id, "small healing potion");
-            g.ct.set<description>(id, "a small healing potion");
-            g.ct.set<healing>(id, vec3{1, 6, 0});
             auto e = g.ensure_registry_entity(id);
             g.registry.emplace_or_replace<EntityName>(e, EntityName{"small healing potion"});
             g.registry.emplace_or_replace<EntityDescription>(e, EntityDescription{"a small healing potion"});
@@ -156,15 +124,6 @@ with_fun gamestate::potion_init(potiontype_t pt) {
 
 with_fun gamestate::player_init(int maxhp_roll) {
     return [this, maxhp_roll](gamestate& g, const entityid id) {
-        g.ct.set<strength>(id, chara_creation.strength);
-        g.ct.set<dexterity>(id, chara_creation.dexterity);
-        g.ct.set<constitution>(id, chara_creation.constitution);
-        g.ct.set<intelligence>(id, chara_creation.intelligence);
-        g.ct.set<wisdom>(id, chara_creation.wisdom);
-        g.ct.set<charisma>(id, chara_creation.charisma);
-        g.ct.set<hd>(id, vec3{1, chara_creation.hitdie, 0});
-        g.ct.set<hp>(id, vec2{maxhp_roll, maxhp_roll});
-        g.ct.set<alignment>(id, chara_creation.alignment);
         auto e = g.ensure_registry_entity(id);
         g.registry.emplace_or_replace<StrengthAttr>(e, StrengthAttr{chara_creation.strength});
         g.registry.emplace_or_replace<DexterityAttr>(e, DexterityAttr{chara_creation.dexterity});
@@ -214,12 +173,11 @@ bool gamestate::alignment_is_aggressive(alignment_t alignment_value) {
 
 with_fun gamestate::npc_alignment_init(alignment_t alignment_value) {
     return [alignment_value](gamestate& g, const entityid id) {
-        g.ct.set<alignment>(id, alignment_value);
         g.registry.emplace_or_replace<AlignmentComponent>(g.ensure_registry_entity(id), AlignmentComponent{alignment_value});
     };
 }
 
-entityid gamestate::create_weapon_at_with(ComponentTable& ct, vec3 loc, with_fun weaponInitFunction) {
+entityid gamestate::create_weapon_at_with(vec3 loc, with_fun weaponInitFunction) {
     minfo2("create weapon at with: %d %d %d", loc.x, loc.y, loc.z);
     if (d.floors.size() == 0) {
         merror2("dungeon floors size is 0");
@@ -248,29 +206,23 @@ entityid gamestate::create_weapon_at_with(ComponentTable& ct, vec3 loc, with_fun
         minfo2("failed to add weapon to df");
         return INVALID;
     }
-    ct.set<location>(id, loc);
     registry.emplace_or_replace<Position>(ensure_registry_entity(id), Position{loc});
     sync_registry_grid_position(id, loc);
     return id;
 }
 
-entityid gamestate::create_weapon_at_random_loc_with(CT& ct, with_fun weaponInitFunction) {
+entityid gamestate::create_weapon_at_random_loc_with(with_fun weaponInitFunction) {
     vec3 loc = d.floors[d.current_floor]->get_random_loc();
     if (vec3_invalid(loc)) {
         merror("loc is invalid");
         return INVALID;
     }
-    return create_weapon_at_with(ct, loc, dagger_init());
+    return create_weapon_at_with(loc, dagger_init());
 }
 
-entityid gamestate::create_shield_with(ComponentTable& ct, with_fun shieldInitFunction) {
+entityid gamestate::create_shield_with(with_fun shieldInitFunction) {
     entityid id = add_entity();
-    ct.set<entitytype>(id, entitytype_t::ITEM);
     sync_entt_entity_type_tags(id, entitytype_t::ITEM);
-    ct.set<itemtype>(id, itemtype_t::SHIELD);
-    ct.set<durability>(id, 100);
-    ct.set<max_durability>(id, 100);
-    ct.set<update>(id, false);
     auto e = ensure_registry_entity(id);
     registry.emplace_or_replace<ItemSubtype>(e, ItemSubtype{itemtype_t::SHIELD});
     registry.emplace_or_replace<ItemDurability>(e, ItemDurability{100});
@@ -281,16 +233,15 @@ entityid gamestate::create_shield_with(ComponentTable& ct, with_fun shieldInitFu
     return id;
 }
 
-entityid gamestate::create_shield_at_with(ComponentTable& ct, vec3 loc, with_fun shieldInitFunction) {
+entityid gamestate::create_shield_at_with(vec3 loc, with_fun shieldInitFunction) {
     if (d.floors.size() == 0) {
         return INVALID;
     }
-    entityid id = create_shield_with(ct, shieldInitFunction);
+    entityid id = create_shield_with(shieldInitFunction);
     shared_ptr<dungeon_floor> df = d.get_floor(loc.z);
     if (!df->df_add_at(id, entitytype_t::ITEM, loc)) {
         return INVALID;
     }
-    ct.set<location>(id, loc);
     registry.emplace_or_replace<Position>(ensure_registry_entity(id), Position{loc});
     sync_registry_grid_position(id, loc);
     return id;
@@ -298,10 +249,7 @@ entityid gamestate::create_shield_at_with(ComponentTable& ct, vec3 loc, with_fun
 
 entityid gamestate::create_potion_with(with_fun potionInitFunction) {
     entityid id = add_entity();
-    ct.set<entitytype>(id, entitytype_t::ITEM);
     sync_entt_entity_type_tags(id, entitytype_t::ITEM);
-    ct.set<itemtype>(id, itemtype_t::POTION);
-    ct.set<update>(id, true);
     auto e = ensure_registry_entity(id);
     registry.emplace_or_replace<ItemSubtype>(e, ItemSubtype{itemtype_t::POTION});
     registry.emplace_or_replace<NeedsUpdate>(e, NeedsUpdate{true});
@@ -323,8 +271,6 @@ entityid gamestate::create_potion_at_with(vec3 loc, with_fun potionInitFunction)
     if (!df->df_add_at(id, entitytype_t::ITEM, loc)) {
         return INVALID;
     }
-    ct.set<location>(id, loc);
-    ct.set<update>(id, true);
     auto e = ensure_registry_entity(id);
     registry.emplace_or_replace<Position>(e, Position{loc});
     registry.emplace_or_replace<NeedsUpdate>(e, NeedsUpdate{true});
@@ -358,12 +304,6 @@ void gamestate::set_npc_starting_stats(entityid id) {
     int wisdom_ = gen(mt) + wis_m;
     int constitution_ = gen(mt) + con_m;
     int charisma_ = gen(mt) + cha_m;
-    ct.set<strength>(id, strength_);
-    ct.set<dexterity>(id, dexterity_);
-    ct.set<intelligence>(id, intelligence_);
-    ct.set<wisdom>(id, wisdom_);
-    ct.set<constitution>(id, constitution_);
-    ct.set<charisma>(id, charisma_);
     auto e = ensure_registry_entity(id);
     registry.emplace_or_replace<StrengthAttr>(e, StrengthAttr{strength_});
     registry.emplace_or_replace<DexterityAttr>(e, DexterityAttr{dexterity_});
@@ -393,33 +333,13 @@ void gamestate::set_npc_starting_stats(entityid id) {
     uniform_int_distribution<int> gen2(1, hitdie.y);
     int my_maxhp = std::max(1, gen2(mt) + get_stat_bonus(constitution_));
     int my_hp = my_maxhp;
-    ct.set<hp>(id, vec2{my_hp, my_maxhp});
-    ct.set<base_ac>(id, 10);
-    ct.set<hd>(id, hitdie);
     registry.emplace_or_replace<HitPoints>(e, HitPoints{vec2{my_hp, my_maxhp}});
     registry.emplace_or_replace<BaseArmorClass>(e, BaseArmorClass{10});
     registry.emplace_or_replace<HitDie>(e, HitDie{hitdie});
 }
 
 void gamestate::set_npc_defaults(entityid id) {
-    ct.set<entitytype>(id, entitytype_t::NPC);
     sync_entt_entity_type_tags(id, entitytype_t::NPC);
-    ct.set<spritemove>(id, Rectangle{0, 0, 0, 0});
-    ct.set<dead>(id, false);
-    ct.set<update>(id, true);
-    ct.set<direction>(id, direction_t::DOWN_RIGHT);
-    ct.set<attacking>(id, false);
-    ct.set<block_success>(id, false);
-    ct.set<damaged>(id, false);
-    ct.set<inventory>(id, make_shared<vector<entityid>>());
-    ct.set<equipped_weapon>(id, ENTITYID_INVALID);
-    ct.set<aggro>(id, false);
-    ct.set<vision_distance>(id, 3);
-    ct.set<hearing_distance>(id, 3);
-    ct.set<level>(id, 1);
-    ct.set<xp>(id, 0);
-    ct.set<entity_default_action>(id, entity_default_action_t::NONE);
-    ct.set<target_path>(id, make_shared<vector<vec3>>());
     auto e = ensure_registry_entity(id);
     registry.emplace_or_replace<SpriteMoveState>(e, SpriteMoveState{Rectangle{0, 0, 0, 0}});
     registry.emplace_or_replace<DeadFlag>(e, DeadFlag{false});
@@ -442,25 +362,21 @@ void gamestate::set_npc_defaults(entityid id) {
 entityid gamestate::create_npc_with(race_t rt, with_fun npcInitFunction) {
     entityid id = add_entity();
     set_npc_defaults(id);
-    ct.set<race>(id, rt);
     registry.emplace_or_replace<ActorKind>(ensure_registry_entity(id), ActorKind{rt});
 
     const ActorDefinition* def = get_actor_definition(rt);
     const alignment_t default_alignment = def ? def->default_alignment : default_alignment_for_race(rt);
 
     npc_alignment_init(default_alignment)(*this, id);
-    ct.set<aggro>(id, alignment_is_aggressive(default_alignment));
     registry.emplace_or_replace<AggroFlag>(ensure_registry_entity(id), AggroFlag{alignment_is_aggressive(default_alignment)});
     set_npc_starting_stats(id);
     npcInitFunction(*this, id);
     if (!has_component<EntityName>(id)) {
         const string npc_name = def ? def->default_name : race2str(rt);
-        ct.set<name>(id, npc_name);
         registry.emplace_or_replace<EntityName>(ensure_registry_entity(id), EntityName{npc_name});
     }
     if (!has_component<DialogueLine>(id)) {
         const string npc_dialogue = def ? def->default_description : "They give you a guarded look but say nothing.";
-        ct.set<dialogue_text>(id, npc_dialogue);
         registry.emplace_or_replace<DialogueLine>(ensure_registry_entity(id), DialogueLine{npc_dialogue});
     }
 
@@ -504,7 +420,6 @@ entityid gamestate::create_npc_at_with(race_t rt, vec3 loc, with_fun npcInitFunc
         return INVALID;
     }
     minfo2("setting location for %d", id);
-    ct.set<location>(id, loc);
     registry.emplace_or_replace<Position>(ensure_registry_entity(id), Position{loc});
     sync_registry_grid_position(id, loc);
     msuccess2("created npc %d", id);
@@ -527,7 +442,6 @@ entityid gamestate::create_orc_with(with_fun monsterInitFunction) {
     constexpr race_t r = race_t::ORC;
     entityid id = create_npc_with(r, monsterInitFunction);
     const string orc_name = get_random_orc_name();
-    ct.set<name>(id, orc_name);
     registry.emplace_or_replace<EntityName>(ensure_registry_entity(id), EntityName{orc_name});
     return id;
 }
@@ -551,8 +465,6 @@ entityid gamestate::create_orc_at_with(vec3 loc, with_fun monsterInitFunction) {
     if (!df->df_add_at(id, entitytype_t::NPC, loc)) {
         return ENTITYID_INVALID;
     }
-    ct.set<location>(id, loc);
-    ct.set<update>(id, true);
     auto e = ensure_registry_entity(id);
     registry.emplace_or_replace<Position>(e, Position{loc});
     registry.emplace_or_replace<NeedsUpdate>(e, NeedsUpdate{true});
@@ -580,7 +492,6 @@ entityid gamestate::create_player_at_with(vec3 loc, string n, with_fun playerIni
     constexpr int light_rad = 3;
     constexpr int hear_dist = 3;
     set_hero_id(id);
-    ct.set<entitytype>(id, entitytype_t::PLAYER);
     sync_entt_entity_type_tags(id, entitytype_t::PLAYER);
 
     auto df = d.get_floor(loc.z);
@@ -588,12 +499,6 @@ entityid gamestate::create_player_at_with(vec3 loc, string n, with_fun playerIni
     tile.set_cached_player_present(true);
     tile.set_cached_live_npc(id);
 
-    ct.set<hp>(id, vec2{hp_, maxhp_});
-    ct.set<vision_distance>(id, vis_dist);
-    ct.set<light_radius>(id, light_rad);
-    ct.set<hearing_distance>(id, hear_dist);
-    ct.set<name>(id, n);
-    ct.set<dead>(id, false);
     auto e = ensure_registry_entity(id);
     registry.emplace_or_replace<HitPoints>(e, HitPoints{vec2{hp_, maxhp_}});
     registry.emplace_or_replace<VisionRange>(e, VisionRange{vis_dist});
@@ -607,15 +512,7 @@ entityid gamestate::create_player_at_with(vec3 loc, string n, with_fun playerIni
 entityid gamestate::create_box_with() {
     entityid id = add_entity();
     const StaticWorldDefinition& definition = get_static_world_definition(entitytype_t::BOX);
-    ct.set<entitytype>(id, entitytype_t::BOX);
     sync_entt_entity_type_tags(id, entitytype_t::BOX);
-    ct.set<spritemove>(id, Rectangle{0, 0, 0, 0});
-    ct.set<update>(id, true);
-    ct.set<pushable>(id, definition.pushable);
-    ct.set<pullable>(id, definition.pullable);
-    ct.set<solid>(id, definition.solid);
-    ct.set<name>(id, definition.name);
-    ct.set<description>(id, definition.description);
     auto e = ensure_registry_entity(id);
     registry.emplace_or_replace<SpriteMoveState>(e, SpriteMoveState{Rectangle{0, 0, 0, 0}});
     registry.emplace_or_replace<NeedsUpdate>(e, NeedsUpdate{true});
@@ -644,7 +541,6 @@ entityid gamestate::create_box_at_with(vec3 loc) {
         merror("failed df_add_at: %d, %d, %d", id, loc.x, loc.y);
         return ENTITYID_INVALID;
     }
-    ct.set<location>(id, loc);
     registry.emplace_or_replace<Position>(ensure_registry_entity(id), Position{loc});
     sync_registry_grid_position(id, loc);
     return id;

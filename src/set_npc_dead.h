@@ -9,7 +9,6 @@
 
 /** @brief Mark an NPC dead and flag its current tile for cache refresh. */
 static inline void set_npc_dead(gamestate& g, entityid id) {
-    g.ct.set<dead>(id, true);
     const vec3 loc = g.get_component_or<Position>(id, vec3{-1, -1, -1});
     massert(!vec3_equal(loc, vec3{-1, -1, -1}), "id %d has no location", id);
 

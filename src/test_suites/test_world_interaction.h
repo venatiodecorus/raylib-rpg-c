@@ -53,7 +53,6 @@ public:
         TS_ASSERT_DIFFERS(door_id, ENTITYID_INVALID);
         TS_ASSERT(!g.try_entity_move(hero, vec3{1, 0, 0}));
 
-        g.ct.set<door_open>(door_id, true);
         TS_ASSERT(g.try_entity_move(hero, vec3{1, 0, 0}));
         TS_ASSERT(vec3_equal(g.get_component_or<Position>(hero, vec3{-1, -1, -1}), vec3{2, 1, 0}));
     }
@@ -85,7 +84,6 @@ public:
         gamestate g;
         add_floor(g);
         const entityid hero = create_hero(g, vec3{2, 2, 0});
-        g.ct.set<direction>(hero, direction_t::RIGHT);
         const entityid box = g.create_box_at_with(vec3{3, 2, 0});
 
         TS_ASSERT_DIFFERS(box, ENTITYID_INVALID);
@@ -99,7 +97,6 @@ public:
         gamestate g;
         add_floor(g);
         const entityid hero = create_hero(g, vec3{2, 2, 0});
-        g.ct.set<direction>(hero, direction_t::RIGHT);
 
         const vec3 corpse_loc{3, 2, 0};
         const entityid corpse = g.create_orc_at_with(corpse_loc, [](gamestate&, const entityid) { });
@@ -108,8 +105,6 @@ public:
         tile_t& corpse_tile = g.d.get_floor(0)->tile_at(corpse_loc);
         TS_ASSERT_EQUALS(corpse_tile.tile_remove(corpse), corpse);
         corpse_tile.add_dead_npc(corpse);
-        g.ct.set<dead>(corpse, true);
-        g.ct.set<pullable>(corpse, true);
 
         TS_ASSERT(g.try_entity_pull(hero));
         TS_ASSERT(vec3_equal(g.get_component_or<Position>(hero, vec3{-1, -1, -1}), vec3{1, 2, 0}));
@@ -124,7 +119,6 @@ public:
         gamestate g;
         add_floor(g);
         const entityid hero = create_hero(g, vec3{2, 2, 0});
-        g.ct.set<direction>(hero, direction_t::RIGHT);
 
         const entityid candle = g.create_prop_at_with(proptype_t::DUNGEON_CANDLE_00, vec3{3, 2, 0}, dungeon_prop_init(proptype_t::DUNGEON_CANDLE_00));
 
@@ -197,7 +191,6 @@ public:
         gamestate g;
         add_floor(g);
         const entityid hero = create_hero(g, vec3{2, 2, 0});
-        g.ct.set<direction>(hero, direction_t::RIGHT);
         const entityid table =
             g.create_prop_at_with(proptype_t::DUNGEON_WOODEN_TABLE_01, vec3{3, 2, 0}, dungeon_prop_init(proptype_t::DUNGEON_WOODEN_TABLE_01));
 
@@ -215,7 +208,6 @@ public:
         add_floor(g);
 
         const entityid hero = create_hero(g, vec3{2, 2, 0});
-        g.ct.set<direction>(hero, direction_t::RIGHT);
         const entityid box = g.create_box_at_with(vec3{3, 2, 0});
 
         TS_ASSERT_DIFFERS(box, ENTITYID_INVALID);
@@ -339,7 +331,6 @@ public:
         const entityid box = g.create_box_at_with(vec3{2, 1, 0});
         TS_ASSERT_DIFFERS(box, ENTITYID_INVALID);
         plate->active = false;
-        g.ct.set<door_open>(door, false);
 
         TS_ASSERT(g.queue_pressure_plate_refresh_event(0));
         const gameplay_event_result_t result = g.process_gameplay_events();
@@ -356,7 +347,6 @@ public:
         add_floor(g);
 
         const entityid hero = create_hero(g, vec3{2, 1, 0});
-        g.ct.set<direction>(hero, direction_t::RIGHT);
         const entityid box = g.create_box_at_with(vec3{3, 1, 0});
         const entityid door = g.create_door_at_with(vec3{5, 1, 0}, [](gamestate&, const entityid) { });
         TS_ASSERT_DIFFERS(hero, ENTITYID_INVALID);
@@ -636,14 +626,12 @@ public:
         TS_ASSERT_DIFFERS(door, ENTITYID_INVALID);
 
         g.hero_id = hero;
-        g.ct.set<direction>(hero, direction_t::RIGHT);
 
         inputstate is = {};
         press_key(is, KEY_D);
         TS_ASSERT(g.handle_open_door(is, false));
         TS_ASSERT(g.get_component_or<DoorOpenFlag>(door, false));
 
-        g.ct.set<door_open>(door, false);
         inputstate_reset(is);
         press_key(is, KEY_O);
         TS_ASSERT(!g.handle_open_door(is, false));
@@ -656,8 +644,6 @@ public:
 
         const entityid hero = create_hero(g, vec3{1, 1, 0});
         const entityid npc = g.create_npc_at_with(race_t::DWARF, vec3{2, 1, 0}, [](gamestate& g, const entityid id) {
-            g.ct.set<name>(id, "Borin");
-            g.ct.set<dialogue_text>(id, "Keep your torch high.");
         });
 
         TS_ASSERT_DIFFERS(hero, ENTITYID_INVALID);
@@ -676,8 +662,6 @@ public:
 
         const entityid hero = create_hero(g, vec3{1, 1, 0});
         const entityid npc = g.create_npc_at_with(race_t::DWARF, vec3{2, 1, 0}, [](gamestate& g, const entityid id) {
-            g.ct.set<name>(id, "Borin");
-            g.ct.set<dialogue_text>(id, "Keep your torch high.");
         });
 
         TS_ASSERT_DIFFERS(hero, ENTITYID_INVALID);
@@ -709,8 +693,6 @@ public:
 
         const entityid hero = create_hero(g, vec3{1, 1, 0});
         const entityid prop = g.create_prop_at_with(proptype_t::DUNGEON_JAR_00, vec3{2, 1, 0}, [](gamestate& g, const entityid id) {
-            g.ct.set<name>(id, "jar");
-            g.ct.set<description>(id, "A cracked jar with dry clay inside.");
         });
 
         TS_ASSERT_DIFFERS(hero, ENTITYID_INVALID);
@@ -756,7 +738,6 @@ public:
             g.ui.interaction_body, "A stout treasure chest reinforced with iron bands and built to survive rough handling. The lid stands closed.");
 
         g.close_interaction_modal();
-        g.ct.set<door_open>(chest, true);
         TS_ASSERT(g.try_entity_interact(hero, vec3{2, 1, 0}));
         TS_ASSERT_EQUALS(g.ui.interaction_body, "A stout treasure chest reinforced with iron bands and built to survive rough handling. The lid stands open.");
     }
@@ -777,7 +758,6 @@ public:
         TS_ASSERT_EQUALS(g.ui.interaction_body, "A heavy wooden door bound with iron straps and swollen from the dungeon damp. The door stands closed.");
 
         g.close_interaction_modal();
-        g.ct.set<door_open>(door, true);
         TS_ASSERT(g.try_entity_interact(hero, vec3{2, 1, 0}));
         TS_ASSERT_EQUALS(g.ui.interaction_body, "A heavy wooden door bound with iron straps and swollen from the dungeon damp. The door stands open.");
     }
@@ -808,7 +788,6 @@ public:
         const entityid hero = create_hero(g, vec3{1, 1, 0});
         TS_ASSERT_DIFFERS(hero, ENTITYID_INVALID);
         g.hero_id = hero;
-        g.ct.set<light_radius>(hero, 4);
 
         const entityid door = g.create_door_at_with(vec3{2, 1, 0}, [](gamestate&, const entityid) { });
         TS_ASSERT_DIFFERS(door, ENTITYID_INVALID);
@@ -832,19 +811,16 @@ public:
         const entityid hero = create_hero(g, vec3{1, 1, 0});
         TS_ASSERT_DIFFERS(hero, ENTITYID_INVALID);
         g.hero_id = hero;
-        g.ct.set<light_radius>(hero, 4);
 
         const entityid door = g.create_door_at_with(vec3{2, 1, 0}, [](gamestate&, const entityid) { });
         TS_ASSERT_DIFFERS(door, ENTITYID_INVALID);
 
-        g.ct.set<door_open>(door, true);
         TS_ASSERT(g.update_player_tiles_explored());
 
         tile_t& beyond_tile = g.d.get_floor(0)->tile_at(vec3{3, 1, 0});
         TS_ASSERT(beyond_tile.get_visible());
         TS_ASSERT(beyond_tile.get_explored());
 
-        g.ct.set<door_open>(door, false);
         TS_ASSERT(g.update_player_tiles_explored());
 
         TS_ASSERT(!beyond_tile.get_visible());
@@ -864,12 +840,6 @@ public:
         TS_ASSERT_DIFFERS(hero_weapon, ENTITYID_INVALID);
 
         g.add_to_inventory(hero, hero_weapon);
-        g.ct.set<equipped_weapon>(hero, hero_weapon);
-        g.ct.set<strength>(hero, 18);
-        g.ct.set<dexterity>(hero, 18);
-        g.ct.set<base_ac>(orc, 1);
-        g.ct.set<dexterity>(orc, 1);
-        g.ct.set<hp>(orc, vec2{1, 1});
         tile_t& target_tile = g.d.get_floor(0)->tile_at(vec3{2, 1, 0});
         TS_ASSERT_EQUALS(g.run_attack_action(hero, vec3{2, 1, 0}), attack_result_t::HIT);
 

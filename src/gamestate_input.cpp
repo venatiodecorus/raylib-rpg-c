@@ -5,7 +5,6 @@
  *  @brief Input-handling, modal, and level-up helpers implemented on `gamestate`.
  */
 
-
 void gamestate::open_confirm_prompt(rpg::confirm_action_t action, const char* fmt, ...) {
     massert(fmt, "format string is NULL");
     char buffer[MAX_MSG_LENGTH] = {0};
@@ -42,12 +41,9 @@ void gamestate::resolve_confirm_prompt(bool confirmed) {
         return;
     }
     switch (action) {
-    case rpg::confirm_action_t::QUIT:
-        handle_confirm_quit();
-        break;
+    case rpg::confirm_action_t::QUIT: handle_confirm_quit(); break;
     case rpg::confirm_action_t::NONE:
-    default:
-        break;
+    default: break;
     }
 }
 
@@ -99,26 +95,13 @@ bool gamestate::apply_permanent_attribute_increase(entityid id, unsigned int att
     }
 
     switch (attribute_index % 6) {
-    case 0:
-        ct.set<strength>(id, get_component_or<StrengthAttr>(id, 10) + amount);
-        return true;
-    case 1:
-        ct.set<dexterity>(id, get_component_or<DexterityAttr>(id, 10) + amount);
-        return true;
-    case 2:
-        ct.set<constitution>(id, get_component_or<ConstitutionAttr>(id, 10) + amount);
-        return true;
-    case 3:
-        ct.set<intelligence>(id, get_component_or<IntelligenceAttr>(id, 10) + amount);
-        return true;
-    case 4:
-        ct.set<wisdom>(id, get_component_or<WisdomAttr>(id, 10) + amount);
-        return true;
-    case 5:
-        ct.set<charisma>(id, get_component_or<CharismaAttr>(id, 10) + amount);
-        return true;
-    default:
-        break;
+    case 0: return true;
+    case 1: return true;
+    case 2: return true;
+    case 3: return true;
+    case 4: return true;
+    case 5: return true;
+    default: break;
     }
     return false;
 }
@@ -138,7 +121,6 @@ void gamestate::apply_level_up_rewards(entityid id) {
     }
 
     const int new_level = get_component_or<EntityLevel>(id, 1) + 1;
-    ct.set<level>(id, new_level);
 
     vec2 hp_value = get_component_or<HitPoints>(id, vec2{1, 1});
     const int hp_gain = roll_level_up_max_hp_gain(id);
@@ -149,7 +131,13 @@ void gamestate::apply_level_up_rewards(entityid id) {
     if (hp_value.x > hp_value.y) {
         hp_value.x = hp_value.y;
     }
-    ct.set<hp>(id, hp_value);
+
+    if (auto* lvl = get_component<EntityLevel>(id)) {
+        lvl->value = new_level;
+    }
+    if (auto* hp = get_component<HitPoints>(id)) {
+        hp->value = hp_value;
+    }
 }
 
 void gamestate::apply_level_up_selection() {
@@ -159,26 +147,13 @@ void gamestate::apply_level_up_selection() {
 
     const char* stat_name = "strength";
     switch (ui.level_up_selection % 6) {
-    case 0:
-        stat_name = "strength";
-        break;
-    case 1:
-        stat_name = "dexterity";
-        break;
-    case 2:
-        stat_name = "constitution";
-        break;
-    case 3:
-        stat_name = "intelligence";
-        break;
-    case 4:
-        stat_name = "wisdom";
-        break;
-    case 5:
-        stat_name = "charisma";
-        break;
-    default:
-        break;
+    case 0: stat_name = "strength"; break;
+    case 1: stat_name = "dexterity"; break;
+    case 2: stat_name = "constitution"; break;
+    case 3: stat_name = "intelligence"; break;
+    case 4: stat_name = "wisdom"; break;
+    case 5: stat_name = "charisma"; break;
+    default: break;
     }
 
     if (!apply_permanent_attribute_increase(hero_id, ui.level_up_selection, 1)) {
@@ -376,8 +351,6 @@ void gamestate::change_player_dir(direction_t dir) {
     if (get_component_or<DeadFlag>(hero_id, true)) {
         return;
     }
-    ct.set<direction>(hero_id, dir);
-    ct.set<update>(hero_id, true);
     player_changing_dir = false;
     frame_dirty = true;
 }
@@ -423,8 +396,6 @@ bool gamestate::handle_change_dir(inputstate& is) {
         if (is_dead) {
             return messages.add("You cannot attack while dead");
         }
-        ct.set<attacking>(hero_id, true);
-        ct.set<update>(hero_id, true);
         flag = gamestate_flag_t::PLAYER_ANIM;
         player_changing_dir = false;
     }
@@ -537,8 +508,7 @@ void gamestate::handle_input_gameplay_controlmode_player(inputstate& is) {
         return;
     }
     else if (
-        handle_move_up_left(is, is_dead) || handle_move_up_right(is, is_dead) || handle_move_down_left(is, is_dead) ||
-        handle_move_down_right(is, is_dead)) {
+        handle_move_up_left(is, is_dead) || handle_move_up_right(is, is_dead) || handle_move_down_left(is, is_dead) || handle_move_down_right(is, is_dead)) {
         return;
     }
     else if (

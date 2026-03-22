@@ -11,6 +11,7 @@
 
 using std::function;
 using std::make_shared;
+using std::shared_ptr;
 
 static constexpr int DEFAULT_DUNGEON_FLOOR_WIDTH = 8;
 static constexpr int DEFAULT_DUNGEON_FLOOR_HEIGHT = 8;
@@ -198,7 +199,8 @@ public:
         const bool right_walkable = tile_is_walkable(right.get_type());
         const bool up_walkable = tile_is_walkable(up.get_type());
         const bool down_walkable = tile_is_walkable(down.get_type());
-        const int walkable_neighbors = static_cast<int>(left_walkable) + static_cast<int>(right_walkable) + static_cast<int>(up_walkable) + static_cast<int>(down_walkable);
+        const int walkable_neighbors =
+            static_cast<int>(left_walkable) + static_cast<int>(right_walkable) + static_cast<int>(up_walkable) + static_cast<int>(down_walkable);
         if (walkable_neighbors != 2) {
             return false;
         }
@@ -210,21 +212,17 @@ public:
         }
 
         if (horizontal_passage) {
-            const bool left_has_branch =
-                tile_is_walkable(tile_at(vec3{left_loc.x, left_loc.y - 1, left_loc.z}).get_type()) ||
-                tile_is_walkable(tile_at(vec3{left_loc.x, left_loc.y + 1, left_loc.z}).get_type());
-            const bool right_has_branch =
-                tile_is_walkable(tile_at(vec3{right_loc.x, right_loc.y - 1, right_loc.z}).get_type()) ||
-                tile_is_walkable(tile_at(vec3{right_loc.x, right_loc.y + 1, right_loc.z}).get_type());
+            const bool left_has_branch = tile_is_walkable(tile_at(vec3{left_loc.x, left_loc.y - 1, left_loc.z}).get_type()) ||
+                                         tile_is_walkable(tile_at(vec3{left_loc.x, left_loc.y + 1, left_loc.z}).get_type());
+            const bool right_has_branch = tile_is_walkable(tile_at(vec3{right_loc.x, right_loc.y - 1, right_loc.z}).get_type()) ||
+                                          tile_is_walkable(tile_at(vec3{right_loc.x, right_loc.y + 1, right_loc.z}).get_type());
             return left_has_branch != right_has_branch;
         }
 
-        const bool up_has_branch =
-            tile_is_walkable(tile_at(vec3{up_loc.x - 1, up_loc.y, up_loc.z}).get_type()) ||
-            tile_is_walkable(tile_at(vec3{up_loc.x + 1, up_loc.y, up_loc.z}).get_type());
-        const bool down_has_branch =
-            tile_is_walkable(tile_at(vec3{down_loc.x - 1, down_loc.y, down_loc.z}).get_type()) ||
-            tile_is_walkable(tile_at(vec3{down_loc.x + 1, down_loc.y, down_loc.z}).get_type());
+        const bool up_has_branch = tile_is_walkable(tile_at(vec3{up_loc.x - 1, up_loc.y, up_loc.z}).get_type()) ||
+                                   tile_is_walkable(tile_at(vec3{up_loc.x + 1, up_loc.y, up_loc.z}).get_type());
+        const bool down_has_branch = tile_is_walkable(tile_at(vec3{down_loc.x - 1, down_loc.y, down_loc.z}).get_type()) ||
+                                     tile_is_walkable(tile_at(vec3{down_loc.x + 1, down_loc.y, down_loc.z}).get_type());
         return up_has_branch != down_has_branch;
     }
 
@@ -663,8 +661,9 @@ public:
             for (int y = 0; y < height; y++) {
                 const vec3 loc = {x, y, floor};
                 tile_t& tile = tile_at(loc);
-                const bool type_invalid = tile.get_type() == tiletype_t::NONE || tile.get_type() == tiletype_t::STONE_WALL_00 || tile.get_type() == tiletype_t::STONE_WALL_01 ||
-                                          tile.get_type() == tiletype_t::UPSTAIRS || tile.get_type() == tiletype_t::DOWNSTAIRS;
+                const bool type_invalid = tile.get_type() == tiletype_t::NONE || tile.get_type() == tiletype_t::STONE_WALL_00 ||
+                                          tile.get_type() == tiletype_t::STONE_WALL_01 || tile.get_type() == tiletype_t::UPSTAIRS ||
+                                          tile.get_type() == tiletype_t::DOWNSTAIRS;
                 if (type_invalid) {
                     continue;
                 }

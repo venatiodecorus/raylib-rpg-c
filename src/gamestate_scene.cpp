@@ -1,12 +1,11 @@
-#include "gamestate.h"
-#include "ecs_core_components.h"
 #include "ecs_actor_components.h"
+#include "ecs_core_components.h"
+#include "gamestate.h"
 #include <entt/entt.hpp>
 
 /** @file gamestate_scene.cpp
  *  @brief Scene-specific input and character-creation helpers implemented on `gamestate`.
  */
-
 
 void gamestate::handle_input_title_scene(inputstate& is) {
     if (inputstate_is_pressed(is, KEY_ESCAPE)) {
@@ -54,7 +53,9 @@ void gamestate::make_all_npcs_target_player() {
     auto view = registry.view<LegacyEntityId, NpcTag>();
     for (auto entity : view) {
         entityid id = view.get<LegacyEntityId>(entity).id;
-        ct.set<target_id>(id, hero_id);
+        if (auto* tgt = get_component<TargetEntity>(id)) {
+            tgt->value = hero_id;
+        }
     }
 }
 

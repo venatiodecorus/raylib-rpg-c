@@ -284,15 +284,7 @@ public:
 
         g.add_to_inventory(hero, hero_weapon);
         g.add_to_inventory(orc, orc_weapon);
-        g.ct.set<equipped_weapon>(hero, hero_weapon);
-        g.ct.set<equipped_weapon>(orc, orc_weapon);
 
-        g.ct.set<strength>(hero, 18);
-        g.ct.set<dexterity>(hero, 18);
-        g.ct.set<hp>(hero, vec2{12, 12});
-        g.ct.set<strength>(orc, 18);
-        g.ct.set<dexterity>(orc, 18);
-        g.ct.set<hp>(orc, vec2{12, 12});
 
         bool duel_finished = false;
         for (int round = 0; round < 16 && !duel_finished; ++round) {
@@ -341,11 +333,7 @@ public:
         const entityid hero_weapon = g.create_weapon_with(g.sword_init());
         TS_ASSERT_DIFFERS(hero_weapon, ENTITYID_INVALID);
         g.add_to_inventory(hero, hero_weapon);
-        g.ct.set<equipped_weapon>(hero, hero_weapon);
 
-        g.ct.set<strength>(hero, 18);
-        g.ct.set<dexterity>(hero, 18);
-        g.ct.set<hp>(orc, vec2{12, 12});
 
         const attack_result_t result = g.run_attack_action(hero, vec3{2, 1, 0});
 
@@ -368,9 +356,6 @@ public:
         TS_ASSERT_DIFFERS(hero_weapon, ENTITYID_INVALID);
 
         g.add_to_inventory(hero, hero_weapon);
-        g.ct.set<equipped_weapon>(hero, hero_weapon);
-        g.ct.set<strength>(hero, 18);
-        g.ct.set<dexterity>(hero, 18);
 
         TS_ASSERT(!g.get_component_or<AggroFlag>(friendly, true));
 
@@ -395,12 +380,6 @@ public:
         const entityid hero_weapon = g.create_weapon_with(g.sword_init());
         TS_ASSERT_DIFFERS(hero_weapon, ENTITYID_INVALID);
         g.add_to_inventory(hero, hero_weapon);
-        g.ct.set<equipped_weapon>(hero, hero_weapon);
-        g.ct.set<strength>(hero, 18);
-        g.ct.set<dexterity>(hero, 18);
-        g.ct.set<base_ac>(orc, 1);
-        g.ct.set<dexterity>(orc, 1);
-        g.ct.set<hp>(orc, vec2{1, 1});
 
         const attack_result_t result = g.run_attack_action(hero, vec3{2, 1, 0});
 
@@ -422,20 +401,14 @@ public:
         const entityid hero = g.create_player_at_with(vec3{1, 1, 0}, "hero", g.player_init(12));
         const entityid orc = g.create_orc_at_with(vec3{2, 1, 0}, [](gamestate&, const entityid) { });
         const entityid hero_weapon = g.create_weapon_with(g.sword_init());
-        const entityid loot = g.create_weapon_at_with(g.ct, vec3{2, 1, 0}, g.dagger_init());
+        const entityid loot = g.create_weapon_at_with(vec3{2, 1, 0}, g.dagger_init());
         TS_ASSERT_DIFFERS(hero, ENTITYID_INVALID);
         TS_ASSERT_DIFFERS(orc, ENTITYID_INVALID);
         TS_ASSERT_DIFFERS(hero_weapon, ENTITYID_INVALID);
         TS_ASSERT_DIFFERS(loot, ENTITYID_INVALID);
 
         g.add_to_inventory(hero, hero_weapon);
-        g.ct.set<equipped_weapon>(hero, hero_weapon);
         g.add_to_inventory(orc, loot);
-        g.ct.set<strength>(hero, 18);
-        g.ct.set<dexterity>(hero, 18);
-        g.ct.set<base_ac>(orc, 1);
-        g.ct.set<dexterity>(orc, 1);
-        g.ct.set<hp>(orc, vec2{1, 1});
 
         const attack_result_t result = g.run_attack_action(hero, vec3{2, 1, 0});
 
@@ -460,21 +433,13 @@ public:
         TS_ASSERT_DIFFERS(orc, ENTITYID_INVALID);
 
         const entityid hero_weapon = g.create_weapon_with(g.sword_init());
-        const entityid shield = g.create_shield_with(g.ct, g.shield_init());
+        const entityid shield = g.create_shield_with(g.shield_init());
         TS_ASSERT_DIFFERS(hero_weapon, ENTITYID_INVALID);
         TS_ASSERT_DIFFERS(shield, ENTITYID_INVALID);
 
         g.add_to_inventory(hero, hero_weapon);
-        g.ct.set<equipped_weapon>(hero, hero_weapon);
         g.add_to_inventory(orc, shield);
-        g.ct.set<equipped_shield>(orc, shield);
-        g.ct.set<block_chance>(shield, 100);
 
-        g.ct.set<strength>(hero, 18);
-        g.ct.set<dexterity>(hero, 18);
-        g.ct.set<base_ac>(orc, 1);
-        g.ct.set<dexterity>(orc, 1);
-        g.ct.set<hp>(orc, vec2{12, 12});
 
         const attack_result_t result = g.run_attack_action(hero, vec3{2, 1, 0});
 
@@ -493,24 +458,15 @@ public:
         add_floor(g, 8, 8);
 
         const entityid hero = g.create_player_at_with(vec3{1, 1, 0}, "hero", g.player_init(12));
-        const entityid orc = g.create_orc_at_with(vec3{2, 1, 0}, [](gamestate& g, const entityid id) { g.ct.set<name>(id, "orc"); });
         const entityid hero_weapon = g.create_weapon_with(g.sword_init());
-        const entityid shield = g.create_shield_with(g.ct, g.shield_init());
+        const entityid shield = g.create_shield_with(g.shield_init());
         TS_ASSERT_DIFFERS(hero, ENTITYID_INVALID);
         TS_ASSERT_DIFFERS(orc, ENTITYID_INVALID);
         TS_ASSERT_DIFFERS(hero_weapon, ENTITYID_INVALID);
         TS_ASSERT_DIFFERS(shield, ENTITYID_INVALID);
 
         g.add_to_inventory(hero, hero_weapon);
-        g.ct.set<equipped_weapon>(hero, hero_weapon);
         g.add_to_inventory(orc, shield);
-        g.ct.set<equipped_shield>(orc, shield);
-        g.ct.set<block_chance>(shield, 100);
-        g.ct.set<durability>(shield, 5);
-        g.ct.set<strength>(hero, 18);
-        g.ct.set<dexterity>(hero, 18);
-        g.ct.set<base_ac>(orc, 1);
-        g.ct.set<dexterity>(orc, 1);
 
         const size_t initial_history_size = g.messages.history.size();
         const attack_result_t result = g.run_attack_action(hero, vec3{2, 1, 0});
@@ -530,20 +486,12 @@ public:
         add_floor(g, 8, 8);
 
         const entityid hero = g.create_player_at_with(vec3{1, 1, 0}, "hero", g.player_init(12));
-        const entityid orc = g.create_orc_at_with(vec3{2, 1, 0}, [](gamestate& g, const entityid id) { g.ct.set<name>(id, "orc"); });
         const entityid hero_weapon = g.create_weapon_with(g.sword_init());
         TS_ASSERT_DIFFERS(hero, ENTITYID_INVALID);
         TS_ASSERT_DIFFERS(orc, ENTITYID_INVALID);
         TS_ASSERT_DIFFERS(hero_weapon, ENTITYID_INVALID);
 
         g.add_to_inventory(hero, hero_weapon);
-        g.ct.set<equipped_weapon>(hero, hero_weapon);
-        g.ct.set<durability>(hero_weapon, 5);
-        g.ct.set<strength>(hero, 18);
-        g.ct.set<dexterity>(hero, 18);
-        g.ct.set<base_ac>(orc, 1);
-        g.ct.set<dexterity>(orc, 1);
-        g.ct.set<hp>(orc, vec2{12, 12});
 
         const size_t initial_history_size = g.messages.history.size();
         const attack_result_t result = g.run_attack_action(hero, vec3{2, 1, 0});
@@ -571,12 +519,6 @@ public:
         TS_ASSERT_DIFFERS(hero_weapon, ENTITYID_INVALID);
 
         g.add_to_inventory(hero, hero_weapon);
-        g.ct.set<equipped_weapon>(hero, hero_weapon);
-        g.ct.set<durability>(hero_weapon, 0);
-        g.ct.set<strength>(hero, 18);
-        g.ct.set<dexterity>(hero, 18);
-        g.ct.set<base_ac>(orc, 1);
-        g.ct.set<dexterity>(orc, 1);
         const size_t initial_history_size = g.messages.history.size();
 
         const attack_result_t result = g.run_attack_action(hero, vec3{2, 1, 0});
@@ -600,22 +542,14 @@ public:
         const entityid hero = g.create_player_at_with(vec3{1, 1, 0}, "hero", g.player_init(12));
         const entityid orc = g.create_orc_at_with(vec3{2, 1, 0}, [](gamestate&, const entityid) { });
         const entityid hero_weapon = g.create_weapon_with(g.sword_init());
-        const entityid shield = g.create_shield_with(g.ct, g.shield_init());
+        const entityid shield = g.create_shield_with(g.shield_init());
         TS_ASSERT_DIFFERS(hero, ENTITYID_INVALID);
         TS_ASSERT_DIFFERS(orc, ENTITYID_INVALID);
         TS_ASSERT_DIFFERS(hero_weapon, ENTITYID_INVALID);
         TS_ASSERT_DIFFERS(shield, ENTITYID_INVALID);
 
         g.add_to_inventory(hero, hero_weapon);
-        g.ct.set<equipped_weapon>(hero, hero_weapon);
         g.add_to_inventory(orc, shield);
-        g.ct.set<equipped_shield>(orc, shield);
-        g.ct.set<block_chance>(shield, 100);
-        g.ct.set<durability>(shield, 0);
-        g.ct.set<strength>(hero, 18);
-        g.ct.set<dexterity>(hero, 18);
-        g.ct.set<base_ac>(orc, 1);
-        g.ct.set<dexterity>(orc, 1);
         const size_t initial_history_size = g.messages.history.size();
 
         const attack_result_t result = g.run_attack_action(hero, vec3{2, 1, 0});
@@ -637,24 +571,15 @@ public:
         add_floor(g, 8, 8);
 
         const entityid hero = g.create_player_at_with(vec3{1, 1, 0}, "hero", g.player_init(12));
-        const entityid orc = g.create_orc_at_with(vec3{2, 1, 0}, [](gamestate& g, const entityid id) { g.ct.set<name>(id, "orc"); });
         const entityid hero_weapon = g.create_weapon_with(g.sword_init());
-        const entityid shield = g.create_shield_with(g.ct, g.shield_init());
+        const entityid shield = g.create_shield_with(g.shield_init());
         TS_ASSERT_DIFFERS(hero, ENTITYID_INVALID);
         TS_ASSERT_DIFFERS(orc, ENTITYID_INVALID);
         TS_ASSERT_DIFFERS(hero_weapon, ENTITYID_INVALID);
         TS_ASSERT_DIFFERS(shield, ENTITYID_INVALID);
 
         g.add_to_inventory(hero, hero_weapon);
-        g.ct.set<equipped_weapon>(hero, hero_weapon);
-        g.ct.set<durability>(hero_weapon, 5);
         g.add_to_inventory(orc, shield);
-        g.ct.set<equipped_shield>(orc, shield);
-        g.ct.set<durability>(shield, 5);
-        g.ct.set<strength>(hero, 1);
-        g.ct.set<base_ac>(orc, 30);
-        g.ct.set<dexterity>(orc, 18);
-        g.ct.set<hp>(orc, vec2{12, 12});
 
         const size_t initial_history_size = g.messages.history.size();
         const attack_result_t result = g.run_attack_action(hero, vec3{2, 1, 0});
@@ -685,20 +610,12 @@ public:
         add_floor(g, 8, 8);
 
         const entityid hero = g.create_player_at_with(vec3{1, 1, 0}, "hero", g.player_init(12));
-        const entityid orc = g.create_orc_at_with(vec3{2, 1, 0}, [](gamestate& g, const entityid id) { g.ct.set<name>(id, "orc"); });
         const entityid hero_weapon = g.create_weapon_with(g.sword_init());
         TS_ASSERT_DIFFERS(hero, ENTITYID_INVALID);
         TS_ASSERT_DIFFERS(orc, ENTITYID_INVALID);
         TS_ASSERT_DIFFERS(hero_weapon, ENTITYID_INVALID);
 
         g.add_to_inventory(hero, hero_weapon);
-        g.ct.set<equipped_weapon>(hero, hero_weapon);
-        g.ct.set<durability>(hero_weapon, 5);
-        g.ct.set<strength>(hero, 18);
-        g.ct.set<dexterity>(hero, 18);
-        g.ct.set<base_ac>(orc, 1);
-        g.ct.set<dexterity>(orc, 1);
-        g.ct.set<hp>(orc, vec2{1, 1});
 
         const size_t initial_history_size = g.messages.history.size();
         const attack_result_t result = g.run_attack_action(hero, vec3{2, 1, 0});
@@ -721,7 +638,6 @@ public:
         add_floor(g, 8, 8);
 
         const entityid hero = g.create_player_at_with(vec3{1, 1, 0}, "hero", g.player_init(12));
-        const entityid orc = g.create_orc_at_with(vec3{2, 1, 0}, [](gamestate& g, const entityid id) { g.ct.set<name>(id, "orc"); });
         const entityid orc_weapon = g.create_weapon_with(g.sword_init());
         TS_ASSERT_DIFFERS(hero, ENTITYID_INVALID);
         TS_ASSERT_DIFFERS(orc, ENTITYID_INVALID);
@@ -729,12 +645,6 @@ public:
 
         g.hero_id = hero;
         g.add_to_inventory(orc, orc_weapon);
-        g.ct.set<equipped_weapon>(orc, orc_weapon);
-        g.ct.set<strength>(orc, 18);
-        g.ct.set<dexterity>(orc, 18);
-        g.ct.set<base_ac>(hero, 1);
-        g.ct.set<dexterity>(hero, 1);
-        g.ct.set<hp>(hero, vec2{1, 1});
 
         tile_t& hero_tile = g.d.get_floor(0)->tile_at(vec3{1, 1, 0});
         const size_t initial_history_size = g.messages.history.size();
