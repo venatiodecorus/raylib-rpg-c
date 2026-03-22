@@ -11,7 +11,6 @@
 #include "item_cache.h"
 #include "massert.h"
 #include "mprint.h"
-#include "tile_id.h"
 
 /**
  * @brief Runtime storage for a single dungeon tile.

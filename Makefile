@@ -8,7 +8,6 @@ SRCDIR = src
 MAIN_C = $(SRCDIR)/main.cpp
 LIBDRAW_C = $(SRCDIR)/libdraw.cpp
 LIBDRAW_SPLIT_C = $(addprefix $(SRCDIR)/, \
-	create_sg_byid.cpp \
 	libdraw_create_spritegroup.cpp \
 	libdraw_update_sprites.cpp \
 	set_sg.cpp)
@@ -30,6 +29,7 @@ ENTITIES_C = $(addprefix $(SRCDIR)/entities/, \
 	box.cpp \
 	chest.cpp \
 	door.cpp \
+	factory.cpp \
 	item.cpp \
 	prop.cpp)
 GAMESTATE_C = $(addprefix $(SRCDIR)/, \

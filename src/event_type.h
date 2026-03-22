@@ -4,7 +4,15 @@
 
 #pragma once
 
-#include "attack_result.h"
+/// @brief Coarse result categories returned from attack resolution.
+enum class attack_result_t {
+    NONE,
+    HIT,
+    MISS,
+    BLOCK,
+    COUNT,
+};
+
 #include "entityid.h"
 #include "vec3.h"
 

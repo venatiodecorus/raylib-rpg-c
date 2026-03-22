@@ -1,14 +1,9 @@
 #include "libdraw_update_sprites.h"
 
-#include "create_sg_byid.h"
 #include "ecs_actor_components.h"
 #include "ecs_gameplay_components.h"
 #include "ecs_item_components.h"
-#include "entities/box.h"
-#include "entities/chest.h"
-#include "entities/door.h"
-#include "entitytype.h"
-#include "libdraw_context.h"
+#include "entities/entity_base.h"
 #include "set_sg.h"
 #include "spritegroup_anim.h"
 #include "update_sprite.h"
@@ -110,14 +105,7 @@ void libdraw_update_sprite_ptr(gamestate& g, rpg::Renderer& renderer, entityid i
         libdraw_set_sg_is_damaged(g, renderer, id, sg);
     }
 
-    if (type == entitytype_t::DOOR) {
-        rpg::entities::Door door;
-        door.update_sprite(g, renderer, id, sg);
-    }
-    else if (type == entitytype_t::CHEST) {
-        rpg::entities::Chest chest;
-        chest.update_sprite(g, renderer, id, sg);
-    }
+    rpg::entities::EntityBase::for_type(type).update_sprite(g, renderer, id, sg);
 
     if (sg->update_dest()) {
         g.frame_dirty = true;
@@ -144,7 +132,8 @@ void libdraw_handle_dirty_entities(gamestate& g, rpg::Renderer& renderer) {
         return;
     }
     for (entityid i = g.new_entityid_begin; i < g.new_entityid_end; i++) {
-        create_sg_byid(g, renderer, i);
+        const entitytype_t itype = g.get_component<EntityTypeTag>(i) ? g.get_component<EntityTypeTag>(i)->type : entitytype_t::NONE;
+        rpg::entities::EntityBase::for_type(itype).create_sprite(g, renderer, i);
         libdraw_update_sprite_pre(g, renderer, i);
     }
     g.frame_dirty = true;

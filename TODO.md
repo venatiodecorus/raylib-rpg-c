@@ -169,7 +169,24 @@ These must be addressed first because everything else depends on them.
 ## Next Steps
 - [x] Consolidate existing files where possible, remove all unused files (all .md, .txt, .csv, .py and .old in src/), move .frag files that are still used into src/shaders/.
 - [x] Remove/migrate sfx.h and sfx.txt from root dir?
-- [ ] Review draw_* files... do we really still need all of these? Can we organize these better?
+- [x] Review draw_* files... do we really still need all of these? Can we organize these better?
+- [ ] Logic is intertwined between scenes, we should define scenes as classes, switching to a scene inits its components. This would let us avoid deferred sprite creation. Below is some context from a different issue and why we can't have entities create their own sprites yet:
+
+```
+No, we can't eliminate the deferred sprite creation. The fundamental constraint is initialization order:
+1. main.cpp:52 — logic_init() creates all entities (dungeon, boxes, weapons, NPCs)
+2. main.cpp:53 — libdraw_init() calls InitWindow() which creates the OpenGL context
+Textures can't be loaded without OpenGL, so sprite creation must be deferred until the render loop. The dirty-flag range on gamestate acts as a message queue from the logic layer to the rendering layer. The renderer intentionally lives on AppContext, not gamestate, to keep game logic decoupled from GPU state.
+Additionally, gamestate_scene.cpp:116-118 forces a bulk dirty reset when transitioning from character creation to gameplay (re-sprites everything). So the deferred mechanism is load-bearing.
+That said, the dispatch mechanism can still be improved. Given you're adding more entities, I'd recommend Option B (static factory on EntityBase) over Option C:
+- Option C (ECS component with EntityBase*) would add a new component to every entity just for dispatch — more machinery for what's essentially a type lookup
+- Option B keeps it simple: one function maps entitytype_t → EntityBase&, all call sites use it, and adding a new entity type means adding one case to the factory
+The call site in libdraw_update_sprites.cpp becomes:
+EntityBase::for_type(type).create_sprite(g, renderer, id);
+And the update_sprite dispatch (lines 113–120) could use the same pattern:
+EntityBase::for_type(type).update_sprite(g, renderer, id, sg);
+```
+
 - [ ] Slice up prop tilemaps with Aseprite
 - [ ] Add https://github.com/ngndang/Better-Slicer/blob/main/Better%20Slicer/Better%20Slicer.lua to credits
 - [ ] Add aseprite mention https://github.com/aseprite/aseprite

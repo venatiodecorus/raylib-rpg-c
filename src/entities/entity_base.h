@@ -5,12 +5,14 @@
 #pragma once
 
 #include "../entityid.h"
+#include "../entitytype.h"
 #include "../libdraw_context.h"
 #include "../spritegroup.h"
 
 class gamestate;
 
-namespace rpg::entities {
+namespace rpg::entities
+{
 
 /** @brief Context passed to entity creation routines. */
 struct CreateContext {
@@ -31,10 +33,14 @@ public:
     virtual void create_sprite(gamestate& g, rpg::Renderer& renderer, entityid id) = 0;
 
     /** @brief Per-frame update of sprite state (animation, direction, open/close swap). */
-    virtual void update_sprite(gamestate& g, rpg::Renderer& renderer, entityid id, spritegroup* sg) = 0;
+    virtual void update_sprite(gamestate& g, rpg::Renderer& renderer, entityid id, spritegroup* sg) {
+    }
 
     /** @brief Draw this entity's sprite to the current render target. */
     virtual void draw(gamestate& g, rpg::Renderer& renderer, entityid id, spritegroup* sg) = 0;
+
+    /** @brief Return the entity handler for the given type. */
+    static EntityBase& for_type(entitytype_t type);
 };
 
 } // namespace rpg::entities

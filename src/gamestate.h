@@ -4,7 +4,6 @@
  *  @brief Top-level gameplay state, orchestration, and API surface for the game runtime.
  */
 
-#include "attack_result.h"
 #include "audio_manager.h"
 #include "biome.h"
 #include "calculate_linear_path.h"

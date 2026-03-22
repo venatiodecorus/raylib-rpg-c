@@ -3,7 +3,6 @@
  */
 
 #include "libdraw.h"
-#include "create_sg_byid.h"
 #include "draw_character_creation_screen.h"
 #include "draw_handle_debug_panel.h"
 #include "draw_keyboard_profile_prompt.h"
