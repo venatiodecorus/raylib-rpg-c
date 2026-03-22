@@ -1,33 +1,28 @@
-#include "draw_frame_2d.h"
+/** @file libdraw_gameplay_scene.cpp
+ *  @brief Gameplay scene rendering composition using renderer classes.
+ */
 
 #include "camera_lock_on.h"
-#include "draw_action_menu.h"
-#include "draw_chest_menu.h"
-#include "draw_controls_menu.h"
-#include "draw_damage_numbers.h"
-#include "draw_dungeon_floor.h"
-#include "draw_handle_debug_panel.h"
-#include "draw_help_menu.h"
-#include "draw_hud.h"
-#include "draw_interaction_modal.h"
-#include "draw_inventory_menu.h"
-#include "draw_keyboard_profile_prompt.h"
-#include "draw_level_up_modal.h"
-#include "draw_look_panel.h"
-#include "draw_message_box.h"
-#include "draw_message_history.h"
-#include "draw_mini_inventory_menu.h"
-#include "draw_option_menu.h"
-#include "draw_sound_menu.h"
-#include "draw_window_color_menu.h"
 #include "ecs_gameplay_components.h"
+#include "hud_renderer.h"
+#include "inventory_renderer.h"
 #include "libdraw_context.h"
 #include "libdraw_from_texture.h"
 #include "libdraw_to_texture.h"
+#include "menu_renderer.h"
+#include "world_renderer.h"
+
+#include "draw_handle_debug_panel.h"
+#include "draw_keyboard_profile_prompt.h"
+
+static rpg::WorldRenderer world_renderer;
+static rpg::HudRenderer hud_renderer;
+static rpg::MenuRenderer menu_renderer;
+static rpg::InventoryRenderer inventory_renderer;
 
 void draw_hud_to_texture(gamestate& g, rpg::Renderer& renderer) {
     BeginTextureMode(renderer.hud_target_texture);
-    draw_hud(g);
+    hud_renderer.draw_hud(g);
     EndTextureMode();
 }
 
@@ -36,26 +31,26 @@ void libdraw_drawframe_2d(gamestate& g, rpg::Renderer& renderer, int vision_dist
 
     BeginMode2D(g.cam2d);
     ClearBackground(BLACK);
-    draw_dungeon_floor(g, renderer, vision_dist, light_rad);
-    draw_damage_numbers(g);
+    world_renderer.draw_floor(g, renderer, vision_dist, light_rad);
+    world_renderer.draw_damage_numbers(g);
     EndMode2D();
 
-    draw_hud(g);
-    draw_look_panel(g);
-    draw_message_history(g);
-    draw_message_box(g);
-    draw_interaction_modal(g);
-    draw_level_up_modal(g);
+    hud_renderer.draw_hud(g);
+    hud_renderer.draw_look_panel(g);
+    hud_renderer.draw_message_history(g);
+    hud_renderer.draw_message_box(g);
+    hud_renderer.draw_interaction_modal(g);
+    hud_renderer.draw_level_up_modal(g);
 
     if (g.ui.display_inventory_menu) {
         if (g.use_mini_inventory_menu()) {
             const Inventory* items = g.get_component<Inventory>(g.hero_id);
             if (items) {
-                draw_mini_inventory_menu(g, renderer, items->value, "Inventory", "E equip  Enter use  Q drop  Esc close", true);
+                inventory_renderer.draw_mini_inventory(g, renderer, items->value, "Inventory", "E equip  Enter use  Q drop  Esc close", true);
             }
         }
         else {
-            draw_inventory_menu(g, renderer);
+            inventory_renderer.draw_inventory(g, renderer);
         }
     }
 
@@ -64,8 +59,9 @@ void libdraw_drawframe_2d(gamestate& g, rpg::Renderer& renderer, int vision_dist
             const entityid source_id = g.ui.chest_deposit_mode ? g.hero_id : g.active_chest_id;
             const Inventory* items = g.get_component<Inventory>(source_id);
             if (items) {
-                draw_mini_inventory_menu(
-                    g, renderer,
+                inventory_renderer.draw_mini_inventory(
+                    g,
+                    renderer,
                     items->value,
                     g.ui.chest_deposit_mode ? "Chest Deposit" : "Chest",
                     g.ui.chest_deposit_mode ? "Tab chest  Enter deposit  D close" : "Tab hero  Enter take  D close",
@@ -73,27 +69,27 @@ void libdraw_drawframe_2d(gamestate& g, rpg::Renderer& renderer, int vision_dist
             }
         }
         else {
-            draw_chest_menu(g, renderer);
+            inventory_renderer.draw_chest(g, renderer);
         }
     }
 
     if (g.ui.display_action_menu) {
-        draw_action_menu(g);
+        menu_renderer.draw_action_menu(g);
     }
     if (g.ui.display_option_menu) {
-        draw_option_menu(g);
+        menu_renderer.draw_option_menu(g);
     }
     if (g.ui.display_sound_menu) {
-        draw_sound_menu(g);
+        menu_renderer.draw_sound_menu(g);
     }
     if (g.ui.display_window_color_menu) {
-        draw_window_color_menu(g);
+        menu_renderer.draw_window_color_menu(g);
     }
     if (g.ui.display_controls_menu) {
-        draw_controls_menu(g);
+        menu_renderer.draw_controls_menu(g);
     }
     if (g.ui.display_help_menu) {
-        draw_help_menu(g);
+        menu_renderer.draw_help_menu(g);
     }
 
     draw_keyboard_profile_prompt(g);

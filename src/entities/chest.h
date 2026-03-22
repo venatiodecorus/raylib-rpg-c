@@ -22,6 +22,7 @@ public:
 
     void create_sprite(gamestate& g, rpg::Renderer& renderer, entityid id) override;
     void update_sprite(gamestate& g, rpg::Renderer& renderer, entityid id, spritegroup* sg) override;
+    void draw(gamestate& g, rpg::Renderer& renderer, entityid id, spritegroup* sg) override;
 };
 
 } // namespace rpg::entities

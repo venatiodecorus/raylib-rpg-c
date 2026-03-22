@@ -9,6 +9,7 @@
 #include "../ecs_world_object_components.h"
 #include "../gamestate.h"
 #include "../actor_definitions.h"
+#include "../get_equipped_sprite.h"
 #include "../libdraw_create_spritegroup.h"
 #include "../mprint.h"
 #include "../massert.h"
@@ -264,6 +265,31 @@ void Actor::update_sprite(gamestate& g, rpg::Renderer& renderer, entityid id, sp
     }
     const vec3 loc = loc_ptr->value;
     sg->snap_dest(loc.x, loc.y);
+}
+
+void Actor::draw(gamestate& g, rpg::Renderer& renderer, entityid id, spritegroup* sg) {
+    massert(id != ENTITYID_INVALID, "entityid is invalid");
+    massert(sg, "spritegroup is NULL");
+    Rectangle dest = {sg->dest.x, sg->dest.y, sg->dest.width, sg->dest.height};
+    auto shield_back_s = get_shield_back_sprite(g, renderer, id, sg);
+    if (shield_back_s) {
+        DrawTexturePro(*shield_back_s->get_texture(), shield_back_s->get_src(), dest, Vector2{0, 0}, 0, WHITE);
+    }
+    auto weapon_back_s = get_weapon_back_sprite(g, renderer, id, sg);
+    if (weapon_back_s) {
+        DrawTexturePro(*weapon_back_s->get_texture(), weapon_back_s->get_src(), dest, Vector2{0, 0}, 0, WHITE);
+    }
+    shared_ptr<sprite> s = sg->get_current();
+    massert(s, "sprite is NULL");
+    DrawTexturePro(*s->get_texture(), s->get_src(), dest, Vector2{0, 0}, 0, WHITE);
+    auto shield_front_s = get_shield_front_sprite(g, renderer, id, sg);
+    if (shield_front_s) {
+        DrawTexturePro(*shield_front_s->get_texture(), shield_front_s->get_src(), dest, Vector2{0, 0}, 0, WHITE);
+    }
+    auto weapon_front_s = get_weapon_front_sprite(g, renderer, id, sg);
+    if (weapon_front_s) {
+        DrawTexturePro(*weapon_front_s->get_texture(), weapon_front_s->get_src(), dest, Vector2{0, 0}, 0, WHITE);
+    }
 }
 
 } // namespace rpg::entities

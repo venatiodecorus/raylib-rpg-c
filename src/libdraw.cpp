@@ -4,38 +4,16 @@
 
 #include "libdraw.h"
 #include "create_sg_byid.h"
-#include "draw_action_menu.h"
 #include "draw_character_creation_screen.h"
-#include "draw_chest_menu.h"
-#include "draw_controls_menu.h"
-#include "draw_damage_numbers.h"
-#include "draw_dungeon_floor.h"
-#include "draw_entity_sprite.h"
-#include "draw_frame_2d.h"
-#include "draw_shield_sprite.h"
-#include "draw_sprite.h"
-#include "draw_weapon_sprite.h"
 #include "draw_handle_debug_panel.h"
-#include "draw_help_menu.h"
-#include "draw_hud.h"
-#include "draw_interaction_modal.h"
-#include "draw_inventory_menu.h"
 #include "draw_keyboard_profile_prompt.h"
-#include "draw_level_up_modal.h"
-#include "draw_look_panel.h"
-#include "draw_message_box.h"
-#include "draw_message_history.h"
-#include "draw_mini_inventory_menu.h"
-#include "draw_option_menu.h"
-#include "draw_sound_menu.h"
 #include "draw_title_screen.h"
-#include "draw_window_color_menu.h"
 #include "ecs_gameplay_components.h"
 #include "entitytype.h"
 #include "libdraw_frame_stats.h"
 #include "libdraw_from_texture.h"
-#include "libdraw_update_shield_for_entity.h"
 #include "libdraw_to_texture.h"
+#include "libdraw_update_shield_for_entity.h"
 #include "libdraw_update_sprites.h"
 #include "libdraw_update_weapon_for_entity.h"
 #include "load_textures.h"
@@ -54,18 +32,13 @@
 Texture2D rpg::Renderer::load_sprite_texture(const rpg::SpriteDef& def) {
     std::string cache_key;
     switch (def.src_type) {
-    case rpg::TXSRC_FILE:
-        cache_key = def.path;
-        break;
+    case rpg::TXSRC_FILE: cache_key = def.path; break;
     case rpg::TXSRC_PLACEHOLDER:
-        cache_key = "__placeholder_" + std::to_string(def.src_w > 0 ? def.src_w : 32)
-                    + "x" + std::to_string(def.src_h > 0 ? def.src_h : 32);
+        cache_key = "__placeholder_" + std::to_string(def.src_w > 0 ? def.src_w : 32) + "x" + std::to_string(def.src_h > 0 ? def.src_h : 32);
         break;
     case rpg::TXSRC_TILEMAP:
-        cache_key = def.path + "@" + std::to_string(def.src_x) + ","
-                    + std::to_string(def.src_y) + ","
-                    + std::to_string(def.src_w) + ","
-                    + std::to_string(def.src_h);
+        cache_key =
+            def.path + "@" + std::to_string(def.src_x) + "," + std::to_string(def.src_y) + "," + std::to_string(def.src_w) + "," + std::to_string(def.src_h);
         break;
     }
 
@@ -92,10 +65,14 @@ Texture2D rpg::Renderer::load_sprite_texture(const rpg::SpriteDef& def) {
                             for (int px = 0; px < cell_w; px++) {
                                 Color c = GetImageColor(image, fr * cell_w + px, ctx * cell_h + py);
                                 if (c.a > 0) {
-                                    if (px < u_min_x) u_min_x = px;
-                                    if (py < u_min_y) u_min_y = py;
-                                    if (px > u_max_x) u_max_x = px;
-                                    if (py > u_max_y) u_max_y = py;
+                                    if (px < u_min_x)
+                                        u_min_x = px;
+                                    if (py < u_min_y)
+                                        u_min_y = py;
+                                    if (px > u_max_x)
+                                        u_max_x = px;
+                                    if (py > u_max_y)
+                                        u_max_y = py;
                                 }
                             }
                         }
@@ -110,17 +87,11 @@ Texture2D rpg::Renderer::load_sprite_texture(const rpg::SpriteDef& def) {
                             Rectangle src_r = {
                                 static_cast<float>(fr * cell_w + u_min_x),
                                 static_cast<float>(ctx * cell_h + u_min_y),
-                                static_cast<float>(cw), static_cast<float>(ch)
-                            };
-                            Rectangle dst_r = {
-                                static_cast<float>(fr * cw),
-                                static_cast<float>(ctx * ch),
-                                static_cast<float>(cw), static_cast<float>(ch)
-                            };
+                                static_cast<float>(cw),
+                                static_cast<float>(ch)};
+                            Rectangle dst_r = {static_cast<float>(fr * cw), static_cast<float>(ctx * ch), static_cast<float>(cw), static_cast<float>(ch)};
                             Image cell = ImageFromImage(image, src_r);
-                            ImageDraw(&compact, cell,
-                                      Rectangle{0, 0, static_cast<float>(cw), static_cast<float>(ch)},
-                                      dst_r, WHITE);
+                            ImageDraw(&compact, cell, Rectangle{0, 0, static_cast<float>(cw), static_cast<float>(ch)}, dst_r, WHITE);
                             UnloadImage(cell);
                         }
                     }
@@ -140,12 +111,7 @@ Texture2D rpg::Renderer::load_sprite_texture(const rpg::SpriteDef& def) {
     case rpg::TXSRC_TILEMAP: {
         Image tilemap = LoadImage(def.path.c_str());
         massert(tilemap.data != NULL, "Failed to load tilemap: %s", def.path.c_str());
-        Rectangle src_rect = {
-            static_cast<float>(def.src_x),
-            static_cast<float>(def.src_y),
-            static_cast<float>(def.src_w),
-            static_cast<float>(def.src_h)
-        };
+        Rectangle src_rect = {static_cast<float>(def.src_x), static_cast<float>(def.src_y), static_cast<float>(def.src_w), static_cast<float>(def.src_h)};
         image = ImageFromImage(tilemap, src_rect);
         UnloadImage(tilemap);
         break;
@@ -164,8 +130,6 @@ void rpg::Renderer::unload_texture_cache() {
     }
     texture_cache.clear();
 }
-
-
 
 void draw_keyboard_profile_prompt(gamestate& g) {
     if (!g.ui.display_keyboard_profile_prompt) {
@@ -196,12 +160,8 @@ void draw_keyboard_profile_prompt(gamestate& g) {
 
 void libdraw_render_current_scene_to_scene_texture(gamestate& g, rpg::Renderer& renderer) {
     switch (g.current_scene) {
-    case scene_t::TITLE:
-        draw_title_screen_to_texture(g, renderer, false);
-        break;
-    case scene_t::MAIN_MENU:
-        draw_title_screen_to_texture(g, renderer, true);
-        break;
+    case scene_t::TITLE: draw_title_screen_to_texture(g, renderer, false); break;
+    case scene_t::MAIN_MENU: draw_title_screen_to_texture(g, renderer, true); break;
     case scene_t::CHARACTER_CREATION:
         minfo3("draw character creation scene to texture");
         draw_char_creation_to_texture(g, renderer);
@@ -211,25 +171,17 @@ void libdraw_render_current_scene_to_scene_texture(gamestate& g, rpg::Renderer& 
         const int light_rad = g.get_component_or<LightRadius>(g.hero_id, 0);
         libdraw_drawframe_2d_to_texture(g, renderer, vision_dist, light_rad);
     } break;
-    default:
-        break;
+    default: break;
     }
 }
 
 void libdraw_draw_current_scene_from_scene_texture(gamestate& g, rpg::Renderer& renderer) {
     switch (g.current_scene) {
     case scene_t::TITLE:
-    case scene_t::MAIN_MENU:
-        draw_title_screen_from_texture(g, renderer);
-        break;
-    case scene_t::CHARACTER_CREATION:
-        draw_char_creation_from_texture(g, renderer);
-        break;
-    case scene_t::GAMEPLAY:
-        libdraw_drawframe_2d_from_texture(g, renderer);
-        break;
-    default:
-        break;
+    case scene_t::MAIN_MENU: draw_title_screen_from_texture(g, renderer); break;
+    case scene_t::CHARACTER_CREATION: draw_char_creation_from_texture(g, renderer); break;
+    case scene_t::GAMEPLAY: libdraw_drawframe_2d_from_texture(g, renderer); break;
+    default: break;
     }
 }
 
@@ -309,7 +261,6 @@ void libdraw_init_resources(gamestate& g, rpg::Renderer& renderer) {
 
     draw_title_screen_to_texture(g, renderer, false);
     draw_char_creation_to_texture(g, renderer);
-
 }
 
 void libdraw_init_rest(gamestate& g, rpg::Renderer& renderer) {

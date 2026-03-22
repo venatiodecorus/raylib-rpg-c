@@ -32,6 +32,9 @@ public:
 
     /** @brief Per-frame update of sprite state (animation, direction, open/close swap). */
     virtual void update_sprite(gamestate& g, rpg::Renderer& renderer, entityid id, spritegroup* sg) = 0;
+
+    /** @brief Draw this entity's sprite to the current render target. */
+    virtual void draw(gamestate& g, rpg::Renderer& renderer, entityid id, spritegroup* sg) = 0;
 };
 
 } // namespace rpg::entities

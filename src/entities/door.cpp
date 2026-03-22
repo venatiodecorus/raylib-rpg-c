@@ -96,4 +96,15 @@ void Door::update_sprite(gamestate& g, rpg::Renderer& renderer, entityid id, spr
     sg->snap_dest(loc.x, loc.y);
 }
 
+void Door::draw(gamestate& g, rpg::Renderer& renderer, entityid id, spritegroup* sg) {
+    massert(id != ENTITYID_INVALID, "entityid is invalid");
+    massert(sg, "spritegroup is NULL");
+    Rectangle dest = {sg->dest.x, sg->dest.y, sg->dest.width, sg->dest.height};
+    massert(dest.width > 0, "dest.width is 0");
+    massert(dest.height > 0, "dest.height is 0");
+    shared_ptr<sprite> s = sg->get_current();
+    massert(s, "sprite is NULL");
+    DrawTexturePro(*s->get_texture(), s->get_src(), dest, Vector2{0, 0}, 0, WHITE);
+}
+
 } // namespace rpg::entities
