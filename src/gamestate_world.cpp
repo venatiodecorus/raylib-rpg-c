@@ -295,6 +295,7 @@ entityid gamestate::create_door_with(with_fun doorInitFunction) {
     entityid id = add_entity();
     const StaticWorldDefinition& definition = get_static_world_definition(entitytype_t::DOOR);
     sync_entt_entity_type_tags(id, entitytype_t::DOOR);
+    registry.emplace_or_replace<NeedsUpdate>(ensure_registry_entity(id), NeedsUpdate{true});
     doorInitFunction(*this, id);
     if (!has_component<EntityName>(id)) {
     }
@@ -356,6 +357,7 @@ entityid gamestate::create_chest_with(with_fun chestInitFunction) {
     entityid id = add_entity();
     const StaticWorldDefinition& definition = get_static_world_definition(entitytype_t::CHEST);
     sync_entt_entity_type_tags(id, entitytype_t::CHEST);
+    registry.emplace_or_replace<NeedsUpdate>(ensure_registry_entity(id), NeedsUpdate{true});
     chestInitFunction(*this, id);
     if (!has_component<EntityName>(id)) {
     }
@@ -422,6 +424,7 @@ entityid gamestate::create_prop_with(proptype_t type, with_fun initFun) {
     entityid id = add_entity();
     const StaticWorldDefinition& definition = get_prop_definition(type);
     sync_entt_entity_type_tags(id, entitytype_t::PROP);
+    registry.emplace_or_replace<NeedsUpdate>(ensure_registry_entity(id), NeedsUpdate{true});
     initFun(*this, id);
     if (!has_component<EntityDescription>(id)) {
     }
