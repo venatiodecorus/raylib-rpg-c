@@ -18,12 +18,12 @@ static inline void load_shaders(rpg::Renderer& renderer) {
     renderer.shaders[1] = LoadShader(0, "shaders/desktop/green-glow.frag");
 #endif
 
-    //shader_grayscale = LoadShader(0, "grayscale.frag"); // No vertex shader needed
-    //shader_glow = LoadShader(0, "glow.frag");
-    //shader_red_glow = LoadShader(0, "red-glow.frag");
-    //shader_color_noise = LoadShader(0, "colornoise.frag");
-    //shader_psychedelic_0 = LoadShader(0, "psychedelic-0.frag");
-    //shader_tile_glow = LoadShader(0, "psychedelic_ripple.frag");
+    //shader_grayscale = LoadShader(0, "shaders/grayscale.frag");
+    //shader_glow = LoadShader(0, "shaders/glow.frag");
+    //shader_red_glow = LoadShader(0, "shaders/red-glow.frag");
+    //shader_color_noise = LoadShader(0, "shaders/colornoise.frag");
+    //shader_psychedelic_0 = LoadShader(0, "shaders/psychedelic-0.frag");
+    //shader_tile_glow = LoadShader(0, "shaders/psychedelic_ripple.frag");
 }
 
 /** @brief Unload the shaders currently stored in the shared shader map. */

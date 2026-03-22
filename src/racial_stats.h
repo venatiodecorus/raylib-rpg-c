@@ -1,16 +1,27 @@
-/** @file get_racial_modifiers.h
- *  @brief Racial attribute modifier lookup helper.
+/** @file racial_stats.h
+ *  @brief Racial hit-die and attribute modifier lookup helpers.
  */
 
 #pragma once
 
 #include "race.h"
 
+/** @brief Return the default hit-die size for a race. */
+static inline const int get_racial_hd(race_t rt) {
+    switch (rt) {
+    case race_t::HUMAN: return 8;
+    case race_t::ELF: return 6;
+    case race_t::DWARF: return 10;
+    default: break;
+    }
+    return 8;
+}
+
 /** @brief Return the racial modifier for a race/stat-index pair. */
 static inline int get_racial_modifiers(race_t r, int stat) {
     switch (r) {
     case race_t::HUMAN:
-        if (stat >= 0 && stat < 6) return 0;
+        return 0;
     case race_t::ELF:
         switch (stat) {
         case 0: return 0;
@@ -41,10 +52,8 @@ static inline int get_racial_modifiers(race_t r, int stat) {
         case 5: return -2;
         default: return 0;
         }
-        // other race cases below...
     default: break;
     }
-
 
     return 0;
 }

@@ -4,7 +4,6 @@
 #include "ecs_gameplay_components.h"
 #include "get_txkey_for_tiletype.h"
 #include "libdraw_context.h"
-#include "libdraw_player_target_box.h"
 
 #include <algorithm>
 #include <functional>
