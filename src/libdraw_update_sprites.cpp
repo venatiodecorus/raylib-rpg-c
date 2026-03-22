@@ -35,7 +35,7 @@ void libdraw_update_sprite_context_ptr(gamestate& g, spritegroup* group, directi
           : dir == direction_t::LEFT && ctx == SPRITEGROUP_CONTEXT_L_D  ? SPRITEGROUP_CONTEXT_L_D
           : dir == direction_t::LEFT && ctx == SPRITEGROUP_CONTEXT_R_U  ? SPRITEGROUP_CONTEXT_L_U
           : dir == direction_t::LEFT && ctx == SPRITEGROUP_CONTEXT_L_U  ? SPRITEGROUP_CONTEXT_L_U
-                                                               : old_ctx;
+                                                                        : old_ctx;
     if (ctx != old_ctx) {
         g.frame_dirty = true;
     }
@@ -164,9 +164,12 @@ void libdraw_update_sprites_post(gamestate& g, rpg::Renderer& renderer) {
         return;
     }
 
-    if (g.framecount % renderer.anim_speed != 0) {
+    float dt = g.test ? (1.0f / DEFAULT_TARGET_FPS) : GetFrameTime();
+    renderer.anim_elapsed += dt;
+    if (renderer.anim_elapsed < ANIM_FRAME_TIME) {
         return;
     }
+    renderer.anim_elapsed -= ANIM_FRAME_TIME;
 
     g.frame_dirty = true;
 

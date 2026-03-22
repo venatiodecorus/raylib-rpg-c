@@ -4,10 +4,10 @@
 
 #pragma once
 
+#include <cstdint>
 #include <cstdio>
 #include <memory>
 #include <raylib.h>
-#include <cstdint>
 
 /// @brief Maximum number of Raylib key codes tracked by the bitset input cache.
 #define MAX_KEYS 400
@@ -29,6 +29,7 @@ typedef struct inputstate {
     bool mouse_held[3]; // Left, Right, Middle buttons held down
     bool mouse_released[3]; // Left, Right, Middle buttons released this frame
     Vector2 mouse_position; // Current mouse position
+    int buffered_key = -1; // Key press buffered across non-input frames
 } inputstate;
 
 /** @brief Clear all cached key and mouse button state for a fresh frame. */
@@ -45,10 +46,9 @@ static inline void inputstate_update(inputstate& is) {
     // Update keyboard state
     for (int k = 0; k < MAX_KEYS; k++) {
         if (IsKeyPressed(k)) {
-            //if (k == KEY_ENTER)
-            //    printf("KEY_ENTER pressed\n");
             const int idx = k / BITS_PER_LONG, bit = k % BITS_PER_LONG;
             is.pressed[idx] |= (1ULL << bit);
+            is.buffered_key = k;
         }
         if (IsKeyDown(k)) {
             const int idx = k / BITS_PER_LONG, bit = k % BITS_PER_LONG;

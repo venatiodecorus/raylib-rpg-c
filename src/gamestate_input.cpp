@@ -351,6 +351,9 @@ void gamestate::change_player_dir(direction_t dir) {
     if (get_component_or<DeadFlag>(hero_id, true)) {
         return;
     }
+    if (auto* facing = get_component<Facing>(hero_id)) {
+        facing->value = dir;
+    }
     player_changing_dir = false;
     frame_dirty = true;
 }
@@ -447,6 +450,12 @@ void gamestate::handle_input_gameplay_controlmode_player(inputstate& is) {
     if (flag != gamestate_flag_t::PLAYER_INPUT) {
         return;
     }
+    if (!inputstate_any_pressed(is) && is.buffered_key >= 0) {
+        const int k = is.buffered_key;
+        const int idx = k / BITS_PER_LONG, bit = k % BITS_PER_LONG;
+        is.pressed[idx] |= (1ULL << bit);
+    }
+    is.buffered_key = -1;
     if (inputstate_is_pressed(is, KEY_ESCAPE)) {
         open_confirm_prompt(rpg::confirm_action_t::QUIT, "Do You Want To Exit? Press Y or N");
         return;

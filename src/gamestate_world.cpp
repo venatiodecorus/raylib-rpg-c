@@ -8,8 +8,8 @@
  *  @brief Dungeon/world generation and placement helpers implemented on `gamestate`.
  */
 
-
-namespace {
+namespace
+{
 int dungeon_clamp_int(int value, int min_value, int max_value) {
     if (value < min_value) {
         return min_value;
@@ -160,7 +160,7 @@ bool dungeon_is_safe_prop_loc(shared_ptr<dungeon_floor> df, vec3 loc) {
 
     return true;
 }
-}
+} // namespace
 
 void gamestate::create_and_add_df_0(biome_t type, int w, int h, [[maybe_unused]] int df_count, [[maybe_unused]] float parts) {
     auto df = d.create_floor(type, w, h);
@@ -188,12 +188,10 @@ void gamestate::create_and_add_df_1(biome_t type, int w, int h, [[maybe_unused]]
     rooms.push_back(room(0, TextFormat("room-%d", 0), TextFormat("room-%d description", 0), start_area));
 
     const int dungeon_area = w * h;
-    const int density_divisor = compact_map
-        ? dungeon_clamp_int(static_cast<int>(16.0f / parts), 8, 16)
-        : dungeon_clamp_int(static_cast<int>(48.0f / parts), 24, 64);
-    const int target_room_count = compact_map
-        ? dungeon_clamp_int(dungeon_area / density_divisor, 4, 5)
-        : dungeon_clamp_int(dungeon_area / density_divisor, 6, 96);
+    const int density_divisor =
+        compact_map ? dungeon_clamp_int(static_cast<int>(16.0f / parts), 8, 16) : dungeon_clamp_int(static_cast<int>(48.0f / parts), 24, 64);
+    const int target_room_count =
+        compact_map ? dungeon_clamp_int(dungeon_area / density_divisor, 4, 5) : dungeon_clamp_int(dungeon_area / density_divisor, 6, 96);
     const int min_gap = compact_map ? 0 : 1;
     const int max_gap = compact_map ? 0 : dungeon_clamp_int((w + h) / 96, 1, 2);
     const int overlap_padding = compact_map ? 0 : 1;
@@ -222,6 +220,41 @@ void gamestate::create_and_add_df_1(biome_t type, int w, int h, [[maybe_unused]]
     d.add_floor(df);
 }
 
+void gamestate::create_and_add_static_floor(biome_t type) {
+    constexpr int W = 12;
+    constexpr int H = 12;
+    auto df = d.create_floor(type, W, H);
+    df->df_set_all_tiles(tiletype_t::STONE_WALL_00);
+
+    // Room A: top-left (1,1)-(4,4)
+    for (int x = 1; x <= 4; x++)
+        for (int y = 1; y <= 4; y++)
+            df->df_set_tile(tiletype_t::FLOOR_STONE_00, x, y);
+
+    // Room B: top-right (7,1)-(10,4)
+    for (int x = 7; x <= 10; x++)
+        for (int y = 1; y <= 4; y++)
+            df->df_set_tile(tiletype_t::FLOOR_STONE_00, x, y);
+
+    // Room C: bottom-center (4,7)-(7,10)
+    for (int x = 4; x <= 7; x++)
+        for (int y = 7; y <= 10; y++)
+            df->df_set_tile(tiletype_t::FLOOR_STONE_00, x, y);
+
+    // Corridor A->B: horizontal (5,3)-(6,3)
+    df->df_set_tile(tiletype_t::FLOOR_STONE_00, 5, 3);
+    df->df_set_tile(tiletype_t::FLOOR_STONE_00, 6, 3);
+
+    // Corridor A->C: vertical (3,5)-(3,6)
+    df->df_set_tile(tiletype_t::FLOOR_STONE_00, 3, 5);
+    df->df_set_tile(tiletype_t::FLOOR_STONE_00, 3, 6);
+
+    // Corridor B->C: vertical (8,5)-(8,6)
+    df->df_set_tile(tiletype_t::FLOOR_STONE_00, 8, 5);
+    df->df_set_tile(tiletype_t::FLOOR_STONE_00, 8, 6);
+
+    d.add_floor(df);
+}
 bool gamestate::assign_random_stairs_to_floor(shared_ptr<dungeon_floor> df) {
     massert(df, "dungeon floor is null");
     auto upstairs_locs = df->df_get_possible_upstairs_locs();
@@ -341,7 +374,7 @@ size_t gamestate::place_doors() {
                 if (!tile.get_can_have_door()) {
                     continue;
                 }
-                entityid door_id = create_door_at_with(loc, [](gamestate&, const entityid) {});
+                entityid door_id = create_door_at_with(loc, [](gamestate&, const entityid) { });
                 if (door_id == ENTITYID_INVALID) {
                     continue;
                 }
@@ -417,7 +450,7 @@ entityid gamestate::place_first_floor_chest() {
         return ENTITYID_INVALID;
     }
     std::shuffle(candidates.begin(), candidates.end(), mt);
-    return create_chest_at_with(candidates.front(), [](gamestate&, const entityid) {});
+    return create_chest_at_with(candidates.front(), [](gamestate&, const entityid) { });
 }
 
 entityid gamestate::create_prop_with(proptype_t type, with_fun initFun) {
@@ -566,7 +599,8 @@ bool gamestate::create_floor_pressure_plate(vec3 loc, entityid linked_door_id) {
     if (vec3_invalid(loc) || loc.z < 0 || static_cast<size_t>(loc.z) >= d.floors.size()) {
         return false;
     }
-    if (linked_door_id == ENTITYID_INVALID || (get_component<EntityTypeTag>(linked_door_id) ? get_component<EntityTypeTag>(linked_door_id)->type : entitytype_t::NONE) != entitytype_t::DOOR) {
+    if (linked_door_id == ENTITYID_INVALID ||
+        (get_component<EntityTypeTag>(linked_door_id) ? get_component<EntityTypeTag>(linked_door_id)->type : entitytype_t::NONE) != entitytype_t::DOOR) {
         return false;
     }
 
@@ -577,14 +611,15 @@ bool gamestate::create_floor_pressure_plate(vec3 loc, entityid linked_door_id) {
     }
 
     tile.set_can_have_door(false);
-    floor_pressure_plates.push_back(floor_pressure_plate_t{
-        loc,
-        linked_door_id,
-        false,
-        false,
-        TX_SWITCHES_PRESSURE_PLATE_UP_00,
-        TX_SWITCHES_PRESSURE_PLATE_DOWN_00,
-    });
+    floor_pressure_plates.push_back(
+        floor_pressure_plate_t{
+            loc,
+            linked_door_id,
+            false,
+            false,
+            TX_SWITCHES_PRESSURE_PLATE_UP_00,
+            TX_SWITCHES_PRESSURE_PLATE_DOWN_00,
+        });
     update_pressure_plates_for_floor(loc.z);
     return true;
 }
@@ -595,7 +630,9 @@ bool gamestate::destroy_floor_pressure_plate(vec3 loc) {
         return false;
     }
 
-    if (plate->linked_door_id != ENTITYID_INVALID && (get_component<EntityTypeTag>(plate->linked_door_id) ? get_component<EntityTypeTag>(plate->linked_door_id)->type : entitytype_t::NONE) == entitytype_t::DOOR) {
+    if (plate->linked_door_id != ENTITYID_INVALID &&
+        (get_component<EntityTypeTag>(plate->linked_door_id) ? get_component<EntityTypeTag>(plate->linked_door_id)->type : entitytype_t::NONE) ==
+            entitytype_t::DOOR) {
     }
 
     plate->active = false;
@@ -626,9 +663,7 @@ bool gamestate::setup_floor_four_pressure_plate_tutorial() {
         }
         const bool outer_wall = x == room_x || x == room_x + tutorial_width - 1 || y == room_y || y == room_y + tutorial_height - 1;
         const bool center_divider = x == split_x && y != center_y;
-        return (outer_wall || center_divider)
-            ? tiletype_t::STONE_WALL_00
-            : df->random_tiletype(tiletype_t::FLOOR_STONE_00, tiletype_t::FLOOR_STONE_11);
+        return (outer_wall || center_divider) ? tiletype_t::STONE_WALL_00 : df->random_tiletype(tiletype_t::FLOOR_STONE_00, tiletype_t::FLOOR_STONE_11);
     };
 
     for (int x = room_x; x < room_x + tutorial_width; x++) {
@@ -656,7 +691,7 @@ bool gamestate::setup_floor_four_pressure_plate_tutorial() {
         return false;
     }
 
-    const entityid door_id = create_door_at_with(door_loc, [](gamestate&, const entityid) {});
+    const entityid door_id = create_door_at_with(door_loc, [](gamestate&, const entityid) { });
     if (door_id == ENTITYID_INVALID) {
         return false;
     }

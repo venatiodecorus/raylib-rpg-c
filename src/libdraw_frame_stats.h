@@ -35,10 +35,10 @@ static inline void libdraw_finish_frame_stats([[maybe_unused]] gamestate& g, [[m
     if (g.last_frame_times_current >= LAST_FRAME_TIMES_MAX) {
         g.last_frame_times_current = 0;
     }
-    g.framecount++;
 
     if (g.last_frame_time > g.max_frame_time) {
         g.max_frame_time = g.last_frame_time;
     }
 #endif
+    g.framecount++;
 }

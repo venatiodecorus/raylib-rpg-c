@@ -14,7 +14,8 @@
 #include <string>
 #include <unordered_map>
 
-namespace rpg {
+namespace rpg
+{
 
 /**
  * @brief Process-lifetime renderer state shared across the libdraw subsystem.
@@ -50,6 +51,8 @@ public:
     Rectangle win_dest = {0, 0, DEFAULT_WIN_WIDTH, DEFAULT_WIN_HEIGHT};
     /// @brief Global animation speed divisor used by sprite update code.
     int anim_speed = DEFAULT_ANIM_SPEED;
+    /// @brief Accumulated time since last animation frame advance.
+    float anim_elapsed = 0.0f;
 
     /** @brief Load (or retrieve from cache) a Texture2D for a SpriteDef. */
     Texture2D load_sprite_texture(const rpg::SpriteDef& def);

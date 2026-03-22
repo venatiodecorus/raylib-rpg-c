@@ -84,7 +84,7 @@ WEB_INCLUDES = -I$(SRCDIR) -Iinclude -I /usr/local/include
 WEB_LINKS = -L$(SRCDIR) -l:libraylib.web.a
 EMCC_OPTIONS = -s USE_GLFW=3 -s EXPORTED_RUNTIME_METHODS=ccall -s ALLOW_MEMORY_GROWTH
 SHELL_FILE = --shell-file $(SRCDIR)/minshell.html
-PRELOAD_FILES = --preload-file $(SRCDIR)/fonts --preload-file $(SRCDIR)/img --preload-file $(SRCDIR)/audio/music --preload-file $(SRCDIR)/music.txt --preload-file $(SRCDIR)/audio/sfx --preload-file $(SRCDIR)/sfx.txt --preload-file $(SRCDIR)/shaders
+PRELOAD_FILES = --preload-file $(SRCDIR)/fonts --preload-file $(SRCDIR)/img --preload-file $(SRCDIR)/audio/music --preload-file $(SRCDIR)/audio/sfx --preload-file $(SRCDIR)/shaders
 WEB_OPTIONS = -DPLATFORM_WEB -DWEB -DSPAWN_MONSTERS -DNPCS_ALL_AT_ONCE -DSTART_MESSAGES
 
 

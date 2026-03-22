@@ -874,6 +874,9 @@ bool gamestate::try_entity_move(entityid id, vec3 v) {
     if (auto* upd = get_component<NeedsUpdate>(id)) {
         upd->value = true;
     }
+    if (auto* facing = get_component<Facing>(id)) {
+        facing->value = get_dir_from_loc(v);
+    }
     if (check_hearing(hero_id, aloc)) {
         audio.queue("sfx/Minifantasy_Dungeon_SFX/16_human_walk_stone_1.wav");
     }

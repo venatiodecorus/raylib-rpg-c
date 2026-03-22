@@ -5,45 +5,45 @@
  */
 
 #include "attack_result.h"
+#include "audio_manager.h"
 #include "biome.h"
 #include "calculate_linear_path.h"
 #include "character_creation.h"
 #include "controlmode.h"
+#include "damage_popups.h"
 #include "debugpanel.h"
 #include "dungeon.h"
 #include "ecs_core_components.h"
 #include "ecs_gameplay_components.h"
 #include "ecs_world_object_components.h"
 #include "event_type.h"
+#include "frame_timing_state.h"
 #include "gameplay_keybindings.h"
 #include "gameplay_queue_state.h"
 #include "gamestate_flag.h"
 #include "get_racial_hd.h"
 #include "get_racial_modifiers.h"
-#include "frame_timing_state.h"
 #include "inputstate.h"
 #include "keybinding_state.h"
 #include "libdraw_context.h"
 #include "libgame_defines.h"
 #include "magic_values.h"
+#include "message_log.h"
 #include "option_menu.h"
 #include "orc_names.h"
-#include "ui_state.h"
+#include "pathfinder.h"
 #include "presentation_state.h"
 #include "pressure_plate_state.h"
 #include "random_state.h"
 #include "roll.h"
 #include "runtime_session_state.h"
 #include "scene.h"
-#include "audio_manager.h"
-#include "message_log.h"
-#include "pathfinder.h"
-#include "damage_popups.h"
 #include "stat_bonus.h"
 #include "texture_ids.h"
+#include "ui_state.h"
 #include "world_object_definitions.h"
-#include <entt/entt.hpp>
 #include <algorithm>
+#include <entt/entt.hpp>
 #include <functional>
 #include <map>
 
@@ -56,27 +56,27 @@
 
 // GAMESTATE_SIZEOFTIMEBUF defined in runtime_session_state.h
 // LAST_FRAME_TIMES_MAX defined in frame_timing_state.h
-constexpr int GAMESTATE_SIZEOFDEBUGPANELBUF         = 1024;
-constexpr int MAX_MESSAGES                          = 64;
-constexpr int MAX_MSG_LENGTH                        = 256;
-constexpr int LIST_INIT_CAPACITY                    = 16;
-constexpr int DEFAULT_MAX_HISTORY_SIZE              = 1024;
-constexpr int GAMESTATE_DEBUGPANEL_DEFAULT_X        = 0;
-constexpr int GAMESTATE_DEBUGPANEL_DEFAULT_Y        = 0;
-constexpr int GAMESTATE_DEBUGPANEL_DEFAULT_WIDTH    = 200;
-constexpr int GAMESTATE_DEBUGPANEL_DEFAULT_HEIGHT   = 200;
+constexpr int GAMESTATE_SIZEOFDEBUGPANELBUF = 1024;
+constexpr int MAX_MESSAGES = 64;
+constexpr int MAX_MSG_LENGTH = 256;
+constexpr int LIST_INIT_CAPACITY = 16;
+constexpr int DEFAULT_MAX_HISTORY_SIZE = 1024;
+constexpr int GAMESTATE_DEBUGPANEL_DEFAULT_X = 0;
+constexpr int GAMESTATE_DEBUGPANEL_DEFAULT_Y = 0;
+constexpr int GAMESTATE_DEBUGPANEL_DEFAULT_WIDTH = 200;
+constexpr int GAMESTATE_DEBUGPANEL_DEFAULT_HEIGHT = 200;
 constexpr int GAMESTATE_DEBUGPANEL_DEFAULT_FONT_SIZE = 20;
-constexpr int GAMESTATE_INIT_ENTITYIDS_MAX          = 3000000;
+constexpr int GAMESTATE_INIT_ENTITYIDS_MAX = 3000000;
 
 class gamestate;
 
 typedef function<void(gamestate& g, const entityid)> with_fun;
 
+using std::function;
 using std::make_pair;
 using std::map;
 using std::mt19937;
 using std::pair;
-using std::function;
 
 using std::priority_queue;
 using std::round;
@@ -196,7 +196,7 @@ public:
         test_guard = false;
         player_changing_dir = false;
         ui.chest_deposit_mode = false;
-        #ifndef TEST
+#ifndef TEST
         test = false;
 #else
         test = true;
@@ -358,7 +358,8 @@ public:
         registry.emplace_or_replace<EntityTypeTag>(e, EntityTypeTag{type});
         if (type == entitytype_t::NPC) {
             registry.emplace_or_replace<NpcTag>(e, NpcTag{});
-        } else if (registry.any_of<NpcTag>(e)) {
+        }
+        else if (registry.any_of<NpcTag>(e)) {
             registry.remove<NpcTag>(e);
         }
     }
@@ -381,7 +382,8 @@ public:
     entityid find_first_entity_of_type(entitytype_t type) {
         entityid result = ENTITYID_INVALID;
         for_entities_of_type(type, [&result](entityid id) {
-            if (result == ENTITYID_INVALID) result = id;
+            if (result == ENTITYID_INVALID)
+                result = id;
         });
         return result;
     }
@@ -441,6 +443,9 @@ public:
 
     /** @brief Create and add a generated floor using the current room-and-corridor generator. */
     void create_and_add_df_1(biome_t type, int w, int h, int df_count, float parts);
+
+    /** @brief Create and add a static debug floor with a fixed layout. */
+    void create_and_add_static_floor(biome_t type);
 
     /** @brief Randomly assign upstairs and downstairs locations on a single floor. */
     bool assign_random_stairs_to_floor(shared_ptr<dungeon_floor> df);
@@ -1352,7 +1357,7 @@ public:
             : flag == gamestate_flag_t::PLAYER_ANIM  ? "Player anim"
             : flag == gamestate_flag_t::NPC_TURN     ? "NPC Turn"
             : flag == gamestate_flag_t::NPC_ANIM     ? "NPC anim"
-                                                  : "Unknown",
+                                                     : "Unknown",
             entity_turn,
             loc.x,
             loc.y,
@@ -1440,7 +1445,8 @@ public:
     bool& keyboard_profile_confirmed = keybind.keyboard_profile_confirmed;
     bool& controls_menu_waiting_for_key = keybind.controls_menu_waiting_for_key;
     gameplay_input_action_t& controls_menu_pending_action = keybind.controls_menu_pending_action;
-    std::array<std::array<gameplay_keybinding_t, static_cast<size_t>(gameplay_input_action_t::COUNT)>, static_cast<size_t>(keyboard_profile_t::COUNT)>& keybindings = keybind.keybindings;
+    std::array<std::array<gameplay_keybinding_t, static_cast<size_t>(gameplay_input_action_t::COUNT)>, static_cast<size_t>(keyboard_profile_t::COUNT)>&
+        keybindings = keybind.keybindings;
 
     bool& processing_actions = queue_state.processing_actions;
     vector<gameplay_event_t>& gameplay_events = queue_state.gameplay_events;
@@ -1448,5 +1454,4 @@ public:
     vector<floor_pressure_plate_t>& floor_pressure_plates = pressure_plate_state.floor_pressure_plates;
     vec3& floor_four_tutorial_orc_spawn = pressure_plate_state.floor_four_tutorial_orc_spawn;
     entityid& active_chest_id = ui.active_chest_id;
-
 };

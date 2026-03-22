@@ -106,7 +106,7 @@ void gamestate::handle_input_character_creation_scene(inputstate& is) {
             maxhp_roll = do_roll_best_of_3(vec3{1, myhd, 0}) + get_stat_bonus(chara_creation.constitution);
         }
         shared_ptr<dungeon_floor> df = d.floors[0];
-        vec3 start_loc = df->get_random_loc();
+        vec3 start_loc = vec3{2, 2, 0};
         massert(!vec3_invalid(start_loc), "start_loc is (-1,-1,-1) - no valid start location exists");
         const string player_name = chara_creation.name.empty() ? "hero" : chara_creation.name;
         entity_turn = create_player_at_with(start_loc, player_name, player_init(maxhp_roll));

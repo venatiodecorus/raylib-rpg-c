@@ -169,3 +169,6 @@ These must be addressed first because everything else depends on them.
 ## Next Steps
 - [ ] Consolidate existing files where possible, remove all unused files (all .md, .txt, .csv, .py and .old in src/), move .frag files that are still used into src/shaders/.
 - [ ] Remove/migrate sfx.h and sfx.txt from root dir?
+- [ ] Slice up prop tilemaps with Aseprite
+- [ ] Add https://github.com/ngndang/Better-Slicer/blob/main/Better%20Slicer/Better%20Slicer.lua to credits
+- [ ] Add aseprite mention https://github.com/aseprite/aseprite

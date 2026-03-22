@@ -2,7 +2,6 @@
 
 #include "../ecs_gameplay_components.h"
 #include "../gamestate.h"
-#include "../sfx.h"
 #include <cxxtest/TestSuite.h>
 
 class InventoryTestSuite : public CxxTest::TestSuite {

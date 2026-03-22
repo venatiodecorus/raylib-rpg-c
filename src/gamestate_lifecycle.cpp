@@ -1,13 +1,12 @@
-#include "gamestate.h"
-#include "ecs_core_components.h"
 #include "ecs_actor_components.h"
+#include "ecs_core_components.h"
 #include "ecs_gameplay_components.h"
+#include "gamestate.h"
 #include <entt/entt.hpp>
 
 /** @file gamestate_lifecycle.cpp
  *  @brief Core gameplay lifecycle, visibility, and tick helpers implemented on `gamestate`.
  */
-
 
 void gamestate::update_tile(tile_t& tile) {
     tile.set_explored(true);
@@ -143,86 +142,43 @@ void gamestate::update_npc_behavior(entityid id) {
     if (is_entity_adjacent(id, hero_id)) {
         return;
     }
-
 }
 
 void gamestate::logic_init() {
     minfo("gamestate.logic_init");
     srand(time(NULL));
     SetRandomSeed(time(NULL));
-    constexpr float parts = 1.0;
     massert(!d.is_initialized, "dungeon is already initialized");
-    create_and_add_df_1(biome_t::STONE, 8, 8, 4, parts);
-    create_and_add_df_1(biome_t::STONE, 24, 24, 4, parts);
-    create_and_add_df_1(biome_t::STONE, 16, 16, 4, parts);
-    create_and_add_df_0(biome_t::STONE, 16, 16, 4, parts);
-    const bool stairs_assigned = assign_random_stairs();
-    massert(stairs_assigned, "failed to assign dungeon stairs");
-    if (!stairs_assigned) {
-        merror("failed to assign dungeon stairs");
-        return;
-    }
+    create_and_add_static_floor(biome_t::STONE);
     d.current_floor = 0;
     d.is_initialized = true;
 
     massert(d.floors.size() > 0, "dungeon.floors.size is 0");
-    setup_floor_four_pressure_plate_tutorial();
-    place_doors();
-    place_props();
-    place_floor_three_pullable_props();
-    place_floor_three_pullable_sign();
-    place_first_floor_chest();
     auto floor_zero = d.get_current_floor();
-    constexpr int num_boxes = 1;
-    for (int i = 0; i < num_boxes; i++) {
-        create_box_at_with(floor_zero->get_random_loc());
-    }
-    auto floor_three = d.get_floor(3);
-    constexpr int floor_three_box_count = 3;
-    for (int i = 0; i < floor_three_box_count; i++) {
-        create_box_at_with(floor_three->get_random_loc());
-    }
-    create_weapon_at_with(floor_zero->get_random_loc(), sword_init());
-    create_shield_at_with(floor_zero->get_random_loc(), shield_init());
+
+    // Place a box in Room B
+    create_box_at_with(vec3{8, 2, 0});
+
+    // Place a weapon and shield in Room A
+    create_weapon_at_with(vec3{2, 2, 0}, sword_init());
+    create_shield_at_with(vec3{2, 3, 0}, shield_init());
+
+    // Place a friendly NPC in Room A
+    create_npc_at_with(race_t::HUMAN, vec3{3, 2, 0}, [](gamestate& g, const entityid id) {
+        g.registry.emplace_or_replace<AggroFlag>(g.ensure_registry_entity(id), AggroFlag{false});
+    });
+
+    // Place a hostile slime in Room C
     auto green_slime_init = [](gamestate& g, const entityid id) {
         auto e = g.ensure_registry_entity(id);
         g.registry.emplace_or_replace<EntityName>(e, EntityName{"green slime"});
         g.registry.emplace_or_replace<DialogueLine>(e, DialogueLine{"The slime jiggles quietly."});
-        g.registry.emplace_or_replace<AggroFlag>(e, AggroFlag{false});
+        g.registry.emplace_or_replace<AggroFlag>(e, AggroFlag{true});
         g.registry.emplace_or_replace<EntityLevel>(e, EntityLevel{1});
         g.registry.emplace_or_replace<Experience>(e, Experience{0});
     };
-    auto armed_orc_init = [this](gamestate& g, const entityid id) {
-        vector<with_fun> weapon_inits = {
-            dagger_init(),
-            sword_init(),
-            axe_init(),
-        };
-        uniform_int_distribution<int> weapon_dist(0, static_cast<int>(weapon_inits.size()) - 1);
-        const entityid weapon_id = create_weapon_with(weapon_inits[weapon_dist(random.mt)]);
-        const entityid potion_id = create_potion_with(potion_init(potiontype_t::HP_SMALL));
-        add_to_inventory(id, weapon_id);
-        add_to_inventory(id, potion_id);
-        auto e = g.ensure_registry_entity(id);
-        g.registry.emplace_or_replace<EquippedWeapon>(e, EquippedWeapon{weapon_id});
-        g.registry.emplace_or_replace<AggroFlag>(e, AggroFlag{true});
-    };
+    create_npc_at_with(race_t::GREEN_SLIME, vec3{5, 8, 0}, green_slime_init);
 
-    const race_t friendly_race = static_cast<race_t>(GetRandomValue(static_cast<int>(race_t::NONE) + 1, static_cast<int>(race_t::COUNT) - 1));
-    const vec3 friendly_loc = d.get_floor(0)->get_random_loc();
-    create_npc_at_with(friendly_race, friendly_loc, [](gamestate& g, const entityid id) {
-        g.registry.emplace_or_replace<AggroFlag>(g.ensure_registry_entity(id), AggroFlag{false});
-    });
-
-    auto floor_one = d.get_floor(1);
-    for (int i = 0; i < 9; i++) {
-        const vec3 slime_loc = floor_one->get_random_loc();
-        create_npc_at_with(race_t::GREEN_SLIME, slime_loc, green_slime_init);
-    }
-
-    const vec3 floor_two_orc_loc = vec3_valid(floor_four_tutorial_orc_spawn) ? floor_four_tutorial_orc_spawn : d.get_floor(2)->get_random_loc();
-    create_orc_at_with(floor_two_orc_loc, armed_orc_init);
-    msuccess("end creating monsters...");
     messages.add("Welcome to the game! Press enter to cycle messages.");
     messages.add("For help, press ?");
     msuccess("liblogic_init: Game state initialized");
@@ -255,7 +211,7 @@ void gamestate::advance_animation_phase() {
         : flag == gamestate_flag_t::PLAYER_INPUT ? "player input"
         : flag == gamestate_flag_t::NPC_TURN     ? "npc turn"
         : flag == gamestate_flag_t::NPC_ANIM     ? "npc anim"
-                                              : "Unknown");
+                                                 : "Unknown");
     if (flag == gamestate_flag_t::PLAYER_ANIM) {
 #ifndef NPCS_ALL_AT_ONCE
         entity_turn++;
