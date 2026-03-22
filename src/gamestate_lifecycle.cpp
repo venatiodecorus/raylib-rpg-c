@@ -289,13 +289,17 @@ void gamestate::finalize_render_feedback() {
     auto view = registry.view<LegacyEntityId>();
     for (auto entity : view) {
         entityid id = view.get<LegacyEntityId>(entity).id;
-        if (has_component<NeedsUpdate>(id)) {
+        if (auto* upd = get_component<NeedsUpdate>(id)) {
+            upd->value = false;
         }
-        if (has_component<AttackingFlag>(id)) {
+        if (auto* atk = get_component<AttackingFlag>(id)) {
+            atk->value = false;
         }
-        if (has_component<BlockSuccessFlag>(id)) {
+        if (auto* blk = get_component<BlockSuccessFlag>(id)) {
+            blk->value = false;
         }
-        if (has_component<SpriteMoveState>(id)) {
+        if (auto* sm = get_component<SpriteMoveState>(id)) {
+            sm->value = Rectangle{0, 0, 0, 0};
         }
     }
 
