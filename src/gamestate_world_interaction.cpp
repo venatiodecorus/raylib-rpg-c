@@ -793,6 +793,9 @@ bool gamestate::run_traverse_stairs_action(entityid id) {
 bool gamestate::try_entity_move(entityid id, vec3 v) {
     massert(id != ENTITYID_INVALID, "Entity ID is invalid!");
     minfo2("entity %d is trying to move: (%d,%d,%d)", id, v.x, v.y, v.z);
+    if (auto* facing = get_component<Facing>(id)) {
+        facing->value = get_dir_from_xy(v.x, v.y);
+    }
     massert(has_component<Position>(id), "id %d has no location", id);
 
     vec3 loc = get_component_or<Position>(id, vec3{-1, -1, -1});
