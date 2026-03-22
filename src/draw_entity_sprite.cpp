@@ -3,8 +3,7 @@
 #include "draw_shield_sprite.h"
 #include "draw_sprite.h"
 #include "draw_weapon_sprite.h"
-#include "get_shield_sprite.h"
-#include "get_weapon_sprite.h"
+#include "get_equipped_sprite.h"
 #include "libdraw_context.h"
 
 void draw_entity_sprite([[maybe_unused]] gamestate& g, spritegroup* sg) {
