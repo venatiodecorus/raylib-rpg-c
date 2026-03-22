@@ -24,7 +24,6 @@ struct AppContext {
  */
 static void gameloop(void* arg) {
     AppContext* ctx = static_cast<AppContext*>(arg);
-    PollInputEvents();
     inputstate_update(ctx->is);
     ctx->g.tick(ctx->is);
     drawframe(ctx->g, ctx->renderer);
