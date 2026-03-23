@@ -20,7 +20,6 @@
 #include "gameplay_keybindings.h"
 #include "gameplay_queue_state.h"
 #include "gamestate_flag.h"
-#include "racial_stats.h"
 #include "inputstate.h"
 #include "keybinding_state.h"
 #include "libdraw_context.h"
@@ -32,6 +31,7 @@
 #include "pathfinder.h"
 #include "presentation_state.h"
 #include "pressure_plate_state.h"
+#include "racial_stats.h"
 #include "random_state.h"
 #include "roll.h"
 #include "runtime_session_state.h"
@@ -664,12 +664,6 @@ public:
     /** @brief Perform an in-process gameplay restart without recreating the OS window. */
     void restart_game();
 
-    /** @brief Handle input while the title scene is active. */
-    void handle_input_title_scene(inputstate& is);
-
-    /** @brief Handle input while the main menu scene is active. */
-    void handle_input_main_menu_scene(inputstate& is);
-
     /**
      * @brief Create and place the player actor at a dungeon location.
      *
@@ -693,18 +687,6 @@ public:
 
     /** @brief Retarget all active NPCs toward the player actor. */
     void make_all_npcs_target_player();
-
-    /** @brief Append one printable character to the character-creation name buffer. */
-    bool try_append_character_creation_char(int codepoint);
-
-    /** @brief Remove the last character from the character-creation name buffer. */
-    bool backspace_character_creation_name();
-
-    /** @brief Pull typed characters from Raylib into the character-creation name buffer. */
-    bool handle_character_creation_text_input(inputstate& is);
-
-    /** @brief Handle input while the character creation scene is active. */
-    void handle_input_character_creation_scene(inputstate& is);
 
     /** @brief Advance high-level gameplay phase after one animation slice completes. */
     void advance_animation_phase();

@@ -21,6 +21,11 @@ AUX_DRAW_C = $(addprefix $(SRCDIR)/, \
 	menu_renderer.cpp \
 	inventory_renderer.cpp \
 	hud_renderer.cpp)
+SCENES_C = $(addprefix $(SRCDIR)/, \
+	title_scene.cpp \
+	main_menu_scene.cpp \
+	character_creation_scene.cpp \
+	gameplay_scene.cpp)
 AUDIO_MANAGER_C = $(SRCDIR)/audio_manager.cpp
 MESSAGE_LOG_C = $(SRCDIR)/message_log.cpp
 DAMAGE_POPUPS_C = $(SRCDIR)/damage_popups.cpp
@@ -48,7 +53,7 @@ GAMESTATE_C = $(addprefix $(SRCDIR)/, \
 	gamestate_world_interaction.cpp \
 	gamestate_entity_factory.cpp)
 GAMESTATE_O = $(GAMESTATE_C:.cpp=.o) $(ENTITIES_C:.cpp=.o)
-GAME_SOURCES = $(MAIN_C) $(LIBDRAW_C) $(LIBDRAW_SPLIT_C) $(AUX_DRAW_C) $(AUDIO_MANAGER_C) $(MESSAGE_LOG_C) $(DAMAGE_POPUPS_C) $(GAMESTATE_C)
+GAME_SOURCES = $(MAIN_C) $(LIBDRAW_C) $(LIBDRAW_SPLIT_C) $(AUX_DRAW_C) $(SCENES_C) $(AUDIO_MANAGER_C) $(MESSAGE_LOG_C) $(DAMAGE_POPUPS_C) $(GAMESTATE_C)
 
 LINK_MATH = -lm
 
@@ -87,7 +92,7 @@ WEB_OPTIONS = -DPLATFORM_WEB -DWEB -DSPAWN_MONSTERS -DNPCS_ALL_AT_ONCE -DSTART_M
 all: game tests
 
 # Desktop build
-game: $(SRCDIR)/main.o $(SRCDIR)/libdraw.o $(LIBDRAW_SPLIT_C:.cpp=.o) $(AUX_DRAW_C:.cpp=.o) $(SRCDIR)/audio_manager.o $(SRCDIR)/message_log.o $(SRCDIR)/damage_popups.o $(GAMESTATE_O)
+game: $(SRCDIR)/main.o $(SRCDIR)/libdraw.o $(LIBDRAW_SPLIT_C:.cpp=.o) $(AUX_DRAW_C:.cpp=.o) $(SCENES_C:.cpp=.o) $(SRCDIR)/audio_manager.o $(SRCDIR)/message_log.o $(SRCDIR)/damage_popups.o $(GAMESTATE_O)
 	$(CXX) $(WFLAGS) $(CXXFLAGS) $(CFLAGS) $^ $(RAYLIB_LIBS) -o $@
 
 $(SRCDIR)/%.o: $(SRCDIR)/%.cpp

@@ -756,16 +756,7 @@ void gamestate::handle_input(inputstate& is) {
         handle_input_confirm_prompt(is);
         return;
     }
-    if (current_scene == scene_t::TITLE) {
-        handle_input_title_scene(is);
-    }
-    else if (current_scene == scene_t::MAIN_MENU) {
-        handle_input_main_menu_scene(is);
-    }
-    else if (current_scene == scene_t::CHARACTER_CREATION) {
-        handle_input_character_creation_scene(is);
-    }
-    else if (current_scene == scene_t::GAMEPLAY) {
+    if (current_scene == scene_t::GAMEPLAY) {
         handle_input_gameplay_scene(is);
     }
 }
