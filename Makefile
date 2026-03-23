@@ -86,7 +86,7 @@ WEB_OPTIONS = -DPLATFORM_WEB -DWEB -DSPAWN_MONSTERS -DNPCS_ALL_AT_ONCE -DSTART_M
 
 
 # Phony targets
-.PHONY: all clean docs docs-clean game tests tests_heavy
+.PHONY: all clean docs docs-clean game tests tests_heavy tests_coverage
 
 # Targets
 all: game tests
@@ -104,18 +104,33 @@ index.html: $(GAME_SOURCES)
 
 # Unit tests
 $(SRCDIR)/tests.cpp: $(SRCDIR)/unit_test.h $(wildcard $(SRCDIR)/test_suites/test_*.h)
-	cxxtestgen --error-printer -o $@ $(SRCDIR)/unit_test.h $(SRCDIR)/test_suites/test_gamestate_lifecycle.h $(SRCDIR)/test_suites/test_combat_bootstrap.h $(SRCDIR)/test_suites/test_dungeon_bootstrap.h $(SRCDIR)/test_suites/test_entity_factory.h $(SRCDIR)/test_suites/test_entity_placement.h $(SRCDIR)/test_suites/test_inventory.h $(SRCDIR)/test_suites/test_pathfinder.h $(SRCDIR)/test_suites/test_renderer_seams.h $(SRCDIR)/test_suites/test_tile_cache.h $(SRCDIR)/test_suites/test_utility_helpers.h $(SRCDIR)/test_suites/test_world_interaction.h
+	cxxtestgen --error-printer -o $@ $(SRCDIR)/unit_test.h $(SRCDIR)/test_suites/test_gamestate_lifecycle.h $(SRCDIR)/test_suites/test_combat_bootstrap.h $(SRCDIR)/test_suites/test_dungeon_bootstrap.h $(SRCDIR)/test_suites/test_entity_factory.h $(SRCDIR)/test_suites/test_entity_placement.h $(SRCDIR)/test_suites/test_inventory.h $(SRCDIR)/test_suites/test_pathfinder.h $(SRCDIR)/test_suites/test_renderer_seams.h $(SRCDIR)/test_suites/test_tile_cache.h $(SRCDIR)/test_suites/test_utility_helpers.h $(SRCDIR)/test_suites/test_utility_helpers_expanded.h $(SRCDIR)/test_suites/test_message_log.h $(SRCDIR)/test_suites/test_audio_manager.h $(SRCDIR)/test_suites/test_inputstate.h $(SRCDIR)/test_suites/test_world_interaction.h $(SRCDIR)/test_suites/test_damage_popups.h $(SRCDIR)/test_suites/test_game_tick.h $(SRCDIR)/test_suites/test_combat_math.h $(SRCDIR)/test_suites/test_visibility.h
 
 CXXTEST_CFLAGS := $(shell pkg-config --cflags cxxtest 2>/dev/null || echo "-I/opt/homebrew/Cellar/cxxtest/4.4_3/include")
 
-tests: $(SRCDIR)/tests.cpp $(SRCDIR)/audio_manager.o $(SRCDIR)/message_log.o $(SRCDIR)/damage_popups.o $(GAMESTATE_O)
+tests: $(SRCDIR)/tests.cpp $(SRCDIR)/audio_manager.o $(SRCDIR)/message_log.o $(SRCDIR)/damage_popups.o $(SRCDIR)/test_stubs.o $(GAMESTATE_O)
 	$(CXX) $(WFLAGS) -o $@ $^ $(RAYLIB_CFLAGS) $(RAYLIB_LIBS) -I$(SRCDIR) -Iinclude $(CXXTEST_CFLAGS) $(CXXFLAGS) $(CFLAGS)
 
 $(SRCDIR)/tests_heavy.cpp: $(SRCDIR)/unit_test_heavy.h $(SRCDIR)/unit_test.h $(wildcard $(SRCDIR)/test_suites/test_*.h)
-	cxxtestgen --error-printer -o $@ $(SRCDIR)/unit_test_heavy.h $(SRCDIR)/unit_test.h $(SRCDIR)/test_suites/test_gamestate_lifecycle.h $(SRCDIR)/test_suites/test_combat_bootstrap.h $(SRCDIR)/test_suites/test_dungeon_bootstrap.h $(SRCDIR)/test_suites/test_entity_factory.h $(SRCDIR)/test_suites/test_entity_placement.h $(SRCDIR)/test_suites/test_heavy_simulation.h $(SRCDIR)/test_suites/test_inventory.h $(SRCDIR)/test_suites/test_pathfinder.h $(SRCDIR)/test_suites/test_renderer_seams.h $(SRCDIR)/test_suites/test_tile_cache.h $(SRCDIR)/test_suites/test_utility_helpers.h $(SRCDIR)/test_suites/test_world_interaction.h
+	cxxtestgen --error-printer -o $@ $(SRCDIR)/unit_test_heavy.h $(SRCDIR)/unit_test.h $(SRCDIR)/test_suites/test_gamestate_lifecycle.h $(SRCDIR)/test_suites/test_combat_bootstrap.h $(SRCDIR)/test_suites/test_dungeon_bootstrap.h $(SRCDIR)/test_suites/test_entity_factory.h $(SRCDIR)/test_suites/test_entity_placement.h $(SRCDIR)/test_suites/test_heavy_simulation.h $(SRCDIR)/test_suites/test_inventory.h $(SRCDIR)/test_suites/test_pathfinder.h $(SRCDIR)/test_suites/test_renderer_seams.h $(SRCDIR)/test_suites/test_tile_cache.h $(SRCDIR)/test_suites/test_utility_helpers.h $(SRCDIR)/test_suites/test_utility_helpers_expanded.h $(SRCDIR)/test_suites/test_message_log.h $(SRCDIR)/test_suites/test_audio_manager.h $(SRCDIR)/test_suites/test_inputstate.h $(SRCDIR)/test_suites/test_world_interaction.h $(SRCDIR)/test_suites/test_damage_popups.h $(SRCDIR)/test_suites/test_game_tick.h $(SRCDIR)/test_suites/test_combat_math.h $(SRCDIR)/test_suites/test_visibility.h
 
-tests_heavy: $(SRCDIR)/tests_heavy.cpp $(SRCDIR)/audio_manager.o $(SRCDIR)/message_log.o $(SRCDIR)/damage_popups.o $(GAMESTATE_O)
+tests_heavy: $(SRCDIR)/tests_heavy.cpp $(SRCDIR)/audio_manager.o $(SRCDIR)/message_log.o $(SRCDIR)/damage_popups.o $(SRCDIR)/test_stubs.o $(GAMESTATE_O)
 	$(CXX) $(WFLAGS) -o $@ $^ $(RAYLIB_CFLAGS) $(RAYLIB_LIBS) -I$(SRCDIR) -Iinclude $(CXXTEST_CFLAGS) $(CXXFLAGS) $(CFLAGS)
+
+# Coverage
+COVERAGE_DIR = coverage_report
+tests_coverage: $(SRCDIR)/tests.cpp
+	@echo "Building tests with coverage instrumentation..."
+	$(MAKE) clean
+	CXXFLAGS="-DDEBUG=1 -DDEBUG_ASSERT=1 -DNPCS_ALL_AT_ONCE -DMUSIC_OFF --coverage -fprofile-arcs -ftest-coverage" $(MAKE) tests
+	@echo "Running tests..."
+	-./tests
+	@echo "Generating coverage report..."
+	@mkdir -p $(COVERAGE_DIR)
+	lcov --capture --directory $(SRCDIR) --output-file $(COVERAGE_DIR)/coverage.info --ignore-errors source,inconsistent --rc derive_function_end_line=0 2>/dev/null || echo "lcov not found; install via: brew install lcov"
+	lcov --remove $(COVERAGE_DIR)/coverage.info '/opt/*' '/usr/*' '*/include/entt/*' '*/test_suites/*' --output-file $(COVERAGE_DIR)/coverage_filtered.info --rc derive_function_end_line=0 2>/dev/null || true
+	genhtml $(COVERAGE_DIR)/coverage_filtered.info --output-directory $(COVERAGE_DIR)/html 2>/dev/null || echo "genhtml not found; install via: brew install lcov"
+	@echo "Coverage report: $(COVERAGE_DIR)/html/index.html"
 
 # Documentation
 docs:
@@ -125,4 +140,4 @@ docs-clean:
 	rm -rf docs/api
 
 clean:
-	rm -rfv game tests tests_heavy index.html index.js index.wasm index.data $(SRCDIR)/*.o $(SRCDIR)/entities/*.o $(SRCDIR)/*.gch $(SRCDIR)/tests.cpp $(SRCDIR)/tests_heavy.cpp
+	rm -rfv game tests tests_heavy index.html index.js index.wasm index.data $(SRCDIR)/*.o $(SRCDIR)/entities/*.o $(SRCDIR)/*.gch $(SRCDIR)/tests.cpp $(SRCDIR)/tests_heavy.cpp $(SRCDIR)/*.gcda $(SRCDIR)/*.gcno $(SRCDIR)/entities/*.gcda $(SRCDIR)/entities/*.gcno coverage_report

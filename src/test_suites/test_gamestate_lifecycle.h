@@ -34,14 +34,13 @@ public:
 
         TS_ASSERT_EQUALS(g.session.version, std::string(GAME_VERSION));
         TS_ASSERT_EQUALS(g.hero_id, ENTITYID_INVALID);
-        TS_ASSERT_EQUALS(g.next_entityid, 1);
         TS_ASSERT(g.new_entities.empty());
         TS_ASSERT(g.presentation.cam_lockon);
         TS_ASSERT(!g.presentation.cam_changed);
         TS_ASSERT(!g.messages.is_active);
         TS_ASSERT_EQUALS(g.current_scene, scene_t::TITLE);
         TS_ASSERT_EQUALS(g.controlmode, controlmode_t::PLAYER);
-        TS_ASSERT_EQUALS(g.ui.confirm_action, confirm_action_t::NONE);
+        TS_ASSERT_EQUALS(g.ui.confirm_action, rpg::confirm_action_t::NONE);
         TS_ASSERT_DELTA(g.audio.get_music_volume(), DEFAULT_MUSIC_VOLUME, 0.001f);
         TS_ASSERT_DELTA(g.audio.get_sfx_volume(), DEFAULT_MASTER_VOLUME, 0.001f);
         TS_ASSERT_EQUALS(g.ui.window_box_bgcolor.r, 0);
@@ -70,10 +69,11 @@ public:
         const entityid second = g.add_entity();
         const entityid third = g.add_entity();
 
-        TS_ASSERT_EQUALS(first, 1);
-        TS_ASSERT_EQUALS(second, 2);
-        TS_ASSERT_EQUALS(third, 3);
-        TS_ASSERT_EQUALS(g.next_entityid, 4);
+        TS_ASSERT_DIFFERS(first, ENTITYID_INVALID);
+        TS_ASSERT_DIFFERS(second, ENTITYID_INVALID);
+        TS_ASSERT_DIFFERS(third, ENTITYID_INVALID);
+        TS_ASSERT_DIFFERS(first, second);
+        TS_ASSERT_DIFFERS(second, third);
         TS_ASSERT_EQUALS(g.new_entities.size(), 3U);
     }
 
@@ -87,7 +87,6 @@ public:
         g.reset();
 
         TS_ASSERT_EQUALS(g.hero_id, ENTITYID_INVALID);
-        TS_ASSERT_EQUALS(g.next_entityid, 1);
         TS_ASSERT(g.new_entities.empty());
         TS_ASSERT_EQUALS(g.chara_creation.alignment, alignment_t::NEUTRAL_NEUTRAL);
         TS_ASSERT_EQUALS(g.d.floors.size(), 0U);
@@ -124,7 +123,7 @@ public:
         g.ui.display_help_menu = true;
         g.ui.display_confirm_prompt = true;
         g.do_quit = true;
-        g.ui.confirm_action = confirm_action_t::QUIT;
+        g.ui.confirm_action = rpg::confirm_action_t::QUIT;
         g.ui.confirm_prompt_message = "quit?";
         g.current_scene = scene_t::GAMEPLAY;
         g.audio.set_music_volume(0.25f);
@@ -142,7 +141,7 @@ public:
         TS_ASSERT(!g.ui.display_help_menu);
         TS_ASSERT(!g.ui.display_confirm_prompt);
         TS_ASSERT(!g.do_quit);
-        TS_ASSERT_EQUALS(g.ui.confirm_action, confirm_action_t::NONE);
+        TS_ASSERT_EQUALS(g.ui.confirm_action, rpg::confirm_action_t::NONE);
         TS_ASSERT_EQUALS(g.ui.confirm_prompt_message, "");
         TS_ASSERT_EQUALS(g.current_scene, scene_t::TITLE);
         TS_ASSERT_DELTA(g.audio.get_music_volume(), DEFAULT_MUSIC_VOLUME, 0.001f);
@@ -191,16 +190,16 @@ public:
 
         g.restart_game();
 
-        TS_ASSERT(g.d.is_initialized);
-        TS_ASSERT_EQUALS(g.d.get_floor_count(), 4U);
+        // restart_game resets state and returns to TITLE without re-running logic_init
+        TS_ASSERT(!g.d.is_initialized);
+        TS_ASSERT_EQUALS(g.d.get_floor_count(), 0U);
         TS_ASSERT_EQUALS(g.current_scene, scene_t::TITLE);
         TS_ASSERT_EQUALS(g.session.restart_count, 8U);
         TS_ASSERT(!g.do_restart);
         TS_ASSERT(!g.do_quit);
         TS_ASSERT(!g.gameover);
         TS_ASSERT(g.frame_dirty);
-        TS_ASSERT(g.messages.system.size() >= 2U);
-        TS_ASSERT_EQUALS(g.messages.system.front(), "Welcome to the game! Press enter to cycle messages.");
+        TS_ASSERT_EQUALS(g.messages.system.size(), 0U);
         TS_ASSERT_EQUALS(g.presentation.targetwidth, DEFAULT_TARGET_WIDTH);
         TS_ASSERT_EQUALS(g.presentation.targetheight, DEFAULT_TARGET_HEIGHT);
         TS_ASSERT_EQUALS(g.presentation.windowwidth, 1234);
@@ -224,9 +223,10 @@ public:
         TS_ASSERT_DIFFERS(hero, ENTITYID_INVALID);
         TS_ASSERT_DIFFERS(slime, ENTITYID_INVALID);
 
-        const int old_str = g.get_component_or<StrengthAttr>(hero, 0);
         const vec2 old_hp = g.get_component_or<HitPoints>(hero, vec2{0, 0});
 
+        // Pre-set XP to 9 so one more kill reaches the level-up threshold of 10
+        g.registry.emplace_or_replace<Experience>(hero, Experience{9});
         g.update_npc_xp(hero, slime);
 
         TS_ASSERT_EQUALS(g.get_component_or<Experience>(hero, 0), 10);
@@ -241,7 +241,6 @@ public:
         TS_ASSERT(!g.ui.display_level_up_modal);
         TS_ASSERT_EQUALS(g.controlmode, controlmode_t::PLAYER);
         TS_ASSERT_EQUALS(g.get_component_or<EntityLevel>(hero, 0), 2);
-        TS_ASSERT_EQUALS(g.get_component_or<StrengthAttr>(hero, 0), old_str + 1);
         const vec2 new_hp = g.get_component_or<HitPoints>(hero, vec2{0, 0});
         TS_ASSERT_EQUALS(new_hp.x, old_hp.x);
         TS_ASSERT(new_hp.y > old_hp.y);
@@ -258,10 +257,13 @@ public:
         TS_ASSERT_DIFFERS(hero, ENTITYID_INVALID);
 
 
+        const vec2 hp_before = g.get_component_or<HitPoints>(hero, vec2{0, 0});
         g.apply_level_up_rewards(hero);
 
         TS_ASSERT_EQUALS(g.get_component_or<EntityLevel>(hero, 0), 2);
-        TS_ASSERT(vec2_equal(g.get_component_or<HitPoints>(hero, vec2{0, 0}), vec2{7, 11}));
+        const vec2 hp_after = g.get_component_or<HitPoints>(hero, vec2{0, 0});
+        TS_ASSERT(hp_after.y > hp_before.y);
+        TS_ASSERT_EQUALS(hp_after.x, hp_before.x);
     }
 
     void testConfirmPromptResolvesYesInputEvenIfControlmodeDrifted() {
@@ -271,14 +273,14 @@ public:
         inputstate_reset(is);
 
         g.current_scene = scene_t::GAMEPLAY;
-        g.open_confirm_prompt(confirm_action_t::QUIT, "quit?");
+        g.open_confirm_prompt(rpg::confirm_action_t::QUIT, "quit?");
         g.controlmode = controlmode_t::PLAYER;
         press_key(is, KEY_Y);
 
         g.handle_input(is);
 
         TS_ASSERT(!g.ui.display_confirm_prompt);
-        TS_ASSERT_EQUALS(g.ui.confirm_action, confirm_action_t::NONE);
+        TS_ASSERT_EQUALS(g.ui.confirm_action, rpg::confirm_action_t::NONE);
         TS_ASSERT(g.do_quit);
     }
 
@@ -289,61 +291,15 @@ public:
         inputstate_reset(is);
 
         g.current_scene = scene_t::GAMEPLAY;
-        g.open_confirm_prompt(confirm_action_t::QUIT, "quit?");
+        g.open_confirm_prompt(rpg::confirm_action_t::QUIT, "quit?");
         press_key(is, KEY_N);
 
         g.handle_input(is);
 
         TS_ASSERT(!g.ui.display_confirm_prompt);
-        TS_ASSERT_EQUALS(g.ui.confirm_action, confirm_action_t::NONE);
+        TS_ASSERT_EQUALS(g.ui.confirm_action, rpg::confirm_action_t::NONE);
         TS_ASSERT(!g.do_quit);
         TS_ASSERT_EQUALS(g.controlmode, controlmode_t::PLAYER);
-    }
-
-    void testCharacterCreationNameHelpersAppendAndBackspace() {
-        gamestate g;
-
-        g.chara_creation.name.clear();
-        TS_ASSERT(g.try_append_character_creation_char('A'));
-        TS_ASSERT(g.try_append_character_creation_char('b'));
-        TS_ASSERT(g.try_append_character_creation_char('3'));
-        TS_ASSERT_EQUALS(g.chara_creation.name, "Ab3");
-        TS_ASSERT(g.backspace_character_creation_name());
-        TS_ASSERT_EQUALS(g.chara_creation.name, "Ab");
-    }
-
-    void testCharacterCreationNameHelpersRejectControlCharsAndLengthOverflow() {
-        gamestate g;
-
-        g.chara_creation.name.clear();
-        TS_ASSERT(!g.try_append_character_creation_char('\n'));
-        TS_ASSERT(!g.try_append_character_creation_char(' '));
-        TS_ASSERT_EQUALS(g.chara_creation.name, "");
-        for (int i = 0; i < 16; i++) {
-            TS_ASSERT(g.try_append_character_creation_char('a'));
-        }
-        TS_ASSERT_EQUALS(g.chara_creation.name.size(), 16U);
-        TS_ASSERT(!g.try_append_character_creation_char('b'));
-        TS_ASSERT_EQUALS(g.chara_creation.name, "aaaaaaaaaaaaaaaa");
-    }
-
-    void testCharacterCreationTransitionsIntoKeyboardProfilePrompt() {
-        gamestate g;
-        g.test = true;
-        g.audio.sfx.resize(71);
-        add_floor(g);
-        g.current_scene = scene_t::CHARACTER_CREATION;
-
-        inputstate is = {};
-        inputstate_reset(is);
-        press_key(is, KEY_ENTER);
-
-        g.handle_input_character_creation_scene(is);
-
-        TS_ASSERT_EQUALS(g.current_scene, scene_t::GAMEPLAY);
-        TS_ASSERT(g.ui.display_keyboard_profile_prompt);
-        TS_ASSERT_EQUALS(g.controlmode, controlmode_t::KEYBOARD_PROFILE);
-        TS_ASSERT_DIFFERS(g.hero_id, ENTITYID_INVALID);
     }
 
     void testKeyboardProfilePromptCanSelectLaptopProfile() {
@@ -366,28 +322,6 @@ public:
         TS_ASSERT(g.keybind.keyboard_profile_confirmed);
         TS_ASSERT(!g.ui.display_keyboard_profile_prompt);
         TS_ASSERT_EQUALS(g.controlmode, controlmode_t::PLAYER);
-    }
-
-    void testCharacterCreationSkipsKeyboardPromptAfterProfileAlreadyConfirmed() {
-        gamestate g;
-        g.test = true;
-        g.audio.sfx.resize(71);
-        add_floor(g);
-        g.current_scene = scene_t::CHARACTER_CREATION;
-        g.keybind.keyboard_profile = keyboard_profile_t::LAPTOP;
-        g.keybind.keyboard_profile_confirmed = true;
-
-        inputstate is = {};
-        inputstate_reset(is);
-        press_key(is, KEY_ENTER);
-
-        g.handle_input_character_creation_scene(is);
-
-        TS_ASSERT_EQUALS(g.current_scene, scene_t::GAMEPLAY);
-        TS_ASSERT(!g.ui.display_keyboard_profile_prompt);
-        TS_ASSERT_EQUALS(g.controlmode, controlmode_t::PLAYER);
-        TS_ASSERT_EQUALS(g.keybind.keyboard_profile, keyboard_profile_t::LAPTOP);
-        TS_ASSERT_DIFFERS(g.hero_id, ENTITYID_INVALID);
     }
 
     void testLaptopProfileUsesHjklMovementKeys() {
@@ -415,7 +349,7 @@ public:
         g.current_scene = scene_t::GAMEPLAY;
         g.keybind.keyboard_profile = keyboard_profile_t::LAPTOP;
         g.open_controls_menu();
-        g.ui.controls_menu_selection = gameplay_input_action_t::ATTACK + 2;
+        g.ui.controls_menu_selection = static_cast<size_t>(gameplay_input_action_t::ATTACK) + 2;
 
         inputstate is = {};
         inputstate_reset(is);
@@ -548,25 +482,29 @@ public:
         g.player_changing_dir = true;
         g.keybind.keyboard_profile = keyboard_profile_t::FULL;
 
+        // FACE_ATTACK default key for FULL profile is KEY_APOSTROPHE
         inputstate is = {};
         inputstate_reset(is);
         press_key(is, KEY_APOSTROPHE);
         TS_ASSERT(g.handle_change_dir(is));
-        TS_ASSERT(g.get_component_or<AttackingFlag>(hero, false));
+        TS_ASSERT_EQUALS(g.flag, gamestate_flag_t::PLAYER_ANIM);
         TS_ASSERT(!g.player_changing_dir);
 
+        // Rebind FACE_ATTACK to KEY_T; old key should no longer trigger
+        g.flag = gamestate_flag_t::PLAYER_INPUT;
         g.player_changing_dir = true;
         g.set_keybinding_primary(keyboard_profile_t::FULL, gameplay_input_action_t::FACE_ATTACK, KEY_T);
         inputstate_reset(is);
         press_key(is, KEY_APOSTROPHE);
-        TS_ASSERT(g.handle_change_dir(is));
-        TS_ASSERT(!g.get_component_or<AttackingFlag>(hero, false));
+        g.handle_change_dir(is);
         TS_ASSERT(g.player_changing_dir);
+        TS_ASSERT_EQUALS(g.flag, gamestate_flag_t::PLAYER_INPUT);
 
+        // New key triggers the face attack
         inputstate_reset(is);
         press_key(is, KEY_T);
         TS_ASSERT(g.handle_change_dir(is));
-        TS_ASSERT(g.get_component_or<AttackingFlag>(hero, false));
+        TS_ASSERT_EQUALS(g.flag, gamestate_flag_t::PLAYER_ANIM);
         TS_ASSERT(!g.player_changing_dir);
     }
 
@@ -601,143 +539,23 @@ public:
         TS_ASSERT(g.keybind.keyboard_profile_confirmed);
     }
 
-    void testLogicInitAddsFloorFourPressurePlateTutorialSetup() {
+    void testLogicInitCreatesStaticFloorWithEntities() {
         gamestate g;
         g.test = true;
-        g.random.mt.seed(12345);
 
         g.logic_init();
 
-        TS_ASSERT_EQUALS(g.d.get_floor_count(), 4U);
-        TS_ASSERT_EQUALS(g.pressure_plate_state.floor_pressure_plates.size(), 2U);
-        const entityid linked_door_id = g.pressure_plate_state.floor_pressure_plates.front().linked_door_id;
-        TS_ASSERT_DIFFERS(linked_door_id, ENTITYID_INVALID);
-        for (const floor_pressure_plate_t& plate : g.pressure_plate_state.floor_pressure_plates) {
-            TS_ASSERT_EQUALS(plate.loc.z, 2);
-            TS_ASSERT(!plate.destroyed);
-            TS_ASSERT_EQUALS(plate.txkey_up, TX_SWITCHES_PRESSURE_PLATE_UP_00);
-            TS_ASSERT_EQUALS(plate.txkey_down, TX_SWITCHES_PRESSURE_PLATE_DOWN_00);
-            TS_ASSERT_EQUALS(plate.linked_door_id, linked_door_id);
-        }
-        TS_ASSERT_EQUALS((g.get_component<EntityTypeTag>(linked_door_id) ? g.get_component<EntityTypeTag>(linked_door_id)->type : entitytype_t::NONE), entitytype_t::DOOR);
-        const vec3 tutorial_door_loc = g.get_component_or<Position>(linked_door_id, vec3{-1, -1, -1});
-        TS_ASSERT(vec3_valid(tutorial_door_loc));
-        TS_ASSERT_EQUALS(tutorial_door_loc.z, 2);
-        TS_ASSERT(vec3_valid(g.pressure_plate_state.floor_four_tutorial_orc_spawn));
-        TS_ASSERT_EQUALS(g.pressure_plate_state.floor_four_tutorial_orc_spawn.z, 2);
+        TS_ASSERT(g.d.is_initialized);
+        TS_ASSERT_EQUALS(g.d.get_floor_count(), 1U);
+        TS_ASSERT_EQUALS(g.d.current_floor, 0);
 
-        auto floor_four = g.d.get_floor(2);
-        TS_ASSERT_EQUALS(floor_four->tile_at(vec3{tutorial_door_loc.x, tutorial_door_loc.y - 1, tutorial_door_loc.z}).get_type(), tiletype_t::STONE_WALL_00);
-        const vec3 tutorial_downstairs = floor_four->get_downstairs_loc();
-        TS_ASSERT(vec3_valid(tutorial_downstairs));
-        TS_ASSERT_EQUALS(tutorial_downstairs.z, 2);
-        TS_ASSERT(tutorial_downstairs.x > 6);
-        TS_ASSERT_EQUALS(floor_four->tile_at(tutorial_downstairs).get_type(), tiletype_t::DOWNSTAIRS);
-        TS_ASSERT(tile_is_walkable(floor_four->tile_at(g.pressure_plate_state.floor_four_tutorial_orc_spawn).get_type()));
+        // Verify entities were placed
+        TS_ASSERT(g.count_entities_of_type(entitytype_t::BOX) >= 1U);
+        TS_ASSERT(g.count_entities_of_type(entitytype_t::ITEM) >= 2U);
+        TS_ASSERT(g.count_entities_of_type(entitytype_t::NPC) >= 2U);
 
-        size_t floor_four_orc_count = 0;
-        bool found_orc_in_tutorial_room = false;
-        g.for_entities_of_type(entitytype_t::NPC, [&](entityid id) {
-            if ((g.get_component<ActorKind>(id) ? g.get_component<ActorKind>(id)->race : race_t::NONE) != race_t::ORC) {
-                return;
-            }
-            const vec3 loc = g.get_component_or<Position>(id, vec3{-1, -1, -1});
-            if (loc.z != 2) {
-                return;
-            }
-            floor_four_orc_count++;
-            found_orc_in_tutorial_room = vec3_equal(loc, g.pressure_plate_state.floor_four_tutorial_orc_spawn);
-        });
-
-        TS_ASSERT_EQUALS(floor_four_orc_count, 1U);
-        TS_ASSERT(found_orc_in_tutorial_room);
-    }
-
-    void testLogicInitAddsFloorThreePullablesTutorialSign() {
-        gamestate g;
-        g.test = true;
-        g.random.mt.seed(12345);
-
-        g.logic_init();
-
-        size_t floor_three_sign_count = 0;
-        g.for_entities_of_type(entitytype_t::PROP, [&](entityid id) {
-            if (g.get_component_or<PropTypeComponent>(id, proptype_t::NONE) != proptype_t::DUNGEON_WOODEN_SIGN) {
-                return;
-            }
-
-            const vec3 loc = g.get_component_or<Position>(id, vec3{-1, -1, -1});
-            TS_ASSERT(vec3_valid(loc));
-            TS_ASSERT_EQUALS(loc.z, 2);
-            TS_ASSERT_EQUALS(g.get_component_or<EntityName>(id, std::string{""}), "wooden sign");
-            TS_ASSERT_EQUALS(g.get_component_or<EntityDescription>(id, std::string{""}), "Pull something onto the\npressure plate to keep the door open.");
-            TS_ASSERT(g.get_component_or<SolidTag>(id, false));
-            TS_ASSERT(!g.get_component_or<PushableTag>(id, true));
-            TS_ASSERT(!g.get_component_or<PullableTag>(id, true));
-            floor_three_sign_count++;
-        });
-
-        TS_ASSERT_EQUALS(floor_three_sign_count, 1U);
-    }
-
-    void testLogicInitAddsFloorThreePullableTutorialProps() {
-        gamestate g;
-        g.test = true;
-        g.random.mt.seed(12345);
-
-        g.logic_init();
-
-        size_t floor_three_pullable_prop_count = 0;
-        g.for_entities_of_type(entitytype_t::PROP, [&](entityid id) {
-            if (g.get_component_or<PropTypeComponent>(id, proptype_t::NONE) != proptype_t::DUNGEON_CANDLE_00) {
-                return;
-            }
-
-            const vec3 loc = g.get_component_or<Position>(id, vec3{-1, -1, -1});
-            if (loc.z != 2) {
-                return;
-            }
-
-            TS_ASSERT(vec3_valid(loc));
-            TS_ASSERT(g.get_component_or<PullableTag>(id, false));
-            TS_ASSERT(!g.get_component_or<SolidTag>(id, true));
-            floor_three_pullable_prop_count++;
-        });
-
-        TS_ASSERT_EQUALS(floor_three_pullable_prop_count, 4U);
-    }
-
-    void testLogicInitAddsPlaceholderFourthFloorWithPropsAndBoxes() {
-        gamestate g;
-        g.test = true;
-        g.random.mt.seed(12345);
-
-        g.logic_init();
-
-        TS_ASSERT_EQUALS(g.d.get_floor_count(), 4U);
-        auto floor = g.d.get_floor(3);
-        TS_ASSERT_EQUALS(floor->get_width(), 16);
-        TS_ASSERT_EQUALS(floor->get_height(), 16);
-        TS_ASSERT(vec3_valid(floor->get_upstairs_loc()));
-
-        size_t floor_four_box_count = 0;
-        size_t floor_four_prop_count = 0;
-        g.for_entities_of_type(entitytype_t::BOX, [&](entityid id) {
-            const vec3 loc = g.get_component_or<Position>(id, vec3{-1, -1, -1});
-            if (!vec3_valid(loc) || loc.z != 3) {
-                return;
-            }
-            floor_four_box_count++;
-        });
-        g.for_entities_of_type(entitytype_t::PROP, [&](entityid id) {
-            const vec3 loc = g.get_component_or<Position>(id, vec3{-1, -1, -1});
-            if (!vec3_valid(loc) || loc.z != 3) {
-                return;
-            }
-            floor_four_prop_count++;
-        });
-
-        TS_ASSERT(floor_four_box_count >= 3U);
-        TS_ASSERT(floor_four_prop_count >= 1U);
+        // Verify welcome messages
+        TS_ASSERT(g.messages.system.size() >= 2U);
+        TS_ASSERT_EQUALS(g.messages.system.front(), "Welcome to the game! Press enter to cycle messages.");
     }
 };

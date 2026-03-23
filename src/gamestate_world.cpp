@@ -65,18 +65,6 @@ bool dungeon_room_fits(Rectangle candidate, const vector<room>& rooms, int width
     return true;
 }
 
-with_fun dungeon_prop_init(proptype_t type) {
-    return [type](gamestate& g, const entityid id) {
-        const StaticWorldDefinition& definition = get_prop_definition(type);
-        const auto e = id;
-        g.registry.emplace_or_replace<EntityName>(e, EntityName{definition.name});
-        g.registry.emplace_or_replace<EntityDescription>(e, EntityDescription{definition.description});
-        g.registry.emplace_or_replace<SolidTag>(e, SolidTag{definition.solid});
-        g.registry.emplace_or_replace<PushableTag>(e, PushableTag{definition.pushable});
-        g.registry.emplace_or_replace<PullableTag>(e, PullableTag{definition.pullable});
-    };
-}
-
 proptype_t dungeon_random_floor_prop_type(mt19937& mt) {
     static constexpr proptype_t floor_prop_types[] = {
         proptype_t::DUNGEON_STATUE_00,
@@ -164,6 +152,18 @@ bool dungeon_is_safe_prop_loc(shared_ptr<dungeon_floor> df, vec3 loc) {
     return true;
 }
 } // namespace
+
+with_fun dungeon_prop_init(proptype_t type) {
+    return [type](gamestate& g, const entityid id) {
+        const StaticWorldDefinition& definition = get_prop_definition(type);
+        const auto e = id;
+        g.registry.emplace_or_replace<EntityName>(e, EntityName{definition.name});
+        g.registry.emplace_or_replace<EntityDescription>(e, EntityDescription{definition.description});
+        g.registry.emplace_or_replace<SolidTag>(e, SolidTag{definition.solid});
+        g.registry.emplace_or_replace<PushableTag>(e, PushableTag{definition.pushable});
+        g.registry.emplace_or_replace<PullableTag>(e, PullableTag{definition.pullable});
+    };
+}
 
 void gamestate::create_and_add_df_0(biome_t type, int w, int h, [[maybe_unused]] int df_count, [[maybe_unused]] float parts) {
     auto df = d.create_floor(type, w, h);

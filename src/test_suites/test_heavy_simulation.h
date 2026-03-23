@@ -127,7 +127,6 @@ public:
     void testTickHeavySimulationResolvesAdjacentOrcFightWithoutBreakingTileState() {
         gamestate g;
         g.test = true;
-        g.audio.sfx.resize(71);
         g.random.mt.seed(12345);
         g.logic_init();
 

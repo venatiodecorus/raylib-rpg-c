@@ -2,6 +2,7 @@
 
 #include "../ecs_gameplay_components.h"
 #include "../gamestate.h"
+#include "../world_object_definitions.h"
 #include <cxxtest/TestSuite.h>
 
 class EntityFactoryTestSuite : public CxxTest::TestSuite {

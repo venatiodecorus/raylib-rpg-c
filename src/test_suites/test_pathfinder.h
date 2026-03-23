@@ -9,7 +9,7 @@
 
 class PathfinderTestSuite : public CxxTest::TestSuite {
 private:
-    static constexpr int NO_PUSHABLE = ENTITYID_INVALID;
+    static const entityid NO_PUSHABLE = ENTITYID_INVALID;
 
     /** @brief Create an all-walkable floor of the given dimensions. */
     std::shared_ptr<dungeon_floor> make_open_floor(int w, int h, int floor_num = 0) {
@@ -117,7 +117,7 @@ public:
         auto df = make_open_floor(8, 8);
         // Block (4,3) via the pushable callback — forces path around it.
         auto pushable_at_4_3 = [](int x, int y, int) -> entityid {
-            return (x == 4 && y == 3) ? 42 : ENTITYID_INVALID;
+            return (x == 4 && y == 3) ? static_cast<entityid>(42) : ENTITYID_INVALID;
         };
 
         Pathfinder pf;

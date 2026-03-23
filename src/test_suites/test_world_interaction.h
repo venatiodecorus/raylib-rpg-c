@@ -2,6 +2,7 @@
 
 #include "../ecs_gameplay_components.h"
 #include "../gamestate.h"
+#include "../world_object_definitions.h"
 #include <cxxtest/TestSuite.h>
 
 class WorldInteractionTestSuite : public CxxTest::TestSuite {
@@ -411,7 +412,7 @@ public:
 
     void testRunOpenDoorActionUsesQueuedDoorIntent() {
         gamestate g;
-        g.audio.sfx.resize(71);
+
         add_floor(g);
 
         const entityid hero = create_hero(g, vec3{1, 1, 0});
@@ -466,7 +467,7 @@ public:
 
     void testTryEntityOpenChestUsesChestLocationFloorAndOpensMenu() {
         gamestate g;
-        g.audio.sfx.resize(71);
+
         add_floor(g);
         add_floor(g);
         g.d.current_floor = 0;
@@ -487,7 +488,7 @@ public:
 
     void testRunOpenChestActionUsesQueuedChestIntent() {
         gamestate g;
-        g.audio.sfx.resize(71);
+
         add_floor(g);
 
         const entityid hero = create_hero(g, vec3{1, 1, 0});
@@ -507,7 +508,7 @@ public:
 
     void testRunOpenChestActionClosesExistingChestMenu() {
         gamestate g;
-        g.audio.sfx.resize(71);
+
         add_floor(g);
 
         const entityid hero = create_hero(g, vec3{1, 1, 0});
@@ -529,7 +530,7 @@ public:
 
     void testRunTraverseStairsActionUsesQueuedStairsIntent() {
         gamestate g;
-        g.audio.sfx.resize(71);
+
         add_floor(g);
         add_floor(g);
 
@@ -551,7 +552,7 @@ public:
 
     void testRunTraverseStairsActionRefreshesSourceAndDestinationPressurePlateDoors() {
         gamestate g;
-        g.audio.sfx.resize(71);
+
         add_floor(g);
         add_floor(g);
 
@@ -617,7 +618,7 @@ public:
 
     void testHandleOpenDoorUsesKeyDInsteadOfKeyO() {
         gamestate g;
-        g.audio.sfx.resize(71);
+
         add_floor(g);
 
         const entityid hero = create_hero(g, vec3{1, 1, 0});
@@ -767,7 +768,7 @@ public:
         add_floor(g);
         g.test = true;
         g.controlmode = controlmode_t::PLAYER;
-        g.open_interaction_modal(42, "Speaker", "Line");
+        g.open_interaction_modal(static_cast<entityid>(42), "Speaker", "Line");
 
         inputstate is{};
         press_key(is, KEY_ENTER);

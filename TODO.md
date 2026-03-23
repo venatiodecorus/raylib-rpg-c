@@ -190,7 +190,7 @@ EntityBase::for_type(type).update_sprite(g, renderer, id, sg);
 - [ ] Slice up prop tilemaps with Aseprite
 - [ ] Add https://github.com/ngndang/Better-Slicer/blob/main/Better%20Slicer/Better%20Slicer.lua to credits
 - [ ] Add aseprite mention https://github.com/aseprite/aseprite
-- [ ] Fix error with cxxtest, re-write test suite
+- [x] Fix error with cxxtest, re-write test suite
 - [ ] New documentation
 - [x] Remove lookup_registry_entity() and legacy_to_entt, we should only be relying on the ENTT registry
 - [x] Make game respond to exit codes properly, right now it needs to be force quit or killed from command line
