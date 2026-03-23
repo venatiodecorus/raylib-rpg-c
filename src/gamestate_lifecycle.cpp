@@ -196,7 +196,6 @@ void gamestate::restart_game() {
     windowwidth = previous_window_width > 0 ? previous_window_width : DEFAULT_WIN_WIDTH;
     windowheight = previous_window_height > 0 ? previous_window_height : DEFAULT_WIN_HEIGHT;
     cam2d.offset = Vector2{targetwidth / 4.0f, targetheight / 4.0f};
-    logic_init();
     do_restart = false;
     restart_count = previous_restart_count + 1;
     current_scene = scene_t::TITLE;

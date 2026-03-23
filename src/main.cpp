@@ -98,7 +98,6 @@ static void gameloop(void* arg) {
 int main() {
     AppContext* ctx = new AppContext();
     ctx->scene = nullptr;
-    ctx->g.logic_init();
     libdraw_init(ctx->g, ctx->renderer);
     ctx->g.audio.init(ctx->g.random.mt, ctx->g.test);
 

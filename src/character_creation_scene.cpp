@@ -3,10 +3,7 @@
  */
 
 #include "character_creation_scene.h"
-#include "ecs_actor_components.h"
-#include "ecs_core_components.h"
 #include "gamestate.h"
-#include <entt/entt.hpp>
 
 static bool try_append_character_creation_char(gamestate& g, int codepoint) {
     constexpr size_t max_name_len = 16;
@@ -49,22 +46,7 @@ void CharacterCreationScene::handle_input(gamestate& g, inputstate& is) {
     bool changed = handle_character_creation_text_input(g, is);
     if (inputstate_is_pressed(is, KEY_ENTER)) {
         g.audio.queue("sfx/Minifantasy_Dungeon_SFX/02_chest_close_1.wav");
-        int myhd = g.chara_creation.hitdie;
-        int maxhp_roll = -1;
-        while (maxhp_roll < 1) {
-            maxhp_roll = do_roll_best_of_3(vec3{1, myhd, 0}) + get_stat_bonus(g.chara_creation.constitution);
-        }
-        shared_ptr<dungeon_floor> df = g.d.floors[0];
-        vec3 start_loc = vec3{2, 2, 0};
-        massert(!vec3_invalid(start_loc), "start_loc is (-1,-1,-1) - no valid start location exists");
-        const string player_name = g.chara_creation.name.empty() ? "hero" : g.chara_creation.name;
-        g.create_player_at_with(start_loc, player_name, g.player_init(maxhp_roll));
-        massert(g.hero_id != ENTITYID_INVALID, "heroid is invalid");
-        g.make_all_npcs_target_player();
         g.current_scene = scene_t::GAMEPLAY;
-        if (!g.keyboard_profile_confirmed) {
-            g.open_keyboard_profile_prompt();
-        }
         changed = true;
     }
     else if (inputstate_is_pressed(is, KEY_SPACE)) {

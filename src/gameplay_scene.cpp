@@ -7,6 +7,30 @@
 
 void GameplayScene::on_enter(gamestate& g) {
     minfo("GameplayScene::on_enter");
+
+    // Create the dungeon, NPCs, and items if this is a fresh game.
+    if (!g.d.is_initialized) {
+        g.logic_init();
+    }
+
+    // Create the player from character-creation parameters if not yet spawned.
+    if (g.hero_id == ENTITYID_INVALID) {
+        int myhd = g.chara_creation.hitdie;
+        int maxhp_roll = -1;
+        while (maxhp_roll < 1) {
+            maxhp_roll = do_roll_best_of_3(vec3{1, myhd, 0}) + get_stat_bonus(g.chara_creation.constitution);
+        }
+        const vec3 start_loc = vec3{2, 2, 0};
+        const string player_name = g.chara_creation.name.empty() ? "hero" : g.chara_creation.name;
+        g.create_player_at_with(start_loc, player_name, g.player_init(maxhp_roll));
+        massert(g.hero_id != ENTITYID_INVALID, "hero_id is invalid after player creation");
+        g.make_all_npcs_target_player();
+
+        if (!g.keyboard_profile_confirmed) {
+            g.open_keyboard_profile_prompt();
+        }
+    }
+
     g.frame_dirty = true;
 }
 
