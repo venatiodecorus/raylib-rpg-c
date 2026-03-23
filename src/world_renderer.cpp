@@ -17,7 +17,7 @@ namespace rpg
 
 bool WorldRenderer::draw_player_target_box(gamestate& g, rpg::Renderer& renderer) {
     entityid id = g.hero_id;
-    if (id == -1) {
+    if (id == ENTITYID_INVALID) {
         return false;
     }
     const Facing* dir_ptr = g.get_component<Facing>(id);

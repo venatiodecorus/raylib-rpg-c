@@ -34,10 +34,10 @@ public:
         TS_ASSERT_EQUALS(ids.size(), 4U);
         {
             size_t npc_count = 0;
-            g.registry.view<LegacyEntityId, NpcTag>().each([&](auto e, auto& lid) {
-                if (!g.get_component_or<DeadFlag>(lid.id, true) && g.get_component_or<Position>(lid.id, vec3{-1, -1, -1}).z == 0)
+            for (auto e : g.registry.view<NpcTag>()) {
+                if (!g.get_component_or<DeadFlag>(e, true) && g.get_component_or<Position>(e, vec3{-1, -1, -1}).z == 0)
                     npc_count++;
-            });
+            }
             TS_ASSERT_EQUALS(npc_count, 4U);
         }
     }
@@ -54,10 +54,10 @@ public:
         TS_ASSERT_EQUALS(second, ENTITYID_INVALID);
         {
             size_t npc_count = 0;
-            g.registry.view<LegacyEntityId, NpcTag>().each([&](auto e, auto& lid) {
-                if (!g.get_component_or<DeadFlag>(lid.id, true) && g.get_component_or<Position>(lid.id, vec3{-1, -1, -1}).z == 0)
+            for (auto e : g.registry.view<NpcTag>()) {
+                if (!g.get_component_or<DeadFlag>(e, true) && g.get_component_or<Position>(e, vec3{-1, -1, -1}).z == 0)
                     npc_count++;
-            });
+            }
             TS_ASSERT_EQUALS(npc_count, 1U);
         }
     }
@@ -78,10 +78,10 @@ public:
         TS_ASSERT_EQUALS(ids.size(), 9U);
         {
             size_t npc_count = 0;
-            g.registry.view<LegacyEntityId, NpcTag>().each([&](auto e, auto& lid) {
-                if (!g.get_component_or<DeadFlag>(lid.id, true) && g.get_component_or<Position>(lid.id, vec3{-1, -1, -1}).z == 0)
+            for (auto e : g.registry.view<NpcTag>()) {
+                if (!g.get_component_or<DeadFlag>(e, true) && g.get_component_or<Position>(e, vec3{-1, -1, -1}).z == 0)
                     npc_count++;
-            });
+            }
             TS_ASSERT_EQUALS(npc_count, 9U);
         }
 
@@ -92,10 +92,10 @@ public:
         TS_ASSERT_EQUALS(g.next_entityid, before_next_entity);
         {
             size_t npc_count = 0;
-            g.registry.view<LegacyEntityId, NpcTag>().each([&](auto e, auto& lid) {
-                if (!g.get_component_or<DeadFlag>(lid.id, true) && g.get_component_or<Position>(lid.id, vec3{-1, -1, -1}).z == 0)
+            for (auto e : g.registry.view<NpcTag>()) {
+                if (!g.get_component_or<DeadFlag>(e, true) && g.get_component_or<Position>(e, vec3{-1, -1, -1}).z == 0)
                     npc_count++;
-            });
+            }
             TS_ASSERT_EQUALS(npc_count, 9U);
         }
     }
@@ -126,10 +126,10 @@ public:
         {
             auto count_floor = [&](int floor) {
                 size_t count = 0;
-                g.registry.view<LegacyEntityId, NpcTag>().each([&](auto e, auto& lid) {
-                    if (!g.get_component_or<DeadFlag>(lid.id, true) && g.get_component_or<Position>(lid.id, vec3{-1, -1, -1}).z == floor)
+                for (auto e : g.registry.view<NpcTag>()) {
+                    if (!g.get_component_or<DeadFlag>(e, true) && g.get_component_or<Position>(e, vec3{-1, -1, -1}).z == floor)
                         count++;
-                });
+                }
                 return count;
             };
             TS_ASSERT(count_floor(0) >= 1U);
@@ -148,14 +148,14 @@ public:
 
         auto find_live_on_floor = [&](int floor) -> entityid {
             entityid result = ENTITYID_INVALID;
-            g.registry.view<LegacyEntityId, NpcTag>().each([&](auto e, auto& lid) {
+            for (auto e : g.registry.view<NpcTag>()) {
                 if (result != ENTITYID_INVALID)
-                    return;
-                if (g.get_component_or<DeadFlag>(lid.id, true))
-                    return;
-                if (g.get_component_or<Position>(lid.id, vec3{-1, -1, -1}).z == floor)
-                    result = lid.id;
-            });
+                    break;
+                if (g.get_component_or<DeadFlag>(e, true))
+                    continue;
+                if (g.get_component_or<Position>(e, vec3{-1, -1, -1}).z == floor)
+                    result = e;
+            }
             return result;
         };
 
@@ -171,12 +171,12 @@ public:
         TS_ASSERT(!g.get_component_or<AggroFlag>(floor_one_npc, true));
         {
             size_t slime_count = 0;
-            g.registry.view<LegacyEntityId, NpcTag>().each([&](auto e, auto& lid) {
-                if (!g.get_component_or<DeadFlag>(lid.id, true) &&
-                    (g.get_component<ActorKind>(lid.id) ? g.get_component<ActorKind>(lid.id)->race : race_t::NONE) == race_t::GREEN_SLIME &&
-                    g.get_component_or<Position>(lid.id, vec3{-1, -1, -1}).z == 1)
+            for (auto e : g.registry.view<NpcTag>()) {
+                if (!g.get_component_or<DeadFlag>(e, true) &&
+                    (g.get_component<ActorKind>(e) ? g.get_component<ActorKind>(e)->race : race_t::NONE) == race_t::GREEN_SLIME &&
+                    g.get_component_or<Position>(e, vec3{-1, -1, -1}).z == 1)
                     slime_count++;
-            });
+            }
             TS_ASSERT_EQUALS(slime_count, 9U);
         }
         TS_ASSERT_EQUALS((g.get_component<ActorKind>(floor_two_npc) ? g.get_component<ActorKind>(floor_two_npc)->race : race_t::NONE), race_t::ORC);
@@ -674,9 +674,8 @@ public:
         TS_ASSERT(vec3_valid(hero_loc));
 
         const int maxhp_roll = 10;
-        g.entity_turn = g.create_player_at_with(hero_loc, "darkmage", g.player_init(maxhp_roll));
+        g.create_player_at_with(hero_loc, "darkmage", g.player_init(maxhp_roll));
         TS_ASSERT_DIFFERS(g.hero_id, ENTITYID_INVALID);
-        TS_ASSERT_EQUALS(g.entity_turn, g.hero_id);
 
         g.make_all_npcs_target_player();
         g.current_scene = scene_t::GAMEPLAY;

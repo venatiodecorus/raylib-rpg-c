@@ -58,13 +58,10 @@ void CharacterCreationScene::handle_input(gamestate& g, inputstate& is) {
         vec3 start_loc = vec3{2, 2, 0};
         massert(!vec3_invalid(start_loc), "start_loc is (-1,-1,-1) - no valid start location exists");
         const string player_name = g.chara_creation.name.empty() ? "hero" : g.chara_creation.name;
-        g.entity_turn = g.create_player_at_with(start_loc, player_name, g.player_init(maxhp_roll));
+        g.create_player_at_with(start_loc, player_name, g.player_init(maxhp_roll));
         massert(g.hero_id != ENTITYID_INVALID, "heroid is invalid");
         g.make_all_npcs_target_player();
         g.current_scene = scene_t::GAMEPLAY;
-        g.dirty_entities = true;
-        g.new_entityid_begin = 0;
-        g.new_entityid_end = g.next_entityid;
         if (!g.keyboard_profile_confirmed) {
             g.open_keyboard_profile_prompt();
         }

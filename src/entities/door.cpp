@@ -18,7 +18,7 @@ entityid Door::create(gamestate& g) {
     entityid id = g.add_entity();
     const StaticWorldDefinition& definition = get_static_world_definition(entitytype_t::DOOR);
     g.sync_entt_entity_type_tags(id, entitytype_t::DOOR);
-    g.registry.emplace_or_replace<NeedsUpdate>(g.ensure_registry_entity(id), NeedsUpdate{true});
+    g.registry.emplace_or_replace<NeedsUpdate>(id, NeedsUpdate{true});
     g.attach_static_world_definition(id, definition);
     return id;
 }
@@ -39,7 +39,7 @@ entityid Door::create_at(gamestate& g, vec3 loc) {
     if (id == INVALID) {
         return INVALID;
     }
-    if (!df->df_add_at(id, entitytype_t::DOOR, loc)) {
+    if (df->df_add_at(id, entitytype_t::DOOR, loc) == ENTITYID_INVALID) {
         return INVALID;
     }
     g.sync_registry_grid_position(id, loc);
@@ -66,7 +66,7 @@ bool Door::try_open(gamestate& g, entityid actor_id, vec3 loc) {
 
 void Door::create_sprite(gamestate& g, rpg::Renderer& renderer, entityid id) {
     massert(id != ENTITYID_INVALID, "entityid is invalid");
-    const entt::entity registry_entity = g.lookup_registry_entity(id);
+    const auto registry_entity = id;
     if (registry_entity != entt::null && g.registry.all_of<StaticVisual>(registry_entity)) {
         const StaticVisual& visual = g.registry.get<StaticVisual>(registry_entity);
         if (visual.sprites != nullptr && visual.sprite_count > 0) {

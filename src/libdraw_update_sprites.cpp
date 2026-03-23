@@ -128,10 +128,11 @@ void libdraw_update_sprite_pre(gamestate& g, rpg::Renderer& renderer, entityid i
 }
 
 void libdraw_handle_dirty_entities(gamestate& g, rpg::Renderer& renderer) {
-    if (!g.dirty_entities) {
+    if (g.new_entities.empty()) {
         return;
     }
-    for (entityid i = g.new_entityid_begin; i < g.new_entityid_end; i++) {
+    for (const entt::entity e : g.new_entities) {
+        const entityid i = static_cast<entityid>(e);
         const entitytype_t itype = g.get_component<EntityTypeTag>(i) ? g.get_component<EntityTypeTag>(i)->type : entitytype_t::NONE;
         rpg::entities::EntityBase::for_type(itype).create_sprite(g, renderer, i);
         libdraw_update_sprite_pre(g, renderer, i);
@@ -143,10 +144,9 @@ void libdraw_update_sprites_pre(gamestate& g, rpg::Renderer& renderer) {
     minfo2("BEGIN update sprites pre");
     if (g.current_scene == scene_t::GAMEPLAY) {
         libdraw_handle_dirty_entities(g, renderer);
-        auto view = g.registry.view<LegacyEntityId, EntityTypeTag>();
+        auto view = g.registry.view<EntityTypeTag>();
         for (auto entity : view) {
-            entityid id = view.get<LegacyEntityId>(entity).id;
-            libdraw_update_sprite_pre(g, renderer, id);
+            libdraw_update_sprite_pre(g, renderer, entity);
         }
     }
     msuccess2("END update sprites pre");
@@ -167,9 +167,9 @@ void libdraw_update_sprites_post(gamestate& g, rpg::Renderer& renderer) {
 
     g.frame_dirty = true;
 
-    auto view = g.registry.view<LegacyEntityId, EntityTypeTag>();
+    auto view = g.registry.view<EntityTypeTag>();
     for (auto entity : view) {
-        entityid id = view.get<LegacyEntityId>(entity).id;
+        entityid id = entity;
         const entitytype_t type = view.get<EntityTypeTag>(entity).type;
         if (type == entitytype_t::NONE) {
             continue;

@@ -1,12 +1,14 @@
 /** @file entityid.h
- *  @brief Shared entity id alias and invalid-id sentinel macros.
+ *  @brief Entity id alias backed by entt::entity.
  */
 
 #pragma once
 
-/// @brief Integer identifier type used for all runtime entities.
-typedef int entityid;
+#include <entt/entt.hpp>
+
+/// @brief Entity identifier type — alias for entt::entity.
+using entityid = entt::entity;
 /// @brief Canonical invalid entity id sentinel.
-#define ENTITYID_INVALID -1
+constexpr entityid ENTITYID_INVALID = entt::null;
 /// @brief Generic invalid sentinel used throughout older gameplay code.
-#define INVALID -1
+constexpr entityid INVALID = entt::null;

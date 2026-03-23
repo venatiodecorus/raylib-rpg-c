@@ -124,7 +124,7 @@ Key formatting rules:
 
 ### Architecture Notes
 
-- Entity-Component system uses a custom `ComponentTable` (type-erased storage via `type_index`)
+- Entity-Component system uses EnTT (`entt::registry`); `entityid` is an alias for `entt::entity`
 - ECS component tags are defined in `ecs_*_components.h` files
 - Game state is centralized in the `gamestate` struct (`src/gamestate.h`, ~1400 lines)
 - Rendering is split across many `draw_*.cpp` files; the main render entry is `drawframe()` in `libdraw.cpp`

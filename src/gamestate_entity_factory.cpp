@@ -11,7 +11,7 @@
 
 namespace {
 void mirror_item_common(gamestate& g, entityid id, const ItemDefinition* definition) {
-    const entt::entity registry_entity = g.ensure_registry_entity(id);
+    const auto registry_entity = id;
     if (definition == nullptr) {
         return;
     }
@@ -24,7 +24,7 @@ void mirror_weapon_item(gamestate& g, entityid id, weapontype_t type) {
     const ItemDefinition* definition = find_weapon_definition(type);
     mirror_item_common(g, id, definition);
 
-    const entt::entity registry_entity = g.ensure_registry_entity(id);
+    const auto registry_entity = id;
     g.registry.emplace_or_replace<ItemKind>(registry_entity, ItemKind{itemtype_t::WEAPON});
     g.registry.emplace_or_replace<WeaponKind>(registry_entity, WeaponKind{type});
 }
@@ -33,7 +33,7 @@ void mirror_shield_item(gamestate& g, entityid id, shieldtype_t type) {
     const ItemDefinition* definition = find_shield_definition(type);
     mirror_item_common(g, id, definition);
 
-    const entt::entity registry_entity = g.ensure_registry_entity(id);
+    const auto registry_entity = id;
     g.registry.emplace_or_replace<ItemKind>(registry_entity, ItemKind{itemtype_t::SHIELD});
     g.registry.emplace_or_replace<ShieldKind>(registry_entity, ShieldKind{type});
 }
@@ -42,7 +42,7 @@ void mirror_potion_item(gamestate& g, entityid id, potiontype_t type) {
     const ItemDefinition* definition = find_potion_definition(type);
     mirror_item_common(g, id, definition);
 
-    const entt::entity registry_entity = g.ensure_registry_entity(id);
+    const auto registry_entity = id;
     g.registry.emplace_or_replace<ItemKind>(registry_entity, ItemKind{itemtype_t::POTION});
     g.registry.emplace_or_replace<PotionKind>(registry_entity, PotionKind{type});
 }
@@ -62,7 +62,7 @@ entityid gamestate::create_weapon_with(with_fun weaponInitFunction) {
 
 with_fun gamestate::dagger_init() {
     return [](gamestate& g, const entityid id) {
-        auto e = g.ensure_registry_entity(id);
+        const auto e = id;
         g.registry.emplace_or_replace<EntityName>(e, EntityName{"dagger"});
         g.registry.emplace_or_replace<EntityDescription>(e, EntityDescription{"Stabby stabby."});
         g.registry.emplace_or_replace<WeaponSubtype>(e, WeaponSubtype{weapontype_t::DAGGER});
@@ -74,7 +74,7 @@ with_fun gamestate::dagger_init() {
 
 with_fun gamestate::axe_init() {
     return [](gamestate& g, const entityid id) {
-        auto e = g.ensure_registry_entity(id);
+        const auto e = id;
         g.registry.emplace_or_replace<EntityName>(e, EntityName{"axe"});
         g.registry.emplace_or_replace<EntityDescription>(e, EntityDescription{"Choppy choppy"});
         g.registry.emplace_or_replace<WeaponSubtype>(e, WeaponSubtype{weapontype_t::AXE});
@@ -86,7 +86,7 @@ with_fun gamestate::axe_init() {
 
 with_fun gamestate::sword_init() {
     return [](gamestate& g, const entityid id) {
-        auto e = g.ensure_registry_entity(id);
+        const auto e = id;
         g.registry.emplace_or_replace<EntityName>(e, EntityName{"short sword"});
         g.registry.emplace_or_replace<EntityDescription>(e, EntityDescription{"your basic soldier's short sword"});
         g.registry.emplace_or_replace<WeaponSubtype>(e, WeaponSubtype{weapontype_t::SHORT_SWORD});
@@ -98,7 +98,7 @@ with_fun gamestate::sword_init() {
 
 with_fun gamestate::shield_init() {
     return [](gamestate& g, const entityid id) {
-        auto e = g.ensure_registry_entity(id);
+        const auto e = id;
         g.registry.emplace_or_replace<EntityName>(e, EntityName{"kite shield"});
         g.registry.emplace_or_replace<EntityDescription>(e, EntityDescription{"Standard knight's shield"});
         g.registry.emplace_or_replace<ShieldSubtype>(e, ShieldSubtype{shieldtype_t::KITE});
@@ -110,9 +110,9 @@ with_fun gamestate::shield_init() {
 
 with_fun gamestate::potion_init(potiontype_t pt) {
     return [pt](gamestate& g, const entityid id) {
-        g.registry.emplace_or_replace<PotionSubtype>(g.ensure_registry_entity(id), PotionSubtype{pt});
+        g.registry.emplace_or_replace<PotionSubtype>(id, PotionSubtype{pt});
         if (pt == potiontype_t::HP_SMALL) {
-            auto e = g.ensure_registry_entity(id);
+            const auto e = id;
             g.registry.emplace_or_replace<EntityName>(e, EntityName{"small healing potion"});
             g.registry.emplace_or_replace<EntityDescription>(e, EntityDescription{"a small healing potion"});
             g.registry.emplace_or_replace<HealingDice>(e, HealingDice{vec3{1, 6, 0}});
@@ -122,7 +122,7 @@ with_fun gamestate::potion_init(potiontype_t pt) {
 
 with_fun gamestate::player_init(int maxhp_roll) {
     return [this, maxhp_roll](gamestate& g, const entityid id) {
-        auto e = g.ensure_registry_entity(id);
+        const auto e = id;
         g.registry.emplace_or_replace<StrengthAttr>(e, StrengthAttr{chara_creation.strength});
         g.registry.emplace_or_replace<DexterityAttr>(e, DexterityAttr{chara_creation.dexterity});
         g.registry.emplace_or_replace<ConstitutionAttr>(e, ConstitutionAttr{chara_creation.constitution});
@@ -145,7 +145,7 @@ bool gamestate::alignment_is_aggressive(alignment_t alignment_value) {
 
 with_fun gamestate::npc_alignment_init(alignment_t alignment_value) {
     return [alignment_value](gamestate& g, const entityid id) {
-        g.registry.emplace_or_replace<AlignmentComponent>(g.ensure_registry_entity(id), AlignmentComponent{alignment_value});
+        g.registry.emplace_or_replace<AlignmentComponent>(id, AlignmentComponent{alignment_value});
     };
 }
 
@@ -178,7 +178,7 @@ entityid gamestate::create_weapon_at_with(vec3 loc, with_fun weaponInitFunction)
         minfo2("failed to add weapon to df");
         return INVALID;
     }
-    registry.emplace_or_replace<Position>(ensure_registry_entity(id), Position{loc});
+    registry.emplace_or_replace<Position>(id, Position{loc});
     sync_registry_grid_position(id, loc);
     return id;
 }
@@ -272,7 +272,7 @@ entityid gamestate::create_orc_with(with_fun monsterInitFunction) {
     constexpr race_t r = race_t::ORC;
     entityid id = create_npc_with(r, monsterInitFunction);
     const string orc_name = get_random_orc_name();
-    registry.emplace_or_replace<EntityName>(ensure_registry_entity(id), EntityName{orc_name});
+    registry.emplace_or_replace<EntityName>(id, EntityName{orc_name});
     return id;
 }
 
@@ -292,10 +292,10 @@ entityid gamestate::create_orc_at_with(vec3 loc, with_fun monsterInitFunction) {
     if (id == ENTITYID_INVALID) {
         return ENTITYID_INVALID;
     }
-    if (!df->df_add_at(id, entitytype_t::NPC, loc)) {
+    if (df->df_add_at(id, entitytype_t::NPC, loc) == ENTITYID_INVALID) {
         return ENTITYID_INVALID;
     }
-    auto e = ensure_registry_entity(id);
+    const auto e = id;
     registry.emplace_or_replace<Position>(e, Position{loc});
     registry.emplace_or_replace<NeedsUpdate>(e, NeedsUpdate{true});
     return id;
@@ -329,7 +329,7 @@ entityid gamestate::create_player_at_with(vec3 loc, string n, with_fun playerIni
     tile.set_cached_player_present(true);
     tile.set_cached_live_npc(id);
 
-    auto e = ensure_registry_entity(id);
+    const auto e = id;
     registry.emplace_or_replace<HitPoints>(e, HitPoints{vec2{hp_, maxhp_}});
     registry.emplace_or_replace<VisionRange>(e, VisionRange{vis_dist});
     registry.emplace_or_replace<LightRadius>(e, LightRadius{light_rad});

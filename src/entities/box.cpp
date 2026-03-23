@@ -18,7 +18,7 @@ entityid Box::create(gamestate& g) {
     entityid id = g.add_entity();
     const StaticWorldDefinition& definition = get_static_world_definition(entitytype_t::BOX);
     g.sync_entt_entity_type_tags(id, entitytype_t::BOX);
-    auto e = g.ensure_registry_entity(id);
+    const auto e = id;
     g.registry.emplace_or_replace<SpriteMoveState>(e, SpriteMoveState{Rectangle{0, 0, 0, 0}});
     g.registry.emplace_or_replace<NeedsUpdate>(e, NeedsUpdate{true});
     g.registry.emplace_or_replace<PushableTag>(e, PushableTag{definition.pushable});
@@ -46,7 +46,7 @@ entityid Box::create_at(gamestate& g, vec3 loc) {
         merror("failed df_add_at: %d, %d, %d", id, loc.x, loc.y);
         return ENTITYID_INVALID;
     }
-    g.registry.emplace_or_replace<Position>(g.ensure_registry_entity(id), Position{loc});
+    g.registry.emplace_or_replace<Position>(id, Position{loc});
     g.sync_registry_grid_position(id, loc);
     return id;
 }
@@ -68,7 +68,7 @@ bool Box::try_push(gamestate& g, entityid id, vec3 v) {
 
 void Box::create_sprite(gamestate& g, rpg::Renderer& renderer, entityid id) {
     massert(id != ENTITYID_INVALID, "entityid is invalid");
-    const entt::entity registry_entity = g.lookup_registry_entity(id);
+    const auto registry_entity = id;
     if (registry_entity != entt::null && g.registry.all_of<StaticVisual>(registry_entity)) {
         const StaticVisual& visual = g.registry.get<StaticVisual>(registry_entity);
         if (visual.sprites != nullptr && visual.sprite_count > 0) {

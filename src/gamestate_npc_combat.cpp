@@ -72,7 +72,7 @@ void gamestate::handle_weapon_durability_loss(entityid atk_id, entityid tgt_id) 
         return;
     }
     remove_from_inventory(atk_id, equipped_wpn);
-    auto wpn_entity = lookup_registry_entity(equipped_wpn);
+    auto wpn_entity = equipped_wpn;
     if (wpn_entity != entt::null) {
         registry.destroy(wpn_entity);
     }
@@ -94,7 +94,7 @@ void gamestate::handle_shield_durability_loss(entityid defender, entityid attack
         return;
     }
     remove_from_inventory(defender, shield);
-    auto shield_entity = lookup_registry_entity(shield);
+    auto shield_entity = shield;
     if (shield_entity != entt::null) {
         registry.destroy(shield_entity);
     }
@@ -477,29 +477,16 @@ bool gamestate::handle_npc(entityid id) {
 void gamestate::handle_npcs() {
     minfo2("handle npcs");
     if (flag == gamestate_flag_t::NPC_TURN) {
-#ifndef NPCS_ALL_AT_ONCE
-        if (entity_turn >= 1 && entity_turn < next_entityid) {
-            if ((get_component<EntityTypeTag>(entity_turn) ? get_component<EntityTypeTag>(entity_turn)->type : entitytype_t::NONE) == entitytype_t::NPC) {
-                handle_npc(entity_turn);
-                flag = gamestate_flag_t::NPC_ANIM;
-            }
-            else {
-                flag = gamestate_flag_t::NPC_ANIM;
-            }
-        }
-#else
-        auto view = registry.view<LegacyEntityId, NpcTag>();
+        auto view = registry.view<NpcTag>();
         for (auto entity : view) {
-            entityid id = view.get<LegacyEntityId>(entity).id;
-            const bool result = handle_npc(id);
+            const bool result = handle_npc(entity);
             if (result) {
-                msuccess2("npc %d handled successfully", id);
+                msuccess2("npc %d handled successfully", entity);
             }
             else {
-                merror2("npc %d handle failed", id);
+                merror2("npc %d handle failed", entity);
             }
         }
         flag = gamestate_flag_t::NPC_ANIM;
-#endif
     }
 }

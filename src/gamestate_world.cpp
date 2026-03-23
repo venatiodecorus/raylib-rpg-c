@@ -68,7 +68,7 @@ bool dungeon_room_fits(Rectangle candidate, const vector<room>& rooms, int width
 with_fun dungeon_prop_init(proptype_t type) {
     return [type](gamestate& g, const entityid id) {
         const StaticWorldDefinition& definition = get_prop_definition(type);
-        auto e = g.ensure_registry_entity(id);
+        const auto e = id;
         g.registry.emplace_or_replace<EntityName>(e, EntityName{definition.name});
         g.registry.emplace_or_replace<EntityDescription>(e, EntityDescription{definition.description});
         g.registry.emplace_or_replace<SolidTag>(e, SolidTag{definition.solid});

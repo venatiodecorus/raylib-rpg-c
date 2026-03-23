@@ -22,7 +22,7 @@ void DamagePopups::add(int x, int y, int floor, int amount, bool critical, std::
 
     std::uniform_real_distribution<float> drift_dist(-2.5f, 2.5f);
     damage_popup_t popup = {};
-    popup.target_id = -1;
+    popup.target_id = ENTITYID_INVALID;
     popup.amount = amount;
     popup.critical = critical;
     popup.floor = floor;

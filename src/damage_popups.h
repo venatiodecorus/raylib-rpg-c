@@ -12,7 +12,7 @@
 #include <algorithm>
 
 struct damage_popup_t {
-    entityid target_id = -1;
+    entityid target_id = ENTITYID_INVALID;
     int amount;
     bool critical;
     int floor;

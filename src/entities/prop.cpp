@@ -18,7 +18,7 @@ entityid Prop::create(gamestate& g, proptype_t type) {
     entityid id = g.add_entity();
     const StaticWorldDefinition& definition = get_prop_definition(type);
     g.sync_entt_entity_type_tags(id, entitytype_t::PROP);
-    g.registry.emplace_or_replace<NeedsUpdate>(g.ensure_registry_entity(id), NeedsUpdate{true});
+    g.registry.emplace_or_replace<NeedsUpdate>(id, NeedsUpdate{true});
     g.attach_static_world_definition(id, definition);
     return id;
 }
@@ -46,7 +46,7 @@ entityid Prop::create_at(gamestate& g, proptype_t type, vec3 loc) {
 
 void Prop::create_sprite(gamestate& g, rpg::Renderer& renderer, entityid id) {
     massert(id != ENTITYID_INVALID, "entityid is invalid");
-    const entt::entity registry_entity = g.lookup_registry_entity(id);
+    const auto registry_entity = id;
     if (registry_entity != entt::null && g.registry.all_of<StaticVisual>(registry_entity)) {
         const StaticVisual& visual = g.registry.get<StaticVisual>(registry_entity);
         if (visual.sprites != nullptr && visual.sprite_count > 0) {

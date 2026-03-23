@@ -241,7 +241,7 @@ bool gamestate::drop_inventory_item(entityid actor_id, entityid item_id) {
     if (static_cast<size_t>(loc.z) < d.get_floor_count()) {
         df = d.get_floor(loc.z);
     }
-    if (!df->df_add_at(item_id, entitytype_t::ITEM, loc)) {
+    if (df->df_add_at(item_id, entitytype_t::ITEM, loc) == ENTITYID_INVALID) {
         merror("Failed to add to %d, %d, %d", loc.x, loc.y, loc.z);
         add_to_inventory(actor_id, item_id);
         return false;

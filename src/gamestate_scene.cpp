@@ -9,10 +9,9 @@
 
 void gamestate::make_all_npcs_target_player() {
     massert(hero_id != ENTITYID_INVALID, "hero_id is invalid");
-    auto view = registry.view<LegacyEntityId, NpcTag>();
+    auto view = registry.view<NpcTag>();
     for (auto entity : view) {
-        entityid id = view.get<LegacyEntityId>(entity).id;
-        if (auto* tgt = get_component<TargetEntity>(id)) {
+        if (auto* tgt = get_component<TargetEntity>(entity)) {
             tgt->value = hero_id;
         }
     }

@@ -16,18 +16,16 @@ private:
     }
 
     entityid find_live_npc_on_floor(gamestate& g, int floor, race_t race_value = race_t::NONE) {
-        auto view = g.registry.view<LegacyEntityId, NpcTag>();
-        for (auto entity : view) {
-            entityid id = view.get<LegacyEntityId>(entity).id;
-            if (g.get_component_or<DeadFlag>(id, true)) {
+        for (auto entity : g.registry.view<NpcTag>()) {
+            if (g.get_component_or<DeadFlag>(entity, true)) {
                 continue;
             }
-            if (race_value != race_t::NONE && (g.get_component<ActorKind>(id) ? g.get_component<ActorKind>(id)->race : race_t::NONE) != race_value) {
+            if (race_value != race_t::NONE && (g.get_component<ActorKind>(entity) ? g.get_component<ActorKind>(entity)->race : race_t::NONE) != race_value) {
                 continue;
             }
-            const vec3 loc = g.get_component_or<Position>(id, vec3{-1, -1, -1});
+            const vec3 loc = g.get_component_or<Position>(entity, vec3{-1, -1, -1});
             if (loc.z == floor) {
-                return id;
+                return entity;
             }
         }
         return ENTITYID_INVALID;
@@ -141,7 +139,7 @@ public:
         const vec3 hero_loc = find_open_adjacent_tile(g, orc_loc);
         TS_ASSERT(vec3_valid(hero_loc));
 
-        g.entity_turn = g.create_player_at_with(hero_loc, "heavy_hero", g.player_init(18));
+        g.create_player_at_with(hero_loc, "heavy_hero", g.player_init(18));
         TS_ASSERT_DIFFERS(g.hero_id, ENTITYID_INVALID);
 
         const entityid hero_weapon = g.create_weapon_with(g.sword_init());
@@ -156,7 +154,6 @@ public:
 
         bool resolved = false;
         for (int step = 0; step < 256 && !resolved; ++step) {
-            g.entity_turn = orc;
             g.flag = gamestate_flag_t::NPC_TURN;
             g.tick(is);
 

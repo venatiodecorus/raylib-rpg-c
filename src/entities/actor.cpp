@@ -19,14 +19,14 @@ namespace rpg::entities {
 namespace {
 
 void set_npc_alignment(gamestate& g, entityid id, alignment_t alignment_value) {
-    g.registry.emplace_or_replace<AlignmentComponent>(g.ensure_registry_entity(id), AlignmentComponent{alignment_value});
+    g.registry.emplace_or_replace<AlignmentComponent>(id, AlignmentComponent{alignment_value});
 }
 
 } // namespace
 
 void Actor::set_defaults(gamestate& g, entityid id) {
     g.sync_entt_entity_type_tags(id, entitytype_t::NPC);
-    auto e = g.ensure_registry_entity(id);
+    const auto e = id;
     g.registry.emplace_or_replace<SpriteMoveState>(e, SpriteMoveState{Rectangle{0, 0, 0, 0}});
     g.registry.emplace_or_replace<DeadFlag>(e, DeadFlag{false});
     g.registry.emplace_or_replace<NeedsUpdate>(e, NeedsUpdate{true});
@@ -64,7 +64,7 @@ void Actor::set_starting_stats(gamestate& g, entityid id) {
     int wisdom_ = gen(g.mt) + wis_m;
     int constitution_ = gen(g.mt) + con_m;
     int charisma_ = gen(g.mt) + cha_m;
-    auto e = g.ensure_registry_entity(id);
+    const auto e = id;
     g.registry.emplace_or_replace<StrengthAttr>(e, StrengthAttr{strength_});
     g.registry.emplace_or_replace<DexterityAttr>(e, DexterityAttr{dexterity_});
     g.registry.emplace_or_replace<IntelligenceAttr>(e, IntelligenceAttr{intelligence_});
@@ -135,25 +135,25 @@ bool Actor::alignment_is_aggressive(alignment_t alignment_value) {
 entityid Actor::create_npc(gamestate& g, race_t rt) {
     entityid id = g.add_entity();
     set_defaults(g, id);
-    g.registry.emplace_or_replace<ActorKind>(g.ensure_registry_entity(id), ActorKind{rt});
+    g.registry.emplace_or_replace<ActorKind>(id, ActorKind{rt});
 
     const ActorDefinition* def = get_actor_definition(rt);
     const alignment_t default_alignment = def ? def->default_alignment : default_alignment_for_race(rt);
 
     set_npc_alignment(g, id, default_alignment);
-    g.registry.emplace_or_replace<AggroFlag>(g.ensure_registry_entity(id), AggroFlag{alignment_is_aggressive(default_alignment)});
+    g.registry.emplace_or_replace<AggroFlag>(id, AggroFlag{alignment_is_aggressive(default_alignment)});
     set_starting_stats(g, id);
     if (!g.has_component<EntityName>(id)) {
         const string npc_name = def ? def->default_name : race2str(rt);
-        g.registry.emplace_or_replace<EntityName>(g.ensure_registry_entity(id), EntityName{npc_name});
+        g.registry.emplace_or_replace<EntityName>(id, EntityName{npc_name});
     }
     if (!g.has_component<DialogueLine>(id)) {
         const string npc_dialogue = def ? def->default_description : "They give you a guarded look but say nothing.";
-        g.registry.emplace_or_replace<DialogueLine>(g.ensure_registry_entity(id), DialogueLine{npc_dialogue});
+        g.registry.emplace_or_replace<DialogueLine>(id, DialogueLine{npc_dialogue});
     }
 
     if (def) {
-        const entt::entity registry_entity = g.ensure_registry_entity(id);
+        const auto registry_entity = id;
         g.registry.emplace_or_replace<ActorKind>(registry_entity, ActorKind{rt});
         g.registry.emplace_or_replace<ActorVisual>(registry_entity, ActorVisual{def->sprites, def->sprite_count});
         g.registry.emplace_or_replace<ActorText>(registry_entity, ActorText{def->default_name, def->default_description});
@@ -192,7 +192,7 @@ entityid Actor::create_npc_at(gamestate& g, race_t rt, vec3 loc) {
         return INVALID;
     }
     minfo2("setting location for %d", id);
-    g.registry.emplace_or_replace<Position>(g.ensure_registry_entity(id), Position{loc});
+    g.registry.emplace_or_replace<Position>(id, Position{loc});
     g.sync_registry_grid_position(id, loc);
     msuccess2("created npc %d", id);
     return id;
@@ -226,7 +226,7 @@ entityid Actor::create_player_at(gamestate& g, vec3 loc, const std::string& n) {
     tile.set_cached_player_present(true);
     tile.set_cached_live_npc(id);
 
-    auto e = g.ensure_registry_entity(id);
+    const auto e = id;
     g.registry.emplace_or_replace<HitPoints>(e, HitPoints{vec2{hp_, maxhp_}});
     g.registry.emplace_or_replace<VisionRange>(e, VisionRange{vis_dist});
     g.registry.emplace_or_replace<LightRadius>(e, LightRadius{light_rad});
@@ -238,7 +238,7 @@ entityid Actor::create_player_at(gamestate& g, vec3 loc, const std::string& n) {
 
 void Actor::create_sprite(gamestate& g, rpg::Renderer& renderer, entityid id) {
     massert(id != ENTITYID_INVALID, "entityid is invalid");
-    const entt::entity registry_entity = g.lookup_registry_entity(id);
+    const auto registry_entity = id;
     if (registry_entity != entt::null && g.registry.all_of<ActorVisual>(registry_entity)) {
         const ActorVisual& visual = g.registry.get<ActorVisual>(registry_entity);
         if (visual.sprites != nullptr && visual.sprite_count > 0) {

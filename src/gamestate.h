@@ -95,10 +95,7 @@ public:
     controlmode_t controlmode;
     controlmode_t controlmode_before_confirm;
     entityid hero_id;
-    entityid new_entityid_begin;
-    entityid new_entityid_end;
-    entityid next_entityid;
-    entityid entity_turn;
+    std::vector<entt::entity> new_entities;
     bool god_mode;
     bool test;
     bool player_input_received;
@@ -107,7 +104,6 @@ public:
     bool player_changing_dir;
     bool test_guard;
     bool do_quit;
-    bool dirty_entities;
     bool frame_dirty;
     bool do_restart;
     int lock;
@@ -120,7 +116,6 @@ public:
     Pathfinder pathfinder;
     character_creation chara_creation;
     entt::registry registry;
-    std::unordered_map<entityid, entt::entity> legacy_to_entt;
     rpg::UIState ui;
     rpg::KeybindingState keybind;
     rpg::RandomState random;
@@ -161,9 +156,7 @@ public:
         presentation.windowheight = -1;
         hero_id = INVALID;
         ui.active_chest_id = INVALID;
-        entity_turn = 1;
-        new_entityid_begin = ENTITYID_INVALID;
-        new_entityid_end = ENTITYID_INVALID;
+        new_entities.clear();
         session.timebegan = session.currenttime = time(NULL);
         session.timebegantm = localtime(&session.timebegan);
         session.currenttimetm = localtime(&session.currenttime);
@@ -189,7 +182,7 @@ public:
         ui.display_level_up_modal = false;
         do_quit = false;
         presentation.cam_changed = false;
-        gameover = dirty_entities = false;
+        gameover = false;
         queue_state.processing_actions = false;
         test_guard = false;
         player_changing_dir = false;
@@ -225,8 +218,6 @@ public:
         presentation.font_size = GAMESTATE_DEBUGPANEL_DEFAULT_FONT_SIZE;
         presentation.pad = 20;
         presentation.line_spacing = 1.0f;
-        // weird bug maybe when set to 0?
-        next_entityid = 1;
         do_restart = false;
         ui.title_screen_selection = 0;
         lock = 0;
@@ -274,7 +265,6 @@ public:
         reset_default_keybindings();
         messages = rpg::MessageLog();
         registry.clear();
-        legacy_to_entt.clear();
         d.floors.clear();
         d.is_initialized = false;
     }
@@ -286,55 +276,21 @@ public:
     }
 
     entityid add_entity() {
-        entityid id = next_entityid;
-        if (!dirty_entities) {
-            dirty_entities = true;
-            new_entityid_begin = id;
-            new_entityid_end = id + 1;
-        }
-        else {
-            new_entityid_end = id + 1;
-        }
-        next_entityid++;
+        const entt::entity id = registry.create();
+        new_entities.push_back(id);
         return id;
     }
 
-    entt::entity ensure_registry_entity(entityid id) {
-        massert(id != ENTITYID_INVALID, "id is invalid");
-        const entt::entity entity = lookup_registry_entity(id);
-        if (entity != entt::null) {
-            return entity;
-        }
-        const entt::entity created = registry.create();
-        registry.emplace<LegacyEntityId>(created, LegacyEntityId{id});
-        legacy_to_entt[id] = created;
-        return created;
-    }
-
-    entt::entity lookup_registry_entity(entityid id) const {
-        const auto it = legacy_to_entt.find(id);
-        if (it == legacy_to_entt.end()) {
-            return entt::null;
-        }
-        return registry.valid(it->second) ? it->second : entt::null;
-    }
-
-    bool has_registry_entity(entityid id) const {
-        return lookup_registry_entity(id) != entt::null;
-    }
-
-    /// @brief Look up an EnTT component for a legacy entityid. Returns nullptr if missing.
+    /// @brief Look up an EnTT component by entity. Returns nullptr if missing or entity invalid.
     template <typename T>
     T* get_component(entityid id) {
-        auto e = lookup_registry_entity(id);
-        return e != entt::null ? registry.try_get<T>(e) : nullptr;
+        return registry.valid(id) ? registry.try_get<T>(id) : nullptr;
     }
 
-    /// @brief Look up a const EnTT component for a legacy entityid. Returns nullptr if missing.
+    /// @brief Look up a const EnTT component by entity. Returns nullptr if missing or entity invalid.
     template <typename T>
     const T* get_component(entityid id) const {
-        auto e = lookup_registry_entity(id);
-        return e != entt::null ? registry.try_get<T>(e) : nullptr;
+        return registry.valid(id) ? registry.try_get<T>(id) : nullptr;
     }
 
     /// @brief Return the component's .value field, or fallback if the component is absent.
@@ -344,29 +300,28 @@ public:
         return ptr ? ptr->value : fallback;
     }
 
-    /// @brief Check whether a legacy entity has an EnTT component.
+    /// @brief Check whether an entity has a given EnTT component.
     template <typename T>
     bool has_component(entityid id) const {
-        auto e = lookup_registry_entity(id);
-        return e != entt::null && registry.all_of<T>(e);
+        return registry.valid(id) && registry.all_of<T>(id);
     }
 
     void sync_entt_entity_type_tags(entityid id, entitytype_t type) {
-        const entt::entity e = ensure_registry_entity(id);
-        registry.emplace_or_replace<EntityTypeTag>(e, EntityTypeTag{type});
+        massert(registry.valid(id), "entity is invalid");
+        registry.emplace_or_replace<EntityTypeTag>(id, EntityTypeTag{type});
         if (type == entitytype_t::NPC) {
-            registry.emplace_or_replace<NpcTag>(e, NpcTag{});
+            registry.emplace_or_replace<NpcTag>(id, NpcTag{});
         }
-        else if (registry.any_of<NpcTag>(e)) {
-            registry.remove<NpcTag>(e);
+        else if (registry.any_of<NpcTag>(id)) {
+            registry.remove<NpcTag>(id);
         }
     }
 
     void for_entities_of_type(entitytype_t type, std::function<void(entityid)> fn) {
-        auto view = registry.view<LegacyEntityId, EntityTypeTag>();
+        auto view = registry.view<EntityTypeTag>();
         for (auto entity : view) {
             if (view.get<EntityTypeTag>(entity).type == type) {
-                fn(view.get<LegacyEntityId>(entity).id);
+                fn(entity);
             }
         }
     }
@@ -387,7 +342,7 @@ public:
     }
 
     void attach_static_world_definition(entityid id, const StaticWorldDefinition& definition) {
-        const entt::entity registry_entity = ensure_registry_entity(id);
+        const auto registry_entity = id;
         registry.emplace_or_replace<DefinitionRef>(registry_entity, DefinitionRef{definition.id});
         registry.emplace_or_replace<StaticVisual>(registry_entity, StaticVisual{definition.sprites, definition.sprite_count});
         registry.emplace_or_replace<InteractableText>(registry_entity, InteractableText{definition.name, definition.description});
@@ -419,14 +374,14 @@ public:
     }
 
     void sync_registry_grid_position(entityid id, vec3 loc) {
-        const entt::entity registry_entity = lookup_registry_entity(id);
+        const auto registry_entity = id;
         if (registry_entity != entt::null) {
             registry.emplace_or_replace<GridPosition>(registry_entity, GridPosition{loc});
         }
     }
 
     void sync_registry_open_state(entityid id, bool is_open) {
-        const entt::entity registry_entity = lookup_registry_entity(id);
+        const auto registry_entity = id;
         if (registry_entity != entt::null) {
             registry.emplace_or_replace<OpenState>(registry_entity, OpenState{is_open});
         }
@@ -1301,12 +1256,11 @@ public:
             "cam: (%.0f,%.0f) Zoom: %.1f\n"
             "controlmode: %s \n"
             "floor: %d/%d \n"
-            "next_entity_id: %d\n"
-            "hero_id: %d\n"
+            "new_entities: %lu\n"
+            "hero_id: %u\n"
             "flag: %s\n"
-            "entity_turn: %d\n"
             "hero: (%d,%d,%d)\n"
-            "weapon: %d\n"
+            "weapon: %u\n"
             "inventory: %d\n"
             "message count: %d\n"
             "df.width x height: %dx%d\n"
@@ -1330,19 +1284,18 @@ public:
             control_mode,
             0,
             0,
-            next_entityid,
-            hero_id,
+            new_entities.size(),
+            static_cast<uint32_t>(entt::to_integral(hero_id)),
             flag == gamestate_flag_t::NONE           ? "None"
             : flag == gamestate_flag_t::PLAYER_INPUT ? "Player Input"
             : flag == gamestate_flag_t::PLAYER_ANIM  ? "Player anim"
             : flag == gamestate_flag_t::NPC_TURN     ? "NPC Turn"
             : flag == gamestate_flag_t::NPC_ANIM     ? "NPC anim"
                                                      : "Unknown",
-            entity_turn,
             loc.x,
             loc.y,
             loc.z,
-            get_component_or<EquippedWeapon>(hero_id, ENTITYID_INVALID),
+            static_cast<uint32_t>(entt::to_integral(get_component_or<EquippedWeapon>(hero_id, ENTITYID_INVALID))),
             inventory_count,
             message_count,
             df_w,

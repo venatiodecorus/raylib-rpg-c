@@ -18,7 +18,7 @@ namespace rpg::entities {
 entityid Item::create_weapon(gamestate& g) {
     entityid id = g.add_entity();
     g.sync_entt_entity_type_tags(id, entitytype_t::ITEM);
-    auto e = g.ensure_registry_entity(id);
+    const auto e = id;
     g.registry.emplace_or_replace<ItemSubtype>(e, ItemSubtype{itemtype_t::WEAPON});
     g.registry.emplace_or_replace<SpriteMoveState>(e, SpriteMoveState{Rectangle{0, 0, 0, 0}});
     g.registry.emplace_or_replace<NeedsUpdate>(e, NeedsUpdate{true});
@@ -28,7 +28,7 @@ entityid Item::create_weapon(gamestate& g) {
 entityid Item::create_shield(gamestate& g) {
     entityid id = g.add_entity();
     g.sync_entt_entity_type_tags(id, entitytype_t::ITEM);
-    auto e = g.ensure_registry_entity(id);
+    const auto e = id;
     g.registry.emplace_or_replace<ItemSubtype>(e, ItemSubtype{itemtype_t::SHIELD});
     g.registry.emplace_or_replace<ItemDurability>(e, ItemDurability{100});
     g.registry.emplace_or_replace<ItemMaxDurability>(e, ItemMaxDurability{100});
@@ -39,7 +39,7 @@ entityid Item::create_shield(gamestate& g) {
 entityid Item::create_potion(gamestate& g) {
     entityid id = g.add_entity();
     g.sync_entt_entity_type_tags(id, entitytype_t::ITEM);
-    auto e = g.ensure_registry_entity(id);
+    const auto e = id;
     g.registry.emplace_or_replace<ItemSubtype>(e, ItemSubtype{itemtype_t::POTION});
     g.registry.emplace_or_replace<NeedsUpdate>(e, NeedsUpdate{true});
     return id;
@@ -67,7 +67,7 @@ entityid Item::create_weapon_at(gamestate& g, vec3 loc) {
     if (df->df_add_at(id, entitytype_t::ITEM, loc) == ENTITYID_INVALID) {
         return INVALID;
     }
-    g.registry.emplace_or_replace<Position>(g.ensure_registry_entity(id), Position{loc});
+    g.registry.emplace_or_replace<Position>(id, Position{loc});
     g.sync_registry_grid_position(id, loc);
     return id;
 }
@@ -78,10 +78,10 @@ entityid Item::create_shield_at(gamestate& g, vec3 loc) {
     }
     entityid id = create_shield(g);
     shared_ptr<dungeon_floor> df = g.d.get_floor(loc.z);
-    if (!df->df_add_at(id, entitytype_t::ITEM, loc)) {
+    if (df->df_add_at(id, entitytype_t::ITEM, loc) == ENTITYID_INVALID) {
         return INVALID;
     }
-    g.registry.emplace_or_replace<Position>(g.ensure_registry_entity(id), Position{loc});
+    g.registry.emplace_or_replace<Position>(id, Position{loc});
     g.sync_registry_grid_position(id, loc);
     return id;
 }
@@ -96,10 +96,10 @@ entityid Item::create_potion_at(gamestate& g, vec3 loc) {
     if (id == INVALID) {
         return INVALID;
     }
-    if (!df->df_add_at(id, entitytype_t::ITEM, loc)) {
+    if (df->df_add_at(id, entitytype_t::ITEM, loc) == ENTITYID_INVALID) {
         return INVALID;
     }
-    auto e = g.ensure_registry_entity(id);
+    const auto e = id;
     g.registry.emplace_or_replace<Position>(e, Position{loc});
     g.registry.emplace_or_replace<NeedsUpdate>(e, NeedsUpdate{true});
     g.sync_registry_grid_position(id, loc);
@@ -108,7 +108,7 @@ entityid Item::create_potion_at(gamestate& g, vec3 loc) {
 
 void Item::create_sprite(gamestate& g, rpg::Renderer& renderer, entityid id) {
     massert(id != ENTITYID_INVALID, "entityid is invalid");
-    const entt::entity registry_entity = g.lookup_registry_entity(id);
+    const auto registry_entity = id;
     if (registry_entity != entt::null && g.registry.all_of<ItemVisual>(registry_entity)) {
         const ItemVisual& visual = g.registry.get<ItemVisual>(registry_entity);
         if (visual.sprites != nullptr && visual.sprite_count > 0) {

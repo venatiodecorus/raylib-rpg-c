@@ -34,13 +34,10 @@ public:
 
         TS_ASSERT_EQUALS(g.session.version, std::string(GAME_VERSION));
         TS_ASSERT_EQUALS(g.hero_id, ENTITYID_INVALID);
-        TS_ASSERT_EQUALS(g.entity_turn, 1);
         TS_ASSERT_EQUALS(g.next_entityid, 1);
-        TS_ASSERT_EQUALS(g.new_entityid_begin, ENTITYID_INVALID);
-        TS_ASSERT_EQUALS(g.new_entityid_end, ENTITYID_INVALID);
+        TS_ASSERT(g.new_entities.empty());
         TS_ASSERT(g.presentation.cam_lockon);
         TS_ASSERT(!g.presentation.cam_changed);
-        TS_ASSERT(!g.dirty_entities);
         TS_ASSERT(!g.messages.is_active);
         TS_ASSERT_EQUALS(g.current_scene, scene_t::TITLE);
         TS_ASSERT_EQUALS(g.controlmode, controlmode_t::PLAYER);
@@ -77,9 +74,7 @@ public:
         TS_ASSERT_EQUALS(second, 2);
         TS_ASSERT_EQUALS(third, 3);
         TS_ASSERT_EQUALS(g.next_entityid, 4);
-        TS_ASSERT(g.dirty_entities);
-        TS_ASSERT_EQUALS(g.new_entityid_begin, 1);
-        TS_ASSERT_EQUALS(g.new_entityid_end, 4);
+        TS_ASSERT_EQUALS(g.new_entities.size(), 3U);
     }
 
     void testGamestateSetHeroIdAndReset() {
@@ -93,10 +88,8 @@ public:
 
         TS_ASSERT_EQUALS(g.hero_id, ENTITYID_INVALID);
         TS_ASSERT_EQUALS(g.next_entityid, 1);
-        TS_ASSERT_EQUALS(g.new_entityid_begin, ENTITYID_INVALID);
-        TS_ASSERT_EQUALS(g.new_entityid_end, ENTITYID_INVALID);
+        TS_ASSERT(g.new_entities.empty());
         TS_ASSERT_EQUALS(g.chara_creation.alignment, alignment_t::NEUTRAL_NEUTRAL);
-        TS_ASSERT(!g.dirty_entities);
         TS_ASSERT_EQUALS(g.d.floors.size(), 0U);
         TS_ASSERT_EQUALS(g.messages.system.size(), 0U);
         TS_ASSERT_EQUALS(g.messages.history.size(), 0U);

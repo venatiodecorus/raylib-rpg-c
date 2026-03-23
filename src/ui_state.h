@@ -56,7 +56,7 @@ struct UIState {
     std::string confirm_prompt_message;
 
     // Interaction modal
-    entityid active_interaction_entity_id = -1;
+    entityid active_interaction_entity_id = ENTITYID_INVALID;
     std::string interaction_title;
     std::string interaction_body;
 

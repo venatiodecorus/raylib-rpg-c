@@ -46,7 +46,7 @@ public:
         off_y = 0;
         default_anim = 0;
         alpha = 255;
-        id = 0;
+        id = ENTITYID_INVALID;
         sprites.reserve(cap);
         dest = move = Rectangle{0, 0, 0, 0};
         move_rate = 1.0f;

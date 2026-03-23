@@ -113,10 +113,9 @@ bool gamestate::update_player_state() {
 
 void gamestate::update_npcs_state() {
     minfo2("BEGIN update_npcs_state");
-    auto view = registry.view<LegacyEntityId, NpcTag>();
+    auto view = registry.view<NpcTag>();
     for (auto entity : view) {
-        entityid id = view.get<LegacyEntityId>(entity).id;
-        update_npc_behavior(id);
+        update_npc_behavior(entity);
     }
 }
 
@@ -165,12 +164,12 @@ void gamestate::logic_init() {
 
     // Place a friendly NPC in Room A
     create_npc_at_with(race_t::HUMAN, vec3{3, 2, 0}, [](gamestate& g, const entityid id) {
-        g.registry.emplace_or_replace<AggroFlag>(g.ensure_registry_entity(id), AggroFlag{false});
+        g.registry.emplace_or_replace<AggroFlag>(id, AggroFlag{false});
     });
 
     // Place a hostile slime in Room C
     auto green_slime_init = [](gamestate& g, const entityid id) {
-        auto e = g.ensure_registry_entity(id);
+        const auto e = id;
         g.registry.emplace_or_replace<EntityName>(e, EntityName{"green slime"});
         g.registry.emplace_or_replace<DialogueLine>(e, DialogueLine{"The slime jiggles quietly."});
         g.registry.emplace_or_replace<AggroFlag>(e, AggroFlag{true});
@@ -213,55 +212,31 @@ void gamestate::advance_animation_phase() {
         : flag == gamestate_flag_t::NPC_ANIM     ? "npc anim"
                                                  : "Unknown");
     if (flag == gamestate_flag_t::PLAYER_ANIM) {
-#ifndef NPCS_ALL_AT_ONCE
-        entity_turn++;
-        if (entity_turn >= next_entityid) {
-            entity_turn = 1;
-        }
-#endif
         flag = gamestate_flag_t::NPC_TURN;
     }
     else if (flag == gamestate_flag_t::NPC_ANIM) {
-#ifndef NPCS_ALL_AT_ONCE
-        entity_turn++;
-        if (entity_turn >= next_entityid) {
-            entity_turn = 1;
-        }
-        if (entity_turn == hero_id) {
-            flag = gamestate_flag_t::PLAYER_INPUT;
-            turn_count++;
-        }
-        else {
-            flag = gamestate_flag_t::NPC_TURN;
-        }
-#else
         flag = gamestate_flag_t::PLAYER_INPUT;
         turn_count++;
-#endif
     }
 }
 
 void gamestate::finalize_render_feedback() {
-    auto view = registry.view<LegacyEntityId>();
-    for (auto entity : view) {
-        entityid id = view.get<LegacyEntityId>(entity).id;
-        if (auto* upd = get_component<NeedsUpdate>(id)) {
+    for (auto entity : registry.view<EntityTypeTag>()) {
+        if (auto* upd = get_component<NeedsUpdate>(entity)) {
             upd->value = false;
         }
-        if (auto* atk = get_component<AttackingFlag>(id)) {
+        if (auto* atk = get_component<AttackingFlag>(entity)) {
             atk->value = false;
         }
-        if (auto* blk = get_component<BlockSuccessFlag>(id)) {
+        if (auto* blk = get_component<BlockSuccessFlag>(entity)) {
             blk->value = false;
         }
-        if (auto* sm = get_component<SpriteMoveState>(id)) {
+        if (auto* sm = get_component<SpriteMoveState>(entity)) {
             sm->value = Rectangle{0, 0, 0, 0};
         }
     }
 
-    dirty_entities = false;
-    new_entityid_begin = ENTITYID_INVALID;
-    new_entityid_end = ENTITYID_INVALID;
+    new_entities.clear();
 }
 
 void gamestate::tick(inputstate& is) {

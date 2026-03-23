@@ -106,14 +106,16 @@ index.html: $(GAME_SOURCES)
 $(SRCDIR)/tests.cpp: $(SRCDIR)/unit_test.h $(wildcard $(SRCDIR)/test_suites/test_*.h)
 	cxxtestgen --error-printer -o $@ $(SRCDIR)/unit_test.h $(SRCDIR)/test_suites/test_gamestate_lifecycle.h $(SRCDIR)/test_suites/test_combat_bootstrap.h $(SRCDIR)/test_suites/test_dungeon_bootstrap.h $(SRCDIR)/test_suites/test_entity_factory.h $(SRCDIR)/test_suites/test_entity_placement.h $(SRCDIR)/test_suites/test_inventory.h $(SRCDIR)/test_suites/test_pathfinder.h $(SRCDIR)/test_suites/test_renderer_seams.h $(SRCDIR)/test_suites/test_tile_cache.h $(SRCDIR)/test_suites/test_utility_helpers.h $(SRCDIR)/test_suites/test_world_interaction.h
 
+CXXTEST_CFLAGS := $(shell pkg-config --cflags cxxtest 2>/dev/null || echo "-I/opt/homebrew/Cellar/cxxtest/4.4_3/include")
+
 tests: $(SRCDIR)/tests.cpp $(SRCDIR)/audio_manager.o $(SRCDIR)/message_log.o $(SRCDIR)/damage_popups.o $(GAMESTATE_O)
-	$(CXX) -o $@ $^ $(RAYLIB_CFLAGS) $(RAYLIB_LIBS) -I$(SRCDIR) -Iinclude $(CXXFLAGS) $(CFLAGS)
+	$(CXX) $(WFLAGS) -o $@ $^ $(RAYLIB_CFLAGS) $(RAYLIB_LIBS) -I$(SRCDIR) -Iinclude $(CXXTEST_CFLAGS) $(CXXFLAGS) $(CFLAGS)
 
 $(SRCDIR)/tests_heavy.cpp: $(SRCDIR)/unit_test_heavy.h $(SRCDIR)/unit_test.h $(wildcard $(SRCDIR)/test_suites/test_*.h)
 	cxxtestgen --error-printer -o $@ $(SRCDIR)/unit_test_heavy.h $(SRCDIR)/unit_test.h $(SRCDIR)/test_suites/test_gamestate_lifecycle.h $(SRCDIR)/test_suites/test_combat_bootstrap.h $(SRCDIR)/test_suites/test_dungeon_bootstrap.h $(SRCDIR)/test_suites/test_entity_factory.h $(SRCDIR)/test_suites/test_entity_placement.h $(SRCDIR)/test_suites/test_heavy_simulation.h $(SRCDIR)/test_suites/test_inventory.h $(SRCDIR)/test_suites/test_pathfinder.h $(SRCDIR)/test_suites/test_renderer_seams.h $(SRCDIR)/test_suites/test_tile_cache.h $(SRCDIR)/test_suites/test_utility_helpers.h $(SRCDIR)/test_suites/test_world_interaction.h
 
 tests_heavy: $(SRCDIR)/tests_heavy.cpp $(SRCDIR)/audio_manager.o $(SRCDIR)/message_log.o $(SRCDIR)/damage_popups.o $(GAMESTATE_O)
-	$(CXX) -o $@ $^ $(RAYLIB_CFLAGS) $(RAYLIB_LIBS) -I$(SRCDIR) -Iinclude $(CXXFLAGS) $(CFLAGS)
+	$(CXX) $(WFLAGS) -o $@ $^ $(RAYLIB_CFLAGS) $(RAYLIB_LIBS) -I$(SRCDIR) -Iinclude $(CXXTEST_CFLAGS) $(CXXFLAGS) $(CFLAGS)
 
 # Documentation
 docs:
@@ -123,4 +125,4 @@ docs-clean:
 	rm -rf docs/api
 
 clean:
-	rm -rfv game tests tests_heavy index.html index.js index.wasm index.data $(SRCDIR)/*.o $(SRCDIR)/*.gch $(SRCDIR)/tests.cpp $(SRCDIR)/tests_heavy.cpp
+	rm -rfv game tests tests_heavy index.html index.js index.wasm index.data $(SRCDIR)/*.o $(SRCDIR)/entities/*.o $(SRCDIR)/*.gch $(SRCDIR)/tests.cpp $(SRCDIR)/tests_heavy.cpp
