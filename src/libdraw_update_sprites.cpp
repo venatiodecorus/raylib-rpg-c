@@ -131,12 +131,12 @@ void libdraw_handle_dirty_entities(gamestate& g, rpg::Renderer& renderer) {
     if (g.new_entities.empty()) {
         return;
     }
-    for (const entt::entity e : g.new_entities) {
-        const entityid i = static_cast<entityid>(e);
-        const entitytype_t itype = g.get_component<EntityTypeTag>(i) ? g.get_component<EntityTypeTag>(i)->type : entitytype_t::NONE;
-        rpg::entities::EntityBase::for_type(itype).create_sprite(g, renderer, i);
-        libdraw_update_sprite_pre(g, renderer, i);
+    for (const entityid id : g.new_entities) {
+        const entitytype_t itype = g.get_component<EntityTypeTag>(id) ? g.get_component<EntityTypeTag>(id)->type : entitytype_t::NONE;
+        rpg::entities::EntityBase::for_type(itype).create_sprite(g, renderer, id);
+        libdraw_update_sprite_pre(g, renderer, id);
     }
+    g.new_entities.clear();
     g.frame_dirty = true;
 }
 

@@ -236,7 +236,6 @@ void gamestate::finalize_render_feedback() {
         }
     }
 
-    new_entities.clear();
 }
 
 void gamestate::tick(inputstate& is) {
