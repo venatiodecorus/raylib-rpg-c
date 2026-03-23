@@ -263,7 +263,7 @@ void libdraw_init_resources(gamestate& g, rpg::Renderer& renderer) {
 }
 
 void libdraw_init_rest(gamestate& g, rpg::Renderer& renderer) {
-    SetExitKey(KEY_ESCAPE);
+    SetExitKey(KEY_NULL);
     SetTargetFPS(60);
     libdraw_init_render_targets(g, renderer);
     libdraw_init_resources(g, renderer);
@@ -284,7 +284,7 @@ void libdraw_init(gamestate& g, rpg::Renderer& renderer) {
 }
 
 bool libdraw_windowshouldclose(gamestate& g) {
-    return g.do_quit;
+    return g.do_quit || WindowShouldClose();
 }
 
 void libdraw_close_partial(rpg::Renderer& renderer) {
