@@ -193,5 +193,5 @@ EntityBase::for_type(type).update_sprite(g, renderer, id, sg);
 - [ ] Fix error with cxxtest, re-write test suite
 - [ ] New documentation
 - [x] Remove lookup_registry_entity() and legacy_to_entt, we should only be relying on the ENTT registry
-- [ ] Make game respond to exit codes properly, right now it needs to be force quit or killed from command line
+- [x] Make game respond to exit codes properly, right now it needs to be force quit or killed from command line
 - [ ] Adding any field to the gamestate struct triggers an EnTT fast_mod assertion. Even int scene; causes it. This is a pre-existing memory safety issue — likely a buffer overflow somewhere that corrupts EnTT's sparse set internals. The debugpanel.h comment confirms something similar: "game begins black-screening at 497, not sure why" — the 496-byte debug panel buffer is at the edge of overflowing. Implemented Fix: The scene pointer now lives in AppContext instead of gamestate. gamestate.h is unchanged from master. Rendering stays with the original enum-based dispatch. Investigate the memory issue potentially causing a buffer overflow.
