@@ -106,7 +106,7 @@ void MenuRenderer::draw_help_menu(gamestate& g) {
         "Debug panel: p\n"
         "Quit prompt: esc\n"
         "\n"
-        "@evildojo666",
+        "@venatiodecorus",
         keyboard_profile_label(g.keyboard_profile),
         g.get_keybinding_label(g.keyboard_profile, gameplay_input_action_t::MOVE_UP).c_str(),
         g.get_keybinding_label(g.keyboard_profile, gameplay_input_action_t::MOVE_DOWN).c_str(),

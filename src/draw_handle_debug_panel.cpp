@@ -34,7 +34,7 @@ void update_debug_panel(gamestate& g) {
     }
 
     char tmp[1024] = {0};
-    snprintf(tmp, sizeof(tmp), "@evildojo666");
+    snprintf(tmp, sizeof(tmp), "@venatiodecorus");
     strncat(g.debugpanel.buffer, tmp, sizeof(g.debugpanel.buffer) - strlen(g.debugpanel.buffer) - 1);
     msuccess3("update debug panel");
 }

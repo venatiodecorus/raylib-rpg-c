@@ -22,14 +22,14 @@ void draw_title_screen(gamestate& g, rpg::Renderer& renderer, bool show_menu) {
     constexpr float pad = 10;
     constexpr int menu_count = sizeof(menu_text) / sizeof(menu_text[0]);
     constexpr int menu_spacing = 10;
-    const char* evildojo_presents_text = "@evildojo666 presents";
+    const char* evildojo_presents_text = "@venatiodecorus presents";
     const char* title_text_0 = "project.rpg";
     const char* title_text_1 = "          rpg";
     const char* start_text = "Press enter or space to begin";
-    const char* programming_by = "programming by darkmage";
+    const char* programming_by = "programming by venatio";
     const char* art_by = "art by Krishna Palacio";
     const char* sound_effects_by = "sound effects by Leoh Paz";
-    const char* music_by = "music by darkmage + suno.ai";
+    const char* music_by = "music by Krishna Palacio";
     const char* version_text = g.version.c_str();
     const char* date_text = GAME_VERSION_DATE;
 

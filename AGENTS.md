@@ -26,7 +26,7 @@ make clean && CXXFLAGS="-DDEBUG_ASSERT=1 -DNPCS_ALL_AT_ONCE -DDEBUG=1 -DMASTER_V
 make clean && CXXFLAGS="-DDEBUG_ASSERT=1 -DNPCS_ALL_AT_ONCE -DDEBUG=1 -DMASTER_VOLUME=0.25f" make index.html
 
 # Run the game
-./game
+./bin/game
 ```
 
 ### Common Compiler Flags
@@ -134,6 +134,8 @@ Key formatting rules:
 ## Directory Layout
 
 ```
+bin/                  Desktop build output (game binary)
+dist/                 Web build output (index.html, .js, .wasm, .data)
 src/                  All source (.cpp) and header (.h) files (flat structure)
 src/test_suites/      CxxTest test suite headers
 src/shaders/          GLSL fragment shaders

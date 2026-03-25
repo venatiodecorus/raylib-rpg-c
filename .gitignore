@@ -70,4 +70,8 @@ tests_heavy
 tests_heavy.cpp
 *.rar
 *.zip
+bin/
+dist/
 .claude/
+raylib/
+src/libraylib.web.a

@@ -1243,7 +1243,7 @@ public:
         snprintf(
             presentation.debugpanel.buffer,
             sizeof(presentation.debugpanel.buffer),
-            "@evildojo666\n"
+            "@venatiodecorus\n"
             "project.rpg\n"
             //"%s\n" // timebeganbuf
             //"%s\n" // currenttimebuf

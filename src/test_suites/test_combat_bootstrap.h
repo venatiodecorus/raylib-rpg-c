@@ -615,7 +615,7 @@ public:
         TS_ASSERT(vec3_valid(hero_loc));
 
         const int maxhp_roll = 10;
-        g.create_player_at_with(hero_loc, "darkmage", g.player_init(maxhp_roll));
+        g.create_player_at_with(hero_loc, "venatio", g.player_init(maxhp_roll));
         TS_ASSERT_DIFFERS(g.hero_id, ENTITYID_INVALID);
 
         g.make_all_npcs_target_player();

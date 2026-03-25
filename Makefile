@@ -4,6 +4,8 @@ CXX = clang++
 WFLAGS = -Wall -Werror -Wno-unused-but-set-variable -std=c++17
 
 SRCDIR = src
+BINDIR = bin
+DISTDIR = dist
 
 MAIN_C = $(SRCDIR)/main.cpp
 LIBDRAW_C = $(SRCDIR)/libdraw.cpp
@@ -53,7 +55,7 @@ GAMESTATE_C = $(addprefix $(SRCDIR)/, \
 	gamestate_world_interaction.cpp \
 	gamestate_entity_factory.cpp)
 GAMESTATE_O = $(GAMESTATE_C:.cpp=.o) $(ENTITIES_C:.cpp=.o)
-GAME_SOURCES = $(MAIN_C) $(LIBDRAW_C) $(LIBDRAW_SPLIT_C) $(AUX_DRAW_C) $(SCENES_C) $(AUDIO_MANAGER_C) $(MESSAGE_LOG_C) $(DAMAGE_POPUPS_C) $(GAMESTATE_C)
+GAME_SOURCES = $(MAIN_C) $(LIBDRAW_C) $(LIBDRAW_SPLIT_C) $(AUX_DRAW_C) $(SCENES_C) $(AUDIO_MANAGER_C) $(MESSAGE_LOG_C) $(DAMAGE_POPUPS_C) $(GAMESTATE_C) $(ENTITIES_C)
 
 LINK_MATH = -lm
 
@@ -77,11 +79,11 @@ CFLAGS ?= # Allow override
 # Web build setup
 WEB_CC = emcc
 WEB_SOURCES = $(GAME_SOURCES)
-WEB_INCLUDES = -I$(SRCDIR) -Iinclude -I /usr/local/include
+WEB_INCLUDES = -I$(SRCDIR) -Iinclude -I /usr/local/include -Iraylib/src
 WEB_LINKS = -L$(SRCDIR) -l:libraylib.web.a
-EMCC_OPTIONS = -s USE_GLFW=3 -s EXPORTED_RUNTIME_METHODS=ccall -s ALLOW_MEMORY_GROWTH
+EMCC_OPTIONS = -s USE_GLFW=3 -s "EXPORTED_RUNTIME_METHODS=['ccall','setCanvasSize','HEAPF32']" -s ALLOW_MEMORY_GROWTH
 SHELL_FILE = --shell-file $(SRCDIR)/minshell.html
-PRELOAD_FILES = --preload-file $(SRCDIR)/fonts --preload-file $(SRCDIR)/img --preload-file $(SRCDIR)/audio/music --preload-file $(SRCDIR)/audio/sfx --preload-file $(SRCDIR)/shaders
+PRELOAD_FILES = --preload-file gfx --preload-file sfx --preload-file $(SRCDIR)/shaders
 WEB_OPTIONS = -DPLATFORM_WEB -DWEB -DSPAWN_MONSTERS -DNPCS_ALL_AT_ONCE -DSTART_MESSAGES
 
 
@@ -93,14 +95,16 @@ all: game tests
 
 # Desktop build
 game: $(SRCDIR)/main.o $(SRCDIR)/libdraw.o $(LIBDRAW_SPLIT_C:.cpp=.o) $(AUX_DRAW_C:.cpp=.o) $(SCENES_C:.cpp=.o) $(SRCDIR)/audio_manager.o $(SRCDIR)/message_log.o $(SRCDIR)/damage_popups.o $(GAMESTATE_O)
-	$(CXX) $(WFLAGS) $(CXXFLAGS) $(CFLAGS) $^ $(RAYLIB_LIBS) -o $@
+	@mkdir -p $(BINDIR)
+	$(CXX) $(WFLAGS) $(CXXFLAGS) $(CFLAGS) $^ $(RAYLIB_LIBS) -o $(BINDIR)/$@
 
 $(SRCDIR)/%.o: $(SRCDIR)/%.cpp
 	$(CXX) $(WFLAGS) $(CXXFLAGS) $(CFLAGS) $(RAYLIB_CFLAGS) -I$(SRCDIR) -Iinclude -c $< -o $@
 
 # Web build
 index.html: $(GAME_SOURCES)
-	$(WEB_CC) -o $@ $(GAME_SOURCES) $(WEB_INCLUDES) $(WEB_LINKS) $(EMCC_OPTIONS) $(SHELL_FILE) $(PRELOAD_FILES) $(WEB_OPTIONS) $(CFLAGS) $(CXXFLAGS)
+	@mkdir -p $(DISTDIR)
+	$(WEB_CC) -o $(DISTDIR)/$@ $(GAME_SOURCES) $(WEB_INCLUDES) $(WEB_LINKS) $(EMCC_OPTIONS) $(SHELL_FILE) $(PRELOAD_FILES) $(WEB_OPTIONS) $(CFLAGS) $(CXXFLAGS)
 
 # Unit tests
 $(SRCDIR)/tests.cpp: $(SRCDIR)/unit_test.h $(wildcard $(SRCDIR)/test_suites/test_*.h)
@@ -140,4 +144,4 @@ docs-clean:
 	rm -rf docs/api
 
 clean:
-	rm -rfv game tests tests_heavy index.html index.js index.wasm index.data $(SRCDIR)/*.o $(SRCDIR)/entities/*.o $(SRCDIR)/*.gch $(SRCDIR)/tests.cpp $(SRCDIR)/tests_heavy.cpp $(SRCDIR)/*.gcda $(SRCDIR)/*.gcno $(SRCDIR)/entities/*.gcda $(SRCDIR)/entities/*.gcno coverage_report
+	rm -rfv $(BINDIR) $(DISTDIR) tests tests_heavy $(SRCDIR)/*.o $(SRCDIR)/entities/*.o $(SRCDIR)/*.gch $(SRCDIR)/tests.cpp $(SRCDIR)/tests_heavy.cpp $(SRCDIR)/*.gcda $(SRCDIR)/*.gcno $(SRCDIR)/entities/*.gcda $(SRCDIR)/entities/*.gcno coverage_report

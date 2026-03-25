@@ -7,7 +7,7 @@
 // Game info
 constexpr const char* GAME_VERSION = "v0.0.6.26";
 constexpr const char* GAME_VERSION_DATE = "March 17, 2026";
-constexpr const char* WINDOW_TITLE = "@evildojo666 presents: project.rpg";
+constexpr const char* WINDOW_TITLE = "@venatiodecorus presents: project.rpg";
 
 // Window
 constexpr int DEFAULT_WIN_WIDTH = 1920;
